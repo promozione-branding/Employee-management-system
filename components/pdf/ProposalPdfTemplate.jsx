@@ -12,26 +12,56 @@ const ProposalPdfTemplate = ({ data }) => {
   if (!data) {
     return null;
   }
-
-  // Function to convert number to currency words
-  // const toCurrencyWords = (num) => {
-  //   const [integerPart, decimalPart] = num.toFixed(2).split('.');
-  //   let words = toWords(Number(integerPart));
-  //   words = words.charAt(0).toUpperCase() + words.slice(1) + " Rupees"; // Capitalize first letter
-
-  //   if (decimalPart && Number(decimalPart) > 0) {
-  //     words += " and " + toWords(Number(decimalPart)) + " Paise";
-  //   }
-  //   return words;
-  // };
-  // const amountInWords = toCurrencyWords(totalPayableAmount);
-
+  console.log(data, "data");
   // Format the date for display
   const proposalDate = new Date(data.dateOfProposal).toLocaleDateString(
     "en-GB",
     { day: "numeric", month: "long", year: "numeric" }
   );
 
+  const formatIndianCurrency = (num) => {
+    if (typeof num !== "number") return num;
+    return num.toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
+  // ---------------------gst amount calculation ----------------------------
+
+  let totalAfterServiceDiscounts = data.services.reduce((total, service) => {
+    let servicePrice = service.amount;
+    if (service.discountAmount) {
+      servicePrice -= service.discountAmount;
+    } else if (service.discountPercentage) {
+      servicePrice -= (service.amount * service.discountPercentage) / 100;
+    }
+
+    return total + servicePrice;
+  }, 0);
+  if (data.discount > 0) {
+    totalAfterServiceDiscounts = totalAfterServiceDiscounts - data.discount;
+  } else if (data?.discountPercentage > 0) {
+    totalAfterServiceDiscounts =
+      (totalAfterServiceDiscounts * data?.discountPercentage) / 100;
+  }
+
+  totalAfterServiceDiscounts = totalAfterServiceDiscounts * 0.18;
+
+  // ---------------------total amount calculation ----------------------------
+  let totalAmountWithGST = data.totalAmount;
+
+  if (data?.discount > 0) {
+    totalAmountWithGST = totalAmountWithGST - data.discount;
+  } else if (data?.discountPercentage > 0) {
+    totalAmountWithGST = (totalAmountWithGST * data?.discountPercentage) / 100;
+  }
+  let TDSAmount = totalAmountWithGST;
+  totalAmountWithGST = totalAmountWithGST * 0.18 + totalAmountWithGST;
+
+  // ---------------------TDS amount calculation ----------------------------
+  TDSAmount = TDSAmount * 0.02;
+  console.log(TDSAmount, "TDSAmount");
   return (
     <Document style={{ marginTop: "0" }}>
       {/* PAGE 1 */}
@@ -85,6 +115,7 @@ const ProposalPdfTemplate = ({ data }) => {
         <Text style={styles.colNew}>1 Year</Text>
         <Text style={styles.colAmt}>000000.00</Text>
       </View> */}
+
         {/* Dynamically render services */}
         {data.services &&
           data.services.map((service, index) => (
@@ -101,18 +132,36 @@ const ProposalPdfTemplate = ({ data }) => {
               <Text style={styles.colNew}>{service.duration}</Text>
               <Text style={styles.colNew}>
                 {service.discountAmount
-                  ? service.discountAmount.toFixed(2)
+                  ? formatIndianCurrency(service.discountAmount)
                   : service.discountPercentage && service.amount
-                  ? (
-                      (service.amount * service.discountPercentage) /
-                      100
-                    ).toFixed(2)
+                  ? formatIndianCurrency(
+                      (service.amount * service.discountPercentage) / 100
+                    )
                   : "N/A"}
               </Text>
 
               <View style={styles.colAmt}>
-                <Text style={styles.colAmt}>{service?.amount - service?.discountAmount}</Text>
-                <Text style={{width:"30%",marginLeft:"30",textAlign: "center",fontWeight: "bold",textDecoration: 'line-through'}}>{service.amount}</Text>
+                <Text
+                  style={{
+                    width: "30%",
+                    marginLeft: "30",
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    textDecoration: "line-through",
+                  }}
+                >
+                  {formatIndianCurrency(service.amount)}
+                </Text>
+                <Text style={styles.colAmt}>
+                  {service?.discountAmount
+                    ? formatIndianCurrency(
+                        service?.amount - service?.discountAmount
+                      )
+                    : formatIndianCurrency(
+                        service?.amount -
+                          (service.amount * service.discountPercentage) / 100
+                      )}
+                </Text>
               </View>
             </View>
           ))}
@@ -178,17 +227,52 @@ const ProposalPdfTemplate = ({ data }) => {
       </View>
       </View> */}
 
-        <View style={styles.totalBox}>
-          <Text style={styles.totalLabel}>Deal Amount (Inc. GST)</Text>
-          <Text style={styles.totalValue}>{/* 0000.00 */}</Text>
-          <Text style={styles.totalValue}>{data.totalAmount.toFixed(2)}</Text>
-        </View>
+        {data?.discount && (
+          <View style={styles.totalBox}>
+            <Text style={styles.totalLabel}>Discount</Text>
+            <Text style={styles.totalValue}>{/* 0000.00 */}</Text>
+            <Text style={styles.totalValue}>
+              {formatIndianCurrency(data?.discount)}
+            </Text>
+          </View>
+        )}
+
+        {data?.discountPercentage && (
+          <View style={styles.totalBox}>
+            <Text style={styles.totalLabel}>Discount</Text>
+            <Text style={styles.totalValue}>{/* 0000.00 */}</Text>
+            <Text style={styles.totalValue}>
+              {formatIndianCurrency(
+                (data?.totalAmount * data?.discountPercentage) / 100
+              )}
+            </Text>
+          </View>
+        )}
+
+        {/* Tax deducted from sources  */}
+        {!data?.tanNo && (
+          <View style={styles.totalBox}>
+            <Text style={styles.totalLabel}>TDS Amount (0.02%)</Text>
+            <Text style={styles.totalValue}>{/* 0000.00 */}</Text>
+            <Text style={styles.totalValue}>
+              {formatIndianCurrency(TDSAmount)}
+            </Text>
+          </View>
+        )}
+
+        {/* <View style={styles.totalBox}>
+          <Text style={styles.totalLabel}>Deal Amount (Inc. GST)</Text> */}
+        {/* <Text style={styles.totalValue}>0000.00</Text> */}
+        {/* <Text style={styles.totalValue}>
+            {formatIndianCurrency(data.totalAmount)}
+          </Text>
+        </View> */}
 
         <View style={styles.totalBox}>
           <Text style={styles.totalLabel}>GST @ 18%</Text>
           <Text style={styles.totalValue}></Text>
           <Text style={styles.totalValue}>
-            {(data.totalAmount * 0.18).toFixed(2)}
+            {formatIndianCurrency(totalAfterServiceDiscounts)}
           </Text>
         </View>
 
@@ -203,11 +287,20 @@ const ProposalPdfTemplate = ({ data }) => {
           >
             {/* 0000.00 */}
           </Text>
-          <Text
-            style={[styles.totalValue, { fontWeight: "bold", fontSize: 10 }]}
-          >
-            {(data.totalAmount * 1.18).toFixed(2)}
-          </Text>
+
+          {!data?.tanNo ? (
+            <Text
+              style={[styles.totalValue, { fontWeight: "bold", fontSize: 10 }]}
+            >
+              {formatIndianCurrency(totalAmountWithGST + TDSAmount)}
+            </Text>
+          ) : (
+            <Text
+              style={[styles.totalValue, { fontWeight: "bold", fontSize: 10 }]}
+            >
+              {formatIndianCurrency(totalAmountWithGST)}
+            </Text>
+          )}
         </View>
 
         {/* <View style={styles.totalBox}>
@@ -295,7 +388,12 @@ const ProposalPdfTemplate = ({ data }) => {
         </View>
 
         <View
-          style={{ textAlign: "left", color: "red", fontSize: 8, marginTop: 4 }}
+          style={{
+            textAlign: "left",
+            color: "red",
+            fontSize: 8,
+            marginTop: 4,
+          }}
         >
           <Text style={{ marginTop: 8 }}>
             Regd. Office: Vardhman Plaza, Sector 3, Rohini, Delhi – 110085,
@@ -642,7 +740,14 @@ const styles = StyleSheet.create({
 
   colAmt: {
     width: "30%",
-    marginLeft:"30",
+    marginLeft: "30",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+
+  colAmtNew: {
+    width: "30%",
+    marginLeft: "30",
     textAlign: "center",
     fontWeight: "bold",
   },
@@ -689,8 +794,6 @@ const styles = StyleSheet.create({
 
     fontSize: 8,
   },
-
- 
 
   termsBox: {
     marginTop: 14,

@@ -41,31 +41,22 @@ const Proposal = ({ customerId }) => {
   );
 
   function calculationOfTotalAmount() {
-    const totalServicePrice = selectedServices.reduce(
-      (total, service) => total + service.amount,
+    const totalAfterServiceDiscounts = selectedServices.reduce(
+      (total, service) => {
+        let servicePrice = service.amount;
+        if (service.discountAmount) {
+          servicePrice -= service.discountAmount;
+        } else if (service.discountPercentage) {
+          servicePrice -= (service.amount * service.discountPercentage) / 100;
+        }
+
+        return total + servicePrice;
+      },
       0
     );
-
-    let priceAfterDiscount = totalServicePrice;
-
-    if (formData?.discountPercentage > 0) {
-      const discountValue =
-        (totalServicePrice * Number(formData.discountPercentage)) / 100;
-      priceAfterDiscount = totalServicePrice - discountValue;
-    } else if (formData?.discount > 0) {
-      priceAfterDiscount = totalServicePrice - Number(formData.discount);
-    }
-
-    // Apply additional 2% reduction if tanNo exists
-    if (tanNo) {
-      priceAfterDiscount = priceAfterDiscount * 0.98; // Reduce by 2%
-    }
-
-    // Add 18% GST
-    const finalAmountWithGST = priceAfterDiscount * 1.18;
-
-    return finalAmountWithGST;
+    return totalAfterServiceDiscounts
   }
+  
 
   const propsalAllItemForm = {
     clientId: customerId,
@@ -170,7 +161,6 @@ const Proposal = ({ customerId }) => {
       }
 
       const response = await createProposelService(propsalAllItemForm);
-      console.log(response);
       if (response.success) {
         toast.success("Proposal created successfully!");
         setFormData(initialPerposelFormData);

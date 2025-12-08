@@ -14,7 +14,6 @@ const CustomerProposal = ({ customerId }) => {
   async function getAllCustomerPropsals() {
     try {
       const allPropsals = await getAllProposalCustomer(customerId);
-      console.log(allPropsals);
       if (allPropsals?.success) {
         toast.success("Proposal fetched");
         setListPropoasls(allPropsals.data);
