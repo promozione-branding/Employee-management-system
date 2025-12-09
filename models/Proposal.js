@@ -28,7 +28,7 @@ const ProposalSchema = new mongoose.Schema(
     services: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Service", // ★ THIS IS REQUIRED
+        ref: "Service",
       },
     ],
 
@@ -37,6 +37,12 @@ const ProposalSchema = new mongoose.Schema(
     totalAmount: { type: Number, default: 0 },
     validTill: Date,
     paymentMethod: String,
+    partlyPayment: [
+      {
+        paymentDuration: { type: String },
+        paymentAmount: { type: Number },
+      },
+    ],
   },
   { timestamps: true }
 );

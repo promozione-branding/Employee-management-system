@@ -7,11 +7,22 @@ import {
   Image,
   StyleSheet,
 } from "@react-pdf/renderer";
-
+import { ToWords } from 'to-words';
 const ProposalPdfTemplate = ({ data }) => {
   if (!data) {
     return null;
   }
+
+  const toWords = new ToWords({
+  localeCode: 'en-IN',
+  converterOptions: {
+    currency: true,
+    ignoreDecimal: false,
+  }
+});
+
+
+  
 
   // Format the date for display
   const proposalDate = new Date(data.dateOfProposal).toLocaleDateString(
@@ -69,6 +80,8 @@ const ProposalPdfTemplate = ({ data }) => {
   let TDSAmount = totalAmountWithGST;
   totalAmountWithGST = totalAmountWithGST * 0.18 + totalAmountWithGST;
 
+ 
+
   // ---------------------TDS amount calculation ----------------------------
   TDSAmount = TDSAmount * 0.02;
 
@@ -83,9 +96,14 @@ const ProposalPdfTemplate = ({ data }) => {
   }, 0);
 
   // --------------------- Discount show or not ----------------------------
-  const discountShow = data.services.every((value) => value?.discountAmount === null);
-  console.log(data.services, "hello");
-  console.log(discountShow, "discountShow");
+  const discountShow = data.services.some(
+    (service) =>
+      (service.discountAmount !== null && service.discountAmount > 0) ||
+      (service.discountPercentage !== null && service.discountPercentage > 0)
+  );
+
+// total Amount in words 
+const totalAmountInWords = toWords.convert(totalAmount);
 
 
   return (
@@ -127,20 +145,10 @@ const ProposalPdfTemplate = ({ data }) => {
           <Text style={styles.colSN}>S.No.</Text>
           <Text style={styles.colDesc}>Description</Text>
           <Text style={styles.colNew}>Tenure</Text>
-          <Text style={styles.colNew}>Discount</Text>
+          <Text style={styles.colNew}>{discountShow && "Discount"}</Text>
           <Text style={styles.colAmt}>Amount (INR)</Text>
         </View>
 
-        {/* table 1 */}
-        {/* <View style={styles.tableRow}>
-        <Text style={styles.colSN}>1.</Text>
-        <View style={styles.colDesc}>
-          <Text style={styles.serviceTitle}>Service:</Text>
-          <Text style={styles.serviceName}>Web Awareness</Text>
-        </View>
-        <Text style={styles.colNew}>1 Year</Text>
-        <Text style={styles.colAmt}>000000.00</Text>
-      </View> */}
 
         {/* Dynamically render services */}
         {data.services &&
@@ -191,75 +199,15 @@ const ProposalPdfTemplate = ({ data }) => {
               </View>
             </View>
           ))}
-
-        {/* table 2 */}
-        {/* <View style={styles.tableRow}>
-        <Text style={styles.colSN}>2.</Text>
-
-        <View style={styles.colDesc}>
-          <Text style={styles.serviceTitle}>Service:</Text>
-          <Text style={styles.serviceName}>Google Ads Management</Text>
-        </View>
-
-        <Text style={styles.colNew}> 6 Months</Text>
-
-        <Text style={styles.colAmt}>00000.00</Text>
-      </View> */}
-
-        {/* table 3 */}
-
-        {/* <View style={styles.tableRow}>
-        <Text style={styles.colSN}>3.</Text>
-
-        <View style={styles.colDesc}>
-          <Text style={styles.serviceTitle}>Service:</Text>
-          <Text style={styles.serviceName}>LinkedIn Management</Text>
-        </View>
-
-        <Text style={styles.colNew}> 6 Months</Text>
-
-        <Text style={styles.colAmt}>00000.00</Text>
-      </View> */}
-        {/* table 4 */}
-
-        {/* <View style={styles.tableRow}>
-        <Text style={styles.colSN}>4.</Text>
-
-        <View style={styles.colDesc}>
-          <Text>Trust Elite (complimentary)</Text>
-        </View>
-
-        <Text style={styles.colNew}>–––</Text>
-
-        <Text style={styles.colAmt}>0.00</Text>
-      </View> */}
-
-        {/* total rows */}
-        {/* <View style={styles.totalBox}>
-        <Text style={styles.totalLabel}>Total Price</Text>
-        <Text style={styles.totalValue}>00000.00</Text>
-        <Text style={styles.totalValue}>{data.totalAmount.toFixed(2)}</Text>
-      </View> */}
-
-        {/* <View style={styles.totalBox}>
-        <Text style={styles.totalLabel}>Discount</Text>
-        <Text style={styles.totalValue}>9,500.00</Text>
-      </View> */}
-
-        {/* <View style={styles.totalBox}>
-      <View style={styles.totalBox}>
-        <Text style={styles.totalLabel}>TDS (2%)</Text>
-        <Text style={styles.totalValue}>2,800.00</Text>
-      </View>
-      </View> */}
-
-        <View style={styles.totalBox}>
-          <Text style={styles.totalLabel}>Total Discount</Text>
-          <Text style={styles.totalValue}>{/* 0000.00 */}</Text>
-          <Text style={styles.totalValue}>
-            {formatIndianCurrency(totalServiceDiscount)}
-          </Text>
-        </View>
+        {discountShow && (
+          <View style={styles.totalBox}>
+            <Text style={styles.totalLabel}>Total Discount</Text>
+            <Text style={styles.totalValue}>{/* 0000.00 */}</Text>
+            <Text style={styles.totalValue}>
+              {formatIndianCurrency(totalServiceDiscount)}
+            </Text>
+          </View>
+        )}
 
         {/* Tax deducted from sources  */}
         {data?.tanNo && (
@@ -307,12 +255,12 @@ const ProposalPdfTemplate = ({ data }) => {
           </Text>
         </View>
 
-        {/* <View style={styles.totalBox}>
+        <View style={styles.totalBox}>
         <Text style={[styles.totalLabelInWords]}>
-          Total Payable Amount(in words.)
+          In Words
         </Text>
-        <Text style={[styles.totalValueInWords]}>{amountInWords}</Text>
-      </View> */}
+        <Text style={[styles.totalValueInWords]}>{totalAmountInWords}</Text>
+      </View>
 
         {/* terms */}
         <View style={styles.termsBox}>
@@ -795,7 +743,7 @@ const styles = StyleSheet.create({
   totalValueInWords: {
     width: "60%",
     textAlign: "right",
-
+    // fontStyle: "",
     fontSize: 8,
   },
 
