@@ -12,7 +12,7 @@ const ProposalPdfTemplate = ({ data }) => {
   if (!data) {
     return null;
   }
-  console.log(data, "data");
+
   // Format the date for display
   const proposalDate = new Date(data.dateOfProposal).toLocaleDateString(
     "en-GB",
@@ -39,6 +39,16 @@ const ProposalPdfTemplate = ({ data }) => {
 
     return total + servicePrice;
   }, 0);
+
+  let tdcAmount = totalAfterServiceDiscounts * 0.02;
+  let totalGST = totalAfterServiceDiscounts * 0.18;
+
+  let totalAmount =
+    totalAfterServiceDiscounts + totalAfterServiceDiscounts * 0.18;
+  if (data?.tanNo) {
+    totalAmount = totalAmount - tdcAmount;
+  }
+
   if (data.discount > 0) {
     totalAfterServiceDiscounts = totalAfterServiceDiscounts - data.discount;
   } else if (data?.discountPercentage > 0) {
@@ -61,7 +71,23 @@ const ProposalPdfTemplate = ({ data }) => {
 
   // ---------------------TDS amount calculation ----------------------------
   TDSAmount = TDSAmount * 0.02;
-  console.log(TDSAmount, "TDSAmount");
+
+  // --------------------- calculation total discount ----------------------------
+  const totalServiceDiscount = data.services.reduce((total, service) => {
+    if (service.discountAmount) {
+      return total + service.discountAmount;
+    } else if (service.discountPercentage && service.amount) {
+      return total + (service.amount * service.discountPercentage) / 100;
+    }
+    return total;
+  }, 0);
+
+  // --------------------- Discount show or not ----------------------------
+  const discountShow = data.services.every((value) => value?.discountAmount === null);
+  console.log(data.services, "hello");
+  console.log(discountShow, "discountShow");
+
+
   return (
     <Document style={{ marginTop: "0" }}>
       {/* PAGE 1 */}
@@ -137,7 +163,7 @@ const ProposalPdfTemplate = ({ data }) => {
                   ? formatIndianCurrency(
                       (service.amount * service.discountPercentage) / 100
                     )
-                  : "N/A"}
+                  : ""}
               </Text>
 
               <View style={styles.colAmt}>
@@ -227,35 +253,21 @@ const ProposalPdfTemplate = ({ data }) => {
       </View>
       </View> */}
 
-        {data?.discount && (
-          <View style={styles.totalBox}>
-            <Text style={styles.totalLabel}>Discount</Text>
-            <Text style={styles.totalValue}>{/* 0000.00 */}</Text>
-            <Text style={styles.totalValue}>
-              {formatIndianCurrency(data?.discount)}
-            </Text>
-          </View>
-        )}
-
-        {data?.discountPercentage && (
-          <View style={styles.totalBox}>
-            <Text style={styles.totalLabel}>Discount</Text>
-            <Text style={styles.totalValue}>{/* 0000.00 */}</Text>
-            <Text style={styles.totalValue}>
-              {formatIndianCurrency(
-                (data?.totalAmount * data?.discountPercentage) / 100
-              )}
-            </Text>
-          </View>
-        )}
+        <View style={styles.totalBox}>
+          <Text style={styles.totalLabel}>Total Discount</Text>
+          <Text style={styles.totalValue}>{/* 0000.00 */}</Text>
+          <Text style={styles.totalValue}>
+            {formatIndianCurrency(totalServiceDiscount)}
+          </Text>
+        </View>
 
         {/* Tax deducted from sources  */}
-        {!data?.tanNo && (
+        {data?.tanNo && (
           <View style={styles.totalBox}>
-            <Text style={styles.totalLabel}>TDS Amount (0.02%)</Text>
+            <Text style={styles.totalLabel}>TDS Amount (2%)</Text>
             <Text style={styles.totalValue}>{/* 0000.00 */}</Text>
             <Text style={styles.totalValue}>
-              {formatIndianCurrency(TDSAmount)}
+              {formatIndianCurrency(tdcAmount)}
             </Text>
           </View>
         )}
@@ -272,7 +284,7 @@ const ProposalPdfTemplate = ({ data }) => {
           <Text style={styles.totalLabel}>GST @ 18%</Text>
           <Text style={styles.totalValue}></Text>
           <Text style={styles.totalValue}>
-            {formatIndianCurrency(totalAfterServiceDiscounts)}
+            {formatIndianCurrency(totalGST)}
           </Text>
         </View>
 
@@ -288,19 +300,11 @@ const ProposalPdfTemplate = ({ data }) => {
             {/* 0000.00 */}
           </Text>
 
-          {!data?.tanNo ? (
-            <Text
-              style={[styles.totalValue, { fontWeight: "bold", fontSize: 10 }]}
-            >
-              {formatIndianCurrency(totalAmountWithGST + TDSAmount)}
-            </Text>
-          ) : (
-            <Text
-              style={[styles.totalValue, { fontWeight: "bold", fontSize: 10 }]}
-            >
-              {formatIndianCurrency(totalAmountWithGST)}
-            </Text>
-          )}
+          <Text
+            style={[styles.totalValue, { fontWeight: "bold", fontSize: 10 }]}
+          >
+            {formatIndianCurrency(totalAmount)}
+          </Text>
         </View>
 
         {/* <View style={styles.totalBox}>

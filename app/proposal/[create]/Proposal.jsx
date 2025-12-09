@@ -296,7 +296,7 @@ const Proposal = ({ customerId }) => {
                     ) : (
                       <p>
                         Discount Amount : ₹{" "}
-                        {item?.discountAmount.toLocaleString("en-IN")}
+                        {item?.discountAmount?.toLocaleString("en-IN")}
                       </p>
                     )}
 
