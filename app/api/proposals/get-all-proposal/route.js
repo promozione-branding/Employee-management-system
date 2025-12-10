@@ -6,7 +6,7 @@ export async function GET() {
     await connectDB();
 
     const items = await Proposal.find()
-      .select("clientName clientCompany dateOfProposal GSTIN totalAmount")
+      .select("clientName clientCompany dateOfProposal GSTIN totalAmount proposalNo")
       .sort({ createdAt: -1 });
 
     return Response.json(

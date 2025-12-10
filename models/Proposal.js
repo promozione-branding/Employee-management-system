@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const ProposalSchema = new mongoose.Schema(
   {
+    proposalNo: {
+      type: String,
+      unique: true,
+    },
     clientId: {
       type: mongoose.Schema.ObjectId,
       ref: "Customer",
@@ -46,6 +50,25 @@ const ProposalSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+ProposalSchema.pre("save", async function (next) {
+  if (this.isNew) {
+    const lastProposal = await this.constructor
+      .findOne()
+      .sort({ createdAt: -1 });
+
+    let nextProposalNumber = 1;
+    if (lastProposal && lastProposal.proposalNo) {
+      const lastNumber = parseInt(
+        lastProposal.proposalNo.replace("PROMOP", ""),
+        10
+      );
+      nextProposalNumber = lastNumber + 1;
+    }
+    this.proposalNo = `PROMOP${String(nextProposalNumber).padStart(4, "0")}`;
+  }
+  next();
+});
 
 export default mongoose.models.Proposal ||
   mongoose.model("Proposal", ProposalSchema);

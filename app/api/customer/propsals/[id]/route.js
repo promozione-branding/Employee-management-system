@@ -12,7 +12,7 @@ export async function GET(req, context) {
     const customer = await Customer.findById(id).populate({
       path: "proposals",
       select:
-        "clientName clientCompany clientAddress dateOfProposal GSTIN totalAmount",
+        "clientName clientCompany clientAddress dateOfProposal GSTIN totalAmount proposalNo",
     });
 
     if (!customer) {

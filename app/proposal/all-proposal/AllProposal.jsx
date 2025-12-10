@@ -88,6 +88,9 @@ const AllProposal = () => {
             <div key={item?._id}>
               <div>
                 <div className="block p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl hover:bg-gray-50 transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                  <p className="mb-3 font-normal text-gray-600 dark:text-gray-400">
+                    {item?.proposalNo || "na"}
+                  </p>
                   <h5 className="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
                     {item.clientName}
                   </h5>
@@ -102,7 +105,6 @@ const AllProposal = () => {
                     </p>
                   </div>
                   <div className="mt-5 flex gap-4">
-                    
                     <Link
                       href={`/proposal/edit-proposal/${item?._id}`}
                       className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
@@ -115,12 +117,12 @@ const AllProposal = () => {
                     >
                       <Trash2 />
                     </div>
-                    <Link href={`/proposal/pdf-download/${item?._id}`}
+                    <Link
+                      href={`/proposal/pdf-download/${item?._id}`}
                       className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
                     >
                       <Download />
                     </Link>
-                    
                   </div>
                 </div>
               </div>

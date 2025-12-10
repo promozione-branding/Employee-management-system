@@ -1,4 +1,3 @@
-"use client";
 import {
   Document,
   Page,
@@ -10,7 +9,7 @@ import {
 import { ToWords } from "to-words";
 
 
-const ProposalPdfTemplate = ({ data }) => {
+const ProposalPdfTemplateServer = ({ data }) => {
   if (!data) {
     return null;
   }
@@ -578,7 +577,7 @@ const ProposalPdfTemplate = ({ data }) => {
   );
 };
 
-export default ProposalPdfTemplate;
+export default ProposalPdfTemplateServer;
 
 /* ---------------- STYLES ---------------- */
 

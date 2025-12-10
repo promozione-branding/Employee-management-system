@@ -33,6 +33,7 @@ export const addProposalFormControl = [
       { id: "upi", label: "UPI" },
       { id: "card", label: "Card" },
       { id: "net banking", label: "Net Banking" },
+      { id: "cheque", label: "Cheque" },
     ],
   },
 ];

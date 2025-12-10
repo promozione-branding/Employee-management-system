@@ -1,15 +1,22 @@
 "use client";
 
 import { getAllProposalCustomer } from "@/service/customer";
-import { deleteProposalService } from "@/service/proposal";
-import { Album, Download, Eye, Pencil, Trash2 } from "lucide-react";
+import {
+  deleteProposalService,
+  sendProposalPdfEmailService,
+} from "@/service/proposal";
+import { Album, Download, Eye, Mail, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const CustomerProposal = ({ customerId }) => {
-
   const [listPropoasls, setListPropoasls] = useState([]);
+
+  async function sendEmailHandler(proposalId) {
+    const res = await sendProposalPdfEmailService(proposalId);
+    console.log(res);
+  }
 
   async function getAllCustomerPropsals() {
     try {
@@ -48,7 +55,7 @@ const CustomerProposal = ({ customerId }) => {
 
   return (
     <div>
-      <p className="font-bold text-2xl text-center mb-5">All Propsals</p>
+      <p className="font-bold text-2xl text-center mb-5">All Proposals</p>
       {listPropoasls.length ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {listPropoasls.map((item) => (
@@ -57,6 +64,9 @@ const CustomerProposal = ({ customerId }) => {
               className="border rounded-lg p-4 shadow-md bg-white flex flex-col justify-between"
             >
               <div>
+                <p className="bg-blue-300 flex py-1 px-3 rounded-full w-35 font-medium my-2">
+                  {item?.proposalNo}
+                </p>
                 <h3 className="font-bold text-lg mb-2 truncate">
                   {item?.clientCompany}
                 </h3>
@@ -80,9 +90,18 @@ const CustomerProposal = ({ customerId }) => {
               </p>
 
               <div className="mt-5 flex gap-4">
-                <Link href={`/proposal/pdf-download/${item?._id}`} className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full">
+                <Link
+                  href={`/proposal/pdf-download/${item?._id}`}
+                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
+                >
                   <Download />
                 </Link>
+                <div
+                  onClick={() => sendEmailHandler(item?._id)}
+                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
+                >
+                  <Mail />
+                </div>
                 <Link
                   href={`/proposal/edit-proposal/${item?._id}`}
                   className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
@@ -95,7 +114,6 @@ const CustomerProposal = ({ customerId }) => {
                 >
                   <Trash2 />
                 </div>
-              
               </div>
             </div>
           ))}
