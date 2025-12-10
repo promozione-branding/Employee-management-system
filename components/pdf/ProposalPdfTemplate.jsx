@@ -7,22 +7,20 @@ import {
   Image,
   StyleSheet,
 } from "@react-pdf/renderer";
-import { ToWords } from 'to-words';
+import { ToWords } from "to-words";
 const ProposalPdfTemplate = ({ data }) => {
   if (!data) {
     return null;
   }
 
+
   const toWords = new ToWords({
-  localeCode: 'en-IN',
-  converterOptions: {
-    currency: true,
-    ignoreDecimal: false,
-  }
-});
-
-
-  
+    localeCode: "en-IN",
+    converterOptions: {
+      currency: true,
+      ignoreDecimal: false,
+    },
+  });
 
   // Format the date for display
   const proposalDate = new Date(data.dateOfProposal).toLocaleDateString(
@@ -80,8 +78,6 @@ const ProposalPdfTemplate = ({ data }) => {
   let TDSAmount = totalAmountWithGST;
   totalAmountWithGST = totalAmountWithGST * 0.18 + totalAmountWithGST;
 
- 
-
   // ---------------------TDS amount calculation ----------------------------
   TDSAmount = TDSAmount * 0.02;
 
@@ -102,9 +98,8 @@ const ProposalPdfTemplate = ({ data }) => {
       (service.discountPercentage !== null && service.discountPercentage > 0)
   );
 
-// total Amount in words 
-const totalAmountInWords = toWords.convert(totalAmount);
-
+  // total Amount in words
+  const totalAmountInWords = toWords.convert(totalAmount);
 
   return (
     <Document style={{ marginTop: "0" }}>
@@ -148,7 +143,6 @@ const totalAmountInWords = toWords.convert(totalAmount);
           <Text style={styles.colNew}>{discountShow && "Discount"}</Text>
           <Text style={styles.colAmt}>Amount (INR)</Text>
         </View>
-
 
         {/* Dynamically render services */}
         {data.services &&
@@ -256,11 +250,19 @@ const totalAmountInWords = toWords.convert(totalAmount);
         </View>
 
         <View style={styles.totalBox}>
-        <Text style={[styles.totalLabelInWords]}>
-          In Words
-        </Text>
-        <Text style={[styles.totalValueInWords]}>{totalAmountInWords}</Text>
-      </View>
+          <Text style={[styles.totalLabelInWords]}>In Words</Text>
+          <Text style={[styles.totalValueInWords]}>{totalAmountInWords}</Text>
+        </View>
+
+        {data?.partlyPayment?.length &&
+          data?.partlyPayment.map(({ _id, paymentAmount, paymentDuration }) => (
+            <View style={styles.totalBox} key={_id}>
+              <Text style={styles.totalLabel}></Text>
+              <Text style={styles.totalValue}>{paymentDuration}</Text>
+
+              <Text style={styles.totalValue}>{formatIndianCurrency(paymentAmount)}</Text>
+            </View>
+          ))}
 
         {/* terms */}
         <View style={styles.termsBox}>

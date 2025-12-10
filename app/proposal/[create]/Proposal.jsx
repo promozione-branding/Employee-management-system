@@ -1,5 +1,7 @@
 "use client";
 import CommonForm from "@/components/layout/Form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ServiceFormControl, addProposalFormControl } from "@/config/data";
 import {
   initalServiceFormData,
@@ -29,6 +31,13 @@ const Proposal = ({ customerId }) => {
   const [selectedServices, setSelectedServices] = useState([]);
   const [clientDetails, setClientDetails] = useState({});
 
+  // ----------------Partly Payment STATE ----------------
+  const [listOfPayments, setListOfPayments] = useState([]);
+  const [partlyPaymentFormData, setPartlyPaymentFormData] = useState({
+    paymentDuration: "",
+    paymentAmount: "",
+  });
+
   const { Address, GSTIN, city, company, country, name, phone, tanNo, email } =
     clientDetails;
 
@@ -54,9 +63,8 @@ const Proposal = ({ customerId }) => {
       },
       0
     );
-    return totalAfterServiceDiscounts
+    return totalAfterServiceDiscounts;
   }
-  
 
   const propsalAllItemForm = {
     clientId: customerId,
@@ -71,6 +79,7 @@ const Proposal = ({ customerId }) => {
     validTill: formData?.validTill,
     paymentMethod: formData?.paymentMethod,
     totalAmount: calculationOfTotalAmount(),
+    partlyPayment: listOfPayments,
   };
 
   async function fetchAllServices() {
@@ -89,7 +98,6 @@ const Proposal = ({ customerId }) => {
   // add services
   async function handleService(e) {
     e.preventDefault();
-    console.log(serviceFormData, "serviceFormData");
     try {
       if (
         !serviceFormData.serviceTitle ||
@@ -97,6 +105,11 @@ const Proposal = ({ customerId }) => {
         !serviceFormData.duration
       ) {
         toast.error("please fill the service details");
+        return;
+      }
+
+      if (serviceFormData?.discountPercentage > 40) {
+        toast.error("Discount can't be more than 40%");
       }
 
       if (
@@ -160,6 +173,7 @@ const Proposal = ({ customerId }) => {
         return;
       }
 
+     
       const response = await createProposelService(propsalAllItemForm);
       if (response.success) {
         toast.success("Proposal created successfully!");
@@ -234,7 +248,12 @@ const Proposal = ({ customerId }) => {
     });
   };
 
-  // ---------------- Delete function ----------------
+  // ---------------- handle Partly payment form ----------------
+  async function handleParlyPaymentSubmit(e) {
+    e.preventDefault();
+    setListOfPayments([partlyPaymentFormData, ...listOfPayments]);
+    setPartlyPaymentFormData({ paymentDuration: "", paymentAmount: "" });
+  }
 
   async function handleDeleteService(id) {
     const confirm = window.confirm("Are you sure to delete the service");
@@ -254,7 +273,7 @@ const Proposal = ({ customerId }) => {
   return (
     <div className="w-full">
       <h1 className="font-bold text-3xl text-center my-5">Create Perposal</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 px-10 mt-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 px-10 mt-5">
         <div>
           <CommonForm
             formControls={addProposalFormControl}
@@ -264,7 +283,7 @@ const Proposal = ({ customerId }) => {
             buttonText={"Create Proposal"}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-3 ">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 py-3 ">
             {!servicesItem.length ? (
               <div className="flex items-center justify-center bg-red-500 border-2 border-dashed border-gray-400 rounded-lg p-4 text-white hover:bg-red-500 transition-colors duration-200">
                 Add some service
@@ -381,6 +400,53 @@ const Proposal = ({ customerId }) => {
               </p>
             </div>
           </div>
+        </div>
+
+        <div>
+          <form
+            onSubmit={handleParlyPaymentSubmit}
+            className="flex flex-col gap-3 border-b pb-4"
+          >
+            <p className="font-bold text-xl ">Partly Payment</p>
+            <Input
+              value={partlyPaymentFormData?.paymentDuration}
+              onChange={(e) =>
+                setPartlyPaymentFormData((prev) => ({
+                  ...prev,
+                  paymentDuration: e.target.value,
+                }))
+              }
+              placeholder="Enter the Duration of payment"
+            />
+            <Input
+              placeholder="Enter the Amount"
+              value={partlyPaymentFormData?.paymentAmount}
+              onChange={(e) =>
+                setPartlyPaymentFormData((prev) => ({
+                  ...prev,
+                  paymentAmount: e.target.value,
+                }))
+              }
+            />
+            <Button type="submit">Add</Button>
+          </form>
+
+          {listOfPayments?.length ? (
+            <div className="grid gap-2 grid-cols-1">
+              {listOfPayments.map(({ paymentAmount, paymentDuration }, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-center border-2 py-1 rounded-full"
+                >
+                  {paymentDuration} : {paymentAmount}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="border-dashed p-2 mt-3 text-center text-gray-500 rounded-full border-2">
+              Add some part payment
+            </div>
+          )}
         </div>
       </div>
     </div>
