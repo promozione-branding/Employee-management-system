@@ -14,8 +14,18 @@ const CustomerProposal = ({ customerId }) => {
   const [listPropoasls, setListPropoasls] = useState([]);
 
   async function sendEmailHandler(proposalId) {
-    const res = await sendProposalPdfEmailService(proposalId);
-    console.log(res);
+    const toastId = toast.loading("Sending email...");
+    try {
+      const res = await sendProposalPdfEmailService({ proposalId });
+      if (res.success) {
+        toast.success("Email sent successfully!", { id: toastId });
+      } else {
+        throw new Error(res.message || "Failed to send email.");
+      }
+    } catch (error) {
+      console.error("sendEmailHandler error:", error);
+      toast.error(error.message || "An error occurred.", { id: toastId });
+    }
   }
 
   async function getAllCustomerPropsals() {

@@ -107,12 +107,12 @@ const ProposalPdfTemplateServer = ({ data }) => {
       {/* PAGE 1 */}
       <Page size="A4" style={styles.page} orientation="portrait">
         {/* watermark */}
-        <Image src={"/blog/logo2.png"} style={styles.watermark} />
+        <Image src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765437572/logo2_wznumr.png"} style={styles.watermark} />
 
         {/* header */}
         <View style={styles.headerContainer}>
           <View style={styles.leftHeader}>
-            <Image style={styles.logo} src={"/blog/Logo.png"} />
+            <Image style={styles.logo} src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765437571/Logo_ontqxb.png"} />
           </View>
 
           <Text style={styles.proposalTitle}>PROPOSAL</Text>
@@ -314,12 +314,12 @@ const ProposalPdfTemplateServer = ({ data }) => {
 
       {/* PAGE 2 */}
       <Page size="A4" style={[styles.page, { height: "1000px" }]}>
-        <Image src={"/blog/logo2.png"} style={styles.watermark} />
+        <Image src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765437572/logo2_wznumr.png"} style={styles.watermark} />
 
         {/* HEADER */}
         <View style={styles.headerContainer}>
           <View style={styles.leftHeader2}>
-            <Image style={styles.logoSmall} src={"/blog/Logo.png"} />
+            <Image style={styles.logoSmall} src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765437571/Logo_ontqxb.png"} />
           </View>
 
           <View style={styles.rightHeader2}>
@@ -473,12 +473,12 @@ const ProposalPdfTemplateServer = ({ data }) => {
       {/* page 3 */}
 
       <Page size="A4" style={[styles.page, { height: "1000px" }]}>
-        <Image src={"/blog/logo2.png"} style={styles.watermark} />
+        <Image src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765437572/logo2_wznumr.png"} style={styles.watermark} />
 
         {/* HEADER */}
         <View style={styles.headerContainer}>
           <View style={styles.leftHeader2}>
-            <Image style={styles.logoSmall} src={"/blog/Logo.png"} />
+            <Image style={styles.logoSmall} src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765437571/Logo_ontqxb.png"} />
           </View>
 
           <View style={styles.rightHeader2}>

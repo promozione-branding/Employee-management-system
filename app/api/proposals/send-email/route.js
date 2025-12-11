@@ -18,6 +18,8 @@ export async function POST(req) {
       })
       .populate({ path: "clientId", model: "Customer", select: "email" });
 
+    console.log(proposal?.proposalNo, "proposal?.proposalNumber");
+
     if (!proposal) {
       return Response.json(
         {
@@ -48,13 +50,13 @@ export async function POST(req) {
     const emailValue = await transporter.sendMail({
       from: `"promozione branding proposal" <inquiry.promozione@gmail.com>`,
       to: proposal?.clientId?.email,
-      subject: `Your Proposal from Promozione Branding - #${proposal?.proposalNumber}`,
+      subject: `Your Proposal from Promozione Branding - #${proposal?.proposalNo}`,
       html: `
         <p>Dear ${proposal?.clientName},</p>
         <p>Thank you for your interest in our services. Please find your detailed proposal attached for your review.</p>
         <p>We are excited about the possibility of working with you. If you have any questions, please feel free to reach out.</p>
         <p style="margin: 25px 0; text-align: center;">
-          <a href="https://wa.me/918860243743?text=I%20accept%20proposal%20%23${proposal?.proposalNumber}" style="background-color: #25D366; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 8px; font-size: 16px; font-weight: bold;">
+          <a href="https://wa.me/919971700871?text=I%20accept%20proposal%20%23${proposal?.proposalNo}" style="background-color: #25D366; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 8px; font-size: 16px; font-weight: bold;">
             Accept Proposal
           </a>
         </p>
@@ -73,11 +75,11 @@ export async function POST(req) {
 
     return Response.json({
       success: true,
-      message: "done",
+      message: "Proposal has been send on email",
       emailValue,
     });
   } catch (error) {
-    console.log("error while sending mail");
+    console.log("error while sending mail", error);
     return Response.json(
       {
         success: false,

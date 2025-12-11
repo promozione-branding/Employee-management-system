@@ -36,15 +36,20 @@ export async function pdfDownloadService(id) {
   }
 }
 
-export async function sendProposalPdfEmailService(formData) {
-  try {
-    const { data } = await axiosInstance.post("/api/proposals/send-email",formData);
-    if (data?.success) {
-      toast.success(data.message);
-      return data;
-    }
-  } catch (error) {
-    console.log("sendProposalPdfEmailService Error:", error);
-    toast.error(error.message);
-  }
+
+export async function sendProposalPdfEmailService(id) {
+  const { data } = await axiosInstance.post(`/api/proposals/send-email`,id);
+  return data;
 }
+// export async function sendProposalPdfEmailService(formData) {
+//   try {
+//     const { data } = await axiosInstance.post("/api/proposals/send-email",formData);
+//     if (data?.success) {
+//       toast.success(data.message);
+//       return data;
+//     }
+//   } catch (error) {
+//     console.log("sendProposalPdfEmailService Error:", error);
+//     toast.error(error.message);
+//   }
+// }
