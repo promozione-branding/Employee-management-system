@@ -36,16 +36,29 @@ export async function POST(req) {
     );
 
     // 3. Nodemailer transporter
+    // const transporter = nodemailer.createTransport({
+    //   host: "smtp.gmail.com",
+    //   port: 587,
+    //   secure: false,
+    //   auth: {
+    //     user: process.env.YOUR_EMAIL_ADDRESS,
+    //     pass: process.env.YOUR_APP_PASSWORD,
+    //   },
+    // });
+
+    // for render deployment
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
       secure: false,
       auth: {
-        user: process.env.YOUR_EMAIL_ADDRESS,
-        pass: process.env.YOUR_APP_PASSWORD,
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false,
       },
     });
-
     // 4. Send email with attachment
     const emailValue = await transporter.sendMail({
       from: `"promozione branding proposal" <inquiry.promozione@gmail.com>`,
