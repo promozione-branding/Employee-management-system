@@ -1,5 +1,6 @@
 "use client";
 import { getAllinvoicesCustomer } from "@/service/customer";
+import { sendInvoicePdfService } from "@/service/invoice";
 import { BanknoteArrowUp, Download, Eye, Mail, Pencil } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -8,6 +9,7 @@ import toast from "react-hot-toast";
 const AllInvoice = ({ customerId }) => {
   const [invoicesList, setInvoicesList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sendingInvoiceId, setSendingInvoiceId] = useState(null);
 
   async function fetchingInvoices() {
     if (!customerId) {
@@ -29,6 +31,26 @@ const AllInvoice = ({ customerId }) => {
       );
     } finally {
       setLoading(false);
+    }
+  }
+  async function handleInvoiceSend(invoiceId) {
+    if (sendingInvoiceId) return; // Prevent multiple clicks
+    setSendingInvoiceId(invoiceId);
+    const toastId = toast.loading("Sending Invoice...");
+    try {
+      const res = await sendInvoicePdfService({ invoiceId });
+      if (res.success) {
+        toast.success("Email send Successfully", { id: toastId });
+      } else {
+        throw new Error(res.message || "Failed to send email.");
+      }
+    } catch (error) {
+      console.error("sendEmailHandler error:", error);
+      toast.error(error.message || "An error while sending invoice", {
+        id: toastId,
+      });
+    } finally {
+      setSendingInvoiceId(null);
     }
   }
 
@@ -133,9 +155,13 @@ const AllInvoice = ({ customerId }) => {
                       <Link href={`/invoice/edit-invoice/${invoice?._id}`}>
                         <Pencil />
                       </Link>
-                      <div>
+                      <button
+                        onClick={() => handleInvoiceSend(invoice?._id)}
+                        disabled={sendingInvoiceId === invoice._id}
+                        className="disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
                         <Mail />
-                      </div>
+                      </button>
                     </div>
                   </td>
                 </tr>

@@ -78,3 +78,8 @@ export async function pdfDownloaderById(id) {
     toast.error(error.message || "error while fetch pdf information");
   }
 }
+
+export async function sendInvoicePdfService(id) {
+  const { data } = await axiosInstance.post("/api/invoice/send-email", id);
+  return data;
+}

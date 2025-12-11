@@ -18,8 +18,6 @@ export async function POST(req) {
       })
       .populate({ path: "clientId", model: "Customer", select: "email" });
 
-    console.log(proposal?.proposalNo, "proposal?.proposalNumber");
-
     if (!proposal) {
       return Response.json(
         {
@@ -36,29 +34,19 @@ export async function POST(req) {
     );
 
     // 3. Nodemailer transporter
-    // const transporter = nodemailer.createTransport({
-    //   host: "smtp.gmail.com",
-    //   port: 587,
-    //   secure: false,
-    //   auth: {
-    //     user: process.env.YOUR_EMAIL_ADDRESS,
-    //     pass: process.env.YOUR_APP_PASSWORD,
-    //   },
-    // });
-
-    // for render deployment
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
       secure: false,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.YOUR_EMAIL_ADDRESS,
+        pass: process.env.YOUR_APP_PASSWORD,
       },
       tls: {
         rejectUnauthorized: false,
       },
     });
+
     // 4. Send email with attachment
     const emailValue = await transporter.sendMail({
       from: `"promozione branding proposal" <inquiry.promozione@gmail.com>`,
@@ -89,7 +77,7 @@ export async function POST(req) {
     return Response.json({
       success: true,
       message: "Proposal has been send on email",
-      emailValue,
+     
     });
   } catch (error) {
     console.log("error while sending mail", error);

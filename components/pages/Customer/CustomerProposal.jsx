@@ -12,8 +12,11 @@ import toast from "react-hot-toast";
 
 const CustomerProposal = ({ customerId }) => {
   const [listPropoasls, setListPropoasls] = useState([]);
+  const [sendingInvoiceId, setSendingInvoiceId] = useState(null);
 
   async function sendEmailHandler(proposalId) {
+    if (sendingInvoiceId) return; // Prevent multiple clicks
+    setSendingInvoiceId(proposalId);
     const toastId = toast.loading("Sending email...");
     try {
       const res = await sendProposalPdfEmailService({ proposalId });
@@ -25,6 +28,8 @@ const CustomerProposal = ({ customerId }) => {
     } catch (error) {
       console.error("sendEmailHandler error:", error);
       toast.error(error.message || "An error occurred.", { id: toastId });
+    } finally {
+      setSendingInvoiceId(null);
     }
   }
 
@@ -106,12 +111,12 @@ const CustomerProposal = ({ customerId }) => {
                 >
                   <Download />
                 </Link>
-                <div
+                <button disabled={sendingInvoiceId === item?._id}
                   onClick={() => sendEmailHandler(item?._id)}
-                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
+                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Mail />
-                </div>
+                </button>
                 <Link
                   href={`/proposal/edit-proposal/${item?._id}`}
                   className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"

@@ -1,23 +1,23 @@
-"use client";
+
 import {
   Document,
   Page,
   Text,
   View,
   Image,
-  Font,
+  // Font,
   StyleSheet,
 } from "@react-pdf/renderer";
 
-Font.register({
-  family: "LiberationSans",
-  fonts: [
-    { src: "/font/LiberationSans-Regular.ttf" },
-    { src: "/font/LiberationSans-Bold.ttf", fontWeight: "bold" },
-  ],
-});
+// Font.register({
+//   family: "LiberationSans",
+//   fonts: [
+//     { src: "/font/LiberationSans-Regular.ttf" },
+//     { src: "/font/LiberationSans-Bold.ttf", fontWeight: "bold" },
+//   ],
+// });
 
-const Invoice = ({ data }) => {
+const InvoicePdfTemplateServer = ({ data }) => {
   if (!data) {
     return null; // Return nothing if there's no data yet
   }
@@ -147,7 +147,7 @@ const Invoice = ({ data }) => {
                     styles.tableCell,
                     {
                       flex: 3,
-                      fontFamily: "LiberationSans",
+                      // fontFamily: "LiberationSans",
                       fontWeight: "bold",
                     },
                   ]}
@@ -363,11 +363,11 @@ const Invoice = ({ data }) => {
   );
 };
 
-export default Invoice;
+export default InvoicePdfTemplateServer;
 
 const styles = StyleSheet.create({
   page: {
-    fontFamily: "LiberationSans",
+    // fontFamily: "LiberationSans",
     padding: "0px 50px",
     fontSize: 10,
     // fontFamily: "Helvetica",
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   noteSection: {
     marginTop: 24,
     lineHeight: 1.2,
-    fontFamily: "LiberationSans",
+    // fontFamily: "LiberationSans",
   },
   companyDetails: {
     marginTop: 5,
