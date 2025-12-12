@@ -334,3 +334,44 @@ export const createServiceForInvoice = [
     placeholder: "Enter Service price",
   },
 ];
+
+export const registerFormControl = [
+  {
+    label: "Username",
+    name: "username",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter Your Username",
+  },
+  {
+    label: "Email",
+    name: "email",
+    componentType: "input",
+    type: "email",
+    placeholder: "Enter Your Email",
+  },
+  {
+    label: "Password",
+    name: "password",
+    componentType: "input",
+    type: "password",
+    placeholder: "Enter Your Password",
+  },
+];
+
+export const loginFormControl = [
+  {
+    label: "Email",
+    name: "email",
+    componentType: "input",
+    type: "email",
+    placeholder: "Enter Your Email",
+  },
+  {
+    label: "Password",
+    name: "password",
+    componentType: "input",
+    type: "password",
+    placeholder: "Enter Your Password",
+  },
+];

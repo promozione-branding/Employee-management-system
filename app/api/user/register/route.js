@@ -49,6 +49,7 @@ export async function POST(req) {
     const response = NextResponse.json({
       success: true,
       message: "User register successfully",
+      token,
       data: {
         _id: newUser._id,
         username: newUser.username,

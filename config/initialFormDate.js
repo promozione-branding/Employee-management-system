@@ -52,11 +52,22 @@ export const initalServiceFormData = {
   amount: "",
   duration: "",
   discountAmount: "",
-  discountPercentage: ""
+  discountPercentage: "",
 };
 
 export const initialInvoiceServiceFormData = {
   serviceName: "",
   HSN: "",
   price: 0,
+};
+
+export const registerFormData = {
+  username: "",
+  email: "",
+  password: "",
+};
+
+export const loginFormData = {
+  email: "",
+  password: "",
 };
