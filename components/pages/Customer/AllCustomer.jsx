@@ -29,7 +29,6 @@ const AllCustomer = () => {
   async function handleDeleteCustomer(id) {
     try {
       const response = await deleteCustomerServices(id);
-      console.log(response);
       if (response.success) {
         toast.success(response.message);
         setCustomerDeleted(id);
@@ -137,7 +136,7 @@ const AllCustomer = () => {
                 <div>{item?.GSTIN}</div>
                 <div>{item?.Address?.slice(0, 20)}...</div>
                 <div className="flex items-center gap-8">
-                  <Link href={`/customer/${item?._id}`}>
+                  <Link href={`/dashboard/customer/${item?._id}`}>
                     <Eye />
                   </Link>
                   <div

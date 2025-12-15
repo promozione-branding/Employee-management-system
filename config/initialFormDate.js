@@ -45,6 +45,9 @@ export const initalCustomerFormData = {
   pincode: "",
   country: "",
   meetingDate: "",
+  salesPersonEmail: "",
+  SalesPersonName: "",
+  notes: "",
 };
 
 export const initalServiceFormData = {

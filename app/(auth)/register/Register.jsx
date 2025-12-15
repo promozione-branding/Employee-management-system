@@ -14,6 +14,25 @@ const Register = () => {
   async function handleRegisterForm(e) {
     e.preventDefault();
     setLoading(true);
+
+    if (!formData.email || !formData.password || !formData.username) {
+      toast.error("Please enter both email and password.");
+      setLoading(false);
+      return;
+    }
+
+    if (formData?.email?.split("@")[1] !== "promozionebranding.com") {
+      toast.error("Only official company email is supported.");
+      setLoading(false);
+      return;
+    }
+
+    if (formData?.password?.length < 8) {
+      toast.error("Password must be at least 8 characters long.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data } = await registerService(formData);
       if (data.success) {

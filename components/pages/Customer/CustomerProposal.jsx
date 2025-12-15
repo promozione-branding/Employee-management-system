@@ -106,7 +106,7 @@ const CustomerProposal = ({ customerId }) => {
 
               <div className="mt-5 flex gap-4">
                 <Link
-                  href={`/proposal/pdf-download/${item?._id}`}
+                  href={`/dashboard/proposal/pdf-download/${item?._id}`}
                   className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
                 >
                   <Download />
@@ -118,7 +118,7 @@ const CustomerProposal = ({ customerId }) => {
                   <Mail />
                 </button>
                 <Link
-                  href={`/proposal/edit-proposal/${item?._id}`}
+                  href={`/dashboard/proposal/edit-proposal/${item?._id}`}
                   className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
                 >
                   <Pencil />
@@ -140,7 +140,7 @@ const CustomerProposal = ({ customerId }) => {
       )}
 
       <Link
-        href={`/proposal/${customerId}`}
+        href={`/dashboard/proposal/${customerId}`}
         className="fixed bottom-10 right-10 h-20 w-20 bg-blue-300 flex items-center justify-center rounded-full"
       >
         <Album size={30} />

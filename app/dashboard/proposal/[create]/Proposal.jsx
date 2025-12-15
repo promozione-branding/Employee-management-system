@@ -179,7 +179,7 @@ const Proposal = ({ customerId }) => {
         toast.success("Proposal created successfully!");
         setFormData(initialPerposelFormData);
         setSelectedServices([]);
-        navigate.push(`/proposal/pdf-download/${response.data._id}`);
+        navigate.push(`/dashboard/proposal/pdf-download/${response.data._id}`);
       }
     } catch (error) {
       console.log(error);

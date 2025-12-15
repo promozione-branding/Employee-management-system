@@ -17,13 +17,30 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
 
+    if (!form.email || !form.password) {
+      toast.error("Please enter both email and password.");
+      setLoading(false);
+      return;
+    }
+
+    if (form?.email?.split("@")[1] !== "promozionebranding.com") {
+      toast.error("Only official company email is supported.");
+      setLoading(false);
+      return;
+    }
+
+    if (form?.password?.length < 8) {
+      toast.error("Password must be at least 8 characters long.");
+      setLoading(false);
+      return;
+    }
     try {
       const res = await loginService(form);
       if (res.success) {
         toast.success(res.message || "user logged in successfully");
         setForm(loginFormData);
         setLoading(false);
-         window.location.href = "/";
+        window.location.href = "/dashboard";
       }
     } catch (error) {
       console.log(error);

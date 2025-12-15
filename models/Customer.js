@@ -31,6 +31,8 @@ const CustomerSchema = new mongoose.Schema(
     pincode: { type: String },
     country: { type: String },
     meetingDate: { type: String },
+    salesPersonEmail: { type: String },
+    SalesPersonName: { type: String },
     notes: [
       {
         type: String,

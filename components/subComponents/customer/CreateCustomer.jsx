@@ -35,6 +35,8 @@ const CreateCustomer = ({
       }
     }
 
+
+    console.log(formData,"formData");
     try {
       const createdCustomer = await createCustomerServices(formData);
       if (createdCustomer.success) {
