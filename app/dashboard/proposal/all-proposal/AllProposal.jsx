@@ -1,13 +1,5 @@
 "use client";
-import ProposalViewer from "@/components/sections/proposal/Proposal";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import { getAllProposals } from "@/service";
 import { deleteProposalService } from "@/service/proposal";
 import { Download, Eye, Pencil, Trash2 } from "lucide-react";
@@ -106,7 +98,7 @@ const AllProposal = () => {
                   </div>
                   <div className="mt-5 flex gap-4">
                     <Link
-                      href={`/proposal/edit-proposal/${item?._id}`}
+                      href={`/dashboard/proposal/edit-proposal/${item?._id}`}
                       className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
                     >
                       <Pencil />
@@ -118,7 +110,7 @@ const AllProposal = () => {
                       <Trash2 />
                     </div>
                     <Link
-                      href={`/proposal/pdf-download/${item?._id}`}
+                      href={`/dashboard/proposal/pdf-download/${item?._id}`}
                       className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
                     >
                       <Download />

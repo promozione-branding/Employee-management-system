@@ -54,7 +54,7 @@ const SideBar = ({ children }) => {
   ];
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen ">
       <div
         className={`bg-white border-r text-black p-4 flex flex-col transition-all h-screen duration-300 ease-in-out relative ${
           open ? "w-60" : "w-20"

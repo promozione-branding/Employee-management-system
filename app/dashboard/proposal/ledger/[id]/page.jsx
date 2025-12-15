@@ -33,8 +33,54 @@ const CreateLedgerPage = () => {
     console.log("Form Submitted:", submissionData);
   };
 
+  const handlePaymentEntriesChange = (e) => {
+    const { name, value } = e.target;
+    setPaymentEntriesFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const submitPaymentEntries = async (e) => {
+    e.preventDefault();
+    setListOfPayments((prevList) => [...prevList, paymentEntriesFormData]);
+    setPaymentEntriesFormData({
+      description: "",
+      paymentAmount: "",
+    });
+  };
+
   const renderChequeForm = () => (
-    <>
+    <div className="grid grid-cols-2 gap-3 pt-4">
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="bankName"
+        >
+          Bank Name
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="bankName"
+          type="text"
+          placeholder="Enter Bank Name"
+          value={formData.bankName || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="ifscCode"
+        >
+          IFSC Code
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="ifscCode"
+          type="text"
+          placeholder="Enter IFSC Code"
+          value={formData.ifscCode || ""}
+          onChange={handleChange}
+        />
+      </div>
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
@@ -48,21 +94,6 @@ const CreateLedgerPage = () => {
           type="text"
           placeholder="Enter Cheque Number"
           value={formData.chequeNumber || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="chequeDate"
-        >
-          Cheque Date
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="chequeDate"
-          type="date"
-          value={formData.chequeDate || ""}
           onChange={handleChange}
         />
       </div>
@@ -85,22 +116,6 @@ const CreateLedgerPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="bankName"
-        >
-          Bank Name
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="bankName"
-          type="text"
-          placeholder="Enter Bank Name"
-          value={formData.bankName || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
           htmlFor="branchName"
         >
           Branch Name
@@ -117,24 +132,55 @@ const CreateLedgerPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="ifscCode"
+          htmlFor="accountNumber"
         >
-          IFSC Code
+          Account Number
         </label>
         <input
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="ifscCode"
+          id="accountNumber"
+          placeholder="Enter Account No."
           type="text"
-          placeholder="Enter IFSC Code"
-          value={formData.ifscCode || ""}
+          value={formData.accountNumber || ""}
           onChange={handleChange}
         />
       </div>
-    </>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="chequeDate"
+        >
+          Cheque Date
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="chequeDate"
+          type="date"
+          value={formData.chequeDate || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="entiresDate"
+        >
+          Entires Date
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="entiresDate"
+          type="date"
+          placeholder="Enter Entires Date"
+          value={formData.entiresDate || ""}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
   );
 
   const renderNetBankingForm = () => (
-    <>
+    <div className="grid grid-cols-2 gap-3 pt-4">
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
@@ -182,11 +228,27 @@ const CreateLedgerPage = () => {
           onChange={handleChange}
         />
       </div>
-    </>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="entiresDate"
+        >
+          Entires Date
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="entiresDate"
+          type="date"
+          placeholder="Enter Entires Date"
+          value={formData.entiresDate || ""}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
   );
 
   const renderUpiForm = () => (
-    <>
+    <div className="grid grid-cols-2 gap-3 pt-4">
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
@@ -251,11 +313,27 @@ const CreateLedgerPage = () => {
           onChange={handleChange}
         />
       </div>
-    </>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="entiresDate"
+        >
+          Entires Date
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="entiresDate"
+          type="date"
+          placeholder="Enter Entires Date"
+          value={formData.entiresDate || ""}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
   );
 
   const renderCardForm = () => (
-    <>
+    <div className="grid grid-cols-2 gap-3 pt-4">
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
@@ -294,40 +372,56 @@ const CreateLedgerPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="issuingBank"
+          htmlFor="payerPhoneNumber"
         >
-          Issuing Bank
+          Payer Phone Number
         </label>
         <input
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="issuingBank"
+          id="payerPhoneNumber"
           type="text"
-          placeholder="Enter Issuing Bank"
-          value={formData.issuingBank || ""}
+          placeholder="Enter Phone Number"
+          value={formData.payerPhoneNumber || ""}
           onChange={handleChange}
         />
       </div>
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="cardholderName"
+          htmlFor="payerName"
         >
-          Cardholder Name
+          Payer Name
         </label>
         <input
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="cardholderName"
+          id="payerName"
           type="text"
-          placeholder="Enter Cardholder Name"
-          value={formData.cardholderName || ""}
+          placeholder="Enter Payer Name"
+          value={formData.payerName || ""}
           onChange={handleChange}
         />
       </div>
-    </>
+       <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="entiresDate"
+        >
+          Entires Date
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="entiresDate"
+          type="date"
+          placeholder="Enter Entires Date"
+          value={formData.entiresDate || ""}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
   );
 
   return (
-    <div className="flex gap-5 flex-col md:flex-row lg:px-20">
+    <div className="flex gap-5 flex-col md:flex-row lg:px-10">
       <div className="p-4 md:w-1/2">
         <h1 className="text-2xl font-bold text-center mb-6">
           Transation Details
@@ -374,7 +468,7 @@ const CreateLedgerPage = () => {
       <div className="md:w-1/2">
         <h1 className="text-2xl font-bold text-center mb-6">Payment Entires</h1>
 
-        <form>
+        <form onSubmit={submitPaymentEntries}>
           <div className="grid grid-cols-2 gap-5">
             <div className="mb-4">
               <label
@@ -385,9 +479,13 @@ const CreateLedgerPage = () => {
               </label>
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-                id="descriptionOfPayment"
+                id="description"
+                name="description"
                 type="text"
+                required
                 placeholder="Enter payment Description"
+                value={paymentEntriesFormData.description}
+                onChange={handlePaymentEntriesChange}
               />
             </div>
             <div className="mb-4">
@@ -398,10 +496,14 @@ const CreateLedgerPage = () => {
                 Payment Amount
               </label>
               <input
+                required
+                value={paymentEntriesFormData.paymentAmount}
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
                 id="paymentAmount"
+                name="paymentAmount"
                 type="text"
                 placeholder="Enter Payment Amount"
+                onChange={handlePaymentEntriesChange}
               />
             </div>
           </div>
@@ -412,6 +514,34 @@ const CreateLedgerPage = () => {
             Add
           </button>
         </form>
+
+        <div>
+          {listOfPayments.length > 0 ? (
+            <div className="mt-4 space-y-2">
+              {listOfPayments?.map(({ description, paymentAmount }, idx) => (
+                <div
+                  key={idx}
+                  className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200 shadow-sm"
+                >
+                  <span className="text-gray-800">{description}</span>
+                  <span className="font-semibold text-gray-900">
+                    ₹
+                    {!isNaN(parseFloat(paymentAmount))
+                      ? parseFloat(paymentAmount).toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })
+                      : "0.00"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-5 rounded-2xl my-4 text-xl text-gray-400 flex items-center justify-center border-dashed border-2">
+              Add some payment Entries
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
