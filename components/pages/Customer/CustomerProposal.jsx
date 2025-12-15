@@ -5,7 +5,7 @@ import {
   deleteProposalService,
   sendProposalPdfEmailService,
 } from "@/service/proposal";
-import { Album, Download, Eye, Mail, Pencil, Trash2 } from "lucide-react";
+import { Album, Download, Eye, Mail, NotebookPen, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -129,6 +129,12 @@ const CustomerProposal = ({ customerId }) => {
                 >
                   <Trash2 />
                 </div>
+                <Link
+                  href={`/dashboard/proposal/ledger/${item?._id}`}
+                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
+                >
+                  <NotebookPen />
+                </Link>
               </div>
             </div>
           ))}

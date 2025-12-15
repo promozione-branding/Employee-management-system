@@ -87,7 +87,7 @@ export const addCustomerFormControl = [
     placeholder: "Enter Client Name",
   },
   {
-    label: "Client Company",
+    label: "Company Name",
     name: "company",
     componentType: "input",
     type: "text",
@@ -108,21 +108,21 @@ export const addCustomerFormControl = [
     placeholder: "Enter Tax Deduction and Collection Account Number",
   },
   {
-    label: "Email",
+    label: "Email Id",
     name: "email",
     componentType: "input",
     type: "text",
     placeholder: "Enter Email",
   },
   {
-    label: "Phone no.",
+    label: "Contact No.",
     name: "phone",
     componentType: "input",
     type: "text",
     placeholder: "Enter Contact No",
   },
   {
-    label: "Website name",
+    label: "Website Url",
     name: "website",
     componentType: "input",
     type: "text",
@@ -177,7 +177,7 @@ export const addCustomerFormControl = [
     placeholder: "Enter sales Person Email",
   },
   {
-    label: "Sales Person name",
+    label: "Sales Person Name",
     name: "SalesPersonName",
     componentType: "input",
     type: "text",
