@@ -112,7 +112,7 @@ const ProposalPdfTemplateServer = ({ data }) => {
         {/* header */}
         <View style={styles.headerContainer}>
           <View style={styles.leftHeader}>
-            <Image style={styles.logo} src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765437571/Logo_ontqxb.png"} />
+            <Image style={styles.logo} src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765862267/Logo-Company_2_xnnz7x.png"} />
           </View>
 
           <Text style={styles.proposalTitle}>PROPOSAL</Text>
@@ -319,7 +319,7 @@ const ProposalPdfTemplateServer = ({ data }) => {
         {/* HEADER */}
         <View style={styles.headerContainer}>
           <View style={styles.leftHeader2}>
-            <Image style={styles.logoSmall} src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765437571/Logo_ontqxb.png"} />
+            <Image style={styles.logoSmall} src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765862267/Logo-Company_2_xnnz7x.png"} />
           </View>
 
           <View style={styles.rightHeader2}>
@@ -478,7 +478,7 @@ const ProposalPdfTemplateServer = ({ data }) => {
         {/* HEADER */}
         <View style={styles.headerContainer}>
           <View style={styles.leftHeader2}>
-            <Image style={styles.logoSmall} src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765437571/Logo_ontqxb.png"} />
+            <Image style={styles.logoSmall} src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765862267/Logo-Company_2_xnnz7x.png"} />
           </View>
 
           <View style={styles.rightHeader2}>
@@ -623,10 +623,11 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: 200,
-    height: 200,
+     width: 100,
+    height: 100,
     objectFit: "contain",
-    left: -40,
+    borderRadius: 20,
+    left: -10,
   },
 
   rightHeader: {
@@ -764,8 +765,11 @@ const styles = StyleSheet.create({
   },
 
   logoSmall: {
-    width: 130,
-    height: 130,
+   width: 100,
+    height: 100,
+    borderRadius: 20,
+    marginBottom:10,
+    marginTop:10,
     objectFit: "cover",
   },
 

@@ -72,7 +72,7 @@ const InvoicePdfTemplateServer = ({ data }) => {
 
         {/* logo and title */}
         <View style={styles.header}>
-          <Image src={"/blog/Logo.png"} style={styles.logo} />
+          <Image src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765862267/Logo-Company_2_xnnz7x.png"} style={styles.logo} />
           <Text style={styles.title}>TAX INVOICE</Text>
         </View>
 
@@ -386,9 +386,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logo: {
-    width: 120,
-    height: 120,
+   width: 100,
+    height: 100,
     objectFit: "cover",
+    borderRadius:20
   },
   title: {
     top: 20, // vertically center relative to logo

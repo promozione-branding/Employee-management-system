@@ -9,12 +9,10 @@ import {
 } from "@react-pdf/renderer";
 import { ToWords } from "to-words";
 
-
 const ProposalPdfTemplate = ({ data }) => {
   if (!data) {
     return null;
   }
-
 
   const toWords = new ToWords({
     localeCode: "en-IN",
@@ -113,7 +111,7 @@ const ProposalPdfTemplate = ({ data }) => {
         {/* header */}
         <View style={styles.headerContainer}>
           <View style={styles.leftHeader}>
-            <Image style={styles.logo} src={"/blog/Logo.png"} />
+            <Image style={styles.logo} src={"/blog/Logo-Company (2).png"} />
           </View>
 
           <Text style={styles.proposalTitle}>PROPOSAL</Text>
@@ -262,7 +260,9 @@ const ProposalPdfTemplate = ({ data }) => {
               <Text style={styles.totalLabel}></Text>
               <Text style={styles.totalValue}>{paymentDuration}</Text>
 
-              <Text style={styles.totalValue}>{formatIndianCurrency(paymentAmount)}</Text>
+              <Text style={styles.totalValue}>
+                {formatIndianCurrency(paymentAmount)}
+              </Text>
             </View>
           ))}
 
@@ -320,7 +320,10 @@ const ProposalPdfTemplate = ({ data }) => {
         {/* HEADER */}
         <View style={styles.headerContainer}>
           <View style={styles.leftHeader2}>
-            <Image style={styles.logoSmall} src={"/blog/Logo.png"} />
+            <Image
+              style={styles.logoSmall}
+              src={"/blog/Logo-Company (2).png"}
+            />
           </View>
 
           <View style={styles.rightHeader2}>
@@ -479,7 +482,10 @@ const ProposalPdfTemplate = ({ data }) => {
         {/* HEADER */}
         <View style={styles.headerContainer}>
           <View style={styles.leftHeader2}>
-            <Image style={styles.logoSmall} src={"/blog/Logo.png"} />
+            <Image
+              style={styles.logoSmall}
+              src={"/blog/Logo-Company (2).png"}
+            />
           </View>
 
           <View style={styles.rightHeader2}>
@@ -624,10 +630,11 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: 200,
-    height: 200,
+    width: 100,
+    height: 100,
     objectFit: "contain",
-    left: -40,
+    borderRadius: 20,
+    left: -10,
   },
 
   rightHeader: {
@@ -649,6 +656,7 @@ const styles = StyleSheet.create({
     marginTop: 120,
     marginLeft: 100,
     color: "#222",
+    marginBottom: 10,
   },
 
   clientBox: {
@@ -765,8 +773,11 @@ const styles = StyleSheet.create({
   },
 
   logoSmall: {
-    width: 130,
-    height: 130,
+    width: 100,
+    height: 100,
+    borderRadius: 20,
+    marginBottom:10,
+    marginTop:10,
     objectFit: "cover",
   },
 

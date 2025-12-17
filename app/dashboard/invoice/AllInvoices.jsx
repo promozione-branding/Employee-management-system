@@ -39,7 +39,7 @@ const AllInvoice = ({ customerId }) => {
       <h1 className="text-center font-bold text-3xl mb-8">All Invoices</h1>
 
       <Link
-        href={`/invoice/${customerId}`}
+        href={`/dashboard/invoice/${customerId}`}
         className="fixed bottom-10 right-10 h-20 w-20 bg-blue-300 flex items-center justify-center rounded-full"
       >
         <BanknoteArrowUp size={30} />

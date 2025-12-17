@@ -53,7 +53,7 @@ const CustomerSchema = new mongoose.Schema(
     ledger: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Legder",
+        ref: "Ledger",
       },
     ],
   },

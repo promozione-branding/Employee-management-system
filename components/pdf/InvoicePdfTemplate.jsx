@@ -72,7 +72,7 @@ const Invoice = ({ data }) => {
 
         {/* logo and title */}
         <View style={styles.header}>
-          <Image src={"/blog/Logo.png"} style={styles.logo} />
+          <Image src={"/blog/Logo-Company (2).png"} style={styles.logo} />
           <Text style={styles.title}>TAX INVOICE</Text>
         </View>
 
@@ -386,9 +386,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 100,
+    height: 100,
     objectFit: "cover",
+    borderRadius:20
   },
   title: {
     top: 20, // vertically center relative to logo

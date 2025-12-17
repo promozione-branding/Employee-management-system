@@ -71,7 +71,7 @@ const AllInvoice = ({ customerId }) => {
       <h1 className="text-center font-bold text-3xl mb-8">All Invoices</h1>
 
       <Link
-        href={`/invoice/${customerId}`}
+        href={`/dashboard/invoice/${customerId}`}
         className="fixed bottom-10 right-10 h-20 w-20 bg-blue-300 flex items-center justify-center rounded-full"
       >
         <BanknoteArrowUp size={30} />
@@ -146,13 +146,13 @@ const AllInvoice = ({ customerId }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center gap-4">
-                      <Link href={`/invoice/pdf-download/${invoice._id}`}>
+                      <Link href={`/dashboard/invoice/pdf-download/${invoice._id}`}>
                         <Download />
                       </Link>
-                      <Link href={`/invoice/view-invoice/${invoice._id}`}>
+                      <Link href={`/dashboard/invoice/view-invoice/${invoice._id}`}>
                         <Eye />
                       </Link>
-                      <Link href={`/invoice/edit-invoice/${invoice?._id}`}>
+                      <Link href={`/dashboard/invoice/edit-invoice/${invoice?._id}`}>
                         <Pencil />
                       </Link>
                       <button

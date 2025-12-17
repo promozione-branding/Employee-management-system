@@ -133,7 +133,7 @@ const CreateInvoice = ({ id }) => {
       toast.success("Invoice created successfully!");
       setSelectedServices([]);
       setInvoiceFormData({ taxType: "", invoiceDate: "" });
-      router.push(`/customer/${id}`);
+      router.push(`/dashboard/customer/${id}`);
     }
   }
 

@@ -1,7 +1,8 @@
-import CustomerProposal from "@/components/pages/Customer/CustomerProposal";
-import AllInvoice from "@/components/pages/Invoice/AllInvoice";
-import Customer from "@/components/subComponents/customer/Customer";
+import CustomerProposal from "../CustomerProposal";
+import AllInvoice from "../invoice/AllInvoice";
+import Customer from "../Customer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AllLedger from "../ledger/AllLedger";
 
 const CustomerDashboard = ({ customerId }) => {
   return (
@@ -18,7 +19,7 @@ const CustomerDashboard = ({ customerId }) => {
         </TabsContent>
         <TabsContent value="invoice"><AllInvoice customerId={customerId}/></TabsContent>
         <TabsContent value="proposal"><CustomerProposal customerId={customerId}/></TabsContent>
-        <TabsContent value="ledger">All ledger</TabsContent>
+        <TabsContent value="ledger"><AllLedger /></TabsContent>
       </Tabs>
     </div>
   );
