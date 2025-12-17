@@ -396,3 +396,40 @@ export const loginFormControl = [
     placeholder: "Enter Your Password",
   },
 ];
+
+export const ledgerFormControl = [
+  {
+    label: "Opening Balance",
+    name: "openingBalance",
+    componentType: "input",
+    type: "text",
+    placeholder: "Opening Balance",
+  },
+  {
+    label: "Voucher",
+    name: "voucher",
+    componentType: "select",
+    options: [
+      { id: "upi", label: "UPI" },
+      { id: "card", label: "Card" },
+      { id: "net banking", label: "Net Banking" },
+      { id: "cheque", label: "Cheque" },
+    ],
+  },
+  {
+    label: "Debit",
+    name: "debit",
+    componentType: "input",
+    type: "text",
+    placeholder: "Debit Amount",
+  },
+  {
+    label: "Credit",
+    name: "credit",
+    componentType: "input",
+    type: "text",
+    placeholder: "Credit Amount",
+  },
+];
+
+

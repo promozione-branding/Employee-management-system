@@ -10,22 +10,24 @@ const LedgerSchema = new mongoose.Schema(
     proposalId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Proposal",
+      required: true,
     },
     openingBalance: { type: Number, required: true },
     entries: [
       {
         date: { type: Date, default: Date.now, required: true },
-        description: { type: String, required: true },
-        debit: { type: Number, default: 0 },
-        credit: { type: Number, default: 0 },
-        balance: { type: Number, required: true },
-        paymentDetails: {
-          method: {
-            type: String,
-            enum: ["cheque", "upi", "net_banking", "credit/debit_card"],
-          },
-          transactionId: String,
+        particular: {
+          description: { type: String, required: true },
+          items: [
+            {
+              subDescription: { type: String },
+              price: { type: Number, required: true },
+            },
+          ],
         },
+        voucher: { type: String, required: true },
+        debit: { type: Number },
+        credit: { type: Number },
       },
     ],
   },

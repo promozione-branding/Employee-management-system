@@ -130,7 +130,7 @@ const CustomerProposal = ({ customerId }) => {
                   <Trash2 />
                 </div>
                 <Link
-                  href={`/dashboard/proposal/ledger/${item?._id}`}
+                  href={`/dashboard/ledger/${item?._id}`}
                   className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
                 >
                   <NotebookPen />

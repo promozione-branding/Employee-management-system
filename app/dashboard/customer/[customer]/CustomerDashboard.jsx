@@ -2,7 +2,7 @@ import CustomerProposal from "../CustomerProposal";
 import AllInvoice from "../invoice/AllInvoice";
 import Customer from "../Customer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AllLedger from "../ledger/AllLedger";
+import LedgerDetails from "../ledger/LedgerDetails";
 
 const CustomerDashboard = ({ customerId }) => {
   return (
@@ -19,7 +19,7 @@ const CustomerDashboard = ({ customerId }) => {
         </TabsContent>
         <TabsContent value="invoice"><AllInvoice customerId={customerId}/></TabsContent>
         <TabsContent value="proposal"><CustomerProposal customerId={customerId}/></TabsContent>
-        <TabsContent value="ledger"><AllLedger /></TabsContent>
+        <TabsContent value="ledger"><LedgerDetails /></TabsContent>
       </Tabs>
     </div>
   );
