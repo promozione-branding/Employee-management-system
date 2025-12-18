@@ -19,7 +19,7 @@ const CustomerDashboard = ({ customerId }) => {
         </TabsContent>
         <TabsContent value="invoice"><AllInvoice customerId={customerId}/></TabsContent>
         <TabsContent value="proposal"><CustomerProposal customerId={customerId}/></TabsContent>
-        <TabsContent value="ledger"><LedgerDetails /></TabsContent>
+        <TabsContent value="ledger"><LedgerDetails customerId={customerId}/></TabsContent>
       </Tabs>
     </div>
   );

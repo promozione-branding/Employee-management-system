@@ -5,10 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ledgerFormControl } from "@/config/data";
-import { useState } from "react";
+import { ledgerFormInitialFormData } from "@/config/initialFormDate";
+import { createLedgerService, fetchingProposalsInfo } from "@/service/ledger";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
-const CreateLedger = () => {
-  const [ledgerFormData, setLedgerFormData] = useState({});
+const CreateLedger = ({ proposalId }) => {
+  const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
+  const [ledgerFormData, setLedgerFormData] = useState(
+    ledgerFormInitialFormData
+  );
+
+  const [proposalDetails, setProposalDetails] = useState(null);
+
+  const [globalEntries, setGlobalEntries] = useState([]);
 
   // ------------ entries form -------
   const [entriesFormData, setEntriesFormData] = useState({
@@ -23,13 +33,50 @@ const CreateLedger = () => {
     price: "",
   });
 
+  async function fetchProposalInformation() {
+    try {
+      const res = await fetchingProposalsInfo(proposalId);
+      if (res.success) {
+        setLoadingForProposalInfo(false);
+        setProposalDetails(res.data);
+      }
+    } catch (error) {
+      console.log(error);
+      setLoadingForProposalInfo(true);
+      toast.error(
+        error.message || "error while fetching the proposal Information"
+      );
+    }
+  }
+
   function handleEntriesFormSubmit(e) {
     e.preventDefault();
-    console.log(entriesFormData,"entriesFormData");
+
+    if (particularItemList.length <= 0) {
+      toast.error("Please add SubHeading and amount");
+      return;
+    }
+
+    const data = {
+      date: entriesFormData?.date,
+      description: entriesFormData.description,
+      item: particularItemList,
+    };
+    setGlobalEntries((prev) => [...prev, data]);
+    setEntriesFormData({
+      date: "",
+      description: "",
+    });
+    setParticularItemList([]);
   }
 
   function handleItemsSubmit(e) {
     e.preventDefault();
+    if (isNaN(itemsHeading?.price) || itemsHeading?.price.trim() === "") {
+      toast.error("Please enter a valid number for the amount.");
+      return;
+    }
+
     setParticularItemList((prev) => [...prev, itemsHeading]);
     setItemsHeading({
       subDescription: "",
@@ -37,103 +84,189 @@ const CreateLedger = () => {
     });
   }
 
+  // ---------- handle First form --------
+  async function handleLedgerFormSubmit(e) {
+    e.preventDefault();
+
+    if (
+      !ledgerFormData?.openingBalance &&
+      !ledgerFormData?.voucher &&
+      !ledgerFormData?.debit &&
+      !ledgerFormData?.credit
+    ) {
+      toast.error(
+        "Please fill at least one field: Opening Balance, Voucher, Debit, or Credit."
+      );
+      return;
+    }
+
+    if (
+      isNaN(ledgerFormData?.openingBalance) ||
+      ledgerFormData?.openingBalance.trim() === ""
+    ) {
+      toast.error("Please enter a valid number for the amount.");
+      return;
+    }
+
+    if (isNaN(ledgerFormData?.debit)) {
+      toast.error("Please enter a valid number for the amount.");
+      return;
+    }
+
+    if (isNaN(ledgerFormData?.credit)) {
+      toast.error("Please enter a valid number for the amount.");
+      return;
+    }
+
+    if (globalEntries.length <= 0) {
+      toast.error("Please fill the another form also");
+      return;
+    }
+
+    try {
+      const data = globalEntries.map(({ date, description, item }) => ({
+        date,
+        particular: {
+          description,
+          items: item,
+        },
+        voucher: ledgerFormData?.voucher,
+        debit: Number(ledgerFormData?.debit),
+        credit: Number(ledgerFormData?.credit),
+      }));
+
+      const ledgerFormDataApi = {
+        customerId: proposalDetails?.clientId,
+        proposalId: proposalId,
+        openingBalance: Number(ledgerFormData?.openingBalance),
+        entries: data,
+      };
+
+      const res = await createLedgerService(ledgerFormDataApi);
+      if (res.success) {
+        toast.success(res.message || "Ledger created successfully");
+        setLedgerFormData(ledgerFormInitialFormData);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message || "error while creating the ledger");
+    }
+  }
+
+  useEffect(() => {
+    fetchProposalInformation();
+  }, []);
+
   return (
-    <div className="flex gap-5">
-      <div className="w-1/2">
-        <CommonForm
-          formControls={ledgerFormControl}
-          formData={ledgerFormData}
-          setFormData={setLedgerFormData}
-        />
-      </div>
-      <div className="w-1/2">
-        <form
-          onSubmit={handleEntriesFormSubmit}
-          className="flex flex-col gap-3"
-        >
-          <div className="flex flex-col gap-2">
-            <Label>Date</Label>
-            <Input
-              value={entriesFormData.date}
-              onChange={(e) =>
-                setEntriesFormData((prev) => ({
-                  ...prev,
-                  date: e.target.value,
-                }))
-              }
-              type={"date"}
+    <>
+      {loadingForProposalInfo ? (
+        <div className="animate-pulse text-lg">Loading...</div>
+      ) : (
+        <div className="flex gap-5">
+          <div className="w-1/2">
+            <p className="text-3xl text-center mb-5 font-medium">
+              Create Ledger
+            </p>
+            <CommonForm
+              formControls={ledgerFormControl}
+              formData={ledgerFormData}
+              setFormData={setLedgerFormData}
+              onSubmit={handleLedgerFormSubmit}
             />
           </div>
-          <div className="flex flex-col gap-2">
-            <Label>Description</Label>
-            <Input
-              placeholder="Enter the description"
-              value={entriesFormData.description}
-              onChange={(e) =>
-                setEntriesFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-            />
-          </div>
+          <div className="w-1/2">
+            <p className="text-3xl text-center mb-5 font-medium">
+              Ledger Entries
+            </p>
+            <form
+              onSubmit={handleEntriesFormSubmit}
+              className="flex flex-col gap-3"
+            >
+              <div className="flex flex-col gap-2">
+                <Label>Date</Label>
+                <Input
+                  value={entriesFormData.date}
+                  onChange={(e) =>
+                    setEntriesFormData((prev) => ({
+                      ...prev,
+                      date: e.target.value,
+                    }))
+                  }
+                  type={"date"}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Description</Label>
+                <Input
+                  placeholder="Enter the description"
+                  value={entriesFormData.description}
+                  onChange={(e) =>
+                    setEntriesFormData((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
+                />
+              </div>
 
-          <Button type={"submit"}>Add Entries</Button>
-        </form>
+              <Button type={"submit"}>Add Entries</Button>
+            </form>
 
-        {/* form items  */}
-        <form
-          onSubmit={handleItemsSubmit}
-          className="flex gap-3 items-center py-5"
-        >
-          <Input
-            placeholder="Enter the subheading"
-            value={itemsHeading?.subDescription}
-            onChange={(e) =>
-              setItemsHeading((prev) => ({
-                ...prev,
-                subDescription: e.target.value,
-              }))
-            }
-            required
-          />
-          <Input
-            required
-            placeholder="Enter the Amount"
-            value={itemsHeading?.price}
-            onChange={(e) =>
-              setItemsHeading((prev) => ({
-                ...prev,
-                price: e.target.value,
-              }))
-            }
-          />
-          <Button type="submit">Add</Button>
-        </form>
+            {/* form items  */}
+            <form
+              onSubmit={handleItemsSubmit}
+              className="flex gap-3 items-center py-5"
+            >
+              <Input
+                placeholder="Enter the subheading"
+                value={itemsHeading?.subDescription}
+                onChange={(e) =>
+                  setItemsHeading((prev) => ({
+                    ...prev,
+                    subDescription: e.target.value,
+                  }))
+                }
+                required
+              />
+              <Input
+                required
+                placeholder="Enter the Amount"
+                value={itemsHeading?.price}
+                onChange={(e) =>
+                  setItemsHeading((prev) => ({
+                    ...prev,
+                    price: e.target.value,
+                  }))
+                }
+              />
+              <Button type="submit">Add</Button>
+            </form>
 
-        <div>
-          {particularItemList.length === 0 ? (
-            <div className="border-dashed border p-3 rounded-lg text-gray-300 text-center font-semibold">
-              There is no Sub Heading Item
-            </div>
-          ) : (
-            <div className="flex gap-2 flex-col">
-              {particularItemList.map((item) => (
-                <div
-                  key={item.subDescription}
-                  className="flex items-center justify-between bg-gray-200 px-3 py-3 rounded-2xl"
-                >
-                  <div>{item?.subDescription}</div>
-                  <div className="font-bold ">
-                    ₹{Number(item?.price)?.toLocaleString("en-IN")}
-                  </div>
+            <div>
+              {particularItemList.length === 0 ? (
+                <div className="border-dashed border p-3 rounded-lg text-gray-300 text-center font-semibold">
+                  There is no Sub Heading Item
                 </div>
-              ))}
+              ) : (
+                <div className="flex gap-2 flex-col">
+                  {particularItemList.map((item) => (
+                    <div
+                      key={item.subDescription}
+                      className="flex items-center justify-between bg-gray-200 px-3 py-3 rounded-2xl"
+                    >
+                      <div>{item?.subDescription}</div>
+                      <div className="font-bold ">
+                        ₹{Number(item?.price)?.toLocaleString("en-IN")}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 

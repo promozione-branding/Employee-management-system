@@ -31,9 +31,16 @@ export async function getAllProposalCustomer(id) {
   return data;
 }
 
-// all Invoices of customer 
+// all Invoices of customer
 
 export async function getAllinvoicesCustomer(id) {
   const { data } = await axiosInstance.get(`/api/customer/invoice/${id}`);
+  return data;
+}
+
+// customer ledger
+
+export async function customerLedgerService(id) {
+  const { data } = await axiosInstance.get(`/api/customer/ledger/${id}`);
   return data;
 }

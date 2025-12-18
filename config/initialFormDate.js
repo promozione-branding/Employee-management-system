@@ -74,3 +74,10 @@ export const loginFormData = {
   email: "",
   password: "",
 };
+
+export const ledgerFormInitialFormData = {
+  openingBalance: "",
+  voucher: "",
+  debit: "",
+  credit: "",
+};

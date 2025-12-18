@@ -5,17 +5,19 @@ const LedgerSchema = new mongoose.Schema(
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
-      required: true,
     },
     proposalId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Proposal",
-      required: true,
     },
-    openingBalance: { type: Number, required: true },
+    openingBalance: { type: Number, required: true, default: 0 },
+    
     entries: [
       {
         date: { type: Date, default: Date.now, required: true },
+        voucher: { type: String, required: true },
+        debit: { type: Number },
+        credit: { type: Number },
         particular: {
           description: { type: String, required: true },
           items: [
@@ -25,9 +27,6 @@ const LedgerSchema = new mongoose.Schema(
             },
           ],
         },
-        voucher: { type: String, required: true },
-        debit: { type: Number },
-        credit: { type: Number },
       },
     ],
   },
