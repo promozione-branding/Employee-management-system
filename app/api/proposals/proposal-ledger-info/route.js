@@ -7,7 +7,7 @@ export async function POST(req) {
     await connectDB();
     const { proposalId } = await req.json();
 
-    const findProposal = await Proposal.findById(proposalId).select("clientId tanNo totalAmount");
+    const findProposal = await Proposal.findById(proposalId).select("proposalNo tanNo totalAmount");
 
     if (!findProposal) {
       return NextResponse.json(

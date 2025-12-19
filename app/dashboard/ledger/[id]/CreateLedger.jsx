@@ -1,37 +1,43 @@
 "use client";
-
-import CommonForm from "@/components/layout/Form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ledgerFormControl } from "@/config/data";
-import { ledgerFormInitialFormData } from "@/config/initialFormDate";
-import { createLedgerService, fetchingProposalsInfo } from "@/service/ledger";
-import { useEffect, useState } from "react";
+import { fetchingProposalsInfo } from "@/service/ledger";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const CreateLedger = ({ proposalId }) => {
-  const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
-  const [ledgerFormData, setLedgerFormData] = useState(
-    ledgerFormInitialFormData
-  );
-
+const CreateLedgerPage = ({ proposalId }) => {
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [formData, setFormData] = useState({});
   const [proposalDetails, setProposalDetails] = useState(null);
 
-  const [globalEntries, setGlobalEntries] = useState([]);
+  // loading
+  const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
 
-  // ------------ entries form -------
-  const [entriesFormData, setEntriesFormData] = useState({
-    date: "",
+  //   ----------------payment Entries State---------------
+  const [paymentEntriesFormData, setPaymentEntriesFormData] = useState({
     description: "",
+    paymentAmount: "",
   });
 
-  //   state for sub heading and amount
-  const [particularItemList, setParticularItemList] = useState([]);
-  const [itemsHeading, setItemsHeading] = useState({
-    subDescription: "",
-    price: "",
-  });
+  const [listOfPayments, setListOfPayments] = useState([]);
+
+  const handlePaymentMethodChange = (e) => {
+    setPaymentMethod(e.target.value);
+    setFormData({}); // Reset form data when payment method changes
+  };
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // You can now access the full form data here
+    const submissionData = {
+      paymentMethod,
+      ...formData,
+    };
+    console.log("Form Submitted:", submissionData);
+  };
 
   async function fetchProposalInformation() {
     try {
@@ -49,218 +55,551 @@ const CreateLedger = ({ proposalId }) => {
     }
   }
 
-  function handleEntriesFormSubmit(e) {
-    e.preventDefault();
-
-    if (particularItemList.length <= 0) {
-      toast.error("Please add SubHeading and amount");
-      return;
-    }
-
-    const data = {
-      date: entriesFormData?.date,
-      description: entriesFormData.description,
-      item: particularItemList,
-    };
-    setGlobalEntries((prev) => [...prev, data]);
-    setEntriesFormData({
-      date: "",
-      description: "",
-    });
-    setParticularItemList([]);
-  }
-
-  function handleItemsSubmit(e) {
-    e.preventDefault();
-    if (isNaN(itemsHeading?.price) || itemsHeading?.price.trim() === "") {
-      toast.error("Please enter a valid number for the amount.");
-      return;
-    }
-
-    setParticularItemList((prev) => [...prev, itemsHeading]);
-    setItemsHeading({
-      subDescription: "",
-      price: "",
-    });
-  }
-
-  // ---------- handle First form --------
-  async function handleLedgerFormSubmit(e) {
-    e.preventDefault();
-
-    if (
-      !ledgerFormData?.openingBalance &&
-      !ledgerFormData?.voucher &&
-      !ledgerFormData?.debit &&
-      !ledgerFormData?.credit
-    ) {
-      toast.error(
-        "Please fill at least one field: Opening Balance, Voucher, Debit, or Credit."
-      );
-      return;
-    }
-
-    if (
-      isNaN(ledgerFormData?.openingBalance) ||
-      ledgerFormData?.openingBalance.trim() === ""
-    ) {
-      toast.error("Please enter a valid number for the amount.");
-      return;
-    }
-
-    if (isNaN(ledgerFormData?.debit)) {
-      toast.error("Please enter a valid number for the amount.");
-      return;
-    }
-
-    if (isNaN(ledgerFormData?.credit)) {
-      toast.error("Please enter a valid number for the amount.");
-      return;
-    }
-
-    if (globalEntries.length <= 0) {
-      toast.error("Please fill the another form also");
-      return;
-    }
-
-    try {
-      const data = globalEntries.map(({ date, description, item }) => ({
-        date,
-        particular: {
-          description,
-          items: item,
-        },
-        voucher: ledgerFormData?.voucher,
-        debit: Number(ledgerFormData?.debit),
-        credit: Number(ledgerFormData?.credit),
-      }));
-
-      const ledgerFormDataApi = {
-        customerId: proposalDetails?.clientId,
-        proposalId: proposalId,
-        openingBalance: Number(ledgerFormData?.openingBalance),
-        entries: data,
-      };
-
-      // console.log(ledgerFormDataApi,"ledgerFormDataApi");
-      const res = await createLedgerService(ledgerFormDataApi);
-      if (res.success) {
-        toast.success(res.message || "Ledger created successfully");
-        setLedgerFormData(ledgerFormInitialFormData);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message || "error while creating the ledger");
-    }
-  }
-
   useEffect(() => {
     fetchProposalInformation();
   }, []);
 
+  const renderChequeForm = () => (
+    <div className="grid grid-cols-2 gap-3">
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="description"
+        >
+          Particular Description
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="description"
+          type="text"
+          placeholder="Enter Particular description"
+          value={formData.description || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="chequeNumber"
+        >
+          Cheque Number
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="chequeNumber"
+          type="text"
+          placeholder="Enter Cheque Number"
+          value={formData.chequeNumber || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="chequeDate"
+        >
+          Cheque Date
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="chequeDate"
+          type="date"
+          value={formData.chequeDate || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="amount"
+        >
+          Amount
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="amount"
+          type="number"
+          placeholder="Enter Amount"
+          value={formData.amount || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="bankName"
+        >
+          Bank Name
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="bankName"
+          type="text"
+          placeholder="Enter Bank Name"
+          value={formData.bankName || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="branchName"
+        >
+          Branch Name
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="branchName"
+          type="text"
+          placeholder="Enter Branch Name"
+          value={formData.branchName || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="ifscCode"
+        >
+          IFSC Code
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="ifscCode"
+          type="text"
+          placeholder="Enter IFSC Code"
+          value={formData.ifscCode || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="entryDate"
+        >
+          Entry Date
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="entryDate"
+          type="date"
+          value={formData.entryDate || ""}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
+  );
+
+  const renderNetBankingForm = () => (
+    <div className="grid grid-cols-2 gap-3">
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="description"
+        >
+          Particular Description
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="description"
+          type="text"
+          placeholder="Enter Particular description"
+          value={formData.description || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="transactionId"
+        >
+          Transaction ID / UTR
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="transactionId"
+          type="text"
+          placeholder="Enter Transaction ID / UTR"
+          value={formData.transactionId || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="transactionDate"
+        >
+          Transaction Date
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="transactionDate"
+          type="date"
+          value={formData.transactionDate || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="amount"
+        >
+          Amount
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="amount"
+          type="number"
+          placeholder="Enter Amount"
+          value={formData.amount || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="entryDate"
+        >
+          Entry Date
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="entryDate"
+          type="date"
+          value={formData.entryDate || ""}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
+  );
+
+  const renderUpiForm = () => (
+    <div className="grid grid-cols-2 gap-3">
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="description"
+        >
+          Particular Description
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="description"
+          type="text"
+          placeholder="Enter Particular description"
+          value={formData.description || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="upiId"
+        >
+          UPI ID
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="upiId"
+          type="text"
+          placeholder="Enter UPI ID"
+          value={formData.upiId || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="payerName"
+        >
+          Payer Name
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="payerName"
+          type="text"
+          placeholder="Enter Payer Name"
+          value={formData.payerName || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="amount"
+        >
+          Amount
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="amount"
+          type="number"
+          placeholder="Enter Amount"
+          value={formData.amount || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="upiTransactionId"
+        >
+          UPI Transaction ID / UTR
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="upiTransactionId"
+          type="text"
+          placeholder="Enter UPI Transaction ID / UTR"
+          value={formData.upiTransactionId || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="entryDate"
+        >
+          Entry Date
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="entryDate"
+          type="date"
+          value={formData.entryDate || ""}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
+  );
+
+  const renderCardForm = () => (
+    <div className="grid grid-cols-2 gap-3">
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="description"
+        >
+          Particular Description
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="description"
+          type="text"
+          placeholder="Enter Particular description"
+          value={formData.description || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="cardType"
+        >
+          Card Type
+        </label>
+        <select
+          id="cardType"
+          className="shadow border rounded w-full py-2 px-3 text-gray-700"
+          value={formData.cardType || ""}
+          onChange={handleChange}
+        >
+          <option value="">Select Card Type</option>
+          <option value="credit">Credit Card</option>
+          <option value="debit">Debit Card</option>
+        </select>
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="last4Digits"
+        >
+          Last 4 Digits
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="last4Digits"
+          type="text"
+          maxLength="4"
+          placeholder="Enter Last 4 Digits"
+          value={formData.last4Digits || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="issuingBank"
+        >
+          Issuing Bank
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="issuingBank"
+          type="text"
+          placeholder="Enter Issuing Bank"
+          value={formData.issuingBank || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="cardholderName"
+        >
+          Cardholder Name
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="cardholderName"
+          type="text"
+          placeholder="Enter Cardholder Name"
+          value={formData.cardholderName || ""}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="entryDate"
+        >
+          Entry Date
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="entryDate"
+          type="date"
+          value={formData.entryDate || ""}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <>
       {loadingForProposalInfo ? (
-        <div className="animate-pulse text-lg">Loading...</div>
+        <>Loading...</>
       ) : (
-        <div className="flex gap-5">
-          <div className="w-1/2">
-            <p className="text-3xl text-center mb-5 font-medium">
-              Create Ledger
-            </p>
-            <CommonForm
-              formControls={ledgerFormControl}
-              formData={ledgerFormData}
-              setFormData={setLedgerFormData}
-              onSubmit={handleLedgerFormSubmit}
-            />
+        <div className="flex gap-5 flex-col md:flex-row lg:px-20">
+          <div className="p-2 md:w-1/2">
+            <h1 className="text-2xl font-bold text-center mb-2">
+              Transation Details
+            </h1>
+            <form
+              className="bg-white shadow-md rounded-xl px-8 pt-6 pb-8 mb-4"
+              onSubmit={handleSubmit}
+            >
+              <div className="mb-4">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="paymentMethod"
+                >
+                  Method of Payment
+                </label>
+                <select
+                  id="paymentMethod"
+                  onChange={handlePaymentMethodChange}
+                  value={paymentMethod}
+                  className="shadow border rounded w-full py-2 px-3 text-gray-700"
+                >
+                  <option value="">Select a method</option>
+                  <option value="cheque">Cheque</option>
+                  <option value="net-banking">Net Banking</option>
+                  <option value="upi">UPI</option>
+                  <option value="card">Credit/Debit Card</option>
+                </select>
+              </div>
+              {paymentMethod === "cheque" && renderChequeForm()}
+              {paymentMethod === "net-banking" && renderNetBankingForm()}
+              {paymentMethod === "upi" && renderUpiForm()}
+              {paymentMethod === "card" && renderCardForm()}
+              {paymentMethod && (
+                <button
+                  type="submit"
+                  className="bg-blue-500 hover:bg-blue-700 text-white w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                >
+                  Submit
+                </button>
+              )}
+            </form>
           </div>
-          <div className="w-1/2">
-            <p className="text-3xl text-center mb-5 font-medium">
-              Ledger Entries
-            </p>
-            <form
-              onSubmit={handleEntriesFormSubmit}
-              className="flex flex-col gap-3"
-            >
-              <div className="flex flex-col gap-2">
-                <Label>Date</Label>
-                <Input
-                  value={entriesFormData.date}
-                  onChange={(e) =>
-                    setEntriesFormData((prev) => ({
-                      ...prev,
-                      date: e.target.value,
-                    }))
-                  }
-                  type={"date"}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label>Description</Label>
-                <Input
-                  placeholder="Enter the description"
-                  value={entriesFormData.description}
-                  onChange={(e) =>
-                    setEntriesFormData((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                />
-              </div>
 
-              <Button type={"submit"}>Add Entries</Button>
-            </form>
+          <div className="md:w-1/2">
+            {/* <h1 className="text-2xl font-bold text-center mb-6">
+              Payment Entires
+            </h1>
 
-            {/* form items  */}
-            <form
-              onSubmit={handleItemsSubmit}
-              className="flex gap-3 items-center py-5"
-            >
-              <Input
-                placeholder="Enter the subheading"
-                value={itemsHeading?.subDescription}
-                onChange={(e) =>
-                  setItemsHeading((prev) => ({
-                    ...prev,
-                    subDescription: e.target.value,
-                  }))
-                }
-                required
-              />
-              <Input
-                required
-                placeholder="Enter the Amount"
-                value={itemsHeading?.price}
-                onChange={(e) =>
-                  setItemsHeading((prev) => ({
-                    ...prev,
-                    price: e.target.value,
-                  }))
-                }
-              />
-              <Button type="submit">Add</Button>
-            </form>
-
-            <div>
-              {particularItemList.length === 0 ? (
-                <div className="border-dashed border p-3 rounded-lg text-gray-300 text-center font-semibold">
-                  There is no Sub Heading Item
+            <form>
+              <div className="grid grid-cols-2 gap-5">
+                <div className="mb-4">
+                  <label
+                    className="block text-gray-700 text-sm font-bold mb-2"
+                    htmlFor="descriptionOfPayment"
+                  >
+                    Description of Payment
+                  </label>
+                  <input
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+                    id="descriptionOfPayment"
+                    type="text"
+                    placeholder="Enter payment Description"
+                  />
                 </div>
-              ) : (
-                <div className="flex gap-2 flex-col">
-                  {particularItemList.map((item) => (
-                    <div
-                      key={item.subDescription}
-                      className="flex items-center justify-between bg-gray-200 px-3 py-3 rounded-2xl"
-                    >
-                      <div>{item?.subDescription}</div>
-                      <div className="font-bold ">
-                        ₹{Number(item?.price)?.toLocaleString("en-IN")}
-                      </div>
-                    </div>
-                  ))}
+                <div className="mb-4">
+                  <label
+                    className="block text-gray-700 text-sm font-bold mb-2"
+                    htmlFor="paymentAmount"
+                  >
+                    Payment Amount
+                  </label>
+                  <input
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+                    id="paymentAmount"
+                    type="text"
+                    placeholder="Enter Payment Amount"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-700 text-white w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline "
+              >
+                Add
+              </button>
+            </form> */}
+
+            <div className="my-5 border py-3 px-5 rounded-2xl flex flex-col space-y-2 w-[50%] ">
+              <div className="bg-blue-500 w-32 flex items-center justify-center rounded-2xl p-1 font-semibold">
+                {proposalDetails?.proposalNo}
+              </div>
+              <div className="font-semibold">
+                Deal Amount: ₹{" "}
+                {(
+                  proposalDetails?.totalAmount +
+                  proposalDetails?.totalAmount * 0.18 -
+                  (proposalDetails.tanNo
+                    ? proposalDetails?.totalAmount * 0.02
+                    : 0)
+                ).toLocaleString("en-IN")}
+              </div>
+
+              <div className="font-semibold">
+                Base Amount: ₹{" "}
+                {proposalDetails?.totalAmount.toLocaleString("en-IN")}
+              </div>
+
+              <div className="font-semibold">
+                GST Amount: ₹{" "}
+                {(proposalDetails?.totalAmount * 0.18).toLocaleString("en-IN")}
+              </div>
+
+              {proposalDetails.tanNo && (
+                <div className="font-semibold">
+                  TDS Amount (2%): - ₹{" "}
+                  {(proposalDetails?.totalAmount * 0.02).toLocaleString(
+                    "en-IN"
+                  )}
                 </div>
               )}
             </div>
@@ -271,4 +610,4 @@ const CreateLedger = ({ proposalId }) => {
   );
 };
 
-export default CreateLedger;
+export default CreateLedgerPage;

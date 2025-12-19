@@ -1,4 +1,3 @@
-import toast from "react-hot-toast";
 import axiosInstance from "../axiosInstance";
 
 export async function fetchingProposalsInfo(id) {

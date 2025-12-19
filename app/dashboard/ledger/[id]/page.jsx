@@ -1,9 +1,9 @@
-import CreateLedger from "./CreateLedger";
+import CreateLedgerPage from "./CreateLedger";
 
 const page = async ({ params }) => {
   const { id } = await params;
 
-  return <CreateLedger proposalId={id} />;
+  return <CreateLedgerPage proposalId={id} />;
 };
 
 export default page;
