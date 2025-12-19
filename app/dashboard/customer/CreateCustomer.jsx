@@ -26,6 +26,7 @@ const CreateCustomer = ({
     for (const control of addCustomerFormControl) {
       if (
         control.name !== "tanNo" &&
+        control.name !== "notes" &&
         control.name !== "website" &&
         control.name !== "meetingDate" &&
         !formData[control.name]

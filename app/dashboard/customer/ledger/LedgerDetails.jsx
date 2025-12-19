@@ -7,63 +7,17 @@ import toast from "react-hot-toast";
 
 const LedgerDetails = ({ customerId }) => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState({ entries: [], openingBalance: 0 }); // Initialize with a default object
 
-  const value= data[0]
-  
-  console.log(value,"hello");
-
-  const ledgerData = [
-    {
-      date: "22-April-25",
-      particular: {
-        description: "Renewal-21142848 (Duo Date: 16-Feb-25)",
-        item: [
-          {
-            desc: "TS 3 Years",
-            price: 80000,
-          },
-          {
-            desc: "GST @18%",
-            price: 14400,
-          },
-        ],
-      },
-      voucher: "Renewal Advice",
-      debit: 94400,
-      credit: 0,
-    },
-    {
-      date: "22-April-25",
-      particular: {
-        description: "Renewal-21142848 (Duo Date: 16-Feb-25)",
-        item: [
-          {
-            desc: "TS 3 Years",
-            price: 80000,
-          },
-          {
-            desc: "GST @18%",
-            price: 14400,
-          },
-          {
-            desc: "GST @18%",
-            price: 14400,
-          },
-        ],
-      },
-      voucher: "Renewal Advice",
-      debit: 94400,
-      credit: 0,
-    },
-  ];
+  const { entries, openingBalance } = data; // This line is now safe as data is always an object
 
   async function fetchLeaderDetail() {
     try {
       const res = await customerLedgerService(customerId);
       if (res.success) {
         setLoading(false);
-        setData(res.data);
+
+        setData(res?.data?.ledger || { entries: [], openingBalance: 0 }); // Ensure data is always an object
       }
     } catch (error) {
       console.log(error);
@@ -101,48 +55,52 @@ const LedgerDetails = ({ customerId }) => {
             <div className="w-[10vw] border-">1-Apr-25</div>
             <div className="w-[50vw] text-center  ">_</div>
             <div className="w-[10vw] pl-3">Opening Balance</div>
-            <div className="w-[15vw] text-right">{value?.openingBalance.toLocaleString("en-IN")}</div>
-            <div className="w-[15vw] text-right">{value?.openingBalance.toLocaleString("en-IN")}</div>
+            <div className="w-[15vw] text-right">
+              {openingBalance.toLocaleString("en-IN")}
+            </div>
+            <div className="w-[15vw] text-right">
+              {openingBalance.toLocaleString("en-IN")}
+            </div>
           </div>
 
           {/* main enteries  */}
           <div>
-            {value.entries.map((item, idx) => (
-              <div key={idx} className="flex  border-b border-black ">
-                <div className="w-[10vw]  border-r-2 border-l-2 border-black p-3">
-                  {item?.date.split("T")[0]}
-                </div>
-                {/* <div className="w-[50vw] text-left flex flex-col gap-3  border-r-2 border-black p-3">
-                  <div>{item?.particular?.description}</div>
-                  <div>
-                    {item?.particular.item.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="ml-5 flex w-[60%]  justify-between border-b border-black"
-                      >
-                        <div>{item.desc}</div>
-                        <div className="font-medium">
-                          {item.price.toLocaleString("en-IN")}
-                        </div>
-                      </div>
-                    ))}
+            {entries.map(
+              ({ date, credit, debit, particular, voucher, _id }) => (
+                <div key={_id} className="flex  border-b border-black ">
+                  <div className="w-[10vw]  border-r-2 border-l-2 border-black p-3">
+                    {date.split("T")[0]}
                   </div>
-                </div> */}
-                {/* <div className="w-[10vw]  border-r-2 border-black p-3">
-                  {item?.voucher}
+                  <div className="w-[50vw] text-left flex flex-col gap-3  border-r-2 border-black p-3">
+                    <div>{particular?.description}</div>
+                    <div>
+                      {particular?.items?.map(
+                        ({ price, subDescription, _id }) => (
+                          <div
+                            key={_id}
+                            className="ml-5 flex w-[60%]  justify-between border-b border-black"
+                          >
+                            <div>{subDescription}</div>
+                            <div className="font-medium">
+                              ₹ {price?.toLocaleString("en-IN")}
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                  <div className="w-[10vw] capitalize border-r-2 border-black p-3">
+                    {voucher}
+                  </div>
+                  <div className="w-[15vw] text-right font-medium  border-r-2 border-black p-3">
+                    {debit.toLocaleString("en-IN")}
+                  </div>
+                  <div className="w-[15vw] text-right font-medium  border-r-2 border-black p-3">
+                    {credit.toLocaleString("en-IN")}
+                  </div>
                 </div>
-                <div className="w-[15vw] text-right font-medium  border-r-2 border-black p-3">
-                  {item?.debit === 0
-                    ? "_"
-                    : item?.debit.toLocaleString("en-IN")}
-                </div>
-                <div className="w-[15vw] text-right font-medium  border-r-2 border-black p-3">
-                  {item?.credit === 0
-                    ? "_"
-                    : item?.credit.toLocaleString("en-IN")}
-                </div> */}
-              </div>
-            ))}
+              )
+            )}
           </div>
 
           {/* create ledger btn  */}

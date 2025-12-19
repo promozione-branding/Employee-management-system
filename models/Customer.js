@@ -50,12 +50,10 @@ const CustomerSchema = new mongoose.Schema(
         ref: "Proposal",
       },
     ],
-    ledger: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Ledger",
-      },
-    ],
+    ledger: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Ledger",
+    },
   },
   { timestamps: true }
 );

@@ -21,8 +21,8 @@ export async function POST(req) {
     if (!newLedger) {
       throw new Error("Error while creating the ledger");
     }
-    findCustomer.ledger.push(newLedger?._id);
-    await findCustomer.save()
+    findCustomer.ledger = newLedger?._id;
+    await findCustomer.save();
 
     return NextResponse.json(
       {

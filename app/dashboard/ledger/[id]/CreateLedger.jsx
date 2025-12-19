@@ -142,6 +142,7 @@ const CreateLedger = ({ proposalId }) => {
         entries: data,
       };
 
+      // console.log(ledgerFormDataApi,"ledgerFormDataApi");
       const res = await createLedgerService(ledgerFormDataApi);
       if (res.success) {
         toast.success(res.message || "Ledger created successfully");
