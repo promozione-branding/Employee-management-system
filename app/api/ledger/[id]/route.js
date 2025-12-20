@@ -44,3 +44,44 @@ export async function GET(req, context) {
     );
   }
 }
+
+export async function PUT(req, context) {
+  try {
+    await connectDB();
+
+    const { id } = await context.params;
+    const payload = await req.json();
+
+    const updatedLedger = await Ladger.findByIdAndUpdate(
+      id,
+      {
+        $push: { entries: payload },
+      },
+      { new: true }
+    );
+
+    if (!updatedLedger) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Ledger not found",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Entry added successfully",
+      data: updatedLedger,
+    });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({
+      success: false,
+      message: "Server error while adding entry",
+    });
+  }
+}

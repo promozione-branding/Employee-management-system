@@ -1,179 +1,43 @@
 "use client";
-import { createLedgerService, fetchingProposalsInfo } from "@/service/ledger";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { customerLedgerService } from "@/service/customer";
 
-const CreateLedgerPage = ({ proposalId }) => {
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+
+const AddEntries = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [formData, setFormData] = useState({});
-  const [proposalDetails, setProposalDetails] = useState(null);
-  const [ledgerData, setLedgerData] = useState(null);
-  const [firstLedgerEntry, setFirstLedgerEntry] = useState(false);
-  const router = useRouter();
 
-  // loading
-  const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
-  const [loadingForLedgerDetails, setLoadingForLedgerDetails] = useState(true);
-
-  async function fetchProposalInformation() {
-    try {
-      const res = await fetchingProposalsInfo(proposalId);
-      if (res.success) {
-        setLoadingForProposalInfo(false);
-        setProposalDetails(res.data);
-        fetchLedgerDetails(res?.data?.clientId);
-      }
-    } catch (error) {
-      console.log(error);
-      setLoadingForProposalInfo(true);
-      toast.error(
-        error.message || "error while fetching the proposal Information"
-      );
-    }
-  }
-
-  async function fetchLedgerDetails(id) {
-    try {
-      const res = await customerLedgerService(id);
-      if (res.success) {
-        setLoadingForLedgerDetails(false);
-        setLedgerData(res.data);
-        setFirstLedgerEntry(ledgerData?.ledger?.entries?.length !== 0);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message);
-    }
-  }
-
-  useEffect(() => {
-    fetchProposalInformation();
-  }, []);
-
-  const handlePaymentMethodChange = (e) => {
-    setPaymentMethod(e.target.value);
-    setFormData({}); // Reset form data when payment method changes
-  };
+  //   state for sub heading and amount
+  const [particularItemList, setParticularItemList] = useState([]);
+  const [itemsHeading, setItemsHeading] = useState({
+    subDescription: "",
+    price: "",
+  });
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const submissionData = {
-      paymentMethod,
-      ...formData,
-    };
-
-    const formDataLedger = {
-      customerId: proposalDetails?.clientId,
-      proposalId: proposalDetails?._id,
-      entries: [
-        {
-          date: submissionData?.entryDate,
-          voucher: submissionData?.paymentMethod,
-          debit: 0,
-          credit: 0,
-          balance:
-            proposalDetails?.totalAmount +
-            proposalDetails?.totalAmount * 0.18 -
-            (proposalDetails?.tanNo ? proposalDetails?.totalAmount * 0.02 : 0),
-          particular: {
-            description: `Proposal #${proposalDetails?.proposalNo}`,
-            items: [
-              {
-                subDescription: "18% GST",
-                price: proposalDetails?.totalAmount * 0.18,
-              },
-              {
-                subDescription: "Service Amount",
-                price: proposalDetails?.totalAmount,
-              },
-              ...(proposalDetails?.tanNo
-                ? [
-                    {
-                      subDescription: "2% TDS",
-                      price: proposalDetails?.totalAmount * 0.02,
-                    },
-                  ]
-                : []),
-              {
-                subDescription: "Total Amount",
-                price:
-                  proposalDetails?.totalAmount +
-                  proposalDetails?.totalAmount * 0.18 -
-                  (proposalDetails?.tanNo
-                    ? proposalDetails?.totalAmount * 0.02
-                    : 0),
-              },
-            ],
-          },
-          chequeDetails:
-            submissionData?.paymentMethod === "cheque"
-              ? {
-                  chequeNumber: submissionData?.chequeNumber,
-                  accountNo: submissionData?.accountNo,
-                  chequeDate: submissionData?.chequeDate,
-                  chequeAmount: submissionData?.amount,
-                  bankName: submissionData?.bankName,
-                  branchName: submissionData?.branchName,
-                  ifscCode: submissionData?.ifscCode,
-                }
-              : {},
-          net_banking:
-            submissionData?.paymentMethod === "net-banking"
-              ? {
-                  transactionId: submissionData?.transactionId,
-                  transactionDate: submissionData?.transactionDate,
-                  transactionAmount: submissionData?.amount,
-                }
-              : {},
-          upi:
-            submissionData?.paymentMethod === "upi"
-              ? {
-                  upi_id: submissionData?.upiId,
-                  payerName: submissionData?.payerName,
-                  transactionId: submissionData?.upiTransactionId,
-                }
-              : {},
-          credit_debit_card:
-            submissionData?.paymentMethod === "card"
-              ? {
-                  card_type: submissionData?.cardType,
-                  cardLastNo: submissionData?.last4Digits,
-                  bankName: submissionData?.issuingBank,
-                  cardHolderName: submissionData?.cardholderName,
-                }
-              : {},
-        },
-      ],
-    };
-
-    try {
-      const res = await createLedgerService(formDataLedger);
-      if (res.success) {
-        toast.success("Ledger Entry create successfully");
-        router.push("/dashboard/customer");
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message || "Error while create ledger");
-    }
+  const handlePaymentMethodChange = (e) => {
+    setPaymentMethod(e.target.value);
+    setFormData({}); // Reset form data when payment method changes
   };
 
-  async function handleEntrySubmit(e) {
+  // add particulars items
+  function handleItemsSubmit(e) {
     e.preventDefault();
-    console.log("hello");
+    if (isNaN(itemsHeading?.price) || itemsHeading?.price.trim() === "") {
+      toast.error("Please enter a valid number for the amount.");
+      return;
+    }
+
+    setParticularItemList((prev) => [...prev, itemsHeading]);
+    setItemsHeading({
+      subDescription: "",
+      price: "",
+    });
   }
 
   const renderChequeForm = () => (
@@ -241,23 +105,6 @@ const CreateLedgerPage = ({ proposalId }) => {
           type="number"
           placeholder="Enter Amount"
           value={formData.amount || ""}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="accountNo"
-        >
-          Account No
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="accountNo"
-          type="number"
-          placeholder="Enter Account No"
-          value={formData.accountNo || ""}
           onChange={handleChange}
           required
         />
@@ -619,154 +466,104 @@ const CreateLedgerPage = ({ proposalId }) => {
   );
 
   return (
-    <>
-      {loadingForProposalInfo ? (
-        <>Loading...</>
-      ) : (
-        <div className="flex gap-5 flex-col md:flex-row lg:px-20">
-          <div className="p-2 md:w-1/2">
-            <h1 className="text-2xl font-bold text-center mb-2">
-              Transation Details
-            </h1>
-            <form
-              className="bg-white shadow-md rounded-xl px-8 pt-6 pb-8 mb-4"
-              onSubmit={firstLedgerEntry ? handleEntrySubmit : handleSubmit}
+    <div className="flex gap-3 ">
+      <div className="overflow-auto w-1/2">
+        <h1 className="text-lg font-bold text-center mb-2">
+          Transation Details
+        </h1>
+        <form
+          className="bg-white shadow-md rounded-xl px-8 pt-6 pb-8 mb-4"
+          // onSubmit={handleSubmit}
+        >
+          <div className="mb-4">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="paymentMethod"
             >
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="paymentMethod"
-                >
-                  Method of Payment
-                </label>
-                <select
-                  id="paymentMethod"
-                  onChange={handlePaymentMethodChange}
-                  value={paymentMethod}
-                  className="shadow border rounded w-full py-2 px-3 text-gray-700"
-                >
-                  <option value="">Select a method</option>
-                  <option value="cheque">Cheque</option>
-                  <option value="net-banking">Net Banking</option>
-                  <option value="upi">UPI</option>
-                  <option value="card">Credit/Debit Card</option>
-                </select>
-              </div>
-              {paymentMethod === "cheque" && renderChequeForm()}
-              {paymentMethod === "net-banking" && renderNetBankingForm()}
-              {paymentMethod === "upi" && renderUpiForm()}
-              {paymentMethod === "card" && renderCardForm()}
-              {paymentMethod && (
-                <button
-                  type="submit"
-                  className="bg-blue-500 hover:bg-blue-700 text-white w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                >
-                  Submit
-                </button>
-              )}
-            </form>
+              Method of Payment
+            </label>
+            <select
+              id="paymentMethod"
+              onChange={handlePaymentMethodChange}
+              value={paymentMethod}
+              className="shadow border rounded w-full py-2 px-3 text-gray-700"
+            >
+              <option value="">Select a method</option>
+              <option value="cheque">Cheque</option>
+              <option value="net-banking">Net Banking</option>
+              <option value="upi">UPI</option>
+              <option value="card">Credit/Debit Card</option>
+            </select>
           </div>
+          {paymentMethod === "cheque" && renderChequeForm()}
+          {paymentMethod === "net-banking" && renderNetBankingForm()}
+          {paymentMethod === "upi" && renderUpiForm()}
+          {paymentMethod === "card" && renderCardForm()}
+          {paymentMethod && (
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-700 text-white w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Submit
+            </button>
+          )}
+        </form>
+      </div>
 
-          <div className="md:w-1/2">
-            <div className="my-5 border py-3 px-5 rounded-2xl flex flex-col space-y-2 w-[50%] ">
-              <div className="bg-blue-500 w-32 flex items-center justify-center rounded-2xl p-1 font-semibold">
-                {proposalDetails?.proposalNo}
-              </div>
-              <div className="font-semibold">
-                Deal Amount: ₹{" "}
-                {(
-                  proposalDetails?.totalAmount +
-                  proposalDetails?.totalAmount * 0.18 -
-                  (proposalDetails.tanNo
-                    ? proposalDetails?.totalAmount * 0.02
-                    : 0)
-                ).toLocaleString("en-IN")}
-              </div>
+      <div className="w-1/2">
+        <form
+          onSubmit={handleItemsSubmit}
+          className="flex gap-3 items-center py-5"
+        >
+          <Input
+            placeholder="Enter the subheading"
+            value={itemsHeading?.subDescription}
+            onChange={(e) =>
+              setItemsHeading((prev) => ({
+                ...prev,
+                subDescription: e.target.value,
+              }))
+            }
+            required
+          />
+          <Input
+            required
+            placeholder="Enter the Amount"
+            value={itemsHeading?.price}
+            onChange={(e) =>
+              setItemsHeading((prev) => ({
+                ...prev,
+                price: e.target.value,
+              }))
+            }
+          />
+          <Button type="submit">Add</Button>
+        </form>
 
-              <div className="font-semibold">
-                Base Amount: ₹{" "}
-                {proposalDetails?.totalAmount.toLocaleString("en-IN")}
-              </div>
-
-              <div className="font-semibold">
-                GST Amount(18%): ₹{" "}
-                {(proposalDetails?.totalAmount * 0.18).toLocaleString("en-IN")}
-              </div>
-
-              {proposalDetails.tanNo && (
-                <div className="font-semibold">
-                  TDS Amount (2%): ₹{" "}
-                  {(proposalDetails?.totalAmount * 0.02).toLocaleString(
-                    "en-IN"
-                  )}
-                </div>
-              )}
+        <div>
+          {particularItemList.length === 0 ? (
+            <div className="border-dashed border p-3 rounded-lg text-gray-300 text-center font-semibold">
+              There is no Sub Heading Item
             </div>
-
-            {ledgerData?.ledger?.entries?.length > 1 && (
-              <div>
-                <Accordion
-                  type="single"
-                  collapsible
-                  className="w-full"
-                  defaultValue="item-1"
+          ) : (
+            <div className="flex gap-2 flex-col">
+              {particularItemList.map((item) => (
+                <div
+                  key={item.subDescription}
+                  className="flex items-center justify-between bg-gray-200 px-3 py-3 rounded-2xl"
                 >
-                  <AccordionItem value="item-1">
-                    <AccordionTrigger>
-                      <div className="flex gap-10">
-                        <div>Cheque </div>
-                        <div className="text-blue-400">₹ 69,940 </div>
-                        <div>1-April-25 </div>
-                        <div>₹ 100,000</div>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="grid grid-cols-2 gap-4 text-balance">
-                      <div>Cheque Number : 435987347</div>
-                      <div>Cheque Date : 1 Dec 25</div>
-                      <div>Bank Name : 435987347</div>
-                      <div>Branch Name : Delhi</div>
-                      <div>IFSC Code : 435987347</div>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-2">
-                    <AccordionTrigger>Shipping Details</AccordionTrigger>
-                    <AccordionContent className="flex flex-col gap-4 text-balance">
-                      <p>
-                        We offer worldwide shipping through trusted courier
-                        partners. Standard delivery takes 3-5 business days,
-                        while express shipping ensures delivery within 1-2
-                        business days.
-                      </p>
-                      <p>
-                        All orders are carefully packaged and fully insured.
-                        Track your shipment in real-time through our dedicated
-                        tracking portal.
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-3">
-                    <AccordionTrigger>Return Policy</AccordionTrigger>
-                    <AccordionContent className="flex flex-col gap-4 text-balance">
-                      <p>
-                        We stand behind our products with a comprehensive 30-day
-                        return policy. If you&apos;re not completely satisfied,
-                        simply return the item in its original condition.
-                      </p>
-                      <p>
-                        Our hassle-free return process includes free return
-                        shipping and full refunds processed within 48 hours of
-                        receiving the returned item.
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </div>
-            )}
-          </div>
+                  <div>{item?.subDescription}</div>
+                  <div className="font-bold ">
+                    ₹{Number(item?.price)?.toLocaleString("en-IN")}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 };
 
-export default CreateLedgerPage;
+export default AddEntries;

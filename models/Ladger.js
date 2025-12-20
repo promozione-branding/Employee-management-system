@@ -32,6 +32,7 @@ const LedgerSchema = new mongoose.Schema(
           chequeNumber: Number,
           chequeDate: Date,
           chequeAmount: Number,
+          accountNo: Number,
           bankName: String,
           branchName: String,
           ifscCode: String,
