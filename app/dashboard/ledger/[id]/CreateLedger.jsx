@@ -1,5 +1,9 @@
 "use client";
-import { createLedgerService, fetchingProposalsInfo } from "@/service/ledger";
+import {
+  createLedgerService,
+  fetchingProposalsInfo,
+  ledgerEntriesService,
+} from "@/service/ledger";
 import {
   Accordion,
   AccordionContent,
@@ -22,6 +26,8 @@ const CreateLedgerPage = ({ proposalId }) => {
   // loading
   const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
   const [loadingForLedgerDetails, setLoadingForLedgerDetails] = useState(true);
+
+  console.log(ledgerData?.ledger?.entries, "ledgerData");
 
   async function fetchProposalInformation() {
     try {
@@ -46,6 +52,7 @@ const CreateLedgerPage = ({ proposalId }) => {
       if (res.success) {
         setLoadingForLedgerDetails(false);
         setLedgerData(res.data);
+
         setFirstLedgerEntry(ledgerData?.ledger?.entries?.length !== 0);
       }
     } catch (error) {
@@ -53,10 +60,6 @@ const CreateLedgerPage = ({ proposalId }) => {
       toast.error(error.message);
     }
   }
-
-  useEffect(() => {
-    fetchProposalInformation();
-  }, []);
 
   const handlePaymentMethodChange = (e) => {
     setPaymentMethod(e.target.value);
@@ -173,8 +176,114 @@ const CreateLedgerPage = ({ proposalId }) => {
 
   async function handleEntrySubmit(e) {
     e.preventDefault();
-    console.log("hello");
+
+    const submissionData = {
+      paymentMethod,
+      ...formData,
+    };
+
+    if (
+      Number(submissionData?.amount) >
+      ledgerData?.ledger?.entries?.at(-1)?.balance
+    ) {
+      toast.error(
+        `Balance is less than the Amount. remaining balance ${ledgerData.ledger?.entries
+          .at(-1)
+          .balance.toLocaleString("en-IN")} `
+      );
+      return;
+    }
+
+    const formDataLedger = {
+      date: submissionData?.entryDate,
+      voucher: submissionData?.paymentMethod,
+      debit: 0,
+      credit: Number(submissionData?.amount),
+      balance: Number(
+        ledgerData?.ledger?.entries?.at(-1)?.balance - submissionData?.amount
+      ),
+      particular: {
+        description: submissionData?.description,
+        items: [
+          {
+            subDescription: "18% GST",
+            price: submissionData?.amount * 0.18,
+          },
+          ...(proposalDetails?.tanNo
+            ? [
+                {
+                  subDescription: "2% TDS",
+                  price: submissionData?.amount * 0.02,
+                },
+              ]
+            : []),
+          {
+            subDescription: "Total Amount",
+            price: Number(submissionData?.amount),
+          },
+        ],
+      },
+      chequeDetails:
+        submissionData?.paymentMethod === "cheque"
+          ? {
+              chequeNumber: submissionData?.chequeNumber,
+              accountNo: submissionData?.accountNo,
+              chequeDate: submissionData?.chequeDate,
+              chequeAmount: submissionData?.amount,
+              bankName: submissionData?.bankName,
+              branchName: submissionData?.branchName,
+              ifscCode: submissionData?.ifscCode,
+            }
+          : {},
+      net_banking:
+        submissionData?.paymentMethod === "net-banking"
+          ? {
+              transactionId: submissionData?.transactionId,
+              transactionDate: submissionData?.transactionDate,
+              transactionAmount: submissionData?.amount,
+            }
+          : {},
+      upi:
+        submissionData?.paymentMethod === "upi"
+          ? {
+              upi_id: submissionData?.upiId,
+              payerName: submissionData?.payerName,
+              transactionId: submissionData?.upiTransactionId,
+            }
+          : {},
+      credit_debit_card:
+        submissionData?.paymentMethod === "card"
+          ? {
+              card_type: submissionData?.cardType,
+              cardLastNo: submissionData?.last4Digits,
+              bankName: submissionData?.issuingBank,
+              cardHolderName: submissionData?.cardholderName,
+            }
+          : {},
+    };
+    console.log(formDataLedger, "formDataLedger");
+
+    try {
+      const res = await ledgerEntriesService(
+        ledgerData?.ledger?._id,
+        formDataLedger
+      );
+
+      console.log(res, "res");
+      if (res.success) {
+        setPaymentMethod("");
+        setFormData({});
+        router.push("/dashboard/customer");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message || "Error while create entries");
+    }
   }
+
+  useEffect(() => {
+    fetchProposalInformation();
+  }, []);
 
   const renderChequeForm = () => (
     <div className="grid grid-cols-2 gap-3">
@@ -615,8 +724,67 @@ const CreateLedgerPage = ({ proposalId }) => {
           onChange={handleChange}
         />
       </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="amount"
+        >
+          Amount
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+          id="amount"
+          type="number"
+          placeholder="Enter Amount"
+          value={formData.amount || ""}
+          onChange={handleChange}
+        />
+      </div>
     </div>
   );
+
+  const renderEntryDetails = (item) => {
+    if (!item) return null;
+
+    switch (item.voucher) {
+      case "cheque":
+        return (
+          <>
+            {item.chequeDetails?.chequeNumber && <div>Cheque Number : {item.chequeDetails.chequeNumber}</div>}
+            {item.chequeDetails?.chequeDate && <div>Cheque Date : {new Date(item.chequeDetails.chequeDate).toLocaleDateString("en-GB")}</div>}
+            {item.chequeDetails?.bankName && <div>Bank Name : {item.chequeDetails.bankName}</div>}
+            {item.chequeDetails?.branchName && <div>Branch Name : {item.chequeDetails.branchName}</div>}
+            {item.chequeDetails?.ifscCode && <div>IFSC Code : {item.chequeDetails.ifscCode}</div>}
+          </>
+        );
+      case "net-banking":
+        return (
+          <>
+            {item.net_banking?.transactionId && <div>Transaction ID : {item.net_banking.transactionId}</div>}
+            {item.net_banking?.transactionDate && <div>Transaction Date : {new Date(item.net_banking.transactionDate).toLocaleDateString("en-GB")}</div>}
+          </>
+        );
+      case "upi":
+        return (
+          <>
+            {item.upi?.upi_id && <div>UPI ID : {item.upi.upi_id}</div>}
+            {item.upi?.payerName && <div>Payer Name : {item.upi.payerName}</div>}
+            {item.upi?.transactionId && <div>Transaction ID : {item.upi.transactionId}</div>}
+          </>
+        );
+      case "card":
+        return (
+          <>
+            {item.credit_debit_card?.card_type && <div>Card Type : {item.credit_debit_card.card_type}</div>}
+            {item.credit_debit_card?.cardLastNo && <div>Last 4 Digits : {item.credit_debit_card.cardLastNo}</div>}
+            {item.credit_debit_card?.bankName && <div>Issuing Bank : {item.credit_debit_card.bankName}</div>}
+            {item.credit_debit_card?.cardHolderName && <div>Cardholder Name : {item.credit_debit_card.cardHolderName}</div>}
+          </>
+        );
+      default:
+        return <div>No details available for this transaction type.</div>;
+    }
+  };
 
   return (
     <>
@@ -711,54 +879,29 @@ const CreateLedgerPage = ({ proposalId }) => {
                   className="w-full"
                   defaultValue="item-1"
                 >
-                  <AccordionItem value="item-1">
-                    <AccordionTrigger>
-                      <div className="flex gap-10">
-                        <div>Cheque </div>
-                        <div className="text-blue-400">₹ 69,940 </div>
-                        <div>1-April-25 </div>
-                        <div>₹ 100,000</div>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="grid grid-cols-2 gap-4 text-balance">
-                      <div>Cheque Number : 435987347</div>
-                      <div>Cheque Date : 1 Dec 25</div>
-                      <div>Bank Name : 435987347</div>
-                      <div>Branch Name : Delhi</div>
-                      <div>IFSC Code : 435987347</div>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-2">
-                    <AccordionTrigger>Shipping Details</AccordionTrigger>
-                    <AccordionContent className="flex flex-col gap-4 text-balance">
-                      <p>
-                        We offer worldwide shipping through trusted courier
-                        partners. Standard delivery takes 3-5 business days,
-                        while express shipping ensures delivery within 1-2
-                        business days.
-                      </p>
-                      <p>
-                        All orders are carefully packaged and fully insured.
-                        Track your shipment in real-time through our dedicated
-                        tracking portal.
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-3">
-                    <AccordionTrigger>Return Policy</AccordionTrigger>
-                    <AccordionContent className="flex flex-col gap-4 text-balance">
-                      <p>
-                        We stand behind our products with a comprehensive 30-day
-                        return policy. If you&apos;re not completely satisfied,
-                        simply return the item in its original condition.
-                      </p>
-                      <p>
-                        Our hassle-free return process includes free return
-                        shipping and full refunds processed within 48 hours of
-                        receiving the returned item.
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
+                  {ledgerData?.ledger?.entries?.slice(1)?.map((item) => (
+                    <AccordionItem value={item?._id} key={item?._id}>
+                      <AccordionTrigger>
+                        <div className="flex gap-10 w-full text-left">
+                          <div className="capitalize w-1/4">
+                            {item?.voucher}
+                          </div>
+                          <div className="text-blue-400 w-1/4">
+                            ₹ {item?.credit?.toLocaleString("en-IN")}
+                          </div>
+                          <div className="w-1/4">
+                            {new Date(item?.date).toLocaleDateString("en-GB")}
+                          </div>
+                          <div className="w-1/4">
+                            ₹ {item?.balance?.toLocaleString("en-IN")}
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="grid grid-cols-2 gap-4 text-balance">
+                        {renderEntryDetails(item)}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
                 </Accordion>
               </div>
             )}

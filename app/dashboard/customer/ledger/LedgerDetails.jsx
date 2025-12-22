@@ -11,7 +11,7 @@ import {
 import { customerLedgerService } from "@/service/customer";
 import { Wallet } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const LedgerDetails = ({ customerId }) => {
@@ -23,15 +23,16 @@ const LedgerDetails = ({ customerId }) => {
   });
 
   const { entries, openingBalance, proposalId } = data;
-  console.log(proposalId, "proposalId");
 
   async function fetchLeaderDetail() {
     try {
-      const res = await customerLedgerService(customerId);
-      if (res.success) {
-        setLoading(false);
+      if (customerId !== "") {
+        const res = await customerLedgerService(customerId);
+        if (res.success) {
+          setLoading(false);
 
-        setData(res?.data?.ledger || { entries: [], openingBalance: 0 });
+          setData(res?.data?.ledger || { entries: [], openingBalance: 0 });
+        }
       }
     } catch (error) {
       console.log(error);
@@ -86,7 +87,10 @@ const LedgerDetails = ({ customerId }) => {
 
           <div>
             {entries.map(
-              ({ date, credit, debit, particular, voucher,balance, _id }, idx) => (
+              (
+                { date, credit, debit, particular, voucher, balance, _id },
+                idx
+              ) => (
                 <div key={_id} className="flex  border-b border-black">
                   <div className="w-[5vw] border-l-2 border-black pl-2 pt-2">
                     {idx + 1}.
@@ -123,13 +127,13 @@ const LedgerDetails = ({ customerId }) => {
                     {voucher}
                   </div>
                   <div className="w-[10vw] text-right font-medium  border-r-2 border-black p-3">
-                    {debit.toLocaleString("en-IN")}
+                    {debit?.toLocaleString("en-IN")}
                   </div>
                   <div className="w-[10vw] text-right font-medium  border-r-2 border-black p-3">
-                    {credit.toLocaleString("en-IN")}
+                    {credit?.toLocaleString("en-IN")}
                   </div>
                   <div className="w-[10vw] text-right font-medium  border-r-2 border-black p-3">
-                    {balance.toLocaleString("en-IN")}
+                    {balance?.toLocaleString("en-IN")}
                   </div>
                 </div>
               )
@@ -138,7 +142,7 @@ const LedgerDetails = ({ customerId }) => {
 
           {/* create ledger btn  */}
 
-          <Dialog >
+          {/* <Dialog>
             <DialogTrigger asChild>
               <button className="bg-amber-300 p-4 absolute bottom-10 right-10 rounded-full">
                 <Wallet />
@@ -154,7 +158,7 @@ const LedgerDetails = ({ customerId }) => {
               </DialogHeader>
               <AddEntriesForm />
             </DialogContent>
-          </Dialog>
+          </Dialog> */}
         </div>
       )}
     </div>
