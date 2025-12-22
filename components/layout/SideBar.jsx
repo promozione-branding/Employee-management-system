@@ -7,6 +7,7 @@ import {
   BookUser,
   BookText,
   LogOut,
+  IdCardLanyard,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -50,6 +51,11 @@ const SideBar = ({ children }) => {
       href: "/dashboard/invoice",
       label: "Invoice",
       icon: <FileText size={100} />,
+    },
+    {
+      href: "/dashboard/employee",
+      label: "Employee",
+      icon: <IdCardLanyard size={100} />,
     },
   ];
 

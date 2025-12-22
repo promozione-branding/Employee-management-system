@@ -27,7 +27,7 @@ const CreateLedgerPage = ({ proposalId }) => {
   const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
   const [loadingForLedgerDetails, setLoadingForLedgerDetails] = useState(true);
 
-  console.log(ledgerData?.ledger?.entries, "ledgerData");
+
 
   async function fetchProposalInformation() {
     try {
@@ -52,8 +52,7 @@ const CreateLedgerPage = ({ proposalId }) => {
       if (res.success) {
         setLoadingForLedgerDetails(false);
         setLedgerData(res.data);
-
-        setFirstLedgerEntry(ledgerData?.ledger?.entries?.length !== 0);
+        setFirstLedgerEntry(res.data?.ledger?.entries?.length > 0);
       }
     } catch (error) {
       console.log(error);
@@ -71,6 +70,7 @@ const CreateLedgerPage = ({ proposalId }) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
+  // for the proposal entry
   const handleSubmit = async (e) => {
     e.preventDefault();
     const submissionData = {
@@ -174,9 +174,9 @@ const CreateLedgerPage = ({ proposalId }) => {
     }
   };
 
+  // this is the main entry function
   async function handleEntrySubmit(e) {
     e.preventDefault();
-
     const submissionData = {
       paymentMethod,
       ...formData,
@@ -261,7 +261,6 @@ const CreateLedgerPage = ({ proposalId }) => {
             }
           : {},
     };
-    console.log(formDataLedger, "formDataLedger");
 
     try {
       const res = await ledgerEntriesService(
@@ -269,7 +268,6 @@ const CreateLedgerPage = ({ proposalId }) => {
         formDataLedger
       );
 
-      console.log(res, "res");
       if (res.success) {
         setPaymentMethod("");
         setFormData({});
@@ -750,35 +748,73 @@ const CreateLedgerPage = ({ proposalId }) => {
       case "cheque":
         return (
           <>
-            {item.chequeDetails?.chequeNumber && <div>Cheque Number : {item.chequeDetails.chequeNumber}</div>}
-            {item.chequeDetails?.chequeDate && <div>Cheque Date : {new Date(item.chequeDetails.chequeDate).toLocaleDateString("en-GB")}</div>}
-            {item.chequeDetails?.bankName && <div>Bank Name : {item.chequeDetails.bankName}</div>}
-            {item.chequeDetails?.branchName && <div>Branch Name : {item.chequeDetails.branchName}</div>}
-            {item.chequeDetails?.ifscCode && <div>IFSC Code : {item.chequeDetails.ifscCode}</div>}
+            {item.chequeDetails?.chequeNumber && (
+              <div>Cheque Number : {item.chequeDetails.chequeNumber}</div>
+            )}
+            {item.chequeDetails?.chequeDate && (
+              <div>
+                Cheque Date :{" "}
+                {new Date(item.chequeDetails.chequeDate).toLocaleDateString(
+                  "en-GB"
+                )}
+              </div>
+            )}
+            {item.chequeDetails?.bankName && (
+              <div>Bank Name : {item.chequeDetails.bankName}</div>
+            )}
+            {item.chequeDetails?.branchName && (
+              <div>Branch Name : {item.chequeDetails.branchName}</div>
+            )}
+            {item.chequeDetails?.ifscCode && (
+              <div>IFSC Code : {item.chequeDetails.ifscCode}</div>
+            )}
           </>
         );
       case "net-banking":
         return (
           <>
-            {item.net_banking?.transactionId && <div>Transaction ID : {item.net_banking.transactionId}</div>}
-            {item.net_banking?.transactionDate && <div>Transaction Date : {new Date(item.net_banking.transactionDate).toLocaleDateString("en-GB")}</div>}
+            {item.net_banking?.transactionId && (
+              <div>Transaction ID : {item.net_banking.transactionId}</div>
+            )}
+            {item.net_banking?.transactionDate && (
+              <div>
+                Transaction Date :{" "}
+                {new Date(item.net_banking.transactionDate).toLocaleDateString(
+                  "en-GB"
+                )}
+              </div>
+            )}
           </>
         );
       case "upi":
         return (
           <>
             {item.upi?.upi_id && <div>UPI ID : {item.upi.upi_id}</div>}
-            {item.upi?.payerName && <div>Payer Name : {item.upi.payerName}</div>}
-            {item.upi?.transactionId && <div>Transaction ID : {item.upi.transactionId}</div>}
+            {item.upi?.payerName && (
+              <div>Payer Name : {item.upi.payerName}</div>
+            )}
+            {item.upi?.transactionId && (
+              <div>Transaction ID : {item.upi.transactionId}</div>
+            )}
           </>
         );
       case "card":
         return (
           <>
-            {item.credit_debit_card?.card_type && <div>Card Type : {item.credit_debit_card.card_type}</div>}
-            {item.credit_debit_card?.cardLastNo && <div>Last 4 Digits : {item.credit_debit_card.cardLastNo}</div>}
-            {item.credit_debit_card?.bankName && <div>Issuing Bank : {item.credit_debit_card.bankName}</div>}
-            {item.credit_debit_card?.cardHolderName && <div>Cardholder Name : {item.credit_debit_card.cardHolderName}</div>}
+            {item.credit_debit_card?.card_type && (
+              <div>Card Type : {item.credit_debit_card.card_type}</div>
+            )}
+            {item.credit_debit_card?.cardLastNo && (
+              <div>Last 4 Digits : {item.credit_debit_card.cardLastNo}</div>
+            )}
+            {item.credit_debit_card?.bankName && (
+              <div>Issuing Bank : {item.credit_debit_card.bankName}</div>
+            )}
+            {item.credit_debit_card?.cardHolderName && (
+              <div>
+                Cardholder Name : {item.credit_debit_card.cardHolderName}
+              </div>
+            )}
           </>
         );
       default:
@@ -786,6 +822,7 @@ const CreateLedgerPage = ({ proposalId }) => {
     }
   };
 
+  console.log(firstLedgerEntry,"firstLedgerEntry");
   return (
     <>
       {loadingForProposalInfo ? (

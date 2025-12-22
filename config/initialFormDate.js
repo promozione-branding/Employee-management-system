@@ -81,3 +81,10 @@ export const ledgerFormInitialFormData = {
   debit: "",
   credit: "",
 };
+
+export const initialEmployeeRegisterFormData = {
+  username: "",
+  email: "",
+  password: "",
+  role:"",
+};

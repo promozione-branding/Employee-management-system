@@ -432,4 +432,37 @@ export const ledgerFormControl = [
   },
 ];
 
+export const employeeRegisterFormControl = [
+  {
+    label: "Username",
+    name: "username",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter Your Username",
+  },
+  {
+    label: "Email",
+    name: "email",
+    componentType: "input",
+    type: "email",
+    placeholder: "Enter Your Email",
+  },
+  {
+    label: "Password",
+    name: "password",
+    componentType: "input",
+    type: "password",
+    placeholder: "Enter Your Password",
+  },
+  {
+    label: "Role",
+    name: "role",
+    componentType: "select",
+    options: [
+      { id: "manager", label: "Manager" },
+      { id: "employee", label: "Employee" }
+    ],
+  },
+];
+
 
