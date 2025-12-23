@@ -459,7 +459,7 @@ export const employeeRegisterFormControl = [
     name: "role",
     componentType: "select",
     options: [
-      { id: "manager", label: "Manager" },
+      { id: "admin", label: "admin" },
       { id: "employee", label: "Employee" }
     ],
   },

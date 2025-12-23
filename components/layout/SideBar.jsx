@@ -12,7 +12,6 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import axios from "axios";
 import toast from "react-hot-toast";
 import axiosInstance from "@/service/axiosInstance";
 
