@@ -2,33 +2,39 @@ import mongoose from "mongoose";
 
 const MeetingSchema = new mongoose.Schema(
   {
-    salesPersonDetails: {
+    salesPersonId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    clientDetails: {
+
+    clientId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
       required: true,
     },
     meetingUpdate: [
-      {
-        callUpdate: {
-          type: {
+      new mongoose.Schema(
+        {
+          updateType: {
             type: String,
-            enum: ["talk", "no-talk"],
+            enum: ["call", "meeting", "general"],
           },
+          status: String,
           note: String,
-          reminder: { type: Date },
-          meetingDate: { type: Date, default: Date.now },
+          reminderAt: {
+            type: Date,
+          },
+          meetingAt: {
+            type: Date,
+          },
+          reminderSent: {
+            type: Boolean,
+            default: false,
+          },
         },
-        generaleUpdate: {
-          note: String,
-          reminder: { type: Date },
-          meetingDate: { type: Date, default: Date.now },
-        },
-      },
+        { timestamps: true }
+      ),
     ],
   },
   { timestamps: true }
