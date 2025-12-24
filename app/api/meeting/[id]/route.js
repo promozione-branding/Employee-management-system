@@ -9,10 +9,11 @@ export async function GET(req, { params }) {
     const { id } = await params;
 
     const findMeeting = await Meeting.findById(id);
+
     if (!findMeeting) {
       return NextResponse.json(
         {
-          message: "meeting does not exists",
+          message: "meeting does not exist",
           success: false,
         },
         {
@@ -24,6 +25,7 @@ export async function GET(req, { params }) {
     return NextResponse.json(
       {
         success: true,
+        message: "meeting details fetched successfully",
         data: findMeeting,
       },
       { status: 200 }
@@ -38,6 +40,49 @@ export async function GET(req, { params }) {
       {
         status: 500,
       }
+    );
+  }
+}
+
+export async function PUT(req, { params }) {
+  try {
+    await connectDB();
+
+    const { id } = await params;
+
+    const payload = await req.json();
+
+    const updateMeeting = await Meeting.findByIdAndUpdate(
+      id,
+      {
+        $push: { meetingUpdate: payload },
+      },
+      { new: true }
+    );
+
+    if (!updateMeeting) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "meeting not found",
+        },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "meeting updated successfully",
+      data: updateMeeting,
+    });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Server error while updating the meeting update",
+      },
+      { status: 500 }
     );
   }
 }

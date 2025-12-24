@@ -2,20 +2,20 @@ import mongoose from "mongoose";
 
 const MeetingSchema = new mongoose.Schema(
   {
-    salesPersonId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-
-    clientId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Customer",
-      required: true,
-    },
     meetingUpdate: [
       new mongoose.Schema(
         {
+          salesPersonId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+          },
+
+          clientId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Customer",
+            required: true,
+          },
           updateType: {
             type: String,
             enum: ["call", "meeting", "general"],

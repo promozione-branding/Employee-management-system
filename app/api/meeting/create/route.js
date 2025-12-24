@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db";
-import Meeting from "@/models/meeting/Meeting";
 import { NextResponse } from "next/server";
+import Meeting from "@/models/meeting/Meeting";
+import Customer from "@/models/Customer";
 
 export async function POST(req) {
   try {
@@ -12,34 +13,28 @@ export async function POST(req) {
       updateType,
       status,
       note,
-      reminderDate,
-      reminderTime,
-      meetingDate,
-      meetingTime,
+      reminderAt,
+      meetingAt,
     } = await req.json();
 
-    if (!salesPersonId || !clientId || !updateType) {
-      return NextResponse.json({
-        message: "Please fill all necessary details",
-        success: false,
-      });
+    const findCustomer = await Customer.findById(clientId);
+    if (!findCustomer) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Customer with provided clientId not found",
+        },
+        {
+          status: 404,
+        }
+      );
     }
 
-    const reminderAt =
-      reminderDate && reminderTime
-        ? new Date(`${reminderDate}T${reminderTime}`)
-        : null;
-
-    const meetingAt =
-      meetingDate && meetingTime
-        ? new Date(`${meetingDate}T${meetingTime}`)
-        : null;
-
-    const newUpdate = await Meeting.create({
-      salesPersonId,
-      clientId,
+    const createMeeting = await Meeting.create({
       meetingUpdate: [
         {
+          salesPersonId,
+          clientId,
           updateType,
           status,
           note,
@@ -49,26 +44,29 @@ export async function POST(req) {
       ],
     });
 
+    if (!createMeeting) {
+      throw new Error("Error while creating the meeting");
+    }
+
+    findCustomer.meetingUpdate = createMeeting?._id;
+    await findCustomer.save();
+
     return NextResponse.json(
       {
         success: true,
-        message: "Meeting update successfully",
-        data: newUpdate,
+        message: "meeting created successfully",
+        data: createMeeting,
       },
-      {
-        status: 201,
-      }
+      { status: 201 }
     );
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return NextResponse.json(
       {
         success: false,
         message: "server error",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }

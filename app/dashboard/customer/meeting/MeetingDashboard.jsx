@@ -1,6 +1,6 @@
 "use client";
 import { Label } from "@/components/ui/label";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -11,8 +11,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import toast from "react-hot-toast";
+import {
+  addNewMeetingUpdate,
+  checkNewMeetService,
+  createMeetingService,
+} from "@/service/meeting";
 
-const MeetingDashboard = () => {
+const MeetingDashboard = ({ customerId, salesPersonId }) => {
+  const [loading, setLoading] = useState(false);
+  const [newMeeting, setNewMeeting] = useState(false);
+  const [meetingUpdateId, setMeetingUpdateId] = useState("");
+
   const [callForm, setCallForm] = useState({
     status: "",
     note: "",
@@ -39,9 +49,102 @@ const MeetingDashboard = () => {
     meetingDate: "",
   });
 
-  const handleCallSubmit = (e) => {
+  const handleCallSubmit = async (e) => {
     e.preventDefault();
-    console.log("Call Update:", callForm);
+    setLoading(true);
+
+    toast.success("handleCallSubmit");
+
+    const formData = {
+      salesPersonId: salesPersonId || "",
+      clientId: customerId,
+      updateType: "call",
+      status: callForm?.status,
+      note: callForm?.note,
+      meetingAt:
+        callForm.meetingDate && callForm.meetingTime
+          ? `${callForm.meetingDate}T${callForm.meetingTime}`
+          : undefined,
+      reminderAt:
+        callForm.reminderDate && callForm.reminderTime
+          ? `${callForm.reminderDate}T${callForm.reminderTime}`
+          : undefined,
+    };
+    if (!formData?.salesPersonId || !formData?.clientId) {
+      toast.error("client id and salesPersonId not found");
+      return;
+    }
+
+    try {
+      const res = await createMeetingService(formData);
+      console.log(res, "data");
+      if (res.success) {
+        toast.success(res.message || "Meet has been created");
+        setLoading(false);
+        setCallForm({
+          status: "",
+          note: "",
+          reminderTime: "",
+          reminderDate: "",
+          meetingTime: "",
+          meetingDate: "",
+        });
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      toast.error(error.message || "Error while create meeting");
+    }
+  };
+
+  const updateCallSubmit = async (e) => {
+    e.preventDefault();
+toast.success("updateCallSubmit")
+    // setLoading(true);
+
+    const formData = {
+      salesPersonId: salesPersonId || "",
+      clientId: customerId,
+      updateType: "call",
+      status: callForm?.status,
+      note: callForm?.note,
+      meetingAt:
+        callForm.meetingDate && callForm.meetingTime
+          ? `${callForm.meetingDate}T${callForm.meetingTime}`
+          : undefined,
+      reminderAt:
+        callForm.reminderDate && callForm.reminderTime
+          ? `${callForm.reminderDate}T${callForm.reminderTime}`
+          : undefined,
+    };
+    
+    if (!formData?.salesPersonId || !formData?.clientId) {
+      toast.error("client id and salesPersonId not found");
+      return;
+    }
+
+    try {
+      if (meetingUpdateId !== "") {
+        const res = await addNewMeetingUpdate(meetingUpdateId, formData);
+        console.log(res, "data");
+        if (res.success) {
+          toast.success(res.message || "Meet has been Updated");
+          setLoading(false);
+          setCallForm({
+            status: "",
+            note: "",
+            reminderTime: "",
+            reminderDate: "",
+            meetingTime: "",
+            meetingDate: "",
+          });
+        }
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      toast.error(error.message || "Error while Updating meeting");
+    }
   };
 
   const handleMeetingSubmit = (e) => {
@@ -54,11 +157,31 @@ const MeetingDashboard = () => {
     console.log("General Update:", generalForm);
   };
 
+  useEffect(() => {
+    async function CheckNewMeet() {
+      try {
+        const res = await checkNewMeetService(customerId);
+        console.log(res.data?.meetingUpdate?._id,"res");
+        if (res.success) {
+          setNewMeeting(res?.newMeeting);
+          setMeetingUpdateId(res.data?.meetingUpdate?._id);
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error(error.message || "error while checking the new meeting");
+      }
+    }
+    CheckNewMeet();
+  }, [customerId]);
+
   return (
     <div className="flex gap-10 ">
       <div className="w-1/3">
         <h2 className="font-bold text-2xl text-center mb-5">Call Update</h2>
-        <form onSubmit={handleCallSubmit} className="flex flex-col gap-2">
+        <form
+          onSubmit={newMeeting ? handleCallSubmit : updateCallSubmit}
+          className="flex flex-col gap-2"
+        >
           <div className="flex flex-col gap-3">
             <Label>Call Update</Label>
             <Select
@@ -124,7 +247,9 @@ const MeetingDashboard = () => {
               />
             </div>
           </div>
-          <Button className={"w-full"}>Update</Button>
+          <Button className={"w-full"} disabled={loading}>
+            Update
+          </Button>
         </form>
       </div>
 

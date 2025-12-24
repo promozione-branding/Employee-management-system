@@ -8,9 +8,11 @@ export async function GET(req, { params }) {
 
     const { id } = await params;
 
-    const ledgerDetails = await Customer.findById(id).select("ledger").populate({
-      path: "ledger",
-    });
+    const ledgerDetails = await Customer.findById(id)
+      .select("ledger")
+      .populate({
+        path: "ledger",
+      });
 
     if (!ledgerDetails) {
       return NextResponse.json(
@@ -25,7 +27,7 @@ export async function GET(req, { params }) {
     return NextResponse.json({
       success: true,
       message: "Customer ledger fetched successfully",
-      data: ledgerDetails, 
+      data: ledgerDetails,
     });
   } catch (error) {
     console.error("Error fetching customer ledger:", error);

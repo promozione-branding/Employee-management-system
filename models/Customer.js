@@ -54,6 +54,10 @@ const CustomerSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Ledger",
     },
+    meetingUpdate: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Meeting",
+    },
   },
   { timestamps: true }
 );
