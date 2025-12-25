@@ -16,7 +16,8 @@ export async function GET(req, { params }) {
           path: "meetingUpdate.salesPersonId",
           select: "username email",
         },
-      });
+      })
+      .lean();
 
     if (!meetingHistory) {
       return NextResponse.json(
@@ -28,6 +29,11 @@ export async function GET(req, { params }) {
           status: 404,
         }
       );
+    }
+
+    // Reverse the meeting update array to show newest first
+    if (meetingHistory.meetingUpdate?.meetingUpdate) {
+      meetingHistory.meetingUpdate.meetingUpdate.reverse();
     }
 
     return NextResponse.json(

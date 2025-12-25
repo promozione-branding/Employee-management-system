@@ -16,7 +16,7 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
           <TabsTrigger value="invoice">invoice</TabsTrigger>
           <TabsTrigger value="ledger">Ledger</TabsTrigger>
           <TabsTrigger value="meeting">Meeting</TabsTrigger>
-          <TabsTrigger value="meetingHistory">Meeting History</TabsTrigger>
+          <TabsTrigger value="meetingHistory">History</TabsTrigger>
         </TabsList>
         <TabsContent value="Customer">
           <Customer customerId={customerId} />

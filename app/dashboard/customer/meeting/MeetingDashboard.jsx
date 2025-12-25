@@ -49,11 +49,10 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
     meetingDate: "",
   });
 
+  // -------------------for Call update --------------------
   const handleCallSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    toast.success("handleCallSubmit");
 
     const formData = {
       salesPersonId: salesPersonId || "",
@@ -99,8 +98,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
 
   const updateCallSubmit = async (e) => {
     e.preventDefault();
-toast.success("updateCallSubmit")
-    // setLoading(true);
+    setLoading(true);
 
     const formData = {
       salesPersonId: salesPersonId || "",
@@ -117,7 +115,7 @@ toast.success("updateCallSubmit")
           ? `${callForm.reminderDate}T${callForm.reminderTime}`
           : undefined,
     };
-    
+
     if (!formData?.salesPersonId || !formData?.clientId) {
       toast.error("client id and salesPersonId not found");
       return;
@@ -147,21 +145,203 @@ toast.success("updateCallSubmit")
     }
   };
 
-  const handleMeetingSubmit = (e) => {
+  // -------------------for Call update --------------------
+
+  // ------------------Meeting update----------------
+
+  const handleMeetingSubmit = async (e) => {
     e.preventDefault();
-    console.log("Meeting Update:", meetingForm);
+    setLoading(true);
+
+    const formData = {
+      salesPersonId: salesPersonId || "",
+      clientId: customerId,
+      updateType: "meeting",
+      status: meetingForm?.status,
+      note: meetingForm?.note,
+      meetingAt:
+        meetingForm.meetingDate && meetingForm.meetingTime
+          ? `${meetingForm.meetingDate}T${meetingForm.meetingTime}`
+          : undefined,
+      reminderAt:
+        meetingForm.reminderDate && meetingForm.reminderTime
+          ? `${meetingForm.reminderDate}T${meetingForm.reminderTime}`
+          : undefined,
+    };
+    if (!formData?.salesPersonId || !formData?.clientId) {
+      toast.error("client id and salesPersonId not found");
+      return;
+    }
+
+    try {
+      const res = await createMeetingService(formData);
+      console.log(res, "data");
+      if (res.success) {
+        toast.success(res.message || "Meet has been created");
+        setLoading(false);
+        setMeetingForm({
+          status: "",
+          note: "",
+          reminderTime: "",
+          reminderDate: "",
+          meetingTime: "",
+          meetingDate: "",
+        });
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      toast.error(error.message || "Error while create meeting");
+    }
   };
 
-  const handleGeneralSubmit = (e) => {
+  const updateMeetingSubmit = async (e) => {
     e.preventDefault();
-    console.log("General Update:", generalForm);
+    setLoading(true);
+
+    const formData = {
+      salesPersonId: salesPersonId || "",
+      clientId: customerId,
+      updateType: "call",
+      status: meetingForm?.status,
+      note: meetingForm?.note,
+      meetingAt:
+        meetingForm.meetingDate && meetingForm.meetingTime
+          ? `${meetingForm.meetingDate}T${meetingForm.meetingTime}`
+          : undefined,
+      reminderAt:
+        meetingForm.reminderDate && meetingForm.reminderTime
+          ? `${meetingForm.reminderDate}T${meetingForm.reminderTime}`
+          : undefined,
+    };
+
+    if (!formData?.salesPersonId || !formData?.clientId) {
+      toast.error("client id and salesPersonId not found");
+      return;
+    }
+
+    try {
+      if (meetingUpdateId !== "") {
+        const res = await addNewMeetingUpdate(meetingUpdateId, formData);
+        if (res.success) {
+          toast.success(res.message || "Meet has been Updated");
+          setLoading(false);
+          setMeetingForm({
+            status: "",
+            note: "",
+            reminderTime: "",
+            reminderDate: "",
+            meetingTime: "",
+            meetingDate: "",
+          });
+        }
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      toast.error(error.message || "Error while Updating meeting");
+    }
   };
+
+  // ------------------Meeting update----------------
+
+  // ------------------General update----------------
+  const handleGeneralSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = {
+      salesPersonId: salesPersonId || "",
+      clientId: customerId,
+      updateType: "general",
+      note: generalForm?.note,
+      meetingAt:
+        generalForm.meetingDate && generalForm.meetingTime
+          ? `${generalForm.meetingDate}T${generalForm.meetingTime}`
+          : undefined,
+      reminderAt:
+        generalForm.reminderDate && generalForm.reminderTime
+          ? `${generalForm.reminderDate}T${generalForm.reminderTime}`
+          : undefined,
+    };
+    if (!formData?.salesPersonId || !formData?.clientId) {
+      toast.error("client id and salesPersonId not found");
+      return;
+    }
+
+    try {
+      const res = await createMeetingService(formData);
+      console.log(res, "data");
+      if (res.success) {
+        toast.success(res.message || "Meet has been created");
+        setLoading(false);
+        setGeneralForm({
+          note: "",
+          reminderTime: "",
+          reminderDate: "",
+          meetingTime: "",
+          meetingDate: "",
+        });
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      toast.error(error.message || "Error while create meeting");
+    }
+  };
+
+  const updateGeneralSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = {
+      salesPersonId: salesPersonId || "",
+      clientId: customerId,
+      updateType: "general",
+      note: generalForm?.note,
+      meetingAt:
+        generalForm.meetingDate && generalForm.meetingTime
+          ? `${generalForm.meetingDate}T${generalForm.meetingTime}`
+          : undefined,
+      reminderAt:
+        generalForm.reminderDate && generalForm.reminderTime
+          ? `${generalForm.reminderDate}T${generalForm.reminderTime}`
+          : undefined,
+    };
+
+    if (!formData?.salesPersonId || !formData?.clientId) {
+      toast.error("client id and salesPersonId not found");
+      return;
+    }
+
+    try {
+      if (meetingUpdateId !== "") {
+        const res = await addNewMeetingUpdate(meetingUpdateId, formData);
+        if (res.success) {
+          toast.success(res.message || "Meet has been Updated");
+          setLoading(false);
+          setGeneralForm({
+            note: "",
+            reminderTime: "",
+            reminderDate: "",
+            meetingTime: "",
+            meetingDate: "",
+          });
+        }
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      toast.error(error.message || "Error while Updating meeting");
+    }
+  };
+
+  // ------------------General update----------------
 
   useEffect(() => {
     async function CheckNewMeet() {
       try {
         const res = await checkNewMeetService(customerId);
-        console.log(res.data?.meetingUpdate?._id,"res");
         if (res.success) {
           setNewMeeting(res?.newMeeting);
           setMeetingUpdateId(res.data?.meetingUpdate?._id);
@@ -248,17 +428,21 @@ toast.success("updateCallSubmit")
             </div>
           </div>
           <Button className={"w-full"} disabled={loading}>
-            Update
+            Call Update
           </Button>
         </form>
       </div>
 
       <div className="w-1/3">
         <h2 className="font-bold text-2xl text-center mb-5">Meeting Update</h2>
-        <form onSubmit={handleMeetingSubmit} className="flex flex-col gap-2">
+        <form
+          onSubmit={newMeeting ? handleMeetingSubmit : updateMeetingSubmit}
+          className="flex flex-col gap-2"
+        >
           <div className="flex flex-col gap-3">
             <Label>Interested</Label>
             <Select
+              required
               value={meetingForm.status}
               onValueChange={(value) =>
                 setMeetingForm({ ...meetingForm, status: value })
@@ -276,6 +460,7 @@ toast.success("updateCallSubmit")
           <div className="flex flex-col gap-3">
             <Label>Note</Label>
             <Textarea
+              required
               value={meetingForm.note}
               onChange={(e) =>
                 setMeetingForm({ ...meetingForm, note: e.target.value })
@@ -333,16 +518,20 @@ toast.success("updateCallSubmit")
               />
             </div>
           </div>
-          <Button className={"w-full"}>Update</Button>
+          <Button className={"w-full"}>Meeting Update</Button>
         </form>
       </div>
 
       <div className="w-1/3">
         <h2 className="font-bold text-2xl text-center mb-5">General Update</h2>
-        <form onSubmit={handleGeneralSubmit} className="flex flex-col gap-2">
+        <form
+          onSubmit={newMeeting ? handleGeneralSubmit : updateGeneralSubmit}
+          className="flex flex-col gap-2"
+        >
           <div className="flex flex-col gap-3">
             <Label>Note</Label>
             <Textarea
+              required
               value={generalForm.note}
               onChange={(e) =>
                 setGeneralForm({ ...generalForm, note: e.target.value })
@@ -400,7 +589,7 @@ toast.success("updateCallSubmit")
               />
             </div>
           </div>
-          <Button className={"w-full"}>Update</Button>
+          <Button className={"w-full"}>generate Update</Button>
         </form>
       </div>
     </div>
