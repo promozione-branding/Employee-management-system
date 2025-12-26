@@ -63,12 +63,12 @@ export default function LoginPage() {
         />
 
         {/* Register Link */}
-        {/* <p className="text-center mt-4 text-gray-600 text-sm">
-          Don't have an account?{" "}
+        <p className="text-center mt-4 text-gray-600 text-sm">
+          Don&apos;t have an account?{" "}
           <a href="/register" className="text-black underline">
             Register
           </a>
-        </p> */}
+        </p>
       </div>
     </div>
   );

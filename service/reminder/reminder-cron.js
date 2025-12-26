@@ -1,51 +1,96 @@
-import Meeting from "@/models/meeting/Meeting";
-import { connectDB } from "@/lib/db";
-import { sendReminderEmail } from "./mailer";
+import Meeting from "../../models/meeting/Meeting.js";
+import User from "../../models/User.js"; // 👈 Register User model
+import { connectDB } from "../../lib/db.js";
+import { sendReminderEmail } from "./mailer.js";
 import fs from "fs";
 import path from "path";
 import Handlebars from "handlebars";
+import dotenv from "dotenv";
+import Customer from "../../models/Customer.js";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, "../../.env") });
 
 await connectDB();
 
-const templatePath = path.join(process.cwd(), "/service/reminder/mailTemplate.html");
+const templatePath = path.join(__dirname, "mailTemplate.html");
 const templateSource = fs.readFileSync(templatePath, "utf8");
 const template = Handlebars.compile(templateSource);
 
 async function checkReminders() {
-  const meetings = await Meeting.find({ "meetingUpdate.reminderSent": false }).populate("clientDetails");
+  const meetings = await Meeting.find()
+    .populate("meetingUpdate.salesPersonId")
+    .populate("meetingUpdate.clientId");
 
-  const nowDate = new Date().toISOString().split("T")[0];
-  const nowTime = new Date().toTimeString().slice(0, 5);
+  if (!meetings || meetings.length === 0) {
+    console.log("⚠ No meetings found");
+    return;
+  }
+
+  const now = new Date();
+  const nowDate = now.toISOString().split("T")[0];
+  const nowTime = now.toTimeString().slice(0, 5);
+
+  console.log("⏳ Checking time:", nowDate, nowTime);
 
   for (const meeting of meetings) {
-    for (const entry of meeting.meetingUpdate) {
-      if (entry.reminderSent) continue;
+    let isModified = false;
+    if (!meeting.meetingUpdate) continue;
 
-      if (entry.reminderDate === nowDate && entry.reminderTime === nowTime) {
+    for (const entry of meeting.meetingUpdate) {
+      const reminderDate = entry.reminderAt?.toISOString().split("T")[0];
+      const reminderTime = entry.reminderAt?.toTimeString().slice(0, 5);
+
+      if (
+        !entry.reminderSent &&
+        reminderDate === nowDate &&
+        reminderTime === nowTime
+      ) {
         const html = template({
-          client: meeting.clientDetails?.name || "Unknown Client",
+          client: entry.clientId?.name || "Unknown Client",
           note: entry.note,
-          meetingDate: entry.meetingDate,
-          meetingTime: entry.meetingTime,
-          reminderDate: entry.reminderDate,
-          reminderTime: entry.reminderTime,
+          meetingAt: entry.meetingAt,
+          reminderAt: entry.reminderAt,
         });
 
         await sendReminderEmail(
-          meeting.clientDetails?.email,
-          `Reminder: Meeting with ${meeting.clientDetails?.name}`,
+          entry?.salesPersonId?.email || "aalekh@promozionebranding.com",
+          `Reminder: Meeting with ${entry.clientId?.name || "Client"}`,
           html
         );
 
         entry.reminderSent = true;
+        isModified = true;
+        console.log("📨 Reminder email triggered!");
+      }
+
+      // ------meeting Update -------------------
+      const meetingDate = entry.meetingAt?.toISOString().split("T")[0];
+      const meetingTime = entry.meetingAt?.toTimeString().slice(0, 5);
+
+      if (meetingDate === nowDate && meetingTime === nowTime) {
+        const htmlForMeetingUpdateReminder = template({
+          client: entry.clientId?.name || "Unknown Client",
+          note: entry.note,
+          meetingAt: entry.meetingAt,
+          reminderAt: entry.reminderAt,
+        });
+        await sendReminderEmail(
+          entry?.salesPersonId?.email,
+          `Reminder: Meeting with ${entry.clientId?.name || "Client"}`,
+          htmlForMeetingUpdateReminder
+        );
+        console.log("📨 Reminder Meeting updated email triggered!");
       }
     }
-
-    await meeting.save();
+    if (isModified) await meeting.save();
   }
 }
 
-await checkReminders();
+checkReminders();
 setInterval(checkReminders, 60 * 1000);
 
 console.log("🚀 Reminder Cron Started...");

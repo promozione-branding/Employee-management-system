@@ -74,6 +74,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       return;
     }
 
+    console.log(formData, "formData");
+
     try {
       const res = await createMeetingService(formData);
       console.log(res, "data");
@@ -121,6 +123,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       return;
     }
 
+
     try {
       if (meetingUpdateId !== "") {
         const res = await addNewMeetingUpdate(meetingUpdateId, formData);
@@ -143,6 +146,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       console.log(error);
       toast.error(error.message || "Error while Updating meeting");
     }
+
   };
 
   // -------------------for Call update --------------------
@@ -202,7 +206,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
     const formData = {
       salesPersonId: salesPersonId || "",
       clientId: customerId,
-      updateType: "call",
+      updateType: "meeting",
       status: meetingForm?.status,
       note: meetingForm?.note,
       meetingAt:

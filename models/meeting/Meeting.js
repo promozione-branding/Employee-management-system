@@ -33,12 +33,14 @@ const MeetingSchema = new mongoose.Schema(
             default: false,
           },
         },
-        { timestamps: true }
+
+        { timestamps: true, strictPopulate: false }
       ),
     ],
   },
   { timestamps: true }
 );
 
-export default mongoose.models.Meeting ||
-  mongoose.model("Meeting", MeetingSchema);
+const Meeting = mongoose.models.Meeting || mongoose.model('Meeting', MeetingSchema);
+
+export default Meeting;
