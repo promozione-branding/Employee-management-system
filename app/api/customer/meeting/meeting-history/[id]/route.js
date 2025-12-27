@@ -1,7 +1,7 @@
-import "@/models/User";
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
 import Customer from "@/models/Customer";
+import Meeting from "@/models/meeting/Meeting";
 
 export async function GET(req, { params }) {
   try {

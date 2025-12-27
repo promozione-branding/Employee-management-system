@@ -16,9 +16,14 @@ dotenv.config({ path: path.join(__dirname, "../../.env") });
 
 await connectDB();
 
-const templatePath = path.join(__dirname, "mailTemplate.html");
+const templatePath = path.join(__dirname, "reminder.html");
 const templateSource = fs.readFileSync(templatePath, "utf8");
 const template = Handlebars.compile(templateSource);
+
+// today is the meeting
+const meetingTemplatePath = path.join(__dirname, "meeting-reminder.html");
+const meetingTemplateSource = fs.readFileSync(meetingTemplatePath, "utf8");
+const meetingTemplate = Handlebars.compile(meetingTemplateSource);
 
 async function checkReminders() {
   const meetings = await Meeting.find()
@@ -51,13 +56,12 @@ async function checkReminders() {
       ) {
         const html = template({
           client: entry.clientId?.name || "Unknown Client",
-          note: entry.note,
-          meetingAt: entry.meetingAt,
-          reminderAt: entry.reminderAt,
+          note: entry?.note,
+          updateType: entry?.updateType,
         });
 
         await sendReminderEmail(
-          entry?.salesPersonId?.email || "aalekh@promozionebranding.com",
+          entry?.salesPersonId?.email,
           `Reminder: Meeting with ${entry.clientId?.name || "Client"}`,
           html
         );
@@ -72,11 +76,11 @@ async function checkReminders() {
       const meetingTime = entry.meetingAt?.toTimeString().slice(0, 5);
 
       if (meetingDate === nowDate && meetingTime === nowTime) {
-        const htmlForMeetingUpdateReminder = template({
+        const htmlForMeetingUpdateReminder = meetingTemplate({
           client: entry.clientId?.name || "Unknown Client",
-          note: entry.note,
-          meetingAt: entry.meetingAt,
-          reminderAt: entry.reminderAt,
+          note: entry?.note,
+          meetingAt: entry.meetingAt?.toLocaleString(),
+          reminderAt: entry.reminderAt?.toLocaleString(),
         });
         await sendReminderEmail(
           entry?.salesPersonId?.email,
