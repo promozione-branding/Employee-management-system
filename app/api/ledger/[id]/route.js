@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
-import Ladger from "@/models/Ladger";
+import Ladger from "@/models/Ledger";
 
 export async function GET(req, context) {
   try {

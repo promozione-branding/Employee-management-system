@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const PUBLIC_ROUTES = ["/login", "/register"];
+const PUBLIC_ROUTES = ["/login", "/register","/login-otp"];
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET

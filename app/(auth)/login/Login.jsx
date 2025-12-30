@@ -69,6 +69,9 @@ export default function LoginPage() {
             Register
           </a>
         </p>
+        <a href="/login-otp" className="flex justify-center mt-4 font-medium text-blue-600 text-sm">
+          Login with OTP{" "}
+        </a>
       </div>
     </div>
   );

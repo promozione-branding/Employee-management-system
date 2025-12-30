@@ -399,13 +399,6 @@ export const loginFormControl = [
 
 export const ledgerFormControl = [
   {
-    label: "Opening Balance",
-    name: "openingBalance",
-    componentType: "input",
-    type: "text",
-    placeholder: "Opening Balance",
-  },
-  {
     label: "Voucher",
     name: "voucher",
     componentType: "select",
@@ -460,9 +453,7 @@ export const employeeRegisterFormControl = [
     componentType: "select",
     options: [
       { id: "admin", label: "admin" },
-      { id: "employee", label: "Employee" }
+      { id: "employee", label: "Employee" },
     ],
   },
 ];
-
-

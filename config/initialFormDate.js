@@ -76,7 +76,6 @@ export const loginFormData = {
 };
 
 export const ledgerFormInitialFormData = {
-  openingBalance: "",
   voucher: "",
   debit: "",
   credit: "",

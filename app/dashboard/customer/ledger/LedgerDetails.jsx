@@ -20,27 +20,29 @@ const LedgerDetails = ({ customerId }) => {
     entries: [],
     openingBalance: 0,
     proposalId: "",
+    _id: "",
   });
 
-  const { entries, openingBalance, proposalId } = data;
+  const { entries, openingBalance, proposalId, _id } = data;
 
-  async function fetchLeaderDetail() {
-    try {
-      if (customerId !== "") {
-        const res = await customerLedgerService(customerId);
-        if (res.success) {
-          setLoading(false);
-
-          setData(res?.data?.ledger || { entries: [], openingBalance: 0 });
-        }
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message || "Error while fetching the ledger");
-    }
-  }
 
   useEffect(() => {
+    async function fetchLeaderDetail() {
+      try {
+        if (customerId !== "") {
+          const res = await customerLedgerService(customerId);
+
+          if (res.success) {
+            setLoading(false);
+
+            setData(res?.data?.ledger || { entries: [], openingBalance: 0 });
+          }
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error(error.message || "Error while fetching the ledger");
+      }
+    }
     fetchLeaderDetail();
   }, []);
 
@@ -142,9 +144,13 @@ const LedgerDetails = ({ customerId }) => {
 
           {/* create ledger btn  */}
 
-          {/* <Dialog>
+          <Dialog>
             <DialogTrigger asChild>
-              <button className="bg-amber-300 p-4 absolute bottom-10 right-10 rounded-full">
+              <button
+                className={`bg-amber-300 p-4 absolute bottom-10 right-10 rounded-full ${
+                  data?.entries?.length >= 2 ? "" : "hidden"
+                }`}
+              >
                 <Wallet />
               </button>
             </DialogTrigger>
@@ -156,9 +162,9 @@ const LedgerDetails = ({ customerId }) => {
                   your account and remove your data from our servers.
                 </DialogDescription>
               </DialogHeader>
-              <AddEntriesForm />
+              <AddEntriesForm proposalId={proposalId} ledgerId={_id}/>
             </DialogContent>
-          </Dialog> */}
+          </Dialog>
         </div>
       )}
     </div>

@@ -24,8 +24,12 @@ const UserSchema = new mongoose.Schema(
       enum: ["admin", "manager", "employee", "client"],
       default: "employee",
     },
+
+    // NEW OTP FIELDS
+    loginOTP: String,
+    loginOTPExpiry: Date,
   },
-  { timestamps: true }
+  { timestamps: true, strictPopulate: false }
 );
 
 // FIX: prevents OverwriteModelError during hot reloads in Next.js

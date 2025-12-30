@@ -173,7 +173,6 @@ const Proposal = ({ customerId }) => {
         return;
       }
 
-     
       const response = await createProposelService(propsalAllItemForm);
       if (response.success) {
         toast.success("Proposal created successfully!");
@@ -232,6 +231,12 @@ const Proposal = ({ customerId }) => {
     }
   }
 
+  // instance for proposal card Partial payment
+  const totalService = calculationOfTotalAmount();
+  const gstAmount = totalService * 0.18;
+  const grandTotal = totalService + gstAmount;
+  const tdsAmount = totalService * 0.02;
+
   useEffect(() => {
     customerDetails();
     fetchAllServices();
@@ -251,8 +256,38 @@ const Proposal = ({ customerId }) => {
   // ---------------- handle Partly payment form ----------------
   async function handleParlyPaymentSubmit(e) {
     e.preventDefault();
+    const currentAmount = Number(partlyPaymentFormData.paymentAmount);
+    const totalPaid = listOfPayments.reduce(
+      (acc, curr) => acc + Number(curr.paymentAmount),
+      0
+    );
+    const remainingBalance = grandTotal - totalPaid;
+
+    if (!partlyPaymentFormData.paymentDuration) {
+      toast.error("Please select a payment duration");
+      return;
+    }
+
+    if (currentAmount <= 0) {
+      toast.error("Amount must be greater than 0");
+      return;
+    }
+
+    if (currentAmount > remainingBalance) {
+      toast.error(
+        `Amount cannot exceed remaining balance of ₹ ${remainingBalance.toLocaleString(
+          "en-IN"
+        )}`
+      );
+      return;
+    }
+
     setListOfPayments([partlyPaymentFormData, ...listOfPayments]);
     setPartlyPaymentFormData({ paymentDuration: "", paymentAmount: "" });
+  }
+
+  function handleDeletePayment(index) {
+    setListOfPayments((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handleDeleteService(id) {
@@ -272,7 +307,7 @@ const Proposal = ({ customerId }) => {
 
   return (
     <div className="w-full">
-      <h1 className="font-bold text-3xl text-center my-5">Create Perposal</h1>
+      <h1 className="font-bold text-2xl text-center my-5">Create Proposal</h1>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 px-10 mt-5">
         <div>
           <CommonForm
@@ -403,12 +438,47 @@ const Proposal = ({ customerId }) => {
         </div>
 
         <div>
+          <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200 mb-4">
+            {totalService === 0 ? (
+              <div className="text-center">Add some service</div>
+            ) : (
+              <div>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
+                  Payment Summary
+                </h2>
+                <div className="space-y-0.5">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Subtotal</span>
+                    <span>₹ {totalService.toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>GST (18%)</span>
+                    <span>₹ {gstAmount.toLocaleString("en-IN")}</span>
+                  </div>
+
+                  {tanNo && (
+                    <div className="flex justify-between text-gray-600">
+                      <span>TDS (10%)</span>
+                      <span>₹ {tdsAmount.toLocaleString("en-IN")}</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between font-bold text-lg text-gray-900 border-t pt-2 mt-2">
+                    <span>Total Amount</span>
+                    <span>₹ {grandTotal.toLocaleString("en-IN")}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           <form
             onSubmit={handleParlyPaymentSubmit}
             className="flex flex-col gap-3 border-b pb-4"
           >
-            <p className="font-bold text-xl ">Partly Payment</p>
-            <Input
+            <p className="font-bold text-xl ">Partial Payment</p>
+            <select
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               value={partlyPaymentFormData?.paymentDuration}
               onChange={(e) =>
                 setPartlyPaymentFormData((prev) => ({
@@ -416,10 +486,21 @@ const Proposal = ({ customerId }) => {
                   paymentDuration: e.target.value,
                 }))
               }
-              placeholder="Enter the Duration of payment"
-            />
+            >
+              <option value="" disabled>
+                Select Payment Duration
+              </option>
+              <option value="Advance Payment">Advance Payment</option>
+              <option value="After 15 Days">After 15 Days</option>
+              <option value="After 30 Days">After 30 Days</option>
+              <option value="After 45 Days">After 45 Days</option>
+              <option value="After 60 Days">After 60 Days</option>
+              <option value="After 90 Days">After 90 Days</option>
+              <option value="After 120 Days">After 120 Days</option>
+            </select>
             <Input
               placeholder="Enter the Amount"
+              type="number"
               value={partlyPaymentFormData?.paymentAmount}
               onChange={(e) =>
                 setPartlyPaymentFormData((prev) => ({
@@ -428,25 +509,53 @@ const Proposal = ({ customerId }) => {
                 }))
               }
             />
+            <p className="text-sm text-gray-500">
+              Balance: ₹{" "}
+              {(
+                grandTotal -
+                listOfPayments.reduce(
+                  (acc, curr) => acc + Number(curr.paymentAmount),
+                  0
+                )
+              ).toLocaleString("en-IN")}
+            </p>
             <Button type="submit">Add</Button>
           </form>
 
-          {listOfPayments?.length ? (
-            <div className="grid gap-2 grid-cols-1">
-              {listOfPayments.map(({ paymentAmount, paymentDuration }, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-center border-2 py-1 rounded-full"
-                >
-                  {paymentDuration} : {paymentAmount}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="border-dashed p-2 mt-3 text-center text-gray-500 rounded-full border-2">
-              Add some part payment
-            </div>
-          )}
+          <div className="mt-4">
+            {listOfPayments?.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {listOfPayments.map(({ paymentAmount, paymentDuration }, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200 shadow-sm"
+                  >
+                    <span className="text-sm font-medium text-gray-700">
+                      {paymentDuration}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-gray-900">
+                        ₹ {Number(paymentAmount).toLocaleString("en-IN")}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePayment(idx)}
+                        className="text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
+                <p className="text-sm text-gray-500">
+                  No partial payments added yet.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

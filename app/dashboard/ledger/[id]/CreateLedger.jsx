@@ -27,8 +27,6 @@ const CreateLedgerPage = ({ proposalId }) => {
   const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
   const [loadingForLedgerDetails, setLoadingForLedgerDetails] = useState(true);
 
-
-
   async function fetchProposalInformation() {
     try {
       const res = await fetchingProposalsInfo(proposalId);
@@ -73,6 +71,9 @@ const CreateLedgerPage = ({ proposalId }) => {
   // for the proposal entry
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    toast.success("handleSubmit");
+
     const submissionData = {
       paymentMethod,
       ...formData,
@@ -177,6 +178,8 @@ const CreateLedgerPage = ({ proposalId }) => {
   // this is the main entry function
   async function handleEntrySubmit(e) {
     e.preventDefault();
+
+    toast.success("handleEntrySubmit");
     const submissionData = {
       paymentMethod,
       ...formData,
@@ -822,7 +825,7 @@ const CreateLedgerPage = ({ proposalId }) => {
     }
   };
 
-  console.log(firstLedgerEntry,"firstLedgerEntry");
+  console.log(firstLedgerEntry, "firstLedgerEntry");
   return (
     <>
       {loadingForProposalInfo ? (

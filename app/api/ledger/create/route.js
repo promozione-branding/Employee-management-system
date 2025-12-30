@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Ledger from "@/models/Ladger";
+import Ledger from "@/models/Ledger";
 import Customer from "@/models/Customer";
 import { NextResponse } from "next/server";
 
