@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/Customer";
 import { NextResponse } from "next/server";
+import Ledger from "@/models/Ledger";
 
 export async function GET(req, { params }) {
   try {
@@ -11,7 +12,7 @@ export async function GET(req, { params }) {
     const ledgerDetails = await Customer.findById(id)
       .select("ledger")
       .populate({
-        path: "ledger",
+        path: "ledger"
       });
 
     if (!ledgerDetails) {

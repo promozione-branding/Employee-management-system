@@ -1,21 +1,51 @@
 "use client";
 
-import { getAllProposalCustomer } from "@/service/customer";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  customerLedgerService,
+  getAllProposalCustomer,
+} from "@/service/customer";
+import { createLedgerService, ledgerEntriesService } from "@/service/ledger";
 import {
   deleteProposalService,
+  proposalLedgerEntryValidation,
   sendProposalPdfEmailService,
 } from "@/service/proposal";
-import { Album, Download, Eye, Mail, NotebookPen, Pencil, Trash2 } from "lucide-react";
+import {
+  Album,
+  Check,
+  Download,
+  Eye,
+  Mail,
+  NotebookPen,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const CustomerProposal = ({ customerId }) => {
   const [listPropoasls, setListPropoasls] = useState([]);
   const [sendingInvoiceId, setSendingInvoiceId] = useState(null);
+  const [proposalLedgerEntryDate, setProposalLedgerEntryDate] = useState("");
+  const [firstEntryOfLedger, setFirstEntryOfLedger] = useState(true);
+  const [ledgerData, setLedgerData] = useState(null);
+
+  const router = useRouter();
 
   async function sendEmailHandler(proposalId) {
-    if (sendingInvoiceId) return; // Prevent multiple clicks
+    if (sendingInvoiceId) return;
     setSendingInvoiceId(proposalId);
     const toastId = toast.loading("Sending email...");
     try {
@@ -39,6 +69,7 @@ const CustomerProposal = ({ customerId }) => {
       if (allPropsals?.success) {
         toast.success("Proposal fetched");
         setListPropoasls(allPropsals.data);
+        return;
       }
     } catch (error) {
       console.log(error);
@@ -64,7 +95,173 @@ const CustomerProposal = ({ customerId }) => {
     }
   }
 
+  // first proposal form entry
+  async function handleProposalLedgerEntry(e, id) {
+    e.preventDefault();
+
+    const proposalDetails = listPropoasls.find((item) => item._id === id);
+
+    if (!proposalDetails) {
+      toast.error("Proposal details not found");
+      return;
+    }
+
+    if (!proposalLedgerEntryDate) {
+      toast.error("Please select a date");
+      return;
+    }
+
+    try {
+      const totalAmount = proposalDetails?.totalAmount || 0;
+      const gstAmount = totalAmount * 0.18;
+      const tdsAmount = proposalDetails?.tanNo ? totalAmount * 0.02 : 0;
+      const grandTotal = totalAmount + gstAmount - tdsAmount;
+
+      const formData = {
+        customerId: customerId,
+        proposalIds: [...(ledgerData?.ledger?.proposalIds || []), id],
+        entries: [
+          {
+            proposalId: id,
+            date: proposalLedgerEntryDate,
+            voucher: "Proposal",
+            debit: 0,
+            credit: 0,
+            balance: grandTotal,
+            particular: {
+              description: `Proposal #${proposalDetails?.proposalNo}`,
+              items: [
+                {
+                  subDescription: "18% GST",
+                  price: gstAmount,
+                },
+                {
+                  subDescription: "Service Amount",
+                  price: totalAmount,
+                },
+                ...(proposalDetails?.tanNo
+                  ? [
+                      {
+                        subDescription: "2% TDS",
+                        price: tdsAmount,
+                      },
+                    ]
+                  : []),
+                {
+                  subDescription: "Total Amount",
+                  price: grandTotal,
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const res = await createLedgerService(formData);
+      if (res.success) {
+        router.push("/dashboard/customer");
+        toast.success("Ledger Entry created Successfully");
+        await proposalLedgerEntryValidation(id, {
+          ledgerEntry: true,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message ||
+          "Error while add proposal in the ledger"
+      );
+    }
+  }
+
+  async function anotherProposalLedgerEntry(e, id) {
+    e.preventDefault();
+
+    const proposalDetails = listPropoasls.find((item) => item._id === id);
+
+    if (!proposalDetails) {
+      toast.error("Proposal details not found");
+      return;
+    }
+
+    if (!proposalLedgerEntryDate) {
+      toast.error("Please select a date");
+      return;
+    }
+
+    try {
+      const totalAmount = proposalDetails?.totalAmount || 0;
+      const gstAmount = totalAmount * 0.18;
+      const tdsAmount = proposalDetails?.tanNo ? totalAmount * 0.02 : 0;
+      const grandTotal = totalAmount + gstAmount - tdsAmount;
+
+      const formData = {
+        proposalId: id,
+        date: proposalLedgerEntryDate,
+        voucher: "Proposal",
+        debit: 0,
+        credit: 0,
+        balance: ledgerData?.ledger?.entries.at(-1)?.balance + grandTotal,
+        particular: {
+          description: `Proposal #${proposalDetails?.proposalNo}`,
+          items: [
+            {
+              subDescription: "18% GST",
+              price: gstAmount,
+            },
+            {
+              subDescription: "Service Amount",
+              price: totalAmount,
+            },
+            ...(proposalDetails?.tanNo
+              ? [
+                  {
+                    subDescription: "2% TDS",
+                    price: tdsAmount,
+                  },
+                ]
+              : []),
+            {
+              subDescription: "Total Amount",
+              price: grandTotal,
+            },
+          ],
+        },
+      };
+
+      const res = await ledgerEntriesService(ledgerData?.ledger?._id, {
+        entriesData: formData,
+        proposalId: id,
+      });
+      if (res.success) {
+        router.push("/dashboard/customer");
+        toast.success("Ledger Entry created Successfully");
+        await proposalLedgerEntryValidation(id, {
+          ledgerEntry: true,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  }
+
+  async function fetchLedgerDetails() {
+    try {
+      if (customerId) {
+        const res = await customerLedgerService(customerId);
+        if (res.success) {
+          setLedgerData(res.data);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  }
+
   useEffect(() => {
+    fetchLedgerDetails();
     getAllCustomerPropsals();
   }, []);
 
@@ -76,12 +273,25 @@ const CustomerProposal = ({ customerId }) => {
           {listPropoasls.map((item) => (
             <div
               key={item?._id}
-              className="border rounded-lg p-4 shadow-md bg-white flex flex-col justify-between"
+              className={`border rounded-lg p-4 shadow-md ${
+                item?.ledgerEntry ? " border-blue-400 border" : "bg-white"
+              } flex flex-col justify-between`}
             >
               <div>
-                <p className="bg-blue-300 flex py-1 px-3 rounded-full w-35 font-medium my-2">
-                  {item?.proposalNo}
-                </p>
+                <div className="flex justify-between">
+                  <p className="bg-blue-300 flex py-1 px-3 rounded-full w-35 font-medium my-2">
+                    {item?.proposalNo}
+                  </p>
+                  <div
+                    className={` ${
+                      item?.ledgerEntry
+                        ? "border flex items-center justify-center w-10 h-10 rounded-full shadow-2xl"
+                        : "hidden"
+                    }`}
+                  >
+                    <Check />
+                  </div>
+                </div>
                 <h3 className="font-bold text-lg mb-2 truncate">
                   {item?.clientCompany}
                 </h3>
@@ -111,7 +321,8 @@ const CustomerProposal = ({ customerId }) => {
                 >
                   <Download />
                 </Link>
-                <button disabled={sendingInvoiceId === item?._id}
+                <button
+                  disabled={sendingInvoiceId === item?._id}
                   onClick={() => sendEmailHandler(item?._id)}
                   className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -129,12 +340,50 @@ const CustomerProposal = ({ customerId }) => {
                 >
                   <Trash2 />
                 </div>
-                <Link
-                  href={`/dashboard/ledger/${item?._id}`}
-                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
-                >
-                  <NotebookPen />
-                </Link>
+
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div
+                      className={`bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full ${
+                        item?.ledgerEntry && "hidden"
+                      }`}
+                    >
+                      <NotebookPen />
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader className={"hidden"}>
+                      <DialogTitle>Are you absolutely sure?</DialogTitle>
+                      <DialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete your account and remove your data from our
+                        servers.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="">
+                      <p className="font-medium text-lg">
+                        Proposal Entry to Ledger
+                      </p>
+                      <form
+                        onSubmit={(e) =>
+                          !ledgerData?.ledger?.entries?.length > 0
+                            ? handleProposalLedgerEntry(e, item?._id)
+                            : anotherProposalLedgerEntry(e, item?._id)
+                        }
+                        className="flex gap-2"
+                      >
+                        <Input
+                          type={"date"}
+                          value={proposalLedgerEntryDate}
+                          onChange={(e) =>
+                            setProposalLedgerEntryDate(e.target.value)
+                          }
+                        />
+                        <Button type="submit">Add</Button>
+                      </form>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           ))}

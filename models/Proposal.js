@@ -11,6 +11,10 @@ const ProposalSchema = new mongoose.Schema(
       ref: "Customer",
       required: true,
     },
+    ledgerEntry: {
+      type: Boolean,
+      default: false,
+    },
     clientName: { type: String, required: true },
     clientCompany: { type: String, required: true },
     clientAddress: { type: String, required: true },
@@ -70,5 +74,7 @@ ProposalSchema.pre("save", async function (next) {
   next();
 });
 
-export default mongoose.models.Proposal ||
-  mongoose.model("Proposal", ProposalSchema);
+const Proposal =
+  mongoose.models.Proposal || mongoose.model("Proposal", ProposalSchema);
+
+export default Proposal;

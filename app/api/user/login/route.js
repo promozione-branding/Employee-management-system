@@ -45,7 +45,7 @@ export async function POST(req) {
         username: checkUser.username,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "5d" }
+      { expiresIn: "1d" }
     );
 
     const userResponse = {
@@ -65,7 +65,7 @@ export async function POST(req) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 5,
+      maxAge: 60 * 60 * 24,
     });
     return response;
   } catch (error) {

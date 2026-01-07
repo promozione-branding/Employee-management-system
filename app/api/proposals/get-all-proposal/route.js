@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Proposal from "@/models/Proposal"; // Your mongoose model
+import Proposal from "@/models/Proposal"; 
 
 export async function GET() {
   try {

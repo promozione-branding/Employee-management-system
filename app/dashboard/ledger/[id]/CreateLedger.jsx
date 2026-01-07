@@ -4,18 +4,18 @@ import {
   fetchingProposalsInfo,
   ledgerEntriesService,
 } from "@/service/ledger";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { customerLedgerService } from "@/service/customer";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { customerLedgerService } from "@/service/customer";
 
-const CreateLedgerPage = ({ proposalId }) => {
+const CreateLedgerPage = ({ customerId }) => {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [formData, setFormData] = useState({});
   const [proposalDetails, setProposalDetails] = useState(null);
@@ -50,13 +50,22 @@ const CreateLedgerPage = ({ proposalId }) => {
       if (res.success) {
         setLoadingForLedgerDetails(false);
         setLedgerData(res.data);
-        setFirstLedgerEntry(res.data?.ledger?.entries?.length > 0);
       }
     } catch (error) {
       console.log(error);
+      setLoadingForLedgerDetails(false);
       toast.error(error.message);
     }
   }
+  const proposalDataEntriesData =
+    ledgerData?.ledger?.entries?.filter(
+      (item) => item?.voucher === "Proposal"
+    ) || [];
+
+  const paymentDataList =
+    ledgerData?.ledger?.entries?.filter(
+      (item) => item?.voucher !== "Proposal"
+    ) || [];
 
   const handlePaymentMethodChange = (e) => {
     setPaymentMethod(e.target.value);
@@ -72,8 +81,6 @@ const CreateLedgerPage = ({ proposalId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    toast.success("handleSubmit");
-
     const submissionData = {
       paymentMethod,
       ...formData,
@@ -81,7 +88,8 @@ const CreateLedgerPage = ({ proposalId }) => {
 
     const formDataLedger = {
       customerId: proposalDetails?.clientId,
-      proposalId: proposalDetails?._id,
+      proposalIds: (prev) => [...prev, proposalDetails?._id],
+
       entries: [
         {
           date: submissionData?.entryDate,
@@ -179,7 +187,6 @@ const CreateLedgerPage = ({ proposalId }) => {
   async function handleEntrySubmit(e) {
     e.preventDefault();
 
-    toast.success("handleEntrySubmit");
     const submissionData = {
       paymentMethod,
       ...formData,
@@ -266,10 +273,9 @@ const CreateLedgerPage = ({ proposalId }) => {
     };
 
     try {
-      const res = await ledgerEntriesService(
-        ledgerData?.ledger?._id,
-        formDataLedger
-      );
+      const res = await ledgerEntriesService(ledgerData?.ledger?._id, {
+        entriesData: formDataLedger,
+      });
 
       if (res.success) {
         setPaymentMethod("");
@@ -283,8 +289,11 @@ const CreateLedgerPage = ({ proposalId }) => {
   }
 
   useEffect(() => {
-    fetchProposalInformation();
-  }, []);
+    // fetchProposalInformation();
+    if (customerId !== "") {
+      fetchLedgerDetails(customerId);
+    }
+  }, [customerId]);
 
   const renderChequeForm = () => (
     <div className="grid grid-cols-2 gap-3">
@@ -825,10 +834,9 @@ const CreateLedgerPage = ({ proposalId }) => {
     }
   };
 
-  console.log(firstLedgerEntry, "firstLedgerEntry");
   return (
     <>
-      {loadingForProposalInfo ? (
+      {loadingForLedgerDetails ? (
         <>Loading...</>
       ) : (
         <div className="flex gap-5 flex-col md:flex-row lg:px-20">
@@ -838,7 +846,7 @@ const CreateLedgerPage = ({ proposalId }) => {
             </h1>
             <form
               className="bg-white shadow-md rounded-xl px-8 pt-6 pb-8 mb-4"
-              onSubmit={firstLedgerEntry ? handleEntrySubmit : handleSubmit}
+              onSubmit={handleEntrySubmit}
             >
               <div className="mb-4">
                 <label
@@ -875,76 +883,117 @@ const CreateLedgerPage = ({ proposalId }) => {
             </form>
           </div>
 
-          <div className="md:w-1/2">
-            <div className="my-5 border py-3 px-5 rounded-2xl flex flex-col space-y-2 w-[50%] ">
-              <div className="bg-blue-500 w-32 flex items-center justify-center rounded-2xl p-1 font-semibold">
-                {proposalDetails?.proposalNo}
-              </div>
-              <div className="font-semibold">
-                Deal Amount: ₹{" "}
-                {(
-                  proposalDetails?.totalAmount +
-                  proposalDetails?.totalAmount * 0.18 -
-                  (proposalDetails.tanNo
-                    ? proposalDetails?.totalAmount * 0.02
-                    : 0)
-                ).toLocaleString("en-IN")}
+          <div className="md:w-1/2 flex flex-col gap-5">
+            <div>
+              <div className="grid grid-cols-2 gap-2">
+                {proposalDataEntriesData.length > 0 &&
+                  proposalDataEntriesData.map((item) => (
+                    <div
+                      key={item?._id}
+                      className="border p-3 rounded-lg bg-white shadow-sm"
+                    >
+                      <p className="font-bold text-center mb-2 border-b pb-1">
+                        {item?.particular?.description?.split(" ")[1]}
+                      </p>
+
+                      <div className="text-sm space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Service Amount</span>
+                          <span className="font-medium">
+                            ₹
+                            {item?.particular?.items
+                              ?.find(
+                                (i) => i?.subDescription === "Service Amount"
+                              )
+                              ?.price?.toLocaleString("en-IN")}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">GST (18%)</span>
+                          <span className="font-medium">
+                            ₹
+                            {item?.particular?.items
+                              ?.find((i) => i?.subDescription === "18% GST")
+                              ?.price?.toLocaleString("en-IN")}
+                          </span>
+                        </div>
+                        {item?.particular?.items?.find(
+                          (i) => i?.subDescription === "2% TDS"
+                        ) && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">TDS (2%)</span>
+                            <span className="font-medium">
+                              ₹
+                              {item?.particular?.items
+                                ?.find((i) => i?.subDescription === "2% TDS")
+                                ?.price?.toLocaleString("en-IN")}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex justify-between font-bold border-t pt-1 mt-1">
+                          <span>Total</span>
+                          <span>
+                            ₹
+                            {item?.particular?.items
+                              ?.find(
+                                (i) => i?.subDescription === "Total Amount"
+                              )
+                              ?.price?.toLocaleString("en-IN")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
               </div>
 
-              <div className="font-semibold">
-                Base Amount: ₹{" "}
-                {proposalDetails?.totalAmount.toLocaleString("en-IN")}
+              <div className="font-bold text-right mt-2">
+                Proposal Total : ₹{" "}
+                {proposalDataEntriesData
+                  ?.reduce((acc, item) => {
+                    const amount = item?.particular?.items?.find(
+                      (i) => i?.subDescription === "Total Amount"
+                    )?.price;
+                    return acc + (amount || 0);
+                  }, 0)
+                  .toLocaleString("en-IN")}
               </div>
-
-              <div className="font-semibold">
-                GST Amount(18%): ₹{" "}
-                {(proposalDetails?.totalAmount * 0.18).toLocaleString("en-IN")}
-              </div>
-
-              {proposalDetails.tanNo && (
-                <div className="font-semibold">
-                  TDS Amount (2%): ₹{" "}
-                  {(proposalDetails?.totalAmount * 0.02).toLocaleString(
-                    "en-IN"
-                  )}
+            </div>
+            <div className="border-t-2">
+              {ledgerData?.ledger?.entries?.length > 1 && (
+                <div>
+                  <Accordion
+                    type="single"
+                    collapsible
+                    className="w-full"
+                    defaultValue="item-1"
+                  >
+                    {paymentDataList.map((item) => (
+                      <AccordionItem value={item?._id} key={item?._id}>
+                        <AccordionTrigger>
+                          <div className="flex gap-10 w-full text-left">
+                            <div className="capitalize w-1/4">
+                              {item?.voucher}
+                            </div>
+                            <div className="text-blue-400 w-1/4">
+                              ₹ {item?.credit?.toLocaleString("en-IN")}
+                            </div>
+                            <div className="w-1/4">
+                              {new Date(item?.date).toLocaleDateString("en-GB")}
+                            </div>
+                            <div className="w-1/4">
+                              ₹ {item?.balance?.toLocaleString("en-IN")}
+                            </div>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="grid grid-cols-2 gap-4 text-balance">
+                          {renderEntryDetails(item)}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
                 </div>
               )}
             </div>
-
-            {ledgerData?.ledger?.entries?.length > 1 && (
-              <div>
-                <Accordion
-                  type="single"
-                  collapsible
-                  className="w-full"
-                  defaultValue="item-1"
-                >
-                  {ledgerData?.ledger?.entries?.slice(1)?.map((item) => (
-                    <AccordionItem value={item?._id} key={item?._id}>
-                      <AccordionTrigger>
-                        <div className="flex gap-10 w-full text-left">
-                          <div className="capitalize w-1/4">
-                            {item?.voucher}
-                          </div>
-                          <div className="text-blue-400 w-1/4">
-                            ₹ {item?.credit?.toLocaleString("en-IN")}
-                          </div>
-                          <div className="w-1/4">
-                            {new Date(item?.date).toLocaleDateString("en-GB")}
-                          </div>
-                          <div className="w-1/4">
-                            ₹ {item?.balance?.toLocaleString("en-IN")}
-                          </div>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="grid grid-cols-2 gap-4 text-balance">
-                        {renderEntryDetails(item)}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </div>
-            )}
           </div>
         </div>
       )}

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ledgerFormControl } from "@/config/data";
 import { ledgerFormInitialFormData } from "@/config/initialFormDate";
+import { customerLedgerService } from "@/service/customer";
 import {
   createLedgerService,
   fetchingProposalsInfo,
@@ -14,7 +15,7 @@ import {
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const AddEntries = ({ proposalId, ledgerId }) => {
+const AddEntries = ({ proposalId, ledgerId, customerId }) => {
   const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
   const [ledgerFormData, setLedgerFormData] = useState(
     ledgerFormInitialFormData
@@ -23,6 +24,9 @@ const AddEntries = ({ proposalId, ledgerId }) => {
   const [proposalDetails, setProposalDetails] = useState(null);
 
   const [globalEntries, setGlobalEntries] = useState([]);
+
+  const [loadingForLedgerDetails, setLoadingForLedgerDetails] = useState(true);
+  const [ledgerData, setLedgerData] = useState(null);
 
   // ------------ entries form -------
   const [entriesFormData, setEntriesFormData] = useState({
@@ -37,7 +41,20 @@ const AddEntries = ({ proposalId, ledgerId }) => {
     price: "",
   });
 
-  console.log(ledgerId, "ledgerId");
+
+  async function fetchLedgerDetails(id) {
+    try {
+      const res = await customerLedgerService(id);
+      if (res.success) {
+        setLoadingForLedgerDetails(false);
+        setLedgerData(res.data);
+      }
+    } catch (error) {
+      console.log(error);
+      setLoadingForLedgerDetails(false);
+      toast.error(error.message);
+    }
+  }
 
   async function fetchProposalInformation() {
     try {
@@ -138,7 +155,11 @@ const AddEntries = ({ proposalId, ledgerId }) => {
         toast.error("ledger id not found");
         return;
       }
-      const res = await ledgerEntriesService(ledgerId,ledgerFormDataApi);
+
+      console.log(ledgerFormDataApi,"ledgerFormDataApi");
+      const res = await ledgerEntriesService(ledgerId, {
+        entriesData: ledgerFormDataApi,
+      });
       if (res.success) {
         toast.success(res.message || "Ledger  successfully");
         setLedgerFormData(ledgerFormInitialFormData);
@@ -150,12 +171,14 @@ const AddEntries = ({ proposalId, ledgerId }) => {
   }
 
   useEffect(() => {
-    fetchProposalInformation();
-  }, []);
+    if (customerId) {
+      fetchLedgerDetails(customerId);
+    }
+  }, [customerId]);
 
   return (
     <>
-      {loadingForProposalInfo ? (
+      {loadingForLedgerDetails ? (
         <div className="animate-pulse text-lg">Loading...</div>
       ) : (
         <div className="flex gap-5">

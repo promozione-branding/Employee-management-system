@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
-import Ladger from "@/models/Ledger";
+import Ledger from "@/models/Ledger";
+import Proposal from "@/models/Proposal";
 
 export async function GET(req, context) {
   try {
@@ -8,7 +9,10 @@ export async function GET(req, context) {
 
     const { id } = await context.params;
 
-    const findLedger = await Ladger.findById(id);
+    const findLedger = await Ledger.findById(id).populate({
+      path: "proposalIds",
+    });
+
     if (!findLedger) {
       return NextResponse.json(
         {
@@ -50,12 +54,12 @@ export async function PUT(req, context) {
     await connectDB();
 
     const { id } = await context.params;
-    const payload = await req.json();
+    const { entriesData, proposalId } = await req.json();
 
-    const updatedLedger = await Ladger.findByIdAndUpdate(
+    const updatedLedger = await Ledger.findByIdAndUpdate(
       id,
       {
-        $push: { entries: payload },
+        $push: { entries: entriesData, proposalIds: proposalId },
       },
       { new: true }
     );

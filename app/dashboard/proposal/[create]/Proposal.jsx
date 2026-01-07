@@ -458,7 +458,7 @@ const Proposal = ({ customerId }) => {
 
                   {tanNo && (
                     <div className="flex justify-between text-gray-600">
-                      <span>TDS (10%)</span>
+                      <span>TDS (2%)</span>
                       <span>₹ {tdsAmount.toLocaleString("en-IN")}</span>
                     </div>
                   )}

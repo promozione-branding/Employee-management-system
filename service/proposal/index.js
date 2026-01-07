@@ -36,9 +36,15 @@ export async function pdfDownloadService(id) {
   }
 }
 
-
 export async function sendProposalPdfEmailService(id) {
-  const { data } = await axiosInstance.post(`/api/proposals/send-email`,id);
+  const { data } = await axiosInstance.post(`/api/proposals/send-email`, id);
   return data;
 }
 
+export async function proposalLedgerEntryValidation(id, formData) {
+  const { data } = await axiosInstance.put(
+    `/api/proposals/proposal-entry/${id}`,
+    formData
+  );
+  return data;
+}

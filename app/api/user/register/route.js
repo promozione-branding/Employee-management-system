@@ -43,7 +43,7 @@ export async function POST(req) {
         username: newUser.username,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "5d" }
+      { expiresIn: "1d" }
     );
 
     const response = NextResponse.json({
@@ -62,7 +62,7 @@ export async function POST(req) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 5,
+      maxAge: 60 * 60 * 24,
     });
 
     return response;
