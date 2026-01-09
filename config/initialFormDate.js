@@ -85,5 +85,16 @@ export const initialEmployeeRegisterFormData = {
   username: "",
   email: "",
   password: "",
-  role:"",
+  role: "",
+};
+
+export const initialEmployeesBasicDetails = {
+  name: "",
+  designation: "",
+  phone: "",
+  address: "",
+  email: "",
+  dob: "",
+  gender: "",
+  joiningDate: "",
 };

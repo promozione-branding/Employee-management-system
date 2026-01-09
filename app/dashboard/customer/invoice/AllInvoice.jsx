@@ -1,15 +1,30 @@
 "use client";
-import { getAllinvoicesCustomer } from "@/service/customer";
+import {
+  customerLedgerService,
+  getAllinvoicesCustomer,
+} from "@/service/customer";
 import { sendInvoicePdfService } from "@/service/invoice";
-import { BanknoteArrowUp, Download, Eye, Mail, Pencil } from "lucide-react";
+import { createLedgerService, ledgerEntriesService } from "@/service/ledger";
+import {
+  BanknoteArrowUp,
+  BookMarked,
+  Download,
+  Eye,
+  Mail,
+  Pencil,
+} from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const AllInvoice = ({ customerId }) => {
   const [invoicesList, setInvoicesList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sendingInvoiceId, setSendingInvoiceId] = useState(null);
+  const [ledgerData, setLedgerData] = useState(null);
+
+  const router = useRouter();
 
   async function fetchingInvoices() {
     if (!customerId) {
@@ -27,7 +42,8 @@ const AllInvoice = ({ customerId }) => {
     } catch (error) {
       console.log(error);
       toast.error(
-        error.message || "An error occurred while fetching customer invoices."
+        error?.response?.data?.message ||
+          "An error occurred while fetching customer invoices."
       );
     } finally {
       setLoading(false);
@@ -51,6 +67,69 @@ const AllInvoice = ({ customerId }) => {
       });
     } finally {
       setSendingInvoiceId(null);
+    }
+  }
+
+  async function invoiceLedgerEntry(invoice) {
+    // console.log(invoice, "invoice");
+    let currentLedger = null;
+    try {
+      const res = await customerLedgerService(customerId);
+      if (res.success) {
+        currentLedger = res.data?.ledger;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    const totalAmount = invoice?.totalAmount || 0;
+    const gstAmount = totalAmount * 0.18;
+    const tdsAmount = invoice?.tanNo ? totalAmount * 0.02 : 0;
+
+
+
+    const currentBalance =
+      currentLedger?.entries?.length > 0
+        ? currentLedger.entries[currentLedger.entries.length - 1].balance
+        : 0;
+
+    const data = {
+      proposalId: invoice?._id,
+      date: new Date().toISOString(),
+      voucher: "Invoice",
+      debit: 0,
+      credit: 0,
+      balance: currentBalance,
+      particular: {
+        description: `Invoice #${invoice?.invoiceNo}`,
+        items: [
+          {
+            subDescription: "Total Amount",
+            price: invoice?.totalAmount,
+          },
+        ],
+      },
+    };
+
+
+    try {
+      let res;
+      if (currentLedger) {
+        res = await ledgerEntriesService(currentLedger._id, {
+          entriesData: data,
+          proposalId: invoice._id,
+        });
+      }
+      console.log(res,"res");
+      if (res.success) {
+        toast.success("Ledger Entry created Successfully");
+        router.push("/dashboard/customer");
+      } else {
+        toast.error(res.message || "Failed to create ledger entry");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message || "Error creating ledger entry");
     }
   }
 
@@ -146,13 +225,19 @@ const AllInvoice = ({ customerId }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center gap-4">
-                      <Link href={`/dashboard/invoice/pdf-download/${invoice._id}`}>
+                      <Link
+                        href={`/dashboard/invoice/pdf-download/${invoice._id}`}
+                      >
                         <Download />
                       </Link>
-                      <Link href={`/dashboard/invoice/view-invoice/${invoice._id}`}>
+                      <Link
+                        href={`/dashboard/invoice/view-invoice/${invoice._id}`}
+                      >
                         <Eye />
                       </Link>
-                      <Link href={`/dashboard/invoice/edit-invoice/${invoice?._id}`}>
+                      <Link
+                        href={`/dashboard/invoice/edit-invoice/${invoice?._id}`}
+                      >
                         <Pencil />
                       </Link>
                       <button
@@ -161,6 +246,12 @@ const AllInvoice = ({ customerId }) => {
                         className="disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Mail />
+                      </button>
+                      <button
+                        onClick={() => invoiceLedgerEntry(invoice)}
+                        className="disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <BookMarked />
                       </button>
                     </div>
                   </td>

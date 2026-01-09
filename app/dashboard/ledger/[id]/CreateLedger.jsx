@@ -63,13 +63,13 @@ const CreateLedgerPage = ({ customerId }) => {
     ) || [];
 
   const paymentDataList =
-    ledgerData?.ledger?.entries?.filter(
-      (item) => item?.voucher !== "Proposal"
+    ledgerData?.ledger?.entries?.filter((item) =>
+      ["upi", "card", "net banking", "cheque"].includes(item?.voucher)
     ) || [];
 
   const handlePaymentMethodChange = (e) => {
     setPaymentMethod(e.target.value);
-    setFormData({}); // Reset form data when payment method changes
+    setFormData({});
   };
 
   const handleChange = (e) => {

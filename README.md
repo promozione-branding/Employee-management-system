@@ -6,19 +6,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ledgerFormControl } from "@/config/data";
 import { ledgerFormInitialFormData } from "@/config/initialFormDate";
-import { createLedgerService, fetchingProposalsInfo } from "@/service/ledger";
+import { customerLedgerService } from "@/service/customer";
+import {
+  createLedgerService,
+  fetchingProposalsInfo,
+  ledgerEntriesService,
+} from "@/service/ledger";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const AddEntries = ({ proposalId }) => {
-  const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
+const AddEntries = ({ ledgerId, customerId }) => {
   const [ledgerFormData, setLedgerFormData] = useState(
     ledgerFormInitialFormData
   );
 
-  const [proposalDetails, setProposalDetails] = useState(null);
-
   const [globalEntries, setGlobalEntries] = useState([]);
+
+  const [loadingForLedgerDetails, setLoadingForLedgerDetails] = useState(true);
+  const [ledgerData, setLedgerData] = useState(null);
 
   // ------------ entries form -------
   const [entriesFormData, setEntriesFormData] = useState({
@@ -26,7 +31,13 @@ const AddEntries = ({ proposalId }) => {
     description: "",
   });
 
+  const lastPaymentEntry = ledgerData?.ledger?.entries
+    ?.filter((item) =>
+      ["upi", "card", "net banking", "cheque"].includes(item?.voucher)
+    )
+    .at(-1);
 
+  console.log(lastPaymentEntry, "lastPaymentEntry");
 
   //   state for sub heading and amount
   const [particularItemList, setParticularItemList] = useState([]);
@@ -35,19 +46,17 @@ const AddEntries = ({ proposalId }) => {
     price: "",
   });
 
-  async function fetchProposalInformation() {
+  async function fetchLedgerDetails(id) {
     try {
-      const res = await fetchingProposalsInfo(proposalId);
+      const res = await customerLedgerService(id);
       if (res.success) {
-        setLoadingForProposalInfo(false);
-        setProposalDetails(res.data);
+        setLoadingForLedgerDetails(false);
+        setLedgerData(res.data);
       }
     } catch (error) {
       console.log(error);
-      setLoadingForProposalInfo(true);
-      toast.error(
-        error.message || "error while fetching the proposal Information"
-      );
+      setLoadingForLedgerDetails(false);
+      toast.error(error.message);
     }
   }
 
@@ -74,10 +83,10 @@ const AddEntries = ({ proposalId }) => {
 
   function handleItemsSubmit(e) {
     e.preventDefault();
-    // if (isNaN(itemsHeading?.price) || itemsHeading?.price.trim() === "") {
-    //   toast.error("Please enter a valid number for the amount.");
-    //   return;
-    // }
+    if (isNaN(itemsHeading?.price) || itemsHeading?.price.trim() === "") {
+      toast.error("Please enter a valid number for the amount.");
+      return;
+    }
 
     setParticularItemList((prev) => [...prev, itemsHeading]);
     setItemsHeading({
@@ -101,14 +110,6 @@ const AddEntries = ({ proposalId }) => {
       return;
     }
 
-    if (
-      isNaN(ledgerFormData?.openingBalance) ||
-      ledgerFormData?.openingBalance.trim() === ""
-    ) {
-      toast.error("Please enter a valid number for the amount.");
-      return;
-    }
-
     if (isNaN(ledgerFormData?.debit)) {
       toast.error("Please enter a valid number for the amount.");
       return;
@@ -119,14 +120,33 @@ const AddEntries = ({ proposalId }) => {
       return;
     }
 
-    if (globalEntries.length <= 0) {
-      toast.error("Please fill the another form also");
+    if (ledgerFormData?.debit && ledgerFormData?.credit) {
+      toast.error("Please provide either a debit or a credit, not both.");
+      return;
+    }
+
+    if (
+      globalEntries.length <= 0 &&
+      (ledgerFormData?.debit || ledgerFormData?.credit)
+    ) {
+      toast.error("Please add items to the entry first.");
+      return;
+    }
+
+    if (
+      lastPaymentEntry?.debit === ledgerFormData?.credit ||
+      lastPaymentEntry?.debit === ledgerFormData?.debit
+    ) {
+      toast.error(
+        `The amount should be ${Number(lastPaymentEntry?.credit || 0)}`
+      );
       return;
     }
 
     try {
       const data = globalEntries.map(({ date, description, item }) => ({
         date,
+        balance: lastPaymentEntry?.balance,
         particular: {
           description,
           items: item,
@@ -136,17 +156,20 @@ const AddEntries = ({ proposalId }) => {
         credit: Number(ledgerFormData?.credit),
       }));
 
-      const ledgerFormDataApi = {
-        customerId: proposalDetails?.clientId,
-        proposalId: proposalId,
-        // openingBalance: Number(ledgerFormData?.openingBalance),
-        entries: data,
-      };
+      const ledgerFormDataApi = data?.[0];
 
-      console.log(ledgerFormDataApi,"ledgerFormDataApi");
-      // const res = await createLedgerService(ledgerFormDataApi);
+      if (ledgerId === "") {
+        toast.error("ledger id not found");
+        return;
+      }
+
+      console.log(ledgerFormDataApi, "ledgerFormDataApi");
+      // const res = await ledgerEntriesService(ledgerId, {
+      //   entriesData: ledgerFormDataApi,
+      // });
+
       // if (res.success) {
-      //   toast.success(res.message || "Ledger created successfully");
+      //   toast.success(res.message || "Ledger  successfully");
       //   setLedgerFormData(ledgerFormInitialFormData);
       // }
     } catch (error) {
@@ -156,12 +179,14 @@ const AddEntries = ({ proposalId }) => {
   }
 
   useEffect(() => {
-    fetchProposalInformation();
-  }, []);
+    if (customerId) {
+      fetchLedgerDetails(customerId);
+    }
+  }, [customerId]);
 
   return (
     <>
-      {loadingForProposalInfo ? (
+      {loadingForLedgerDetails ? (
         <div className="animate-pulse text-lg">Loading...</div>
       ) : (
         <div className="flex gap-5">

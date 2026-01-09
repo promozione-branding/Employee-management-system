@@ -73,7 +73,7 @@ const CustomerProposal = ({ customerId }) => {
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message || "Failed to fetch proposals");
+      toast.error("Failed to fetch proposals");
     }
   }
 

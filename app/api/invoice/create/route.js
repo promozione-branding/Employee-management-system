@@ -17,7 +17,7 @@ export async function POST(req) {
           message: "Customer with the provided clientId not found",
         },
         { status: 404 }
-      ); // Use 404 for "Not Found"
+      ); 
     }
 
     // 2. Now, create the invoice

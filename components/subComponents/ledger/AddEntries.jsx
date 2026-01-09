@@ -15,13 +15,10 @@ import {
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const AddEntries = ({ proposalId, ledgerId, customerId }) => {
-  const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
+const AddEntries = ({ ledgerId, customerId, setOpen }) => {
   const [ledgerFormData, setLedgerFormData] = useState(
     ledgerFormInitialFormData
   );
-
-  const [proposalDetails, setProposalDetails] = useState(null);
 
   const [globalEntries, setGlobalEntries] = useState([]);
 
@@ -34,13 +31,20 @@ const AddEntries = ({ proposalId, ledgerId, customerId }) => {
     description: "",
   });
 
+  const lastPaymentEntry = ledgerData?.ledger?.entries
+    ?.filter((item) =>
+      ["upi", "card", "net banking", "cheque"].includes(item?.voucher)
+    )
+    .at(-1);
+
+  console.log(lastPaymentEntry, "lastPaymentEntry");
+
   //   state for sub heading and amount
   const [particularItemList, setParticularItemList] = useState([]);
   const [itemsHeading, setItemsHeading] = useState({
     subDescription: "",
     price: "",
   });
-
 
   async function fetchLedgerDetails(id) {
     try {
@@ -53,22 +57,6 @@ const AddEntries = ({ proposalId, ledgerId, customerId }) => {
       console.log(error);
       setLoadingForLedgerDetails(false);
       toast.error(error.message);
-    }
-  }
-
-  async function fetchProposalInformation() {
-    try {
-      const res = await fetchingProposalsInfo(proposalId);
-      if (res.success) {
-        setLoadingForProposalInfo(false);
-        setProposalDetails(res.data);
-      }
-    } catch (error) {
-      console.log(error);
-      setLoadingForProposalInfo(true);
-      toast.error(
-        error.message || "error while fetching the proposal Information"
-      );
     }
   }
 
@@ -132,14 +120,33 @@ const AddEntries = ({ proposalId, ledgerId, customerId }) => {
       return;
     }
 
-    if (globalEntries.length <= 0) {
-      toast.error("Please fill the another form also");
+    if (ledgerFormData?.debit && ledgerFormData?.credit) {
+      toast.error("Please provide either a debit or a credit, not both.");
+      return;
+    }
+
+    if (
+      globalEntries.length <= 0 &&
+      (ledgerFormData?.debit || ledgerFormData?.credit)
+    ) {
+      toast.error("Please add items to the entry first.");
+      return;
+    }
+
+    if (
+      lastPaymentEntry?.debit === ledgerFormData?.credit ||
+      lastPaymentEntry?.debit === ledgerFormData?.debit
+    ) {
+      toast.error(
+        `The amount should be ${Number(lastPaymentEntry?.credit || 0)}`
+      );
       return;
     }
 
     try {
       const data = globalEntries.map(({ date, description, item }) => ({
         date,
+        balance: lastPaymentEntry?.balance,
         particular: {
           description,
           items: item,
@@ -156,13 +163,14 @@ const AddEntries = ({ proposalId, ledgerId, customerId }) => {
         return;
       }
 
-      console.log(ledgerFormDataApi,"ledgerFormDataApi");
       const res = await ledgerEntriesService(ledgerId, {
         entriesData: ledgerFormDataApi,
       });
+
       if (res.success) {
         toast.success(res.message || "Ledger  successfully");
         setLedgerFormData(ledgerFormInitialFormData);
+        if (setOpen) setOpen(false);
       }
     } catch (error) {
       console.log(error);
@@ -204,6 +212,7 @@ const AddEntries = ({ proposalId, ledgerId, customerId }) => {
               <div className="flex flex-col gap-2">
                 <Label>Date</Label>
                 <Input
+                  required
                   value={entriesFormData.date}
                   onChange={(e) =>
                     setEntriesFormData((prev) => ({
@@ -217,6 +226,7 @@ const AddEntries = ({ proposalId, ledgerId, customerId }) => {
               <div className="flex flex-col gap-2">
                 <Label>Description</Label>
                 <Input
+                  required
                   placeholder="Enter the description"
                   value={entriesFormData.description}
                   onChange={(e) =>

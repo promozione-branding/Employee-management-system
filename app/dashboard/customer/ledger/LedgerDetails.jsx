@@ -1,6 +1,5 @@
 "use client";
 import AddEntriesForm from "@/components/subComponents/ledger/AddEntries";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,13 +9,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { customerLedgerService } from "@/service/customer";
-import { BadgeIndianRupee, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const LedgerDetails = ({ customerId }) => {
   const [loading, setLoading] = useState(true);
+  const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
   const [data, setData] = useState({
     entries: [],
     openingBalance: 0,
@@ -26,7 +25,11 @@ const LedgerDetails = ({ customerId }) => {
 
   const { entries, openingBalance, _id } = data;
 
-  console.log(entries[0]?.proposalId, "entries");
+  const isDisableManualBtn = entries.filter((item) =>
+    ["upi", "card", "net banking", "cheque"].includes(item?.voucher)
+  ).length
+    ? false
+    : true;
 
   useEffect(() => {
     async function fetchLeaderDetail() {
@@ -46,7 +49,7 @@ const LedgerDetails = ({ customerId }) => {
       }
     }
     fetchLeaderDetail();
-  }, []);
+  }, [isManualEntryOpen]);
 
   return (
     <div>
@@ -63,9 +66,16 @@ const LedgerDetails = ({ customerId }) => {
               >
                 Add Funds
               </Link>
-              <Dialog>
+              <Dialog
+                open={isManualEntryOpen}
+                onOpenChange={setIsManualEntryOpen}
+              >
                 <DialogTrigger asChild>
-                  <button className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm">
+                  <button
+                    className={` ${
+                      isDisableManualBtn ? "hidden" : ""
+                    } bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm`}
+                  >
                     Manual Entry
                   </button>
                 </DialogTrigger>
@@ -77,7 +87,12 @@ const LedgerDetails = ({ customerId }) => {
                       your account and remove your data from our servers.
                     </DialogDescription>
                   </DialogHeader>
-                  <AddEntriesForm proposalId={"5"} ledgerId={_id} customerId={customerId}/>
+                  <AddEntriesForm
+                    proposalId={"5"}
+                    ledgerId={_id}
+                    customerId={customerId}
+                    setOpen={setIsManualEntryOpen}
+                  />
                 </DialogContent>
               </Dialog>
             </div>
@@ -109,10 +124,10 @@ const LedgerDetails = ({ customerId }) => {
                 <div className="w-[50vw] text-center  ">_</div>
                 <div className="w-[10vw] pl-3">Opening Balance</div>
                 <div className="w-[15vw] text-right">
-                  {openingBalance.toLocaleString("en-IN")}
+                  {openingBalance?.toLocaleString("en-IN")}
                 </div>
                 <div className="w-[15vw] text-right">
-                  {openingBalance.toLocaleString("en-IN")}
+                  {openingBalance?.toLocaleString("en-IN")}
                 </div>
               </div>
             ) : null}
@@ -138,7 +153,7 @@ const LedgerDetails = ({ customerId }) => {
                       {idx + 1}.
                     </div>
                     <div className="w-[10vw]  border-r-2 border-l-2 border-black p-3">
-                      {date.split("T")[0]}
+                      {date?.split("T")?.[0]}
                     </div>
                     <div className="w-[35vw] text-left flex flex-col gap-3  border-r-2 border-black p-3">
                       {proposalId !== undefined ? (

@@ -5,20 +5,7 @@ export const addProposalFormControl = [
     componentType: "input",
     type: "date",
   },
-  // {
-  //   label: "Discount",
-  //   name: "discount",
-  //   componentType: "input",
-  //   type: "text",
-  //   placeholder: "Enter Discount",
-  // },
-  // {
-  //   label: "Discount Percentage",
-  //   name: "discountPercentage",
-  //   componentType: "input",
-  //   type: "text",
-  //   placeholder: "Enter Discount Percentage",
-  // },
+
   {
     label: "Valid Till",
     name: "validTill",
@@ -407,6 +394,7 @@ export const ledgerFormControl = [
       { id: "card", label: "Card" },
       { id: "net banking", label: "Net Banking" },
       { id: "cheque", label: "Cheque" },
+      { id: "other", label: "Other" },
     ],
   },
   {
@@ -455,5 +443,66 @@ export const employeeRegisterFormControl = [
       { id: "admin", label: "admin" },
       { id: "employee", label: "Employee" },
     ],
+  },
+];
+
+export const employeeBasicDetailsFormControl = [
+  {
+    label: "Name",
+    name: "name",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter Your Name",
+  },
+  {
+    label: "Designation",
+    name: "designation",
+    componentType: "select",
+    options: [
+      { id: "seo", label: "SEO" },
+      { id: "ads", label: "Ads Manager" },
+      { id: "web-dev", label: "Web Development" },
+      { id: "social-media", label: "Social Media" },
+    ],
+  },
+  {
+    label: "Phone",
+    name: "phone",
+    componentType: "input",
+    type: "tel",
+    placeholder: "Enter Your Phone",
+  },
+  {
+    label: "Address",
+    name: "address",
+    componentType: "textarea",
+    type: "text",
+  },
+  {
+    label: "Email",
+    name: "email",
+    componentType: "input",
+    type: "email",
+  },
+  {
+    label: "Date of Birth",
+    name: "dob",
+    componentType: "input",
+    type: "date",
+  },
+  {
+    label: "Gender",
+    name: "gender",
+    componentType: "select",
+    options: [
+      { id: "male", label: "Male" },
+      { id: "female", label: "Female" },
+    ],
+  },
+  {
+    label: "Joining Date",
+    name: "joiningDate",
+    componentType: "input",
+    type: "date",
   },
 ];
