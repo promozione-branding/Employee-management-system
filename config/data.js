@@ -506,3 +506,30 @@ export const employeeBasicDetailsFormControl = [
     type: "date",
   },
 ];
+
+export const projectDurationFormControl = [
+  {
+    label: "Service",
+    name: "service",
+    componentType: "select",
+    options: [
+      { id: "seo", label: "SEO" },
+      { id: "ads", label: "Ads Manager" },
+      { id: "web-dev", label: "Web Development" },
+      { id: "social-media", label: "Social Media" },
+      { id: "other", label: "Other" },
+    ],
+  },
+  {
+    label: "Start Date",
+    name: "start-date",
+    componentType: "input",
+    type: "date",
+  },
+  {
+    label: "End Date",
+    name: "end-date",
+    componentType: "input",
+    type: "date",
+  },
+];
