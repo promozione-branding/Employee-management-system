@@ -17,11 +17,16 @@ import {
   checkNewMeetService,
   createMeetingService,
 } from "@/service/meeting";
+import { SalesPeopleMeetingService } from "@/service/customer";
+import { preventSelection } from "@fullcalendar/core/internal";
 
 const MeetingDashboard = ({ customerId, salesPersonId }) => {
   const [loading, setLoading] = useState(false);
   const [newMeeting, setNewMeeting] = useState(false);
   const [meetingUpdateId, setMeetingUpdateId] = useState("");
+  const [loadingEmailList, setLoadingEmailList] = useState(true);
+  const [emailListData, setEmailListData] = useState([]);
+  const [selectEmail, setSelectEmail] = useState([]);
 
   const [callForm, setCallForm] = useState({
     status: "",
@@ -49,6 +54,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
     meetingDate: "",
   });
 
+
   // -------------------for Call update --------------------
   const handleCallSubmit = async (e) => {
     e.preventDefault();
@@ -56,6 +62,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
 
     const formData = {
       salesPersonId: salesPersonId || "",
+      salesPerson: selectEmail.map((item) => item?.email),
       clientId: customerId,
       updateType: "call",
       status: callForm?.status,
@@ -73,15 +80,12 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       toast.error("client id and salesPersonId not found");
       return;
     }
-
-    console.log(formData, "formData");
-
     try {
       const res = await createMeetingService(formData);
-      console.log(res, "data");
       if (res.success) {
         toast.success(res.message || "Meet has been created");
         setLoading(false);
+        setSelectEmail([])
         setCallForm({
           status: "",
           note: "",
@@ -104,6 +108,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
 
     const formData = {
       salesPersonId: salesPersonId || "",
+      salesPerson: selectEmail.map((item) => item?.email),
       clientId: customerId,
       updateType: "call",
       status: callForm?.status,
@@ -123,14 +128,13 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       return;
     }
 
-
     try {
       if (meetingUpdateId !== "") {
         const res = await addNewMeetingUpdate(meetingUpdateId, formData);
-        console.log(res, "data");
         if (res.success) {
           toast.success(res.message || "Meet has been Updated");
           setLoading(false);
+          setSelectEmail([])
           setCallForm({
             status: "",
             note: "",
@@ -146,7 +150,6 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       console.log(error);
       toast.error(error.message || "Error while Updating meeting");
     }
-
   };
 
   // -------------------for Call update --------------------
@@ -342,6 +345,18 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
 
   // ------------------General update----------------
 
+  const handleSelectEmail = (email) => {
+    setSelectEmail((prevEmail) => {
+      const isSelected = prevEmail.some((s) => s?._id === email?._id);
+
+      if (isSelected) {
+        return prevEmail.filter((s) => s._id !== email?._id);
+      } else {
+        return [...prevEmail, email];
+      }
+    });
+  };
+
   useEffect(() => {
     async function CheckNewMeet() {
       try {
@@ -358,243 +373,295 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
     CheckNewMeet();
   }, [customerId]);
 
+  useEffect(() => {
+    async function salesPeopleMail() {
+      try {
+        const res = await SalesPeopleMeetingService();
+        if (res.success) {
+          setEmailListData(res.data);
+          setLoadingEmailList(false);
+        }
+      } catch (error) {
+        console.log(error);
+        setLoadingEmailList(true);
+        toast.error(
+          error.response.date.message || "Error while fetching the sales person"
+        );
+      }
+    }
+    salesPeopleMail();
+  }, [customerId]);
+
   return (
-    <div className="flex gap-10 ">
-      <div className="w-1/3">
-        <h2 className="font-bold text-2xl text-center mb-5">Call Update</h2>
-        <form
-          onSubmit={newMeeting ? handleCallSubmit : updateCallSubmit}
-          className="flex flex-col gap-2"
-        >
-          <div className="flex flex-col gap-3">
-            <Label>Call Update</Label>
-            <Select
-              value={callForm.status}
-              onValueChange={(value) =>
-                setCallForm({ ...callForm, status: value })
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Talk" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="talk">Talk</SelectItem>
-                <SelectItem value="no-talk">No Talk</SelectItem>
-              </SelectContent>
-            </Select>
+    <div className="flex flex-col-reverse">
+      <div>
+        {loadingEmailList ? (
+          <div className="border-dashed border-2 text-gray-500 text-center p-5 rounded-2xl mt-5">
+            There is no email found
           </div>
-          <div className="flex flex-col gap-3">
-            <Label>Note</Label>
-            <Textarea
-              value={callForm.note}
-              onChange={(e) =>
-                setCallForm({ ...callForm, note: e.target.value })
-              }
-            />
+        ) : (
+          <div className="flex gap-4 my-3 flex-wrap">
+            {emailListData.map((item) => {
+              return (
+                <button
+                  onClick={() => handleSelectEmail(item)}
+                  key={item?._id}
+                  className={`p-2 border rounded-lg shadow-sm text-sm font-medium text-gray-700 duration-300 capitalize ${
+                    selectEmail.some((s) => s?._id === item?._id)
+                      ? "bg-blue-50 border-emerald-500 scale-105"
+                      : "bg-white border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  @{item?.email?.split("@")[0]}
+                </button>
+              );
+            })}
           </div>
-          <div className="flex flex-col gap-3">
-            <Label>Reminder</Label>
-            <div className="grid gap-2 grid-cols-2">
-              <Input
-                type="time"
-                value={callForm.reminderTime}
-                onChange={(e) =>
-                  setCallForm({ ...callForm, reminderTime: e.target.value })
-                }
-              />
-              <Input
-                type="date"
-                value={callForm.reminderDate}
-                onChange={(e) =>
-                  setCallForm({ ...callForm, reminderDate: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <Label>Meeting Date</Label>
-            <div className="grid gap-2 grid-cols-2">
-              <Input
-                type="time"
-                value={callForm.meetingTime}
-                onChange={(e) =>
-                  setCallForm({ ...callForm, meetingTime: e.target.value })
-                }
-              />
-              <Input
-                type="date"
-                value={callForm.meetingDate}
-                onChange={(e) =>
-                  setCallForm({ ...callForm, meetingDate: e.target.value })
-                }
-              />
-            </div>
-          </div>
-          <Button className={"w-full"} disabled={loading}>
-            Call Update
-          </Button>
-        </form>
+        )}
       </div>
 
-      <div className="w-1/3">
-        <h2 className="font-bold text-2xl text-center mb-5">Meeting Update</h2>
-        <form
-          onSubmit={newMeeting ? handleMeetingSubmit : updateMeetingSubmit}
-          className="flex flex-col gap-2"
-        >
-          <div className="flex flex-col gap-3">
-            <Label>Interested</Label>
-            <Select
-              required
-              value={meetingForm.status}
-              onValueChange={(value) =>
-                setMeetingForm({ ...meetingForm, status: value })
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Client Interested" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="interested">Interested</SelectItem>
-                <SelectItem value="not-interested">Not-Interested</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-3">
-            <Label>Note</Label>
-            <Textarea
-              required
-              value={meetingForm.note}
-              onChange={(e) =>
-                setMeetingForm({ ...meetingForm, note: e.target.value })
-              }
-            />
-          </div>
-          <div className="flex flex-col gap-3">
-            <Label>Reminder</Label>
-            <div className="grid gap-2 grid-cols-2">
-              <Input
-                type="time"
-                value={meetingForm.reminderTime}
-                onChange={(e) =>
-                  setMeetingForm({
-                    ...meetingForm,
-                    reminderTime: e.target.value,
-                  })
+      <div className="flex gap-10 ">
+        <div className="w-1/3">
+          <h2 className="font-bold text-2xl text-center mb-5">Call Update</h2>
+          <form
+            onSubmit={newMeeting ? handleCallSubmit : updateCallSubmit}
+            className="flex flex-col gap-2"
+          >
+            <div className="flex flex-col gap-3">
+              <Label>Call Update</Label>
+              <Select
+                value={callForm.status}
+                onValueChange={(value) =>
+                  setCallForm({ ...callForm, status: value })
                 }
-              />
-              <Input
-                type="date"
-                value={meetingForm.reminderDate}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Talk" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="talk">Talk</SelectItem>
+                  <SelectItem value="no-talk">No Talk</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label>Note</Label>
+              <Textarea
+                value={callForm.note}
                 onChange={(e) =>
-                  setMeetingForm({
-                    ...meetingForm,
-                    reminderDate: e.target.value,
-                  })
+                  setCallForm({ ...callForm, note: e.target.value })
                 }
               />
             </div>
-          </div>
+            <div className="flex flex-col gap-3">
+              <Label>Reminder</Label>
+              <div className="grid gap-2 grid-cols-2">
+                <Input
+                  type="time"
+                  value={callForm.reminderTime}
+                  onChange={(e) =>
+                    setCallForm({ ...callForm, reminderTime: e.target.value })
+                  }
+                />
+                <Input
+                  type="date"
+                  value={callForm.reminderDate}
+                  onChange={(e) =>
+                    setCallForm({ ...callForm, reminderDate: e.target.value })
+                  }
+                />
+              </div>
+            </div>
 
-          <div className="flex flex-col gap-3">
-            <Label>Meeting Date</Label>
-            <div className="grid gap-2 grid-cols-2">
-              <Input
-                type="time"
-                value={meetingForm.meetingTime}
-                onChange={(e) =>
-                  setMeetingForm({
-                    ...meetingForm,
-                    meetingTime: e.target.value,
-                  })
-                }
-              />
-              <Input
-                type="date"
-                value={meetingForm.meetingDate}
-                onChange={(e) =>
-                  setMeetingForm({
-                    ...meetingForm,
-                    meetingDate: e.target.value,
-                  })
-                }
-              />
+            <div className="flex flex-col gap-3">
+              <Label>Meeting Date</Label>
+              <div className="grid gap-2 grid-cols-2">
+                <Input
+                  type="time"
+                  value={callForm.meetingTime}
+                  onChange={(e) =>
+                    setCallForm({ ...callForm, meetingTime: e.target.value })
+                  }
+                />
+                <Input
+                  type="date"
+                  value={callForm.meetingDate}
+                  onChange={(e) =>
+                    setCallForm({ ...callForm, meetingDate: e.target.value })
+                  }
+                />
+              </div>
             </div>
-          </div>
-          <Button className={"w-full"}>Meeting Update</Button>
-        </form>
-      </div>
 
-      <div className="w-1/3">
-        <h2 className="font-bold text-2xl text-center mb-5">General Update</h2>
-        <form
-          onSubmit={newMeeting ? handleGeneralSubmit : updateGeneralSubmit}
-          className="flex flex-col gap-2"
-        >
-          <div className="flex flex-col gap-3">
-            <Label>Note</Label>
-            <Textarea
-              required
-              value={generalForm.note}
-              onChange={(e) =>
-                setGeneralForm({ ...generalForm, note: e.target.value })
-              }
-            />
-          </div>
-          <div className="flex flex-col gap-3">
-            <Label>Reminder</Label>
-            <div className="grid gap-2 grid-cols-2">
-              <Input
-                type="time"
-                value={generalForm.reminderTime}
-                onChange={(e) =>
-                  setGeneralForm({
-                    ...generalForm,
-                    reminderTime: e.target.value,
-                  })
-                }
-              />
-              <Input
-                type="date"
-                value={generalForm.reminderDate}
-                onChange={(e) =>
-                  setGeneralForm({
-                    ...generalForm,
-                    reminderDate: e.target.value,
-                  })
-                }
-              />
-            </div>
-          </div>
+            <Button className={"w-full"} disabled={loading}>
+              Call Update
+            </Button>
+          </form>
+        </div>
 
-          <div className="flex flex-col gap-3">
-            <Label>Meeting Date</Label>
-            <div className="grid gap-2 grid-cols-2">
-              <Input
-                type="time"
-                value={generalForm.meetingTime}
-                onChange={(e) =>
-                  setGeneralForm({
-                    ...generalForm,
-                    meetingTime: e.target.value,
-                  })
+        <div className="w-1/3">
+          <h2 className="font-bold text-2xl text-center mb-5">
+            Meeting Update
+          </h2>
+          <form
+            onSubmit={newMeeting ? handleMeetingSubmit : updateMeetingSubmit}
+            className="flex flex-col gap-2"
+          >
+            <div className="flex flex-col gap-3">
+              <Label>Interested</Label>
+              <Select
+                required
+                value={meetingForm.status}
+                onValueChange={(value) =>
+                  setMeetingForm({ ...meetingForm, status: value })
                 }
-              />
-              <Input
-                type="date"
-                value={generalForm.meetingDate}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Client Interested" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="interested">Interested</SelectItem>
+                  <SelectItem value="not-interested">Not-Interested</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label>Note</Label>
+              <Textarea
+                required
+                value={meetingForm.note}
                 onChange={(e) =>
-                  setGeneralForm({
-                    ...generalForm,
-                    meetingDate: e.target.value,
-                  })
+                  setMeetingForm({ ...meetingForm, note: e.target.value })
                 }
               />
             </div>
-          </div>
-          <Button className={"w-full"}>generate Update</Button>
-        </form>
+            <div className="flex flex-col gap-3">
+              <Label>Reminder</Label>
+              <div className="grid gap-2 grid-cols-2">
+                <Input
+                  type="time"
+                  value={meetingForm.reminderTime}
+                  onChange={(e) =>
+                    setMeetingForm({
+                      ...meetingForm,
+                      reminderTime: e.target.value,
+                    })
+                  }
+                />
+                <Input
+                  type="date"
+                  value={meetingForm.reminderDate}
+                  onChange={(e) =>
+                    setMeetingForm({
+                      ...meetingForm,
+                      reminderDate: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Label>Meeting Date</Label>
+              <div className="grid gap-2 grid-cols-2">
+                <Input
+                  type="time"
+                  value={meetingForm.meetingTime}
+                  onChange={(e) =>
+                    setMeetingForm({
+                      ...meetingForm,
+                      meetingTime: e.target.value,
+                    })
+                  }
+                />
+                <Input
+                  type="date"
+                  value={meetingForm.meetingDate}
+                  onChange={(e) =>
+                    setMeetingForm({
+                      ...meetingForm,
+                      meetingDate: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+            <Button className={"w-full"}>Meeting Update</Button>
+          </form>
+        </div>
+
+        <div className="w-1/3">
+          <h2 className="font-bold text-2xl text-center mb-5">
+            General Update
+          </h2>
+          <form
+            onSubmit={newMeeting ? handleGeneralSubmit : updateGeneralSubmit}
+            className="flex flex-col gap-2"
+          >
+            <div className="flex flex-col gap-3">
+              <Label>Note</Label>
+              <Textarea
+                required
+                value={generalForm.note}
+                onChange={(e) =>
+                  setGeneralForm({ ...generalForm, note: e.target.value })
+                }
+              />
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label>Reminder</Label>
+              <div className="grid gap-2 grid-cols-2">
+                <Input
+                  type="time"
+                  value={generalForm.reminderTime}
+                  onChange={(e) =>
+                    setGeneralForm({
+                      ...generalForm,
+                      reminderTime: e.target.value,
+                    })
+                  }
+                />
+                <Input
+                  type="date"
+                  value={generalForm.reminderDate}
+                  onChange={(e) =>
+                    setGeneralForm({
+                      ...generalForm,
+                      reminderDate: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Label>Meeting Date</Label>
+              <div className="grid gap-2 grid-cols-2">
+                <Input
+                  type="time"
+                  value={generalForm.meetingTime}
+                  onChange={(e) =>
+                    setGeneralForm({
+                      ...generalForm,
+                      meetingTime: e.target.value,
+                    })
+                  }
+                />
+                <Input
+                  type="date"
+                  value={generalForm.meetingDate}
+                  onChange={(e) =>
+                    setGeneralForm({
+                      ...generalForm,
+                      meetingDate: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+            <Button className={"w-full"}>generate Update</Button>
+          </form>
+        </div>
       </div>
     </div>
   );

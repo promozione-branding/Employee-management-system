@@ -9,7 +9,7 @@ import { useState } from "react";
 const Profile = () => {
   const [formData, setFormData] = useState(initialEmployeesBasicDetails);
   const [image, setImage] = useState(
-    "https://i.pinimg.com/736x/9e/c0/f8/9ec0f877571edc437f89c15c08081533.jpg"
+    "https://github.com/shadcn.png"
   );
 
   const handleImageUpload = (e) => {

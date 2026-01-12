@@ -525,28 +525,30 @@ const Proposal = ({ customerId }) => {
           <div className="mt-4">
             {listOfPayments?.length > 0 ? (
               <div className="flex flex-col gap-3">
-                {listOfPayments.map(({ paymentAmount, paymentDuration }, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200 shadow-sm"
-                  >
-                    <span className="text-sm font-medium text-gray-700">
-                      {paymentDuration}
-                    </span>
-                    <div className="flex items-center gap-3">
-                      <span className="font-semibold text-gray-900">
-                        ₹ {Number(paymentAmount).toLocaleString("en-IN")}
+                {listOfPayments.map(
+                  ({ paymentAmount, paymentDuration }, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200 shadow-sm"
+                    >
+                      <span className="text-sm font-medium text-gray-700">
+                        {paymentDuration}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => handleDeletePayment(idx)}
-                        className="text-gray-400 hover:text-red-500 transition-colors"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <span className="font-semibold text-gray-900">
+                          ₹ {Number(paymentAmount).toLocaleString("en-IN")}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePayment(idx)}
+                          className="text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             ) : (
               <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">

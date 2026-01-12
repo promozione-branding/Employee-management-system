@@ -1,5 +1,4 @@
 "use client";
-import CommonForm from "@/components/layout/Form";
 import { projectDurationFormControl } from "@/config/data";
 import {
   createCustomerProjectCycleService,
@@ -7,6 +6,7 @@ import {
   getCustomerProjectCycleService,
   getCustomerServices,
   updateCustomerProjectCycleService,
+  updateCustomerProjectPatchService,
 } from "@/service/customer";
 import { Pencil, Trash } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -21,8 +21,8 @@ const Customer = ({ customerId }) => {
   const [projectFormData, setProjectFormData] = useState({
     service: "",
     serviceName: "",
-    "start-date": "",
-    "end-date": "",
+    startDate: "",
+    endDate: "",
   });
 
   const handleProjectSubmit = async (e) => {
@@ -41,8 +41,8 @@ const Customer = ({ customerId }) => {
               ? {
                   ...item,
                   service: serviceValue,
-                  startDate: projectFormData["start-date"],
-                  endDate: projectFormData["end-date"],
+                  startDate: projectFormData?.startDate,
+                  endDate: projectFormData?.endDate,
                 }
               : item
           );
@@ -94,7 +94,6 @@ const Customer = ({ customerId }) => {
   async function fetchCustomerProjectCycle() {
     try {
       const response = await getCustomerProjectCycleService(customerId);
-      console.log(response);
       if (response.success) {
         setLoadingProjectCycle(true);
         toast.success("Customer project duration fetched");
@@ -110,7 +109,6 @@ const Customer = ({ customerId }) => {
   const fetchCurrentCustomer = async () => {
     try {
       const response = await getCustomerServices(customerId);
-      console.log(response, "response");
       if (response.success) {
         toast.success("Customer details fetched");
         setCustomerDetails(response.data);
@@ -157,9 +155,37 @@ const Customer = ({ customerId }) => {
   }
 
   // edit
-  async function handleProjectUpdate(e, id) {
+  async function handleProjectUpdate(e) {
     e.preventDefault();
-    console.log(id);
+
+    try {
+      const payload = {
+        projectCycleId: projectCycleData?.projectCycle?._id,
+        durationId: currentEditedId,
+        service:
+          projectFormData.service === "other"
+            ? projectFormData.serviceName
+            : projectFormData.service,
+        startDate: projectFormData.startDate,
+        endDate: projectFormData.endDate,
+      };
+
+      const res = await updateCustomerProjectPatchService(payload);
+
+      if (res.success) {
+        toast.success("Project updated successfully");
+        setCurrentEditedId(null);
+        setProjectFormData({
+          service: "",
+          serviceName: "",
+          startDate: "",
+          endDate: "",
+        });
+        fetchCustomerProjectCycle();
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Update failed");
+    }
   }
 
   useEffect(() => {
@@ -226,29 +252,89 @@ const Customer = ({ customerId }) => {
       <div>
         <div className="w-[30vw] border p-4 rounded-lg">
           <p className="font-semibold text-lg mb-4">Add Project</p>
-          <CommonForm
-            formControls={
-              projectFormData.service === "other"
-                ? [
-                    projectDurationFormControl[0],
-                    {
-                      label: "Service Name",
-                      name: "serviceName",
-                      componentType: "input",
-                      type: "text",
-                      placeholder: "Enter Service Name",
-                    },
-                    ...projectDurationFormControl.slice(1),
-                  ]
-                : projectDurationFormControl
-            }
-            formData={projectFormData}
-            setFormData={setProjectFormData}
-            buttonText={currentEditedId ? "Update Project" : "Save Project"}
+          <form
             onSubmit={
               currentEditedId ? handleProjectUpdate : handleProjectSubmit
             }
-          />
+            className="flex flex-col gap-3"
+          >
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Service</label>
+              <select
+                value={projectFormData.service}
+                onChange={(e) =>
+                  setProjectFormData({
+                    ...projectFormData,
+                    service: e.target.value,
+                  })
+                }
+                className="border p-2 rounded-md"
+              >
+                <option value="" disabled>
+                  Select Service
+                </option>
+                {projectDurationFormControl[0]?.options?.map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {projectFormData.service === "other" && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Service Name</label>
+                <input
+                  type="text"
+                  value={projectFormData.serviceName}
+                  onChange={(e) =>
+                    setProjectFormData({
+                      ...projectFormData,
+                      serviceName: e.target.value,
+                    })
+                  }
+                  placeholder="Enter Service Name"
+                  className="border p-2 rounded-md"
+                />
+              </div>
+            )}
+
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Start Date</label>
+              <input
+                type="date"
+                value={projectFormData.startDate}
+                onChange={(e) =>
+                  setProjectFormData({
+                    ...projectFormData,
+                    startDate: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">End Date</label>
+              <input
+                type="date"
+                value={projectFormData?.endDate}
+                onChange={(e) =>
+                  setProjectFormData({
+                    ...projectFormData,
+                    endDate: e.target.value,
+                  })
+                }
+                className="border p-2 rounded-md"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors"
+            >
+              {currentEditedId ? "Update Project" : "Add project"}
+            </button>
+          </form>
           {currentEditedId && (
             <button
               onClick={() => {
@@ -256,8 +342,8 @@ const Customer = ({ customerId }) => {
                 setProjectFormData({
                   service: "",
                   serviceName: "",
-                  "start-date": "",
-                  "end-date": "",
+                  startDate: "",
+                  endDate: "",
                 });
               }}
               className="mt-2 w-full bg-gray-500 text-white py-2 rounded-md hover:bg-gray-600 transition-colors"

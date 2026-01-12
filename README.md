@@ -1,300 +1,440 @@
 "use client";
-
 import CommonForm from "@/components/layout/Form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ledgerFormControl } from "@/config/data";
-import { ledgerFormInitialFormData } from "@/config/initialFormDate";
-import { customerLedgerService } from "@/service/customer";
+import { projectDurationFormControl } from "@/config/data";
 import {
-  createLedgerService,
-  fetchingProposalsInfo,
-  ledgerEntriesService,
-} from "@/service/ledger";
-import { useEffect, useState } from "react";
+  createCustomerProjectCycleService,
+  deleteCustomerProjectCycleService,
+  getCustomerProjectCycleService,
+  getCustomerServices,
+  updateCustomerProjectCycleService,
+} from "@/service/customer";
+import { Pencil, Trash } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const AddEntries = ({ ledgerId, customerId }) => {
-  const [ledgerFormData, setLedgerFormData] = useState(
-    ledgerFormInitialFormData
-  );
+const Customer = ({ customerId }) => {
+  const [customerDetails, setCustomerDetails] = useState(null);
+  const [projectCycleData, setProjectCycleData] = useState(null);
+  const [loadingProjectCycle, setLoadingProjectCycle] = useState(false);
+  const [currentEditedId, setCurrentEditedId] = useState(null);
 
-  const [globalEntries, setGlobalEntries] = useState([]);
-
-  const [loadingForLedgerDetails, setLoadingForLedgerDetails] = useState(true);
-  const [ledgerData, setLedgerData] = useState(null);
-
-  // ------------ entries form -------
-  const [entriesFormData, setEntriesFormData] = useState({
-    date: "",
-    description: "",
+  const [projectFormData, setProjectFormData] = useState({
+    service: "",
+    serviceName: "",
+    "start-date": "",
+    "end-date": "",
   });
 
-  const lastPaymentEntry = ledgerData?.ledger?.entries
-    ?.filter((item) =>
-      ["upi", "card", "net banking", "cheque"].includes(item?.voucher)
-    )
-    .at(-1);
+  const handleProjectSubmit = async (e) => {
+    e.preventDefault();
 
-  console.log(lastPaymentEntry, "lastPaymentEntry");
-
-  //   state for sub heading and amount
-  const [particularItemList, setParticularItemList] = useState([]);
-  const [itemsHeading, setItemsHeading] = useState({
-    subDescription: "",
-    price: "",
-  });
-
-  async function fetchLedgerDetails(id) {
     try {
-      const res = await customerLedgerService(id);
-      if (res.success) {
-        setLoadingForLedgerDetails(false);
-        setLedgerData(res.data);
+      const serviceValue =
+        projectFormData.service === "other"
+          ? projectFormData.serviceName
+          : projectFormData.service;
+
+      if (currentEditedId) {
+        const updatedProjectDuration =
+          projectCycleData?.projectCycle?.projectDuration?.map((item) =>
+            item._id === currentEditedId
+              ? {
+                  ...item,
+                  service: serviceValue,
+                  startDate: projectFormData["start-date"],
+                  endDate: projectFormData["end-date"],
+                }
+              : item
+          );
+
+        const res = await updateCustomerProjectCycleService(
+          projectCycleData?.projectCycle?._id,
+          {
+            projectDuration: updatedProjectDuration,
+          }
+        );
+
+        if (res.success) {
+          toast.success("Project details updated");
+          setProjectFormData({
+            service: "",
+            serviceName: "",
+            "start-date": "",
+            "end-date": "",
+          });
+          setCurrentEditedId(null);
+          fetchCustomerProjectCycle();
+        }
+      } else {
+        const formData = {
+          clientId: customerId,
+          service: serviceValue,
+          "start-date": projectFormData["start-date"],
+          "end-date": projectFormData["end-date"],
+        };
+
+        const res = await createCustomerProjectCycleService(formData);
+        if (res.success) {
+          toast.success("Project details submitted");
+          setProjectFormData({
+            service: "",
+            serviceName: "",
+            "start-date": "",
+            "end-date": "",
+          });
+          fetchCustomerProjectCycle();
+        }
       }
     } catch (error) {
       console.log(error);
-      setLoadingForLedgerDetails(false);
+      toast.error(error.message || "Error while processing project cycle");
+    }
+  };
+
+  async function fetchCustomerProjectCycle() {
+    try {
+      const response = await getCustomerProjectCycleService(customerId);
+      if (response.success) {
+        setLoadingProjectCycle(true);
+        toast.success("Customer project duration fetched");
+        setProjectCycleData(response.data);
+      }
+    } catch (error) {
+      setLoadingProjectCycle(false);
+      console.log(error);
       toast.error(error.message);
     }
   }
 
-  function handleEntriesFormSubmit(e) {
-    e.preventDefault();
-
-    if (particularItemList.length <= 0) {
-      toast.error("Please add SubHeading and amount");
-      return;
+  const fetchCurrentCustomer = async () => {
+    try {
+      const response = await getCustomerServices(customerId);
+      if (response.success) {
+        toast.success("Customer details fetched");
+        setCustomerDetails(response.data);
+      }
+    } catch (error) {
+      console.log(error, "hello error");
+      toast.error(error?.response?.data?.message);
     }
+  };
 
-    const data = {
-      date: entriesFormData?.date,
-      description: entriesFormData.description,
-      item: particularItemList,
-    };
-    setGlobalEntries((prev) => [...prev, data]);
-    setEntriesFormData({
-      date: "",
-      description: "",
+  // edit
+  async function handleEditChange(data) {
+    setProjectFormData({
+      service: data.service,
+      serviceName: data.service,
+      "start-date": data.startDate
+        ? new Date(data.startDate).toISOString().split("T")[0]
+        : "",
+      "end-date": data.endDate
+        ? new Date(data.endDate).toISOString().split("T")[0]
+        : "",
     });
-    setParticularItemList([]);
+    setCurrentEditedId(data._id);
   }
 
-  function handleItemsSubmit(e) {
-    e.preventDefault();
-    if (isNaN(itemsHeading?.price) || itemsHeading?.price.trim() === "") {
-      toast.error("Please enter a valid number for the amount.");
-      return;
-    }
+  // delete
+  async function handleDelete(id) {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this project?"
+    );
 
-    setParticularItemList((prev) => [...prev, itemsHeading]);
-    setItemsHeading({
-      subDescription: "",
-      price: "",
-    });
-  }
-
-  // ---------- handle First form --------
-  async function handleLedgerFormSubmit(e) {
-    e.preventDefault();
-
-    if (
-      !ledgerFormData?.voucher &&
-      !ledgerFormData?.debit &&
-      !ledgerFormData?.credit
-    ) {
-      toast.error(
-        "Please fill at least one field: Opening Balance, Voucher, Debit, or Credit."
-      );
-      return;
-    }
-
-    if (isNaN(ledgerFormData?.debit)) {
-      toast.error("Please enter a valid number for the amount.");
-      return;
-    }
-
-    if (isNaN(ledgerFormData?.credit)) {
-      toast.error("Please enter a valid number for the amount.");
-      return;
-    }
-
-    if (ledgerFormData?.debit && ledgerFormData?.credit) {
-      toast.error("Please provide either a debit or a credit, not both.");
-      return;
-    }
-
-    if (
-      globalEntries.length <= 0 &&
-      (ledgerFormData?.debit || ledgerFormData?.credit)
-    ) {
-      toast.error("Please add items to the entry first.");
-      return;
-    }
-
-    if (
-      lastPaymentEntry?.debit === ledgerFormData?.credit ||
-      lastPaymentEntry?.debit === ledgerFormData?.debit
-    ) {
-      toast.error(
-        `The amount should be ${Number(lastPaymentEntry?.credit || 0)}`
-      );
-      return;
-    }
+    if (!isConfirmed) return;
 
     try {
-      const data = globalEntries.map(({ date, description, item }) => ({
-        date,
-        balance: lastPaymentEntry?.balance,
-        particular: {
-          description,
-          items: item,
-        },
-        voucher: ledgerFormData?.voucher,
-        debit: Number(ledgerFormData?.debit),
-        credit: Number(ledgerFormData?.credit),
-      }));
-
-      const ledgerFormDataApi = data?.[0];
-
-      if (ledgerId === "") {
-        toast.error("ledger id not found");
-        return;
+      const res = await deleteCustomerProjectCycleService(id);
+      if (res.success) {
+        toast.success("Project deleted successfully");
+        fetchCustomerProjectCycle();
       }
-
-      console.log(ledgerFormDataApi, "ledgerFormDataApi");
-      // const res = await ledgerEntriesService(ledgerId, {
-      //   entriesData: ledgerFormDataApi,
-      // });
-
-      // if (res.success) {
-      //   toast.success(res.message || "Ledger  successfully");
-      //   setLedgerFormData(ledgerFormInitialFormData);
-      // }
     } catch (error) {
       console.log(error);
-      toast.error(error.message || "error while creating the ledger");
+      toast.error(error.message || "Error while deleting project");
+    }
+  }
+
+  // edit
+  async function handleProjectUpdate(e, id) {
+    e.preventDefault();
+
+    console.log({
+      "end-date": projectFormData?.["end-date"],
+    });
+    try {
+      const res = await updateCustomerProjectCycleService(id, {
+        "end-date": projectFormData?.["end-date"],
+      });
+      console.log(res, "res");
+      if (res.success) {
+        toast.success("Service Update");
+        setProjectFormData({
+          service: "",
+          serviceName: "",
+          "start-date": "",
+          "end-date": "",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("update error");
     }
   }
 
   useEffect(() => {
-    if (customerId) {
-      fetchLedgerDetails(customerId);
-    }
-  }, [customerId]);
+    fetchCurrentCustomer();
+    fetchCustomerProjectCycle();
+  }, []);
+
+  if (!customerDetails) {
+    return <div>Loading...</div>;
+  }
+
+  const {
+    name,
+    company,
+    GSTIN,
+    phone,
+    website,
+    Address,
+    city,
+    state,
+    pincode,
+    country,
+    meetingDate,
+    tanNo,
+    email,
+    SalesPersonName,
+  } = customerDetails;
 
   return (
-    <>
-      {loadingForLedgerDetails ? (
-        <div className="animate-pulse text-lg">Loading...</div>
-      ) : (
-        <div className="flex gap-5">
-          <div className="w-1/2">
-            <p className="text-lg text-center mb-5 font-medium">
-              Create Ledger
-            </p>
-            <CommonForm
-              formControls={ledgerFormControl}
-              formData={ledgerFormData}
-              setFormData={setLedgerFormData}
-              onSubmit={handleLedgerFormSubmit}
-            />
-          </div>
-          <div className="w-1/2">
-            <p className="text-lg text-center mb-5 font-medium">
-              Ledger Entries
-            </p>
+    <div className="flex gap-5">
+      <div className="border p-4 flex flex-col w-[30vw] rounded-lg">
+        <h2 className="text-xl font-semibold mb-2">{name}</h2>
+        <p className="my-2">
+          <strong>Company:</strong> {company}
+        </p>
+        <p className="my-2">
+          <strong>GSTIN:</strong> {GSTIN}
+        </p>
+        <p className="my-2">
+          <strong>TAN No:</strong> {tanNo || "NA"}
+        </p>
+        <p className="my-2">
+          <strong>Email:</strong> {email}
+        </p>
+        <p className="my-2">
+          <strong>Phone:</strong> {phone}
+        </p>
+        <p className="my-2">
+          <strong>Website:</strong> {website}
+        </p>
+        <p className="my-2">
+          <strong>SalesPersonName:</strong> {SalesPersonName}
+        </p>
+        <p className="my-2">
+          <strong>Address:</strong> {Address}, {city}, {state} - {pincode},{" "}
+          {country}
+        </p>
+        <p className="my-2">
+          <strong>Meeting Date:</strong>{" "}
+          {new Date(meetingDate).toLocaleDateString()}
+        </p>
+      </div>
+
+      <div>
+        {currentEditedId ? (
+          <div className="w-[30vw] border p-4 rounded-lg">
+            <p className="font-semibold text-lg mb-4">Add Project</p>
             <form
-              onSubmit={handleEntriesFormSubmit}
+              onSubmit={
+                currentEditedId ? handleProjectUpdate : handleProjectSubmit
+              }
               className="flex flex-col gap-3"
             >
-              <div className="flex flex-col gap-2">
-                <Label>Date</Label>
-                <Input
-                  value={entriesFormData.date}
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Service</label>
+                <select
+                  value={projectFormData.service}
                   onChange={(e) =>
-                    setEntriesFormData((prev) => ({
-                      ...prev,
-                      date: e.target.value,
-                    }))
+                    setProjectFormData({
+                      ...projectFormData,
+                      service: e.target.value,
+                    })
                   }
-                  type={"date"}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label>Description</Label>
-                <Input
-                  placeholder="Enter the description"
-                  value={entriesFormData.description}
-                  onChange={(e) =>
-                    setEntriesFormData((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-
-              <Button type={"submit"}>Add Entries</Button>
-            </form>
-
-            {/* form items  */}
-            <form
-              onSubmit={handleItemsSubmit}
-              className="flex gap-3 items-center py-5"
-            >
-              <Input
-                placeholder="Enter the subheading"
-                value={itemsHeading?.subDescription}
-                onChange={(e) =>
-                  setItemsHeading((prev) => ({
-                    ...prev,
-                    subDescription: e.target.value,
-                  }))
-                }
-                required
-              />
-              <Input
-                required
-                placeholder="Enter the Amount"
-                value={itemsHeading?.price}
-                onChange={(e) =>
-                  setItemsHeading((prev) => ({
-                    ...prev,
-                    price: e.target.value,
-                  }))
-                }
-              />
-              <Button type="submit">Add</Button>
-            </form>
-
-            <div>
-              {particularItemList.length === 0 ? (
-                <div className="border-dashed border p-3 rounded-lg text-gray-300 text-center font-semibold">
-                  There is no Sub Heading Item
-                </div>
-              ) : (
-                <div className="flex gap-2 flex-col">
-                  {particularItemList.map((item) => (
-                    <div
-                      key={item.subDescription}
-                      className="flex items-center justify-between bg-gray-200 px-3 py-3 rounded-2xl"
-                    >
-                      <div>{item?.subDescription}</div>
-                      <div className="font-bold ">
-                        ₹{Number(item?.price)?.toLocaleString("en-IN")}
-                      </div>
-                    </div>
+                  className="border p-2 rounded-md"
+                >
+                  <option value="" disabled>
+                    Select Service
+                  </option>
+                  {projectDurationFormControl[0]?.options?.map((opt) => (
+                    <option key={opt.id} value={opt.id}>
+                      {opt.label}
+                    </option>
                   ))}
+                </select>
+              </div>
+
+              {projectFormData.service === "other" && (
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium">Service Name</label>
+                  <input
+                    type="text"
+                    value={projectFormData.serviceName}
+                    onChange={(e) =>
+                      setProjectFormData({
+                        ...projectFormData,
+                        serviceName: e.target.value,
+                      })
+                    }
+                    placeholder="Enter Service Name"
+                    className="border p-2 rounded-md"
+                  />
                 </div>
               )}
-            </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Start Date</label>
+                <input
+                  type="date"
+                  value={projectFormData["start-date"]}
+                  onChange={(e) =>
+                    setProjectFormData({
+                      ...projectFormData,
+                      "start-date": e.target.value,
+                    })
+                  }
+                  className="border p-2 rounded-md"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">End Date</label>
+                <input
+                  type="date"
+                  value={projectFormData["end-date"]}
+                  onChange={(e) =>
+                    setProjectFormData({
+                      ...projectFormData,
+                      "end-date": e.target.value,
+                    })
+                  }
+                  className="border p-2 rounded-md"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors"
+              >
+                Update Project
+              </button>
+            </form>
+            {currentEditedId && (
+              <button
+                onClick={() => {
+                  setCurrentEditedId(null);
+                  setProjectFormData({
+                    service: "",
+                    serviceName: "",
+                    "start-date": "",
+                    "end-date": "",
+                  });
+                }}
+                className="mt-2 w-full bg-gray-500 text-white py-2 rounded-md hover:bg-gray-600 transition-colors"
+              >
+                Cancel Edit
+              </button>
+            )}
           </div>
+        ) : (
+          <div className="w-[30vw] border p-4 rounded-lg">
+            <p className="font-semibold text-lg mb-4">Add Project</p>
+            <CommonForm
+              formControls={
+                projectFormData.service === "other"
+                  ? [
+                      projectDurationFormControl[0],
+                      {
+                        label: "Service Name",
+                        name: "serviceName",
+                        componentType: "input",
+                        type: "text",
+                        placeholder: "Enter Service Name",
+                      },
+                      ...projectDurationFormControl.slice(1),
+                    ]
+                  : projectDurationFormControl
+              }
+              formData={projectFormData}
+              setFormData={setProjectFormData}
+              buttonText={"Save Project"}
+              onSubmit={handleProjectSubmit}
+            />
+            {currentEditedId && (
+              <button
+                onClick={() => {
+                  setCurrentEditedId(null);
+                  setProjectFormData({
+                    service: "",
+                    serviceName: "",
+                    "start-date": "",
+                    "end-date": "",
+                  });
+                }}
+                className="mt-2 w-full bg-gray-500 text-white py-2 rounded-md hover:bg-gray-600 transition-colors"
+              >
+                Cancel Edit
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="w-[20vw] border p-4 rounded-lg">
+        <p className="font-semibold text-xl mb-4">Service</p>
+        <div className="flex flex-col gap-3 h-[400px] overflow-y-auto">
+          {projectCycleData?.projectCycle?.projectDuration?.length > 0 ? (
+            projectCycleData?.projectCycle?.projectDuration?.map(
+              (item, idx) => (
+                <div key={idx} className="bg-gray-100 p-3 rounded-md border-b">
+                  <p className="font-semibold capitalize">{item?.service}</p>
+                  <div className="text-sm mt-1">
+                    <p>
+                      Start Date:{" "}
+                      {new Date(item?.["startDate"]).toLocaleDateString()}
+                    </p>
+                    <p>
+                      End Date:{" "}
+                      {new Date(item?.["endDate"]).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex justify-between mt-2">
+                    <button
+                      onClick={() => handleEditChange(item)}
+                      className="h-8 w-8 bg-blue-500 flex items-center justify-center rounded-full"
+                    >
+                      <Pencil size={20} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item?._id)}
+                      className="h-8 w-8 bg-red-500 flex items-center justify-center rounded-full"
+                    >
+                      <Trash size={20} />
+                    </button>
+                  </div>
+                </div>
+              )
+            )
+          ) : (
+            <p className="text-center text-gray-500 mt-10">
+              No Project History Found
+            </p>
+          )}
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 };
 
-export default AddEntries;
+export default Customer;

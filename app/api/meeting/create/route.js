@@ -9,6 +9,7 @@ export async function POST(req) {
 
     const {
       salesPersonId,
+      salesPerson,
       clientId,
       updateType,
       status,
@@ -34,6 +35,7 @@ export async function POST(req) {
       meetingUpdate: [
         {
           salesPersonId,
+          salesPerson,
           clientId,
           updateType,
           status,

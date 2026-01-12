@@ -67,7 +67,6 @@ export async function getCustomerProjectCycleService(id) {
 export async function updateCustomerProjectCycleService(id, formData) {
   const { data } = await axiosInstance.put(
     `/api/customer/project-cycle/get-client-project/${id}`,
-    id,
     formData
   );
   return data;
@@ -76,6 +75,22 @@ export async function updateCustomerProjectCycleService(id, formData) {
 export async function deleteCustomerProjectCycleService(id) {
   const { data } = await axiosInstance.delete(
     `/api/customer/project-cycle/get-client-project/${id}`
+  );
+  return data;
+}
+
+export async function updateCustomerProjectPatchService(payload) {
+  const { data } = await axiosInstance.patch(
+    "/api/customer/project-cycle/update-duration",
+    payload
+  );
+  return data;
+}
+
+// meeting
+export async function SalesPeopleMeetingService() {
+  const { data } = await axiosInstance.get(
+    "/api/customer/meeting/sales-person-dropdown"
   );
   return data;
 }

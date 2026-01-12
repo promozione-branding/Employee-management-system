@@ -10,6 +10,7 @@ const MeetingSchema = new mongoose.Schema(
             ref: "User",
             required: true,
           },
+          salesPerson: [{ type: String }],
 
           clientId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -41,6 +42,7 @@ const MeetingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Meeting = mongoose.models.Meeting || mongoose.model('Meeting', MeetingSchema);
+const Meeting =
+  mongoose.models.Meeting || mongoose.model("Meeting", MeetingSchema);
 
 export default Meeting;
