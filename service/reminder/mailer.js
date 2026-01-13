@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 
 let transporter;
 
-export async function sendReminderEmail(to, subject, html) {
+export async function sendReminderEmail(to, subject, html, cc) {
   if (!transporter) {
     transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
@@ -15,8 +15,9 @@ export async function sendReminderEmail(to, subject, html) {
     });
   }
   await transporter.sendMail({
-    from: `"Reminder Service"`,
+    from: "Reminder Service",
     to,
+    cc,
     subject,
     html,
   });

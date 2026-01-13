@@ -28,7 +28,8 @@ const meetingTemplate = Handlebars.compile(meetingTemplateSource);
 async function checkReminders() {
   const meetings = await Meeting.find()
     .populate("meetingUpdate.salesPersonId")
-    .populate("meetingUpdate.clientId");
+    .populate("meetingUpdate.clientId")
+    .populate("meetingUpdate.salesPerson");
 
   if (!meetings || meetings.length === 0) {
     console.log("⚠ No meetings found");
@@ -49,6 +50,14 @@ async function checkReminders() {
       const reminderDate = entry.reminderAt?.toISOString().split("T")[0];
       const reminderTime = entry.reminderAt?.toTimeString().slice(0, 5);
 
+      const toEmail = entry?.salesPersonId?.email;
+
+      const ccEmails = Array.isArray(entry.salesPerson)
+        ? entry.salesPerson
+            .map((user) => user.email)
+            .filter((email) => email && email !== toEmail)
+        : [];
+
       if (
         !entry.reminderSent &&
         reminderDate === nowDate &&
@@ -63,7 +72,8 @@ async function checkReminders() {
         await sendReminderEmail(
           entry?.salesPersonId?.email,
           `Reminder: Meeting with ${entry.clientId?.name || "Client"}`,
-          html
+          html,
+          ccEmails
         );
 
         entry.reminderSent = true;
@@ -85,7 +95,8 @@ async function checkReminders() {
         await sendReminderEmail(
           entry?.salesPersonId?.email,
           `Reminder: Meeting with ${entry.clientId?.name || "Client"}`,
-          htmlForMeetingUpdateReminder
+          htmlForMeetingUpdateReminder,
+          ccEmails
         );
         console.log("📨 Reminder Meeting updated email triggered!");
       }

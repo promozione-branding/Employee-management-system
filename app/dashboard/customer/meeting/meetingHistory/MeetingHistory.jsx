@@ -8,6 +8,8 @@ const MeetingHistory = ({ customerId }) => {
   const [loading, setLoading] = useState(true);
   const [historyData, setHistoryData] = useState([]);
 
+  console.log(historyData, "historyData");
+
   useEffect(() => {
     async function handleCustomerHistoryFetch() {
       try {
@@ -30,57 +32,34 @@ const MeetingHistory = ({ customerId }) => {
       {loading ? (
         <div>Loading...</div>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {historyData?.length > 0 ? (
-            historyData?.map((item) => (
-              <div
-                key={item?._id}
-                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm  transition-shadow hover:shadow-2xl"
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex flex-col">
-                    <span className="inline-block px-2 py-1 text-lg font-semibold text-blue-600 bg-blue-50 rounded-md w-fit capitalize">
-                      {item?.updateType}
-                    </span>
-
-                    <div
-                      className={`text-lg text-blue-600 mt-1 flex flex-col font-semibold ${
-                        !item?.meetingAt ? "hidden" : ""
-                      }`}
-                    >
-                      <span>Meeting Date</span>
-                      {new Date(item?.meetingAt).toLocaleString()}
-                    </div>
+        <>
+          <div className="grid grid-cols-6 font-medium gap-5 mb-4">
+            <div>S.No</div>
+            <div>Meeting Type</div>
+            <div>Notes</div>
+            <div>Status</div>
+            <div>Meeting At</div>
+            <div>Sales Person</div>
+          </div>
+          <div className="">
+            {historyData?.length > 0 ? (
+              historyData?.map((item, idx) => (
+                <div key={item?._id} className="border-b grid grid-cols-6 gap-5">
+                  <div>{idx + 1}</div>
+                  <div>{item?.updateType}</div>
+                  <div className="text-sm">{item?.note}</div>
+                  <div className="">{item?.status}</div>
+                  <div className="">
+                    {new Date(item?.meetingAt).toLocaleString()}
                   </div>
-                  <span className="text-lg font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded capitalize">
-                    {item.status}
-                  </span>
+                  <div className="">{item?.salesPersonId?.username}</div>
                 </div>
-                <p className="text-lg text-gray-700 mb-4 whitespace-pre-wrap">
-                  {item.note}
-                </p>
-                <div className="flex justify-between items-end border-t pt-3">
-                  <div className="text-lg text-gray-500">
-                    <p className="font-medium text-gray-900">
-                      {item.salesPersonId?.username}
-                    </p>
-                    <p>{item.salesPersonId?.email}</p>
-                  </div>
-                  {item.reminderAt && (
-                    <div className="text-lg text-right">
-                      <p className="text-gray-400">Reminder</p>
-                      <p className="font-medium text-orange-600">
-                        {new Date(item.reminderAt).toLocaleString()}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))
-          ) : (
-            <div>No history available</div>
-          )}
-        </div>
+              ))
+            ) : (
+              <div>No history available</div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );

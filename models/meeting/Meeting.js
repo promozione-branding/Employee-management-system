@@ -10,8 +10,7 @@ const MeetingSchema = new mongoose.Schema(
             ref: "User",
             required: true,
           },
-          salesPerson: [{ type: String }],
-
+          salesPerson: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
           clientId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Customer",

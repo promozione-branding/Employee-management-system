@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LedgerDetails from "../ledger/LedgerDetails";
 import MeetingDashboard from "../meeting/MeetingDashboard";
 import MeetingHistory from "../meeting/meetingHistory/MeetingHistory";
+import HistoryPage from "../history/page";
 
 const CustomerDashboard = ({ customerId, salesPersonId }) => {
   return (
@@ -15,7 +16,7 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
           <TabsTrigger value="proposal">Proposal</TabsTrigger>
           <TabsTrigger value="invoice">invoice</TabsTrigger>
           <TabsTrigger value="ledger">Ledger</TabsTrigger>
-          <TabsTrigger value="meeting">Meeting</TabsTrigger>
+          <TabsTrigger value="meeting">Update</TabsTrigger>
           <TabsTrigger value="meetingHistory">History</TabsTrigger>
         </TabsList>
         <TabsContent value="Customer">
@@ -36,7 +37,10 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
             salesPersonId={salesPersonId}
           />
         </TabsContent>
-        <TabsContent value="meetingHistory"><MeetingHistory customerId={customerId}/></TabsContent>
+        <TabsContent value="meetingHistory">
+          <HistoryPage customerId={customerId} />
+          {/* <MeetingHistory customerId={customerId} /> */}
+        </TabsContent>
       </Tabs>
     </div>
   );

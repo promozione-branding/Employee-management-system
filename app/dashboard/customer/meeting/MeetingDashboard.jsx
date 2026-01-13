@@ -18,7 +18,6 @@ import {
   createMeetingService,
 } from "@/service/meeting";
 import { SalesPeopleMeetingService } from "@/service/customer";
-import { preventSelection } from "@fullcalendar/core/internal";
 
 const MeetingDashboard = ({ customerId, salesPersonId }) => {
   const [loading, setLoading] = useState(false);
@@ -54,7 +53,6 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
     meetingDate: "",
   });
 
-
   // -------------------for Call update --------------------
   const handleCallSubmit = async (e) => {
     e.preventDefault();
@@ -62,7 +60,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
 
     const formData = {
       salesPersonId: salesPersonId || "",
-      salesPerson: selectEmail.map((item) => item?.email),
+      salesPerson: selectEmail.map((item) => item?._id),
+
       clientId: customerId,
       updateType: "call",
       status: callForm?.status,
@@ -80,12 +79,13 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       toast.error("client id and salesPersonId not found");
       return;
     }
+
     try {
       const res = await createMeetingService(formData);
       if (res.success) {
         toast.success(res.message || "Meet has been created");
         setLoading(false);
-        setSelectEmail([])
+        setSelectEmail([]);
         setCallForm({
           status: "",
           note: "",
@@ -108,7 +108,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
 
     const formData = {
       salesPersonId: salesPersonId || "",
-      salesPerson: selectEmail.map((item) => item?.email),
+      salesPerson: selectEmail.map((item) => item?._id),
+
       clientId: customerId,
       updateType: "call",
       status: callForm?.status,
@@ -127,14 +128,13 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       toast.error("client id and salesPersonId not found");
       return;
     }
-
     try {
       if (meetingUpdateId !== "") {
         const res = await addNewMeetingUpdate(meetingUpdateId, formData);
         if (res.success) {
           toast.success(res.message || "Meet has been Updated");
           setLoading(false);
-          setSelectEmail([])
+          setSelectEmail([]);
           setCallForm({
             status: "",
             note: "",
@@ -162,6 +162,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
 
     const formData = {
       salesPersonId: salesPersonId || "",
+      salesPerson: selectEmail.map((item) => item?._id),
       clientId: customerId,
       updateType: "meeting",
       status: meetingForm?.status,
@@ -179,13 +180,13 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       toast.error("client id and salesPersonId not found");
       return;
     }
-
     try {
       const res = await createMeetingService(formData);
       console.log(res, "data");
       if (res.success) {
         toast.success(res.message || "Meet has been created");
         setLoading(false);
+        setSelectEmail([]);
         setMeetingForm({
           status: "",
           note: "",
@@ -208,6 +209,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
 
     const formData = {
       salesPersonId: salesPersonId || "",
+      salesPerson: selectEmail.map((item) => item?._id),
+
       clientId: customerId,
       updateType: "meeting",
       status: meetingForm?.status,
@@ -233,6 +236,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
         if (res.success) {
           toast.success(res.message || "Meet has been Updated");
           setLoading(false);
+          setSelectEmail([]);
           setMeetingForm({
             status: "",
             note: "",
@@ -259,6 +263,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
 
     const formData = {
       salesPersonId: salesPersonId || "",
+      salesPerson: selectEmail.map((item) => item?._id),
+
       clientId: customerId,
       updateType: "general",
       note: generalForm?.note,
@@ -278,10 +284,10 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
 
     try {
       const res = await createMeetingService(formData);
-      console.log(res, "data");
       if (res.success) {
         toast.success(res.message || "Meet has been created");
         setLoading(false);
+        setSelectEmail([]);
         setGeneralForm({
           note: "",
           reminderTime: "",
@@ -303,6 +309,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
 
     const formData = {
       salesPersonId: salesPersonId || "",
+      salesPerson: selectEmail.map((item) => item?._id),
+
       clientId: customerId,
       updateType: "general",
       note: generalForm?.note,
@@ -320,13 +328,13 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       toast.error("client id and salesPersonId not found");
       return;
     }
-
     try {
       if (meetingUpdateId !== "") {
         const res = await addNewMeetingUpdate(meetingUpdateId, formData);
         if (res.success) {
           toast.success(res.message || "Meet has been Updated");
           setLoading(false);
+          setSelectEmail([]);
           setGeneralForm({
             note: "",
             reminderTime: "",
