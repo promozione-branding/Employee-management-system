@@ -17,6 +17,7 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import Loading from "@/components/layout/Loading";
 
 const AllInvoice = ({ customerId }) => {
   const [invoicesList, setInvoicesList] = useState([]);
@@ -139,9 +140,7 @@ const AllInvoice = ({ customerId }) => {
 
   if (loading) {
     return (
-      <div className="text-center py-10">
-        <p className="text-lg font-semibold">Loading Invoices...</p>
-      </div>
+      <Loading />
     );
   }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Loading from "@/components/layout/Loading";
 import { clientMeetingHistory } from "@/service/meeting";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -30,7 +31,7 @@ const MeetingHistory = ({ customerId }) => {
   return (
     <div>
       {loading ? (
-        <div>Loading...</div>
+       <Loading />
       ) : (
         <>
           <div className="grid grid-cols-6 font-medium gap-5 mb-4">

@@ -1,4 +1,5 @@
 "use client";
+import Loading from "@/components/layout/Loading";
 import ProposalPdfTemplate from "@/components/pdf/ProposalPdfTemplate";
 import { pdfDownloadService } from "@/service/proposal";
 import { PDFViewer } from "@react-pdf/renderer";
@@ -32,7 +33,7 @@ const ProposalPdf = ({ id }) => {
   return (
     <>
       {loading ? (
-        <div className="animate-pulse">Loading...</div>
+        <Loading />
       ) : (
         <div style={{ width: "80vw", height: "100vh", overflow: "hidden" }}>
           <PDFViewer

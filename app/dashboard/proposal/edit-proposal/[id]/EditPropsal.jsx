@@ -8,6 +8,7 @@ import {
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import Loading from "@/components/layout/Loading";
 
 const EditPropsal = ({ id }) => {
   const [formData, setFormData] = useState(null);
@@ -84,7 +85,7 @@ const EditPropsal = ({ id }) => {
   }, [id]);
 
   if (formData === null) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return (

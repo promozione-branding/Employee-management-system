@@ -14,6 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import Loading from "@/components/layout/Loading";
 
 const CreateLedgerPage = ({ customerId }) => {
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -837,7 +838,7 @@ const CreateLedgerPage = ({ customerId }) => {
   return (
     <>
       {loadingForLedgerDetails ? (
-        <>Loading...</>
+        <Loading />
       ) : (
         <div className="flex gap-5 flex-col md:flex-row lg:px-20">
           <div className="p-2 md:w-1/2">

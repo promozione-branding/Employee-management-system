@@ -1,7 +1,9 @@
 import React from "react";
+import ClientHistory from "./ClientHistory";
 
-const page = () => {
-  return <div>client-history</div>;
+const page = async ({ params }) => {
+  const { id } = await params;
+  return <ClientHistory customerId={id} />;
 };
 
 export default page;

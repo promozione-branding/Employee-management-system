@@ -1,4 +1,5 @@
 "use client";
+import Loading from "@/components/layout/Loading";
 import AddEntriesForm from "@/components/subComponents/ledger/AddEntries";
 import {
   Dialog,
@@ -54,7 +55,7 @@ const LedgerDetails = ({ customerId }) => {
   return (
     <div>
       {loading ? (
-        <div>Loading....</div>
+        <Loading />
       ) : (
         <div>
           <div className="flex items-center justify-between px-5 py-4">

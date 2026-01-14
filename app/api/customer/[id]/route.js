@@ -1,5 +1,8 @@
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/Customer";
+import { createAuditLog } from "@/utils/createAuditLog";
+import { getAuthUser } from "@/lib/getAuthUser";
+import { NextResponse } from "next/server";
 
 export async function GET(req, context) {
   try {
@@ -7,11 +10,10 @@ export async function GET(req, context) {
 
     const { id } = await context.params;
 
-
     const customer = await Customer.findById(id);
 
     if (!customer) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           message: "Customer not found",
@@ -22,7 +24,7 @@ export async function GET(req, context) {
       );
     }
 
-    return Response.json(
+    return NextResponse.json(
       {
         success: true,
         data: customer,
@@ -31,7 +33,7 @@ export async function GET(req, context) {
     );
   } catch (error) {
     console.log("Get customer by id Error", error);
-    return Response.json(
+    return NextResponse.json(
       { success: false, message: "Server error" },
       {
         status: 500,
@@ -49,7 +51,7 @@ export async function DELETE(req, context) {
     const customer = await Customer.findByIdAndDelete(id);
 
     if (!customer) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           message: "Customer not found",
@@ -60,7 +62,7 @@ export async function DELETE(req, context) {
       );
     }
 
-    return Response.json(
+    return NextResponse.json(
       {
         message: `${customer?.name} customer deleted successfull`,
         success: true,
@@ -69,71 +71,73 @@ export async function DELETE(req, context) {
     );
   } catch (error) {
     console.log("Delete by id api:", error);
-    return Response.json(
+    return NextResponse.json(
       { success: false, message: "Server error" },
       { status: 500 }
     );
   }
 }
 
-
-export async function PUT(req, context) {
+export async function PUT(req, { params }) {
   try {
     await connectDB();
 
-    const { id } = await context.params; // No 'await' needed
+    const { id } = await params;
+    const body = await req.json();
 
-    const {
-      name,
-      company,
-      GSTIN,
-      phone,
-      website,
-      Address,
-      city,
-      state,
-      pincode,
-      country,
-      meetingDate,
-    } = await req.json(); 
+    const authUser = await getAuthUser(req);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
     let findCustomer = await Customer.findById(id);
     if (!findCustomer) {
-      return Response.json(
-        {
-          message: "customer does not exist",
-          success: false,
-        },
+      return NextResponse.json(
+        { message: "customer does not exist", success: false },
         { status: 404 }
       );
     }
 
-    // Use ?? if you want to avoid empty string/false assignments
-    findCustomer.name = name ?? findCustomer.name;
-    findCustomer.company = company ?? findCustomer.company;
-    findCustomer.GSTIN = GSTIN ?? findCustomer.GSTIN;
-    findCustomer.phone = phone ?? findCustomer.phone;
-    findCustomer.website = website ?? findCustomer.website;
-    findCustomer.Address = Address ?? findCustomer.Address; // Fixed here
-    findCustomer.city = city ?? findCustomer.city;
-    findCustomer.state = state ?? findCustomer.state;
-    findCustomer.pincode = pincode ?? findCustomer.pincode;
-    findCustomer.country = country ?? findCustomer.country;
-    findCustomer.meetingDate = meetingDate ?? findCustomer.meetingDate;
+    // 🧾 BEFORE SNAPSHOT
+    const oldData = findCustomer.toObject();
+
+    // 🔄 Update fields
+    Object.keys(body).forEach((key) => {
+      if (key in findCustomer) {
+        findCustomer[key] = body[key] ?? findCustomer[key];
+      }
+    });
+
+    // 📝 HISTORY
+    const createAuditLogId = await createAuditLog({
+      clientId: id,
+      entityType: "Customer",
+      entityId: findCustomer._id,
+      action: "UPDATE",
+      oldData,
+      newData: findCustomer.toObject(),
+      userId: authUser._id,
+    });
+
+    console.log(createAuditLogId?._id, "createAuditLogId");
+
+    findCustomer.history.push(createAuditLogId?._id);
 
     const editedCustomer = await findCustomer.save();
 
-    return Response.json({
+    return NextResponse.json({
       success: true,
       message: "customer edit successfully",
       data: editedCustomer,
     });
   } catch (error) {
     console.log("Edit by id api:", error);
-    return Response.json(
+    return NextResponse.json(
       { success: false, message: "Server error" },
       { status: 500 }
     );
   }
 }
-

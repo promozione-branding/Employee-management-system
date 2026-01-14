@@ -1,4 +1,5 @@
 "use client";
+import Loading from "@/components/layout/Loading";
 import { projectDurationFormControl } from "@/config/data";
 import {
   createCustomerProjectCycleService,
@@ -194,7 +195,7 @@ const Customer = ({ customerId }) => {
   }, []);
 
   if (!customerDetails) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   const {

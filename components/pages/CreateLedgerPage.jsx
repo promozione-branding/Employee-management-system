@@ -9,6 +9,7 @@ import { ledgerFormInitialFormData } from "@/config/initialFormDate";
 import { createLedgerService, fetchingProposalsInfo } from "@/service/ledger";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Loading from "../layout/Loading";
 
 const CreateLedger = ({ proposalId }) => {
   const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
@@ -161,7 +162,7 @@ const CreateLedger = ({ proposalId }) => {
   return (
     <>
       {loadingForProposalInfo ? (
-        <div className="animate-pulse text-lg">Loading...</div>
+        <Loading />
       ) : (
         <div className="flex gap-5">
           <div className="w-1/2">

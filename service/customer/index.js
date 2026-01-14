@@ -94,3 +94,12 @@ export async function SalesPeopleMeetingService() {
   );
   return data;
 }
+
+// client history
+
+export async function getClientHistoryService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/customer/history/customer/${id}`
+  );
+    return data;
+}

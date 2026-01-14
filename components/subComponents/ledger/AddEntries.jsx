@@ -1,6 +1,7 @@
 "use client";
 
 import CommonForm from "@/components/layout/Form";
+import Loading from "@/components/layout/Loading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -187,7 +188,7 @@ const AddEntries = ({ ledgerId, customerId, setOpen }) => {
   return (
     <>
       {loadingForLedgerDetails ? (
-        <div className="animate-pulse text-lg">Loading...</div>
+        <Loading />
       ) : (
         <div className="flex gap-5">
           <div className="w-1/2">

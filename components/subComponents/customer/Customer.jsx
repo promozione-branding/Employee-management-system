@@ -1,4 +1,5 @@
 "use client";
+import Loading from "@/components/layout/Loading";
 import { getCustomerServices } from "@/service/customer";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -24,7 +25,7 @@ const Customer = ({ customerId }) => {
   }, []);
 
   if (!customerDetails) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   const {

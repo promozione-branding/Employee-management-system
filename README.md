@@ -1,51 +1,71 @@
- <div className="grid grid-cols-2 gap-3">
-          {historyData?.length > 0 ? (
-            historyData?.map((item) => (
-              <div
-                key={item?._id}
-                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm  transition-shadow hover:shadow-2xl"
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex flex-col">
-                    <span className="inline-block px-2 py-1 text-lg font-semibold text-blue-600 bg-blue-50 rounded-md w-fit capitalize">
-                      {item?.updateType}
-                    </span>
+export async function PUT(req, { params }) {
+  try {
+    await connectDB();
 
-                    <div
-                      className={`text-lg text-blue-600 mt-1 flex flex-col font-semibold ${
-                        !item?.meetingAt ? "hidden" : ""
-                      }`}
-                    >
-                      <span>Meeting Date</span>
-                      {new Date(item?.meetingAt).toLocaleString()}
-                    </div>
-                  </div>
-                  <span className="text-lg font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded capitalize">
-                    {item.status}
-                  </span>
-                </div>
-                <p className="text-lg text-gray-700 mb-4 whitespace-pre-wrap">
-                  {item.note}
-                </p>
-                <div className="flex justify-between items-end border-t pt-3">
-                  <div className="text-lg text-gray-500">
-                    <p className="font-medium text-gray-900">
-                      {item.salesPersonId?.username}
-                    </p>
-                    <p>{item.salesPersonId?.email}</p>
-                  </div>
-                  {item.reminderAt && (
-                    <div className="text-lg text-right">
-                      <p className="text-gray-400">Reminder</p>
-                      <p className="font-medium text-orange-600">
-                        {new Date(item.reminderAt).toLocaleString()}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))
-          ) : (
-            <div>No history available</div>
-          )}
-        </div>
+    const { id } = await params;
+    const body = await req.json();
+
+    const authUser = await getAuthUser(req);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    let findCustomer = await Customer.findById(id);
+    if (!findCustomer) {
+      return NextResponse.json(
+        { message: "customer does not exist", success: false },
+        { status: 404 }
+      );
+    }
+
+    // 🧾 BEFORE SNAPSHOT
+    const oldData = findCustomer.toObject();
+
+    // 🔄 Update fields
+    Object.keys(body).forEach((key) => {
+      if (key in findCustomer) {
+        findCustomer[key] = body[key] ?? findCustomer[key];
+      }
+    });
+
+    const editedCustomer = await findCustomer.save();
+
+    // 📝 HISTORY
+    const createAuditLogId = await createAuditLog({
+      clientId: id,
+      entityType: "Customer",
+      entityId: editedCustomer._id,
+      action: "UPDATE",
+      oldData,
+      newData: editedCustomer.toObject(),
+      userId: authUser._id,
+    });
+
+    console.log(createAuditLogId?._id, "createAuditLogId");
+
+    let customerHistory = await Customer.findById(id);
+    if (!customerHistory) {
+      return NextResponse.json(
+        { message: "customer does not exist", success: false },
+        { status: 404 }
+      );
+    }
+
+    await findCustomer.history.push(createAuditLogId?._id);
+
+    return NextResponse.json({
+      success: true,
+      message: "customer edit successfully",
+      data: editedCustomer,
+    });
+  } catch (error) {
+    console.log("Edit by id api:", error);
+    return NextResponse.json(
+      { success: false, message: "Server error" },
+      { status: 500 }
+    );
+  }
+}

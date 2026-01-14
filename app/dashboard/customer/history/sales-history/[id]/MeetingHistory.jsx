@@ -1,5 +1,6 @@
 "use client";
 
+import Loading from "@/components/layout/Loading";
 import { clientMeetingHistory } from "@/service/meeting";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -30,7 +31,7 @@ const MeetingHistory = ({ customerId }) => {
   return (
     <div>
       {loading ? (
-        <div>Loading...</div>
+        <Loading />
       ) : (
         <div className="overflow-x-auto bg-white shadow-md rounded-lg">
           <table className="min-w-full divide-y divide-gray-200">
@@ -50,6 +51,9 @@ const MeetingHistory = ({ customerId }) => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Meeting At
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  ReminderAt At
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Sales Person
@@ -84,6 +88,14 @@ const MeetingHistory = ({ customerId }) => {
                         : "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {item?.reminderAt
+                        ? new Date(item.reminderAt).toLocaleString([], {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })
+                        : "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                       {item?.salesPersonId?.username || "Unknown"}
                     </td>
                   </tr>

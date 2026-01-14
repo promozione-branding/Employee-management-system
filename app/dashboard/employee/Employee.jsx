@@ -15,6 +15,7 @@ import { initialEmployeeRegisterFormData } from "@/config/initialFormDate";
 import toast from "react-hot-toast";
 import { registerService } from "@/service/auth";
 import { getAllEmployeeForDashboard } from "@/service/employee-dashboard/employee";
+import Loading from "@/components/layout/Loading";
 
 const Employee = () => {
   const [formData, setFormData] = useState(initialEmployeeRegisterFormData);
@@ -85,7 +86,7 @@ const Employee = () => {
   return (
     <div>
       {employeeLoading ? (
-        <div>Loading ...</div>
+       <Loading />
       ) : (
         <div className="mt-6 bg-white shadow-sm rounded-lg overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">

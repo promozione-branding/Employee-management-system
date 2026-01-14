@@ -1,4 +1,5 @@
 "use client";
+import Loading from "@/components/layout/Loading";
 import { getInvoiceById } from "@/service/invoice"; // Assuming this path is correct for your actual API call
 import React, { useEffect, useState } from "react";
 
@@ -23,9 +24,7 @@ const ViewInvoice = ({ id }) => {
 
   if (loading) {
     return (
-      <div style={{ padding: "20px", textAlign: "center" }}>
-        Loading invoice...
-      </div>
+      <Loading />
     );
   }
 

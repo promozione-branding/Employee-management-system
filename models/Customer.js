@@ -62,6 +62,12 @@ const CustomerSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Meeting",
     },
+    history: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "AuditHistory",
+      },
+    ],
   },
   { timestamps: true }
 );
