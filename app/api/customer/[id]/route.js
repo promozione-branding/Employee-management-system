@@ -42,30 +42,46 @@ export async function GET(req, context) {
   }
 }
 
-export async function DELETE(req, context) {
+export async function DELETE(req, {params}) {
   try {
     await connectDB();
 
-    const { id } = await context.params;
+    const { id } = await params;
 
-    const customer = await Customer.findByIdAndDelete(id);
-
-    if (!customer) {
+    const authUser = await getAuthUser(req);
+    if (!authUser) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Customer not found",
-        },
-        {
-          status: 404,
-        }
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
       );
     }
 
+    const customer = await Customer.findById(id);
+    if (!customer) {
+      return NextResponse.json(
+        { success: false, message: "Customer not found" },
+        { status: 404 }
+      );
+    }
+
+    // 📸 Snapshot before delete
+    const oldData = customer.toObject();
+
+    await customer.deleteOne();
+
+    // 🧾 AUDIT LOG
+    await createAuditLog({
+      entityType: "Customer",
+      entityId: customer._id,
+      action: "DELETE",
+      oldData,
+      userId: authUser._id,
+    });
+
     return NextResponse.json(
       {
-        message: `${customer?.name} customer deleted successfull`,
         success: true,
+        message: `${customer.name} customer deleted successfully`,
       },
       { status: 200 }
     );
@@ -122,7 +138,6 @@ export async function PUT(req, { params }) {
       userId: authUser._id,
     });
 
-    console.log(createAuditLogId?._id, "createAuditLogId");
 
     findCustomer.history.push(createAuditLogId?._id);
 

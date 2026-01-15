@@ -12,9 +12,10 @@ export async function createAuditLog({
   newData,
   userId,
 }) {
-  const changes = [];
+  let changes = [];
 
-  if (action === "UPDATE") {
+  // 🔄 UPDATE
+  if (action === "UPDATE" && oldData && newData) {
     for (const key of Object.keys(newData)) {
       if (IGNORED_FIELDS.includes(key)) continue;
 
@@ -29,12 +30,29 @@ export async function createAuditLog({
         });
       }
     }
+
+    // No real change → no audit
+    if (!changes.length) return null;
   }
 
-  // 🚫 Do not save useless audit logs
-  if (!changes.length) return;
+  // 🗑 DELETE
+  if (action === "DELETE") {
+    changes = [
+      {
+        field: "ALL",
+        oldValue: oldData,
+        newValue: null,
+      },
+    ];
+  }
 
-  const auditDataHistory = await AuditHistory.create({
+  // 🆕 CREATE → allow empty changes
+  if (action === "CREATE") {
+    changes = [];
+  }
+
+  // 🧾 CREATE AUDIT RECORD
+  const auditHistory = await AuditHistory.create({
     clientId,
     entityType,
     entityId,
@@ -43,12 +61,12 @@ export async function createAuditLog({
     changes,
   });
 
-  // 👇 PUSH INTO CUSTOMER
+  // 🔗 LINK TO CUSTOMER
   if (entityType === "Customer") {
     await Customer.findByIdAndUpdate(entityId, {
-      $push: { history: AuditHistory._id },
+      $push: { history: auditHistory._id },
     });
   }
 
-  return auditDataHistory;
+  return auditHistory;
 }

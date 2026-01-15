@@ -101,5 +101,14 @@ export async function getClientHistoryService(id) {
   const { data } = await axiosInstance.get(
     `/api/customer/history/customer/${id}`
   );
-    return data;
+  return data;
+}
+
+// all delete customer
+export async function getAllDeleteCustomer() {
+  const { data } = await axiosInstance.get(
+    "/api/customer/history/customer/deleted-customer"
+  );
+
+  return data;
 }

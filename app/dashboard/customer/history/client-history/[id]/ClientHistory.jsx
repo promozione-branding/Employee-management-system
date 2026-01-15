@@ -33,11 +33,11 @@ const ClientHistory = ({ customerId }) => {
   }, [customerId]);
 
   return (
-    <div>
+    <div className="w-full">
       {loading ? (
         <Loading />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 ">
           {clientHistoryData?.length > 0 ? (
             clientHistoryData.map((history) => (
               <div

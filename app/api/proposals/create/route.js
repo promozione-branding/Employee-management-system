@@ -1,37 +1,61 @@
 import { connectDB } from "@/lib/db";
 import Proposal from "@/models/Proposal";
 import Customer from "@/models/Customer";
+import { createAuditLog } from "@/utils/createAuditLog";
+import { getAuthUser } from "@/lib/getAuthUser";
+import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
     await connectDB();
 
+    // 🔐 AUTH USER
+    const authUser = await getAuthUser(req);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const data = await req.json();
 
+    // 🆕 CREATE PROPOSAL
     const proposal = await Proposal.create(data);
 
     if (!proposal) {
-      return Response.json({
+      return NextResponse.json({
         success: false,
-        message: "Error while creating the proposals",
+        message: "Error while creating the proposal",
       });
     }
 
-    // Find the customer by the clientId from the proposal
-    const findCustomer = await Customer.findById(proposal.clientId);
-
-    if (!findCustomer) {
-      return Response.json({
+    // 🔎 FIND CUSTOMER
+    const customer = await Customer.findById(proposal.clientId);
+    if (!customer) {
+      return NextResponse.json({
         success: false,
-        message: "Customer with the provided clientId not found",
+        message: "Customer not found",
       });
     }
 
-    // Add the new proposal's ID to the customer's proposals array and save
-    findCustomer.proposals.push(proposal._id);
-    await findCustomer.save();
+    // 🧾 CREATE AUDIT HISTORY (PROPOSAL)
+    const createAuditLogId = await createAuditLog({
+      clientId: proposal.clientId,
+      entityType: "Proposal",
+      entityId: proposal._id,
+      action: "CREATE",
+      oldData: null,
+      newData: proposal.toObject(),
+      userId: authUser._id,
+    });
 
-    return Response.json(
+    // 🔗 LINK PROPOSAL TO CUSTOMER
+    customer.proposals.push(proposal._id);
+    customer.history.push(createAuditLogId?._id);
+    await customer.save();
+
+    return NextResponse.json(
       {
         success: true,
         message: "Proposal created successfully",
@@ -41,7 +65,7 @@ export async function POST(req) {
     );
   } catch (error) {
     console.error("CREATE PROPOSAL API ERROR:", error);
-    return Response.json(
+    return NextResponse.json(
       {
         success: false,
         message: "Server Error",
