@@ -6,6 +6,7 @@ import {
   BanknoteArrowUp,
   NotebookTabs,
   Users,
+  Volleyball,
 } from "lucide-react";
 
 const HistoryPage = ({ customerId }) => {
@@ -16,19 +17,14 @@ const HistoryPage = ({ customerId }) => {
       href: `/dashboard/customer/history/client-history/${customerId}`,
     },
     {
-      label: "proposals",
-      icon: <NotebookTabs />,
-      href: `/dashboard/customer/history/proposal-history/${customerId}`,
-    },
-    {
-      label: "Invoice",
-      icon: <BadgeIndianRupee />,
-      href: `/dashboard/customer/history/client-history/${customerId}`,
-    },
-    {
       label: "Sales",
       icon: <BanknoteArrowUp />,
       href: `/dashboard/customer/history/sales-history/${customerId}`,
+    },
+    {
+      label: "All History",
+      icon: <Volleyball />,
+      href: `/dashboard/customer/history/all-history/${customerId}`,
     },
   ];
 

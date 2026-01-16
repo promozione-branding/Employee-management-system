@@ -15,7 +15,7 @@ const AllInvoice = ({ customerId }) => {
       const res = await getInvoiceAllInvoice();
       if (res.success) {
         setInvoicesList(res.data);
-        setLoading(false)
+        setLoading(false);
       }
     } catch (error) {
       console.log(error.message || "error while fetching all invoices");

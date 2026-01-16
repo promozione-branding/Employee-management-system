@@ -6,15 +6,10 @@ export async function GET(req, { params }) {
   try {
     await connectDB();
 
-    const { id } = params;
-    const { searchParams } = new URL(req.url);
-    const type = searchParams.get("type"); // customer | proposal
+    const { id } = await params;
 
     const customer = await Customer.findById(id).populate({
       path: "history",
-      match: type
-        ? { entityType: type.charAt(0).toUpperCase() + type.slice(1) }
-        : {},
       options: { sort: { createdAt: -1 } },
       populate: {
         path: "changedBy",

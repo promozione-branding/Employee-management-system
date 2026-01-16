@@ -47,8 +47,12 @@ export async function createAuditLog({
   }
 
   // 🆕 CREATE → allow empty changes
-  if (action === "CREATE") {
-    changes = [];
+ if (action === "CREATE") {
+    changes.push({
+      field: "ALL",
+      oldValue: null,
+      newValue: newData,
+    });
   }
 
   // 🧾 CREATE AUDIT RECORD

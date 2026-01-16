@@ -36,37 +36,6 @@ export async function GET(req, context) {
   }
 }
 
-// export async function DELETE(req, {params}) {
-//   try {
-//     await connectDB();
-
-//     const { id } = await params;
-
-//     const deleteProposal = await Proposal.findByIdAndDelete(id);
-
-//     if (!deleteProposal) {
-//       return Response.json(
-//         { success: false, message: "Proposal not found" },
-//         { status: 404 }
-//       );
-//     }
-
-//     return Response.json(
-//       {
-//         success: true,
-//         message: "Proposal deleted successfully",
-//         data: deleteProposal,
-//       },
-//       { status: 200 }
-//     );
-//   } catch (error) {
-//     console.log("DELETE Proposal Error:", error);
-//     return Response.json(
-//       { success: false, message: "Server error" },
-//       { status: 500 }
-//     );
-//   }
-// }
 
 export async function DELETE(req, { params }) {
   try {

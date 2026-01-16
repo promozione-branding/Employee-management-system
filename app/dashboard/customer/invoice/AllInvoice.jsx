@@ -234,11 +234,11 @@ const AllInvoice = ({ customerId }) => {
                       >
                         <Eye />
                       </Link>
-                      <Link
+                      {/* <Link
                         href={`/dashboard/invoice/edit-invoice/${invoice?._id}`}
                       >
                         <Pencil />
-                      </Link>
+                      </Link> */}
                       <button
                         onClick={() => handleInvoiceSend(invoice?._id)}
                         disabled={sendingInvoiceId === invoice._id}
