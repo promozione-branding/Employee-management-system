@@ -8,7 +8,7 @@ export async function getAllEmployeeForDashboard() {
 export async function createEmployeeProfile(formData) {
   const { data } = await axiosInstance.post(
     "/api/employee-dashboard/employee-basic-details/create",
-    formData
+    formData,
   );
   return data;
 }
@@ -16,7 +16,14 @@ export async function createEmployeeProfile(formData) {
 export async function updateEmployeeImage(image) {
   const { data } = await axiosInstance.post(
     "/api/employee-dashboard/employee-basic-details/upload-image",
-    image
+    image,
+  );
+  return data;
+}
+
+export async function getEmployeeDetailsService() {
+  const { data } = await axiosInstance.get(
+    "/api/employee-dashboard/employee-basic-details",
   );
   return data;
 }

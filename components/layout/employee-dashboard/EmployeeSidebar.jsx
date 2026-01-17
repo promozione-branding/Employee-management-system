@@ -21,6 +21,7 @@ const EmployeeSidebar = ({ open, setOpen }) => {
   const handleLogout = async () => {
     try {
       await axiosInstance.get("/api/user/logout");
+      sessionStorage.removeItem("employeeData");
       toast.success("Logged out successfully");
       router.push("/login");
     } catch (error) {
@@ -35,7 +36,7 @@ const EmployeeSidebar = ({ open, setOpen }) => {
       label: "Dashboard",
       icon: <LayoutDashboard size={24} />,
     },
-     {
+    {
       href: "/employee-dashboard/clients",
       label: "Client",
       icon: <UsersRound size={24} />,
@@ -45,7 +46,7 @@ const EmployeeSidebar = ({ open, setOpen }) => {
       label: "Attendance",
       icon: <CalendarCheck size={24} />,
     },
-   
+
     {
       href: "/employee-dashboard/leaves",
       label: "Leaves",

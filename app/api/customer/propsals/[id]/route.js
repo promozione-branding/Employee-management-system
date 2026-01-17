@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/db";
-import Customer from "@/models/Customer";
-import Proposal from "@/models/Proposal";
+import Customer from "@/models/admin/Customer";
+import Proposal from "@/models/admin/Proposal";
 
 export async function GET(req, context) {
   try {

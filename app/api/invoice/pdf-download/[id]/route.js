@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/db";
-import Invoice from "@/models/invoice/Invoice";
-import InvoiceService from "@/models/invoice/InvoiceService"; // Make sure to import this for population
+import Invoice from "@/models/admin/invoice/Invoice";
+import InvoiceService from "@/models/admin/invoice/InvoiceService"; // Make sure to import this for population
 
 export async function GET(req, context) {
   try {

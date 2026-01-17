@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Proposal from "@/models/Proposal";
+import Proposal from "@/models/admin/Proposal";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
@@ -7,7 +7,9 @@ export async function POST(req) {
     await connectDB();
     const { proposalId } = await req.json();
 
-    const findProposal = await Proposal.findById(proposalId).select("proposalNo tanNo totalAmount clientId");
+    const findProposal = await Proposal.findById(proposalId).select(
+      "proposalNo tanNo totalAmount clientId"
+    );
 
     if (!findProposal) {
       return NextResponse.json(

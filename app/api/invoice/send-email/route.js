@@ -1,10 +1,10 @@
 import InvoicePdfTemplateServer from "@/components/pdf/InvoicePdfTemplateServer";
 import { connectDB } from "@/lib/db";
-import Invoice from "@/models/invoice/Invoice";
-import InvoiceService from "@/models/invoice/InvoiceService";
+import Invoice from "@/models/admin/invoice/Invoice";
+import InvoiceService from "@/models/admin/invoice/InvoiceService";
 import { renderToBuffer } from "@react-pdf/renderer";
 import nodemailer from "nodemailer";
-import Customer from "@/models/Customer";
+import Customer from "@/models/admin/Customer";
 
 export async function POST(req) {
   try {
@@ -30,7 +30,6 @@ export async function POST(req) {
         }
       );
     }
-
 
     // 2. Generate PDF buffer
     const pdfBuffer = await renderToBuffer(

@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Customer from "@/models/Customer";
+import Customer from "@/models/admin/Customer";
 import { createAuditLog } from "@/utils/createAuditLog";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { NextResponse } from "next/server";
@@ -42,7 +42,7 @@ export async function GET(req, context) {
   }
 }
 
-export async function DELETE(req, {params}) {
+export async function DELETE(req, { params }) {
   try {
     await connectDB();
 
@@ -137,7 +137,6 @@ export async function PUT(req, { params }) {
       newData: findCustomer.toObject(),
       userId: authUser._id,
     });
-
 
     findCustomer.history.push(createAuditLogId?._id);
 

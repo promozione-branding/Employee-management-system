@@ -3,16 +3,21 @@
 import CommonForm from "@/components/layout/Form";
 import { employeeBasicDetailsFormControl } from "@/config/data";
 import { initialEmployeesBasicDetails } from "@/config/initialFormDate";
-import { createEmployeeProfile, updateEmployeeImage } from "@/service/employee-dashboard/employee";
+import {
+  createEmployeeProfile,
+  updateEmployeeImage,
+} from "@/service/employee-dashboard/employee";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const Profile = () => {
   const [formData, setFormData] = useState(initialEmployeesBasicDetails);
   const [image, setImage] = useState("https://github.com/shadcn.png");
   const router = useRouter();
+
+ 
 
   const handleImageUpload = async (e) => {
     try {
@@ -31,7 +36,7 @@ const Profile = () => {
     } catch (error) {
       console.log(error);
       toast.error(
-        error.response.data.message || "Error while uploading profile picture"
+        error.response.data.message || "Error while uploading profile picture",
       );
     }
   };
@@ -59,11 +64,29 @@ const Profile = () => {
     } catch (error) {
       console.log(error);
       toast.error(
-        error?.response?.data?.message || "error while create employee profile"
+        error?.response?.data?.message || "error while create employee profile",
       );
     }
   }
 
+  async function handleUpdateEmployeeBasicDetails(e) {
+    try {
+    } catch (error) {
+      console.log(error);
+      toast.error("error while update employee details")
+    }
+  }
+
+  useEffect(() => {
+    const employeeData = JSON.parse(sessionStorage.getItem("employeeData"));
+    console.log(employeeData, "employeeData");
+    if (employeeData?.basicDetails) {
+      setFormData(employeeData.basicDetails);
+      if (employeeData.basicDetails.profileImage) {
+        setImage(employeeData.basicDetails.profileImage);
+      }
+    }
+  }, []);
   return (
     <div className="container mx-auto p-6 max-w-3xl">
       <div className="bg-white shadow-lg rounded-2xl p-8">
@@ -105,7 +128,9 @@ const Profile = () => {
             formControls={employeeBasicDetailsFormControl}
             formData={formData}
             setFormData={setFormData}
-            onSubmit={handleEmployeeBasicDetailSubmit}
+            onSubmit={
+              formData.name === "" ? "" : handleEmployeeBasicDetailSubmit
+            }
             buttonText="Update Profile"
           />
         </div>

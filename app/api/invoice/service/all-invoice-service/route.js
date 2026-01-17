@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import InvoiceService from "@/models/invoice/InvoiceService";
+import InvoiceService from "@/models/admin/invoice/InvoiceService";
 
 export async function GET(req) {
   try {

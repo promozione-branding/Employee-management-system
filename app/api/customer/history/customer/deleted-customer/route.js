@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/db";
 import AuditHistory from "@/models/admin/AuditHistory";
-import User from "@/models/User";
+import User from "@/models/admin/User";
 import { NextResponse } from "next/server";
 
 export async function GET(req) {

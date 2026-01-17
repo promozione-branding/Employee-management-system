@@ -1,12 +1,14 @@
 import { connectDB } from "@/lib/db";
-import User from "@/models/User";
+import User from "@/models/admin/User";
 import { NextResponse } from "next/server";
 
 export async function GET(req) {
   try {
     await connectDB();
 
-    const allEmployee = await User.find({ role: "employee" }).select("email username");
+    const allEmployee = await User.find({ role: "employee" }).select(
+      "email username"
+    );
 
     return NextResponse.json(
       {

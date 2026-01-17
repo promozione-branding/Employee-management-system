@@ -1,12 +1,14 @@
 import { connectDB } from "@/lib/db";
-import Proposal from "@/models/Proposal"; 
+import Proposal from "@/models/admin/Proposal";
 
 export async function GET() {
   try {
     await connectDB();
 
     const items = await Proposal.find()
-      .select("clientName clientCompany dateOfProposal GSTIN totalAmount proposalNo")
+      .select(
+        "clientName clientCompany dateOfProposal GSTIN totalAmount proposalNo"
+      )
       .sort({ createdAt: -1 });
 
     return Response.json(

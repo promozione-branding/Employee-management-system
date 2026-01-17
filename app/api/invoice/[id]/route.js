@@ -1,7 +1,7 @@
 import { connectDB } from "@/lib/db";
 import { getAuthUser } from "@/lib/getAuthUser";
-import Customer from "@/models/Customer";
-import Invoice from "@/models/invoice/Invoice";
+import Customer from "@/models/admin/Customer";
+import Invoice from "@/models/admin/invoice/Invoice";
 import { createAuditLog } from "@/utils/createAuditLog";
 import { NextResponse } from "next/server";
 

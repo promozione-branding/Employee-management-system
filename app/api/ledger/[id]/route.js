@@ -1,10 +1,10 @@
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
-import Ledger from "@/models/Ledger";
-import Proposal from "@/models/Proposal";
+import Ledger from "@/models/admin/Ledger";
+import Proposal from "@/models/admin/Proposal";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { createAuditLog } from "@/utils/createAuditLog";
-import Customer from "@/models/Customer";
+import Customer from "@/models/admin/Customer";
 
 export async function GET(req, context) {
   try {

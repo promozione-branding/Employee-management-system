@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Meeting from "@/models/meeting/Meeting";
+import Meeting from "@/models/admin/meeting/Meeting";
 import { NextResponse } from "next/server";
 
 export async function GET(req) {

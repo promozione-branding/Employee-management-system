@@ -1,7 +1,7 @@
 import { connectDB } from "@/lib/db";
-import ProjectCycle from "@/models/ProjectCycle";
+import ProjectCycle from "@/models/admin/ProjectCycle";
 import { NextResponse } from "next/server";
-import Customer from "@/models/Customer"; 
+import Customer from "@/models/admin/Customer";
 
 export async function POST(req) {
   try {

@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import InvoiceService from "@/models/invoice/InvoiceService";
+import InvoiceService from "@/models/admin/invoice/InvoiceService";
 
 export async function GET(req, context) {
   try {
@@ -7,7 +7,9 @@ export async function GET(req, context) {
 
     const { id } = await context.params;
 
-    const invoice = await InvoiceService.findById(id).select("serviceName HSN price");
+    const invoice = await InvoiceService.findById(id).select(
+      "serviceName HSN price"
+    );
 
     if (!invoice) {
       return Response.json(

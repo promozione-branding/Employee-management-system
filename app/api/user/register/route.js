@@ -1,4 +1,4 @@
-import User from "@/models/User";
+import User from "@/models/admin/User";
 import { connectDB } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -12,7 +12,10 @@ export async function POST(req) {
 
     if (!username || !email || !password) {
       return NextResponse.json(
-        { success: false, message: "Username, email, and password are required." },
+        {
+          success: false,
+          message: "Username, email, and password are required.",
+        },
         { status: 400 }
       );
     }

@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import User from "@/models/User";
+import User from "@/models/admin/User";
 import { NextResponse } from "next/server";
 
 export async function GET(req, context) {
@@ -81,7 +81,7 @@ export async function PUT(req, context) {
     const { id } = await context.params;
 
     // Only allow specific fields to be updated
-    const { username, role,email } = await req.json();
+    const { username, role, email } = await req.json();
     const updateData = { username, role };
 
     const updatedUser = await User.findByIdAndUpdate(id, updateData, {

@@ -10,39 +10,55 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import CommonForm from "@/components/layout/Form";
-import { employeeRegisterFormControl } from "@/config/data";
-import { initialEmployeeRegisterFormData } from "@/config/initialFormDate";
+import {
+  employeeBasicDetailsFormControl,
+  employeeRegisterFormControl,
+} from "@/config/data";
+import {
+  initialEmployeeRegisterFormData,
+  initialEmployeesBasicDetails,
+} from "@/config/initialFormDate";
 import toast from "react-hot-toast";
 import { registerService } from "@/service/auth";
-import { getAllEmployeeForDashboard } from "@/service/employee-dashboard/employee";
+import {
+  createEmployeeProfile,
+  getAllEmployeeForDashboard,
+} from "@/service/employee-dashboard/employee";
 import Loading from "@/components/layout/Loading";
+import { useRouter } from "next/navigation";
+import GridForm from "@/components/layout/GridForm";
 
 const Employee = () => {
-  const [formData, setFormData] = useState(initialEmployeeRegisterFormData);
+  const [registerFormData, setRegisterFormData] = useState(
+    initialEmployeeRegisterFormData,
+  );
+  const [formData, setFormData] = useState(initialEmployeesBasicDetails);
   const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [employeeList, setEmployeeList] = useState([]);
   const [employeeLoading, setEmployeeLoading] = useState(true);
+  const [employeeId, setEmployeeId] = useState("");
+  const router = useRouter();
 
   async function handleRegister(e) {
     e.preventDefault();
 
     if (
-      !formData.email ||
-      !formData.password ||
-      !formData.username ||
-      !formData?.role
+      !registerFormData.email ||
+      !registerFormData.password ||
+      !registerFormData.username ||
+      !registerFormData?.role
     ) {
       toast.error("Please enter both email and password. also role");
       return;
     }
 
-    if (formData?.email?.split("@")[1] !== "promozionebranding.com") {
+    if (registerFormData?.email?.split("@")[1] !== "promozionebranding.com") {
       toast.error("Only official company email is supported.");
       return;
     }
 
-    if (formData?.password?.length < 8) {
+    if (registerFormData?.password?.length < 8) {
       toast.error("Password must be at least 8 characters long.");
       return;
     }
@@ -50,11 +66,11 @@ const Employee = () => {
     setLoading(true);
 
     try {
-      const { data } = await registerService(formData);
+      const { data } = await registerService(registerFormData);
 
       if (data.success) {
         toast.success(data.message || "Employee add successfully");
-        setFormData(initialEmployeeRegisterFormData);
+        setRegisterFormData(initialEmployeeRegisterFormData);
         setOpenDialog(false);
       }
     } catch (error) {
@@ -79,6 +95,36 @@ const Employee = () => {
     }
   }
 
+  async function handleEmployeeBasicDetailSubmit(e) {
+    e.preventDefault();
+
+    const profileData = {
+      user: employeeId,
+      basicDetails: {
+        ...formData,
+        email: Array.isArray(formData.email)
+          ? formData.email
+          : [formData.email],
+      },
+    };
+
+    try {
+      const res = await createEmployeeProfile(profileData);
+      console.log(res, "res");
+      if (res.success) {
+        setFormData(initialEmployeesBasicDetails);
+        router.push("/employee-dashboard");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message || "error while create employee profile",
+      );
+    }
+  }
+
+  console.log(employeeId,"employeeId");
+
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -86,7 +132,7 @@ const Employee = () => {
   return (
     <div>
       {employeeLoading ? (
-       <Loading />
+        <Loading />
       ) : (
         <div className="mt-6 bg-white shadow-sm rounded-lg overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
@@ -97,6 +143,9 @@ const Employee = () => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Email
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Action
                 </th>
               </tr>
             </thead>
@@ -109,6 +158,40 @@ const Employee = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {employee.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm ">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button
+                            onClick={() => setEmployeeId(employee._id)}
+                            className="bg-blue-400 px-5 py-1 rounded-xl"
+                          >
+                            Add Details
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader className={"hidden"}>
+                            <DialogTitle>Are you absolutely sure?</DialogTitle>
+                            <DialogDescription>
+                              This action cannot be undone. This will
+                              permanently delete your account and remove your
+                              data from our servers.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div>
+                            <p className="text-center mb-4 text-xl">
+                              Add Employee Details
+                            </p>
+                            <GridForm
+                              formControls={employeeBasicDetailsFormControl}
+                              formData={formData}
+                              setFormData={setFormData}
+                              onSubmit={handleEmployeeBasicDetailSubmit}
+                              buttonText="Create Profile"
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </td>
                   </tr>
                 ))
@@ -127,6 +210,7 @@ const Employee = () => {
         </div>
       )}
 
+      {/* for new User  */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogTrigger asChild>
           <div className="absolute bottom-20 right-20 border-2 border-black p-3 rounded-full flex items-center justify-center">
@@ -144,8 +228,8 @@ const Employee = () => {
           <p className="font-bold text-2xl text-center">Add Employee</p>
           <CommonForm
             formControls={employeeRegisterFormControl}
-            formData={formData}
-            setFormData={setFormData}
+            formData={registerFormData}
+            setFormData={setRegisterFormData}
             onSubmit={handleRegister}
             buttonText={"Add"}
             isBtnDisabled={loading}

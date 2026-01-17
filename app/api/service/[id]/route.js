@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Service from "@/models/Service";
+import Service from "@/models/admin/Service";
 
 export async function GET(req, context) {
   try {

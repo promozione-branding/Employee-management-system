@@ -1,8 +1,8 @@
-import Proposal from "@/models/Proposal";
-import Customer from "@/models/Customer";
+import Proposal from "@/models/admin/Proposal";
+import Customer from "@/models/admin/Customer";
 import nodemailer from "nodemailer";
 import { renderToBuffer } from "@react-pdf/renderer";
-import Service from "@/models/Service";
+import Service from "@/models/admin/Service";
 import ProposalPdfTemplateServer from "@/components/pdf/ProposalPdfTemplateServer";
 
 export async function POST(req) {
@@ -77,7 +77,6 @@ export async function POST(req) {
     return Response.json({
       success: true,
       message: "Proposal has been send on email",
-     
     });
   } catch (error) {
     console.log("error while sending mail", error);

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
-import ProjectCycle from "@/models/ProjectCycle";
+import ProjectCycle from "@/models/admin/ProjectCycle";
 
 export async function PATCH(req) {
   try {
@@ -13,13 +13,18 @@ export async function PATCH(req) {
     // ---- validations ----
     if (!projectCycleId || !durationId) {
       return NextResponse.json(
-        { success: false, message: "projectCycleId and durationId are required" },
+        {
+          success: false,
+          message: "projectCycleId and durationId are required",
+        },
         { status: 400 }
       );
     }
 
-    if (!mongoose.Types.ObjectId.isValid(projectCycleId) ||
-        !mongoose.Types.ObjectId.isValid(durationId)) {
+    if (
+      !mongoose.Types.ObjectId.isValid(projectCycleId) ||
+      !mongoose.Types.ObjectId.isValid(durationId)
+    ) {
       return NextResponse.json(
         { success: false, message: "Invalid ObjectId" },
         { status: 400 }

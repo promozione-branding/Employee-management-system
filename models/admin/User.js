@@ -24,6 +24,10 @@ const UserSchema = new mongoose.Schema(
       enum: ["admin", "manager", "employee", "client"],
       default: "employee",
     },
+    employeeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee",
+    },
 
     // NEW OTP FIELDS
     loginOTP: String,

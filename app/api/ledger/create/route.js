@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/db";
-import Ledger from "@/models/Ledger";
-import Customer from "@/models/Customer";
+import Ledger from "@/models/admin/Ledger";
+import Customer from "@/models/admin/Customer";
 import { NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { createAuditLog } from "@/utils/createAuditLog";

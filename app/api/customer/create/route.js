@@ -1,12 +1,8 @@
-
-
 import { connectDB } from "@/lib/db";
-import Customer from "@/models/Customer";
+import Customer from "@/models/admin/Customer";
 import { NextResponse } from "next/server";
 import { createAuditLog } from "@/utils/createAuditLog";
 import { getAuthUser } from "@/lib/getAuthUser";
-
-
 
 export async function POST(req) {
   try {

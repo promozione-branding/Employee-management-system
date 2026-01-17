@@ -1,12 +1,12 @@
-import Meeting from "../../models/meeting/Meeting.js";
-import User from "../../models/User.js"; // 👈 Register User model
+import Meeting from "../../models/admin/meeting/Meeting.js";
+import User from "../../models/admin/User.js"; // 👈 Register User model
 import { connectDB } from "../../lib/db.js";
 import { sendReminderEmail } from "./mailer.js";
 import fs from "fs";
 import path from "path";
 import Handlebars from "handlebars";
 import dotenv from "dotenv";
-import Customer from "../../models/Customer.js";
+import Customer from "../../models/admin/Customer.js";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);

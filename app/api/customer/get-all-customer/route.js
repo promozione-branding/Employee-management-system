@@ -1,13 +1,13 @@
 import { connectDB } from "@/lib/db";
-import Customer from "@/models/Customer";
+import Customer from "@/models/admin/Customer";
 
 export async function GET(req) {
   try {
     await connectDB();
 
-    const allCustomer = await Customer.find().select(
-      "name company phone GSTIN Address"
-    ).sort({ createdAt: -1 });
+    const allCustomer = await Customer.find()
+      .select("name company phone GSTIN Address")
+      .sort({ createdAt: -1 });
     if (!allCustomer) {
       return Response.json({
         success: false,

@@ -1,13 +1,13 @@
 import { connectDB } from "@/lib/db";
 import Employee from "@/models/employee/Employee";
 import { NextResponse } from "next/server";
+import User from "@/models/admin/User";
 
 export async function POST(req) {
   try {
     await connectDB();
     const body = await req.json();
 
-    // 🛑 BASIC VALIDATION
     if (
       !body?.basicDetails?.name ||
       !body?.basicDetails?.designation ||
@@ -21,12 +21,16 @@ export async function POST(req) {
           success: false,
           message: "Required employee fields missing",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // 🆕 CREATE EMPLOYEE
     const employee = await Employee.create(body);
+
+    if (employee?.user) {
+      await User.findByIdAndUpdate(employee.user, { employeeId: employee._id });
+    }
 
     return NextResponse.json(
       {
@@ -34,7 +38,7 @@ export async function POST(req) {
         message: "Employee created successfully",
         data: employee,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("CREATE EMPLOYEE ERROR:", error);
@@ -46,7 +50,7 @@ export async function POST(req) {
           success: false,
           message: "Duplicate employee record",
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -56,7 +60,7 @@ export async function POST(req) {
         message: "Server error",
         error: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

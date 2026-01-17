@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Proposal from "@/models/Proposal";
+import Proposal from "@/models/admin/Proposal";
 import { NextResponse } from "next/server";
 
 export async function PUT(req, { params }) {

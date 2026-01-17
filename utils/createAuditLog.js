@@ -1,5 +1,5 @@
 import AuditHistory from "@/models/admin/AuditHistory";
-import Customer from "@/models/Customer";
+import Customer from "@/models/admin/Customer";
 
 const IGNORED_FIELDS = ["_id", "__v", "createdAt", "updatedAt"];
 
@@ -47,7 +47,7 @@ export async function createAuditLog({
   }
 
   // 🆕 CREATE → allow empty changes
- if (action === "CREATE") {
+  if (action === "CREATE") {
     changes.push({
       field: "ALL",
       oldValue: null,

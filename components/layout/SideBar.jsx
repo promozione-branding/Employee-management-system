@@ -41,16 +41,16 @@ const SideBar = ({ children }) => {
       label: "Customer",
       icon: <BookUser size={100} />,
     },
-    {
-      href: "/dashboard/proposal/all-proposal",
-      label: "Propsals",
-      icon: <BookText />,
-    },
-    {
-      href: "/dashboard/invoice",
-      label: "Invoice",
-      icon: <FileText size={100} />,
-    },
+    // {
+    //   href: "/dashboard/proposal/all-proposal",
+    //   label: "Propsals",
+    //   icon: <BookText />,
+    // },
+    // {
+    //   href: "/dashboard/invoice",
+    //   label: "Invoice",
+    //   icon: <FileText size={100} />,
+    // },
     {
       href: "/dashboard/employee",
       label: "Employee",
@@ -66,7 +66,7 @@ const SideBar = ({ children }) => {
         }`}
       >
         <div className="flex items-center justify-center mb-6">
-          {open && <h1 className="text-2xl font-bold grow">Promizone</h1>}
+          {open && <h1 className="text-2xl font-bold grow">Promozione</h1>}
           <Button
             // variant="ghost"
             onClick={() => setOpen(!open)}

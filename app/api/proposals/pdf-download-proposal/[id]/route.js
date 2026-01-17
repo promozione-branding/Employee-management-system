@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/db";
-import Proposal from "@/models/Proposal";
-import Service from "@/models/Service";
+import Proposal from "@/models/admin/Proposal";
+import Service from "@/models/admin/Service";
 
 export async function GET(req, context) {
   try {
@@ -10,7 +10,8 @@ export async function GET(req, context) {
     const proposal = await Proposal.findById(id).populate({
       path: "services",
       model: "Service",
-      select: "serviceTitle amount duration description discountAmount discountPercentage",
+      select:
+        "serviceTitle amount duration description discountAmount discountPercentage",
     });
 
     if (!proposal) {

@@ -7,6 +7,11 @@ const EmployeeSchema = new mongoose.Schema(
       unique: true,
       index: true,
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
     basicDetails: {
       profileImage: {
@@ -77,10 +82,7 @@ EmployeeSchema.pre("save", async function (next) {
   let nextId = 1;
 
   if (lastEmployee?.employeeId) {
-    const lastNumber = parseInt(
-      lastEmployee.employeeId.replace("EMP", ""),
-      10
-    );
+    const lastNumber = parseInt(lastEmployee.employeeId.replace("EMP", ""), 10);
     if (!isNaN(lastNumber)) {
       nextId = lastNumber + 1;
     }
