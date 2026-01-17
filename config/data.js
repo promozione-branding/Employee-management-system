@@ -459,10 +459,10 @@ export const employeeBasicDetailsFormControl = [
     name: "designation",
     componentType: "select",
     options: [
-      { id: "seo", label: "SEO" },
-      { id: "ads", label: "Ads Manager" },
-      { id: "web-dev", label: "Web Development" },
-      { id: "social-media", label: "Social Media" },
+      { id: "SEO", label: "SEO" },
+      { id: "ADS_MANAGER", label: "Ads Manager" },
+      { id: "WEB_DEVELOPER", label: "Web Development" },
+      { id: "SOCIAL_MEDIA", label: "Social Media" },
     ],
   },
   {
@@ -495,8 +495,8 @@ export const employeeBasicDetailsFormControl = [
     name: "gender",
     componentType: "select",
     options: [
-      { id: "male", label: "Male" },
-      { id: "female", label: "Female" },
+      { id: "MALE", label: "Male" },
+      { id: "FEMALE", label: "Female" },
     ],
   },
   {

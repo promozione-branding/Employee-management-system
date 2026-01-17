@@ -3,24 +3,65 @@
 import CommonForm from "@/components/layout/Form";
 import { employeeBasicDetailsFormControl } from "@/config/data";
 import { initialEmployeesBasicDetails } from "@/config/initialFormDate";
+import { createEmployeeProfile, updateEmployeeImage } from "@/service/employee-dashboard/employee";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const Profile = () => {
   const [formData, setFormData] = useState(initialEmployeesBasicDetails);
-  const [image, setImage] = useState(
-    "https://github.com/shadcn.png"
-  );
+  const [image, setImage] = useState("https://github.com/shadcn.png");
+  const router = useRouter();
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(URL.createObjectURL(file));
+  const handleImageUpload = async (e) => {
+    try {
+      const file = e.target.files[0];
+      if (file) {
+        setImage(URL.createObjectURL(file));
+        const imageForm = new FormData();
+        imageForm.append("file", file);
+
+        const { url } = await updateEmployeeImage(imageForm);
+        if (url) {
+          toast.success("Profile picture uploaded successfully");
+          setImage(url);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error.response.data.message || "Error while uploading profile picture"
+      );
     }
   };
 
   async function handleEmployeeBasicDetailSubmit(e) {
     e.preventDefault();
+
+    const profileData = {
+      basicDetails: {
+        ...formData,
+        profileImage: image,
+        email: Array.isArray(formData.email)
+          ? formData.email
+          : [formData.email],
+      },
+    };
+
+    try {
+      const res = await createEmployeeProfile(profileData);
+      console.log(res, "res");
+      if (res.success) {
+        setFormData(initialEmployeesBasicDetails);
+        router.push("/employee-dashboard");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message || "error while create employee profile"
+      );
+    }
   }
 
   return (
@@ -34,8 +75,8 @@ const Profile = () => {
             >
               <Image
                 src={image}
-                width={150}
-                height={150}
+                width={1000}
+                height={1000}
                 className="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow-sm transition-opacity group-hover:opacity-75"
                 alt="Profile Picture"
               />
