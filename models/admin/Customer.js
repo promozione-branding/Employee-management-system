@@ -68,8 +68,14 @@ const CustomerSchema = new mongoose.Schema(
         ref: "AuditHistory",
       },
     ],
+    workDetails: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "EmployeeWorkDetail",
+      },
+    ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.models.Customer ||

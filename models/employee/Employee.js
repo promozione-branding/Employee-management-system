@@ -12,6 +12,13 @@ const EmployeeSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    workDetails: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "EmployeeWorkDetail",
+      },
+    ],
+   
 
     basicDetails: {
       profileImage: {
@@ -66,7 +73,7 @@ const EmployeeSchema = new mongoose.Schema(
       },
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**

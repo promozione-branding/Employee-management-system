@@ -13,7 +13,7 @@ import {
   getAllCustomerServices,
   getCustomerServices,
 } from "@/service/customer";
-import { Eye, FilePlusCorner, SquarePen, Trash } from "lucide-react";
+import { Eye, FilePlusCorner, Network, SquarePen, Trash } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -116,7 +116,7 @@ const AllCustomer = () => {
         </div>
       ) : (
         <div className="mt-10">
-          <div className="grid grid-cols-6 gap-3 bg-zinc-200 py-3 px-3 rounded font-semibold">
+          <div className="grid grid-cols-6 gap-6 bg-zinc-200 py-3 px-3 rounded font-semibold">
             <div>Company</div>
             <div>Name</div>
             <div>Phone</div>
@@ -135,7 +135,10 @@ const AllCustomer = () => {
                 <div>{item?.phone}</div>
                 <div>{item?.GSTIN}</div>
                 <div>{item?.Address?.slice(0, 20)}...</div>
-                <div className="flex items-center gap-8">
+                <div className="flex items-center justify-left gap-5">
+                  <Link href={`/dashboard/customer/work/${item?._id}`}>
+                   <Network />
+                  </Link>
                   <Link href={`/dashboard/customer/${item?._id}`}>
                     <Eye />
                   </Link>

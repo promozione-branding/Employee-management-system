@@ -36,5 +36,4 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true, strictPopulate: false }
 );
 
-// FIX: prevents OverwriteModelError during hot reloads in Next.js
 export default mongoose.models.User || mongoose.model("User", UserSchema);

@@ -2,86 +2,47 @@
 
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
-// This is a mock service. In a real application, you would have a service
-// that fetches all customers from your API.
-const getAllCustomersService = async () => {
-  // Mock data representing what your API might return.
-  return Promise.resolve({
-    success: true,
-    data: [
-      {
-        _id: "1",
-        name: "John Doe",
-        company: "Doe Inc.",
-        website: "https://doe.com",
-        updatedAt: new Date().toISOString(),
-        process: 10,
-      },
-      {
-        _id: "2",
-        name: "Jane Smith",
-        company: "Smith & Co.",
-        website: "https://smith.co",
-        updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-        process: 10, // 2 days ago
-      },
-      {
-        _id: "3",
-        name: "Peter Jones",
-        company: "Jones LLC",
-        website: "https://jones.com",
-        updatedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-        process: 10, // 5 days ago
-      },
-    ],
-  });
-};
+import Loading from "@/components/layout/Loading";
+import { getEmployeeAssignedClientService } from "@/service/employee-dashboard/employee";
 
 const ClientsPage = () => {
   const [clients, setClients] = useState([]);
+  const [employeeDetails, setEmployeeDetails] = useState({});
   const [loading, setLoading] = useState(true);
 
+
   useEffect(() => {
-    const fetchClients = async () => {
-      setLoading(true);
+    async function getEmployeeClientList() {
       try {
-        // Replace this with your actual API call
-        const response = await getAllCustomersService();
-        if (response.success) {
-          setClients(response.data);
-        } else {
-          toast.error("Failed to fetch clients.");
+        if (employeeDetails?._id) {
+          const res = await getEmployeeAssignedClientService(
+            employeeDetails?._id,
+          );
+          if (res.success) {
+            setLoading(false);
+            setClients(res.data?.workDetails);
+          }
         }
       } catch (error) {
+        console.log(error);
         toast.error(
-          error.message || "An error occurred while fetching clients."
+          error?.response?.data?.message ||
+            "Error while getting the client list",
         );
-        console.error("Failed to fetch clients:", error);
-      } finally {
-        setLoading(false);
       }
-    };
+    }
+    getEmployeeClientList();
+  }, [employeeDetails]);
 
-    fetchClients();
+  useEffect(() => {
+    let user = sessionStorage.getItem("employeeData");
+    const data = JSON.parse(user);
+    setEmployeeDetails(data);
   }, []);
 
-  const handleView = (id) => {
-    // Placeholder for view logic, e.g., navigating to a client's detail page
-    toast.success(`Viewing client ${id}`);
-  };
-
-  const handleDelete = (id) => {
-    // Placeholder for delete logic
-    // You would typically call a delete service and then refresh the list
-    toast.success(`Deleting client ${id}`);
-    setClients(clients.filter((client) => client._id !== id));
-  };
-
   if (loading) {
-    return <div className="container mx-auto p-4">Loading clients...</div>;
+    return <Loading />;
   }
 
   return (
@@ -138,29 +99,31 @@ const ClientsPage = () => {
               clients.map((client) => (
                 <tr key={client._id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {client.name}
+                    {client?.clientId?.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {client.company}
+                    {client?.clientId?.company}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <a
-                      href={client.website}
+                      href={client?.clientId?.website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-indigo-600 hover:text-indigo-900"
                     >
-                      {client.website}
+                      {client?.clientId?.website}
                     </a>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(client.updatedAt).toLocaleDateString()}
                   </td>
                   <td className="px-10  py-4 whitespace-nowrap text-sm text-gray-500">
-                    {client?.process}%
+                    {client?.progressPercentage}%
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link href={`/employee-dashboard/clients/${client._id}`}>
+                    <Link
+                      href={`/employee-dashboard/clients/work/${client._id}`}
+                    >
                       Work Update
                     </Link>
                   </td>
