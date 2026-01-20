@@ -1,5 +1,5 @@
 "use client";
-import { UserRoundPlus } from "lucide-react";
+import { FileUser, IdCard, SmilePlus, UserRoundPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -19,7 +19,7 @@ import {
   initialEmployeesBasicDetails,
 } from "@/config/initialFormDate";
 import toast from "react-hot-toast";
-import { registerService } from "@/service/auth";
+import { createUserService, registerService } from "@/service/auth";
 import {
   createEmployeeProfile,
   getAllEmployeeForDashboard,
@@ -27,6 +27,7 @@ import {
 import Loading from "@/components/layout/Loading";
 import { useRouter } from "next/navigation";
 import GridForm from "@/components/layout/GridForm";
+import Link from "next/link";
 
 const Employee = () => {
   const [registerFormData, setRegisterFormData] = useState(
@@ -66,16 +67,19 @@ const Employee = () => {
     setLoading(true);
 
     try {
-      const { data } = await registerService(registerFormData);
+      const res = await createUserService(registerFormData);
 
-      if (data.success) {
-        toast.success(data.message || "Employee add successfully");
+      if (res.success) {
+        toast.success(res?.message || "Employee add successfully");
         setRegisterFormData(initialEmployeeRegisterFormData);
         setOpenDialog(false);
+        fetchEmployees();
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message || "Error while creating the Employee");
+      toast.error(
+        error?.response?.data?.message || "Error while creating the Employee",
+      );
       setLoading(false);
     }
   }
@@ -110,7 +114,6 @@ const Employee = () => {
 
     try {
       const res = await createEmployeeProfile(profileData);
-      console.log(res, "res");
       if (res.success) {
         setFormData(initialEmployeesBasicDetails);
         router.push("/employee-dashboard");
@@ -123,7 +126,7 @@ const Employee = () => {
     }
   }
 
-  console.log(employeeId,"employeeId");
+  console.log(employeeId, "employeeId");
 
   useEffect(() => {
     fetchEmployees();
@@ -159,14 +162,14 @@ const Employee = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {employee.email}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm ">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
                       <Dialog>
                         <DialogTrigger asChild>
                           <button
                             onClick={() => setEmployeeId(employee._id)}
-                            className="bg-blue-400 px-5 py-1 rounded-xl"
+                            className="px-5 py-1 rounded-xl"
                           >
-                            Add Details
+                            <SmilePlus />
                           </button>
                         </DialogTrigger>
                         <DialogContent>
@@ -192,6 +195,10 @@ const Employee = () => {
                           </div>
                         </DialogContent>
                       </Dialog>
+
+                      <Link href={`/dashboard/employee/employee-details/${employee._id}`}>
+                        <IdCard />
+                      </Link>
                     </td>
                   </tr>
                 ))

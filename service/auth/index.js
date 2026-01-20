@@ -19,3 +19,8 @@ export async function verifyOTP(formData) {
   const { data } = await axiosInstance.post("/api/user/verify-otp", formData);
   return data;
 }
+
+export async function createUserService(formData) {
+  const { data } = await axiosInstance.post("/api/user/create-user", formData);
+  return data;
+}
