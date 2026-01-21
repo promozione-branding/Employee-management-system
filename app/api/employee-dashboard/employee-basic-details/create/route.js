@@ -14,7 +14,7 @@ export async function POST(req) {
       !body?.basicDetails?.phone ||
       !body?.basicDetails?.address ||
       !body?.basicDetails?.gender ||
-      !body?.basicDetails?.email?.length
+      !body?.basicDetails?.email
     ) {
       return NextResponse.json(
         {

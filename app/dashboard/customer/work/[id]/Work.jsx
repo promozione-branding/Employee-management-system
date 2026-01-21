@@ -20,7 +20,6 @@ const ClientWork = ({ customerId }) => {
       try {
         if (selectedDomain !== "") {
           const res = await getEmployeesByDomain(selectedDomain);
-          console.log(res, "res");
           if (res?.success) {
             setLoadingEmployeeList(false);
             toast.success("Employee Details fetched" || "");
@@ -61,7 +60,7 @@ const ClientWork = ({ customerId }) => {
               <p className=" text-gray-400">Select one Domain</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 ">
+            <div className="flex flex-col gap-3">
               {employeeList.length > 0 ? (
                 employeeList.map((employee) => (
                   <div

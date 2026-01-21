@@ -21,13 +21,17 @@ import {
 import toast from "react-hot-toast";
 import { createUserService, registerService } from "@/service/auth";
 import {
+  checkEmployeeExists,
   createEmployeeProfile,
+  getAllEmployee,
   getAllEmployeeForDashboard,
 } from "@/service/employee-dashboard/employee";
 import Loading from "@/components/layout/Loading";
 import { useRouter } from "next/navigation";
 import GridForm from "@/components/layout/GridForm";
 import Link from "next/link";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NewEmployee from "./NewEmployee";
 
 const Employee = () => {
   const [registerFormData, setRegisterFormData] = useState(
@@ -86,7 +90,7 @@ const Employee = () => {
 
   async function fetchEmployees() {
     try {
-      const res = await getAllEmployeeForDashboard();
+      const res = await getAllEmployee();
       console.log(res);
       if (res.success) {
         setEmployeeList(res.data);
@@ -104,15 +108,22 @@ const Employee = () => {
 
     const profileData = {
       user: employeeId,
+      employeeId: formData?.employeeId,
       basicDetails: {
         ...formData,
-        email: Array.isArray(formData.email)
-          ? formData.email
-          : [formData.email],
       },
     };
 
     try {
+      if (employeeId) {
+        const isEmployeeExists = await checkEmployeeExists(employeeId);
+        if (isEmployeeExists.employeeExist) {
+          toast.error("You already added employee details ");
+          router.push("/dashboard");
+          return;
+        }
+      }
+
       const res = await createEmployeeProfile(profileData);
       if (res.success) {
         setFormData(initialEmployeesBasicDetails);
@@ -126,8 +137,6 @@ const Employee = () => {
     }
   }
 
-  console.log(employeeId, "employeeId");
-
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -137,84 +146,112 @@ const Employee = () => {
       {employeeLoading ? (
         <Loading />
       ) : (
-        <div className="mt-6 bg-white shadow-sm rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Username
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {employeeList && employeeList.length > 0 ? (
-                employeeList.map((employee) => (
-                  <tr key={employee._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {employee.username}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <button
-                            onClick={() => setEmployeeId(employee._id)}
-                            className="px-5 py-1 rounded-xl"
-                          >
-                            <SmilePlus />
-                          </button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader className={"hidden"}>
-                            <DialogTitle>Are you absolutely sure?</DialogTitle>
-                            <DialogDescription>
-                              This action cannot be undone. This will
-                              permanently delete your account and remove your
-                              data from our servers.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div>
-                            <p className="text-center mb-4 text-xl">
-                              Add Employee Details
-                            </p>
-                            <GridForm
-                              formControls={employeeBasicDetailsFormControl}
-                              formData={formData}
-                              setFormData={setFormData}
-                              onSubmit={handleEmployeeBasicDetailSubmit}
-                              buttonText="Create Profile"
-                            />
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+        <>
+          <Tabs defaultValue="employee" className="">
+            <TabsList>
+              <TabsTrigger value="employee">Employee</TabsTrigger>
+              <TabsTrigger value="user">New Employee</TabsTrigger>
+            </TabsList>
+            <TabsContent value="employee">
+              <div className="mt-6 bg-white shadow-sm rounded-lg overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        EmployeeId
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Designation
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Email
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {employeeList && employeeList.length > 0 ? (
+                      employeeList.map((employee) => (
+                        <tr key={employee._id}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {employee.employeeId}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {employee?.basicDetails?.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {employee?.basicDetails?.designation}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {employee?.basicDetails?.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
+                            {/* <Dialog>
+                              <DialogTrigger asChild>
+                                <button
+                                  onClick={() => setEmployeeId(employee._id)}
+                                  className="px-5 py-1 rounded-xl"
+                                >
+                                  <SmilePlus />
+                                </button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader className={"hidden"}>
+                                  <DialogTitle>
+                                    Are you absolutely sure?
+                                  </DialogTitle>
+                                  <DialogDescription>
+                                    This action cannot be undone. This will
+                                    permanently delete your account and remove
+                                    your data from our servers.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div>
+                                  <p className="text-center mb-4 text-xl">
+                                    Add Employee Details
+                                  </p>
+                                  <GridForm
+                                    formControls={
+                                      employeeBasicDetailsFormControl
+                                    }
+                                    formData={formData}
+                                    setFormData={setFormData}
+                                    onSubmit={handleEmployeeBasicDetailSubmit}
+                                    buttonText="Create Profile"
+                                  />
+                                </div>
+                              </DialogContent>
+                            </Dialog> */}
 
-                      <Link href={`/dashboard/employee/employee-details/${employee._id}`}>
-                        <IdCard />
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="2"
-                    className="px-6 py-4 text-center text-sm text-gray-500"
-                  >
-                    No employees found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                            <Link
+                              href={`/dashboard/employee/employee-details/${employee._id}`}
+                            >
+                              <IdCard />
+                            </Link>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan="2"
+                          className="px-6 py-4 text-center text-sm text-gray-500"
+                        >
+                          No employees found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </TabsContent>
+            <TabsContent value="user">
+              <NewEmployee />
+            </TabsContent>
+          </Tabs>
+        </>
       )}
 
       {/* for new User  */}

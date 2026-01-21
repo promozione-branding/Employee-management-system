@@ -89,6 +89,7 @@ export const initialEmployeeRegisterFormData = {
 };
 
 export const initialEmployeesBasicDetails = {
+  employeeId:"",
   name: "",
   designation: "",
   phone: "",

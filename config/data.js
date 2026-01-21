@@ -448,6 +448,13 @@ export const employeeRegisterFormControl = [
 
 export const employeeBasicDetailsFormControl = [
   {
+    label: "EmployeeId",
+    name: "employeeId",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter Your employeeId",
+  },
+  {
     label: "Name",
     name: "name",
     componentType: "input",

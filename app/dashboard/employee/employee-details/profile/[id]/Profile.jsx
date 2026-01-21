@@ -1,50 +1,29 @@
 "use client";
-
 import Loading from "@/components/layout/Loading";
-import { useEffect, useState } from "react";
-import {
-  Briefcase,
-  Calendar,
-  Mail,
-  MapPin,
-  Phone,
-  User,
-  UserRoundPen,
-} from "lucide-react";
-import toast from "react-hot-toast";
+import { Briefcase, Calendar, Mail, MapPin, Phone, User } from "lucide-react";
 import { getEmployeeProfileService } from "@/service/employee-dashboard/employee";
-import Image from "next/image";
-import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
-const Profile = () => {
+const Profile = ({ employeeId }) => {
   const [loading, setLoading] = useState(true);
-  const [employeeId, setEmployeeId] = useState(null);
   const [profileData, setProfileData] = useState({});
 
   useEffect(() => {
-    async function fetchProfileDetails() {
+    async function fetchEmployeeDetailsProfile() {
       try {
-        if (employeeId) {
-          const res = await getEmployeeProfileService(employeeId);
-          if (res.success) {
-            setLoading(false);
-            setProfileData(res.data);
-          }
+        const res = await getEmployeeProfileService(employeeId);
+        if (res.success) {
+          setLoading(false);
+          setProfileData(res.data);
         }
       } catch (error) {
         console.log(error);
-        toast.error("Error while fetching employee details");
+        toast.error("Error while fetching the employee profile");
       }
     }
-    fetchProfileDetails();
+    fetchEmployeeDetailsProfile();
   }, [employeeId]);
-
-  useEffect(() => {
-    const employeeData = JSON.parse(sessionStorage.getItem("employeeData"));
-    if (employeeData?.basicDetails) {
-      setEmployeeId(employeeData?._id);
-    }
-  }, []);
 
   if (loading) {
     return <Loading />;
@@ -56,11 +35,9 @@ const Profile = () => {
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Header Section */}
-        <div className="bg-gray-50 p-8 border-b border-gray-100 flex flex-col md:flex-row items-center gap-6 relative">
+        <div className="bg-gray-50 p-8 border-b border-gray-100 flex flex-col md:flex-row items-center gap-6">
           <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md shrink-0">
-            <Image
-              width={1000}
-              height={1000}
+            <img
               src={
                 basicDetails?.profileImage || "https://via.placeholder.com/150"
               }
@@ -79,10 +56,6 @@ const Profile = () => {
               ID: {empId}
             </span>
           </div>
-
-          <Link href={`/employee-dashboard/profile/edit/${employeeId}`} className="absolute right-10 top-5 h-10 w-10 flex items-center justify-center rounded-2xl border">
-            <UserRoundPen />
-          </Link>
         </div>
 
         {/* Details Grid */}

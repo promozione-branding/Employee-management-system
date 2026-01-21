@@ -18,7 +18,6 @@ const EmployeeSchema = new mongoose.Schema(
         ref: "EmployeeWorkDetail",
       },
     ],
-   
 
     basicDetails: {
       profileImage: {
@@ -47,15 +46,13 @@ const EmployeeSchema = new mongoose.Schema(
         required: true,
       },
 
-      email: [
-        {
-          type: String,
-          required: true,
-          lowercase: true,
-          trim: true,
-          match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
-        },
-      ],
+      email: {
+        type: String,
+        required: true,
+        lowercase: true,
+        trim: true,
+        match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
+      },
 
       dob: {
         type: Date,
@@ -75,29 +72,6 @@ const EmployeeSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-
-/**
- * 🔢 Auto-generate Employee ID (EMP0001)
- */
-EmployeeSchema.pre("save", async function (next) {
-  if (!this.isNew) return next();
-
-  const lastEmployee = await this.constructor
-    .findOne({}, { employeeId: 1 })
-    .sort({ createdAt: -1 });
-
-  let nextId = 1;
-
-  if (lastEmployee?.employeeId) {
-    const lastNumber = parseInt(lastEmployee.employeeId.replace("EMP", ""), 10);
-    if (!isNaN(lastNumber)) {
-      nextId = lastNumber + 1;
-    }
-  }
-
-  this.employeeId = `EMP${String(nextId).padStart(4, "0")}`;
-  next();
-});
 
 export default mongoose.models.Employee ||
   mongoose.model("Employee", EmployeeSchema);

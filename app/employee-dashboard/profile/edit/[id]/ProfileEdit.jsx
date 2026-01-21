@@ -1,10 +1,12 @@
 "use client";
 
 import CommonForm from "@/components/layout/Form";
-import { employeeBasicDetailsFormControl } from "@/config/data";
+import { profileFormControl } from "@/config/employee";
+import { initialProfileData } from "@/config/employee/initialData";
 import { initialEmployeesBasicDetails } from "@/config/initialFormDate";
 import {
   createEmployeeProfile,
+  editEmployeeBasicDetails,
   updateEmployeeImage,
 } from "@/service/employee-dashboard/employee";
 import Image from "next/image";
@@ -12,12 +14,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const Profile = () => {
-  const [formData, setFormData] = useState(initialEmployeesBasicDetails);
+const Profile = ({ employeeId }) => {
+  const [formData, setFormData] = useState(initialProfileData);
   const [image, setImage] = useState("https://github.com/shadcn.png");
   const router = useRouter();
-
- 
 
   const handleImageUpload = async (e) => {
     try {
@@ -44,22 +44,22 @@ const Profile = () => {
   async function handleEmployeeBasicDetailSubmit(e) {
     e.preventDefault();
 
-    const profileData = {
-      basicDetails: {
+    try {
+      const formDataValue = {
         ...formData,
         profileImage: image,
-        email: Array.isArray(formData.email)
-          ? formData.email
-          : [formData.email],
-      },
-    };
+      };
+      const filteredData = Object.fromEntries(
+        Object.entries(formDataValue).filter(
+          ([_, value]) => value !== "" && value !== null,
+        ),
+      );
 
-    try {
-      const res = await createEmployeeProfile(profileData);
-      console.log(res, "res");
+      const res = await editEmployeeBasicDetails(employeeId, filteredData);
       if (res.success) {
-        setFormData(initialEmployeesBasicDetails);
-        router.push("/employee-dashboard");
+        toast.success("successfully details updated");
+        setFormData(initialProfileData);
+        router.push("/employee-dashboard/profile");
       }
     } catch (error) {
       console.log(error);
@@ -69,24 +69,16 @@ const Profile = () => {
     }
   }
 
-  async function handleUpdateEmployeeBasicDetails(e) {
-    try {
-    } catch (error) {
-      console.log(error);
-      toast.error("error while update employee details")
-    }
-  }
-
-  useEffect(() => {
-    const employeeData = JSON.parse(sessionStorage.getItem("employeeData"));
-    console.log(employeeData, "employeeData");
-    if (employeeData?.basicDetails) {
-      setFormData(employeeData.basicDetails);
-      if (employeeData.basicDetails.profileImage) {
-        setImage(employeeData.basicDetails.profileImage);
-      }
-    }
-  }, []);
+  // useEffect(() => {
+  //   const employeeData = JSON.parse(sessionStorage.getItem("employeeData"));
+  //   console.log(employeeData, "employeeData");
+  //   if (employeeData?.basicDetails) {
+  //     setFormData(employeeData.basicDetails);
+  //     if (employeeData.basicDetails.profileImage) {
+  //       setImage(employeeData.basicDetails.profileImage);
+  //     }
+  //   }
+  // }, []);
   return (
     <div className="container mx-auto p-6 max-w-3xl">
       <div className="bg-white shadow-lg rounded-2xl p-8">
@@ -125,12 +117,10 @@ const Profile = () => {
 
         <div className="mt-6">
           <CommonForm
-            formControls={employeeBasicDetailsFormControl}
+            formControls={profileFormControl}
             formData={formData}
             setFormData={setFormData}
-            onSubmit={
-              formData.name === "" ? "" : handleEmployeeBasicDetailSubmit
-            }
+            onSubmit={handleEmployeeBasicDetailSubmit}
             buttonText="Update Profile"
           />
         </div>

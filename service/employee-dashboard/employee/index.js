@@ -42,3 +42,40 @@ export async function getWorkDetailByIdService(id) {
 
   return data;
 }
+
+export async function checkEmployeeExists(id) {
+  const { data } = await axiosInstance.get(
+    `/api/employee-dashboard/employee-basic-details/check-employee-exists/${id}`,
+  );
+
+  return data;
+}
+
+export async function getAllEmployee() {
+  const { data } = await axiosInstance.get(
+    "/api/employee-dashboard/employee-basic-details/all-employee",
+  );
+  return data;
+}
+
+export async function getEmployeeProfileService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/employee-dashboard/employee-basic-details/${id}`,
+  );
+
+  return data;
+}
+
+export async function editEmployeeBasicDetails(id, formData) {
+  const { data } = await axiosInstance.patch(
+    `/api/employee-dashboard/employee-basic-details/${id}`,
+    formData,
+  );
+
+  return data;
+}
+
+export async function newEmployeeListService() {
+  const { data } = await axiosInstance.get("/api/employee/new-employee");
+  return data;
+}

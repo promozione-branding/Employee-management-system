@@ -7,7 +7,7 @@ export async function GET(req) {
     await connectDB();
 
     const allEmployee = await Employee.find().select(
-      "-basicDetails.address -basicDetails.dob -basicDetails.gender -basicDetails.joiningDate"
+      "-basicDetails.address -basicDetails.dob -basicDetails.gender -basicDetails.joiningDate -basicDetails.profileImage -user -workDetails -createdAt -updatedAt -__v -basicDetails.phone"
     );
     return NextResponse.json({
       success: true,

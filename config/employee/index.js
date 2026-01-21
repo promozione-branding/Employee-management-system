@@ -497,3 +497,49 @@ export const webDevelopmentChecklistTemplate = [
     proofUrl: "",
   },
 ];
+
+
+export const profileFormControl = [
+ 
+  {
+    label: "Name",
+    name: "name",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter Your Name",
+  },
+  {
+    label: "Phone",
+    name: "phone",
+    componentType: "input",
+    type: "tel",
+    placeholder: "Enter Your Phone",
+  },
+  {
+    label: "Address",
+    name: "address",
+    componentType: "textarea",
+    type: "text",
+  },
+  {
+    label: "Email",
+    name: "email",
+    componentType: "input",
+    type: "email",
+  },
+  {
+    label: "Date of Birth",
+    name: "dob",
+    componentType: "input",
+    type: "date",
+  },
+  {
+    label: "Gender",
+    name: "gender",
+    componentType: "select",
+    options: [
+      { id: "MALE", label: "Male" },
+      { id: "FEMALE", label: "Female" },
+    ],
+  },
+];

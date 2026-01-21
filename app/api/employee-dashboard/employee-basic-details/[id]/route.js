@@ -8,7 +8,7 @@ export async function GET(req, { params }) {
     await connectDB();
     const { id } = await params;
 
-    const employeeId = await Employee.findById(id);
+    const employeeId = await Employee.findById(id).select("basicDetails employeeId");
 
     if (!employeeId) {
       return NextResponse.json(
@@ -22,8 +22,8 @@ export async function GET(req, { params }) {
 
     return NextResponse.json(
       {
-        success: false,
-        message: "get employee by id",
+        success: true,
+        message: "Employee detail fetched",
         data: employeeId,
       },
       {
@@ -42,36 +42,50 @@ export async function GET(req, { params }) {
   }
 }
 
-export async function PUT(req, { params }) {
+export async function PATCH(req, { params }) {
   try {
     await connectDB();
-    const { id } = await params;
 
-    // 🛑 VALID OBJECT ID CHECK
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    const { id } = await params;
+    const body = await req.json();
+
+    // only allow basic details
+
+    const allowedFields = [
+      "profileImage",
+      "name",
+      "designation",
+      "phone",
+      "address",
+      "email",
+      "dob",
+      "gender",
+      "joiningDate",
+    ];
+
+    const updateData = {};
+
+    for (const key of allowedFields) {
+      if (body[key] !== undefined) {
+        updateData[`basicDetails.${key}`] = body[key];
+      }
+    }
+
+    if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
-        { success: false, message: "Invalid employee id" },
-        { status: 400 }
+        {
+          success: false,
+          message: "No valid fields provided for update",
+        },
+        { status: 400 },
       );
     }
 
-    const body = await req.json();
-
-    // 🚫 NEVER allow these to be edited
-    delete body.employeeId;
-    delete body.user;
-    delete body.createdAt;
-    delete body.updatedAt;
-
-    // 🔄 UPDATE EMPLOYEE
     const updatedEmployee = await Employee.findByIdAndUpdate(
       id,
-      { $set: body },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+      { $set: updateData },
+      { new: true, runValidators: true },
+    ).select("basicDetails");
 
     if (!updatedEmployee) {
       return NextResponse.json(
@@ -79,28 +93,26 @@ export async function PUT(req, { params }) {
           success: false,
           message: "Employee not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     return NextResponse.json(
       {
         success: true,
-        message: "Employee updated successfully",
+        message: "Basic details updated successfully",
         data: updatedEmployee,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
-    console.error("EDIT EMPLOYEE ERROR:", error);
+    console.log(error);
     return NextResponse.json(
       {
         success: false,
-        message: "Server error",
-        error: error.message,
+        message: "server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

@@ -59,7 +59,7 @@ const EmployeeWorkDetailSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["PENDING", "IN_PROGRESS", "COMPLETED", "REVIEW", "ON_HOLD"],
-      default: "PENDING",
+      default: "IN_PROGRESS",
     },
 
     progressPercentage: {

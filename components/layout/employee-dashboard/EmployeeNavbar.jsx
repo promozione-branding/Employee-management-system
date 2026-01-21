@@ -75,6 +75,7 @@ const EmployeeNavbar = () => {
             <Image
               width="1000"
               height="1000"
+              alt="employeeImage"
               className=" rounded-full"
               src={
                 basicEmployeeData?.basicDetails?.profileImage ||

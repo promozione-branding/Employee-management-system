@@ -14,7 +14,7 @@ export async function POST(req) {
       clientId,
       department,
       checklist = [],
-      status = "PENDING",
+      status = "IN_PROGRESS",
       progressPercentage = 0,
       startedAt,
     } = body;
@@ -37,10 +37,10 @@ export async function POST(req) {
       startedAt,
     });
 
-    const employee = await Employee.findOne({ _id: employeeId });
-
-    await employee.workDetails.push(workDetail?._id);
-    await employee.save()
+    await Employee.updateMany(
+      { _id: { $in: Array.isArray(employeeId) ? employeeId : [employeeId] } },
+      { $push: { workDetails: workDetail?._id } },
+    );
 
     return NextResponse.json(
       {
