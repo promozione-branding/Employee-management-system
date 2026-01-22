@@ -37,7 +37,7 @@ export async function getEmployeeAssignedClientService(id) {
 
 export async function getWorkDetailByIdService(id) {
   const { data } = await axiosInstance.get(
-    `http://localhost:3000/api/customer/work/get-work-details/${id}`,
+    `/api/customer/work/get-work-details/${id}`,
   );
 
   return data;
