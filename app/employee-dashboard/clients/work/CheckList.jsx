@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-
-
 export default function SEOChecklistForm({ onSubmit, template }) {
   const [checklist, setChecklist] = useState(template);
 
@@ -31,10 +29,13 @@ export default function SEOChecklistForm({ onSubmit, template }) {
     (checklist.filter((c) => c.completed).length / checklist.length) * 100,
   );
 
-  return (
-    <form onSubmit={onSubmit} className="">
-      <h2 className="text-xl font-semibold">SEO Checklist</h2>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(checklist);
+  };
 
+  return (
+    <form onSubmit={handleSubmit} className="">
       <div className="text-sm text-gray-600">Progress: {progress}%</div>
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div

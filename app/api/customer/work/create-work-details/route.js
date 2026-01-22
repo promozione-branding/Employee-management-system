@@ -1,7 +1,8 @@
 import { connectDB } from "@/lib/db";
-import Employee from "@/models/employee/Employee";
 import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
+import Employee from "@/models/employee/Employee";
 import { NextResponse } from "next/server";
+import Customer from "@/models/admin/Customer";
 
 export async function POST(req) {
   try {
@@ -19,16 +20,38 @@ export async function POST(req) {
       startedAt,
     } = body;
 
-    // Basic validation
     if (!employeeId || !clientId || !department) {
       return NextResponse.json(
-        { message: "employeeId, clientId and department are required" },
+        {
+          success: false,
+          message: "employeeId, clientId and department are required",
+        },
         { status: 400 },
       );
     }
 
+    const employeeIds = Array.isArray(employeeId) ? employeeId : [employeeId];
+
+    // 🔒 DUPLICATE CHECK
+    const alreadyAssigned = await EmployeeWorkDetail.findOne({
+      clientId,
+      employeeId: { $in: employeeIds },
+    }).select("_id employeeId clientId");
+
+    if (alreadyAssigned) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "This client is already assigned to one of the selected employees",
+        },
+        { status: 409 }, // Conflict
+      );
+    }
+
+    // ✅ Create work detail
     const workDetail = await EmployeeWorkDetail.create({
-      employeeId,
+      employeeId: employeeIds,
       clientId,
       department,
       checklist,
@@ -37,13 +60,19 @@ export async function POST(req) {
       startedAt,
     });
 
+    // ✅ Sync to Employee
     await Employee.updateMany(
-      { _id: { $in: Array.isArray(employeeId) ? employeeId : [employeeId] } },
-      { $push: { workDetails: workDetail?._id } },
+      { _id: { $in: employeeIds } },
+      { $addToSet: { workDetails: workDetail._id } }, // safer than $push
     );
+
+    await Customer.findByIdAndUpdate(clientId, {
+      $addToSet: { workDetails: workDetail._id },
+    });
 
     return NextResponse.json(
       {
+        success: true,
         message: "Employee work detail created successfully",
         data: workDetail,
       },
@@ -53,7 +82,10 @@ export async function POST(req) {
     console.error("Create EmployeeWorkDetail Error:", error);
 
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      {
+        success: false,
+        message: "Internal Server Error",
+      },
       { status: 500 },
     );
   }
