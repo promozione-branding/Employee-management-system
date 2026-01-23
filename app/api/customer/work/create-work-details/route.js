@@ -16,7 +16,7 @@ export async function POST(req) {
       department,
       checklist = [],
       status = "IN_PROGRESS",
-      progressPercentage = 0,
+      progressPercentage,
       startedAt,
     } = body;
 

@@ -63,10 +63,18 @@ const EmployeeWorkDetailSchema = new mongoose.Schema(
     },
 
     progressPercentage: {
-      type: Number,
-      min: 0,
-      max: 100,
-      default: 0,
+      departmentType: {
+        type: String,
+        enum: ["SEO", "WEB_DEVELOPER", "SOCIAL_MEDIA", "ADS_MANAGER"],
+      },
+      completeField: {
+        type: Number,
+        default: 0,
+      },
+      totalField: {
+        type: Number,
+        default: 0,
+      },
     },
 
     startedAt: {
@@ -79,7 +87,7 @@ const EmployeeWorkDetailSchema = new mongoose.Schema(
 
     reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // admin / manager
+      ref: "User",
     },
 
     reviewNotes: {

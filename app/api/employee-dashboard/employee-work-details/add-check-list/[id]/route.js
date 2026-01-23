@@ -9,8 +9,10 @@ export async function PATCH(req, { params }) {
     const { id } = await params;
     const body = await req.json();
 
+    const { checkList, totalField } = body;
+
     // 🔁 Normalize to array
-    const checklistItems = Array.isArray(body) ? body : [body];
+    const checklistItems = Array.isArray(checkList) ? checkList : [checkList];
 
     if (!checklistItems.length) {
       return NextResponse.json(
@@ -58,6 +60,15 @@ export async function PATCH(req, { params }) {
     }
 
     workDetail.checklist.push(...newItems);
+
+    // Update progress
+    workDetail.progressPercentage = {
+      departmentType: workDetail.department,
+      totalField: totalField,
+      completeField: workDetail.checklist.filter((item) => item.completed)
+        .length,
+    };
+
     await workDetail.save();
 
     return NextResponse.json(

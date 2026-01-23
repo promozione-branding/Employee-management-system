@@ -12,6 +12,8 @@ const ClientsPage = () => {
   const [loading, setLoading] = useState(true);
 
 
+
+
   useEffect(() => {
     async function getEmployeeClientList() {
       try {
@@ -80,12 +82,12 @@ const ClientsPage = () => {
               >
                 Last Active
               </th>
-              <th
+              {/* <th
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
                 Progress
-              </th>
+              </th> */}
               <th
                 scope="col"
                 className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -117,9 +119,9 @@ const ClientsPage = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(client.updatedAt).toLocaleDateString()}
                   </td>
-                  <td className="px-10  py-4 whitespace-nowrap text-sm text-gray-500">
-                    {client?.progressPercentage}%
-                  </td>
+                  {/* <td className="px-10  py-4 whitespace-nowrap text-sm text-gray-500">
+                    10 % hard code
+                  </td> */}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Link
                       href={`/employee-dashboard/clients/work/${client._id}`}

@@ -121,7 +121,6 @@ export const seoChecklistTemplate = [
   },
 ];
 
-
 export const paidAdsChecklistTemplate = [
   {
     key: "ad_account_access",
@@ -245,7 +244,6 @@ export const paidAdsChecklistTemplate = [
   },
 ];
 
-
 export const socialMediaChecklistTemplate = [
   {
     key: "profile_bio_optimization",
@@ -368,7 +366,6 @@ export const socialMediaChecklistTemplate = [
     proofUrl: "",
   },
 ];
-
 
 export const webDevelopmentChecklistTemplate = [
   // 🔹 Planning & Architecture
@@ -498,9 +495,7 @@ export const webDevelopmentChecklistTemplate = [
   },
 ];
 
-
 export const profileFormControl = [
- 
   {
     label: "Name",
     name: "name",
@@ -541,5 +536,36 @@ export const profileFormControl = [
       { id: "MALE", label: "Male" },
       { id: "FEMALE", label: "Female" },
     ],
+  },
+];
+
+export const checkFormControl = [
+  {
+    label: "Key",
+    name: "key",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter Your Key",
+  },
+  {
+    label: "Label",
+    name: "label",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter Your Label",
+  },
+  {
+    label: "Remarks",
+    name: "remarks",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter Your remarks",
+  },
+  {
+    label: "Proof Url",
+    name: "proofUrl",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter Your proofUrl",
   },
 ];

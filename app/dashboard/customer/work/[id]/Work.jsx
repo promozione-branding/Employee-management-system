@@ -1,4 +1,5 @@
 "use client";
+
 import Loading from "@/components/layout/Loading";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,9 +55,13 @@ const ClientWork = ({ customerId }) => {
         clientId: customerId,
         department: selectedDomain,
         startedAt: new Date().toISOString(),
+        progressPercentage: {
+          departmentType: selectedDomain,
+          completeField: 0,
+          totalField: 0,
+        },
       };
       const res = await createWorkDetailsService(formData);
-      console.log(res);
       if (res.success) {
         toast.success("Client assigned successfully");
         setSelectedEmployee([]);
@@ -180,22 +185,8 @@ const ClientWork = ({ customerId }) => {
         {workDetailLoading ? (
           <Loading />
         ) : (
-          <div className="flex flex-col gap-5">
-            <div className="w-[25vw] bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-              <h2 className="text-lg font-semibold mb-3">Client Details</h2>
-              <div className="flex flex-col gap-2">
-                <div>
-                  <p className="text-sm text-gray-500">Company Name</p>
-                  <p className="font-medium">{workDetailData?.company}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Client ID</p>
-                  <p className="text-xs text-gray-400">{workDetailData?._id}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="w-[25vw]">
+          <div className="">
+            <div className="w-[50vw]">
               <h3 className="text-lg font-semibold mb-3">Work History</h3>
               <div className="flex flex-col gap-3">
                 {workDetailData?.workDetails?.map((work, index) => {
@@ -240,9 +231,9 @@ const ClientWork = ({ customerId }) => {
                             <span className="text-xs font-medium text-gray-600">
                               Progress
                             </span>
-                            <span className="text-xs font-medium text-gray-900">
+                            {/* <span className="text-xs font-medium text-gray-900">
                               {work.progressPercentage}%
-                            </span>
+                            </span> */}
                           </div>
                           <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
                             <div
@@ -259,13 +250,14 @@ const ClientWork = ({ customerId }) => {
                               Recent Activity
                             </span>
                             <span className="text-xs text-gray-400">
-                              {completedTasks}/{totalTasks} Tasks
+                              {work?.progressPercentage?.completeField}/
+                              {work?.progressPercentage?.totalField} Tasks
                             </span>
                           </div>
-                          <div className="space-y-2">
+                          <div className="grid grid-cols-6 gap-2">
                             {work.checklist
                               ?.filter((t) => t.completed)
-                              .slice(0, 2)
+                              // .slice(0, 2)
                               .map((item, i) => (
                                 <div key={i} className="flex items-start gap-2">
                                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />

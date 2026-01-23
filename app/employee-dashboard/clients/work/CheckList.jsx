@@ -1,9 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function SEOChecklistForm({ onSubmit, template }) {
+export default function SEOChecklistForm({ onSubmit, template, completed }) {
   const [checklist, setChecklist] = useState(template);
+
+  useEffect(() => {
+    if (completed?.length) {
+      setChecklist((prev) =>
+        prev.map((item) => {
+          const isCompleted = completed.find((c) => c.key === item.key);
+          return isCompleted ? { ...item, ...isCompleted } : item;
+        }),
+      );
+    }
+  }, [completed]);
 
   const toggleCompleted = (index) => {
     setChecklist((prev) =>
@@ -44,43 +55,60 @@ export default function SEOChecklistForm({ onSubmit, template }) {
         />
       </div>
       <div className="grid grid-cols-4 gap-5 mt-5">
-        {checklist.map((item, index) => (
-          <div
-            key={item.key}
-            className="border rounded-2xl p-4 space-y-3 shadow-sm"
-          >
-            <div className="flex items-center gap-3">
+        {checklist.map((item, index) => {
+          const isSaved = completed?.some(
+            (c) => c.key === item.key && c.completed,
+          );
+
+          return (
+            <div
+              key={item.key}
+              className={`border rounded-2xl p-4 space-y-3 shadow-sm ${
+                isSaved ? "border-emerald-500 bg-emerald-50" : ""
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={item.completed}
+                  onChange={() => toggleCompleted(index)}
+                  className="h-4 w-4"
+                  disabled={isSaved}
+                />
+                <span
+                  className={`font-medium ${
+                    isSaved ? "line-through text-gray-500" : ""
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </div>
+
               <input
-                type="checkbox"
-                checked={item.completed}
-                onChange={() => toggleCompleted(index)}
-                className="h-4 w-4"
+                placeholder="Remarks"
+                value={item.remarks}
+                onChange={(e) => updateField(index, "remarks", e.target.value)}
+                className="w-full border rounded-lg p-2 text-sm"
+                disabled={isSaved}
               />
-              <span className="font-medium">{item.label}</span>
+
+              <input
+                type="url"
+                placeholder="Proof URL"
+                value={item.proofUrl}
+                onChange={(e) => updateField(index, "proofUrl", e.target.value)}
+                className="w-full border rounded-lg p-2 text-sm"
+                disabled={isSaved}
+              />
+
+              {item.completedAt && (
+                <p className="text-xs text-gray-500">
+                  Completed at: {new Date(item.completedAt).toLocaleString()}
+                </p>
+              )}
             </div>
-
-            <input
-              placeholder="Remarks"
-              value={item.remarks}
-              onChange={(e) => updateField(index, "remarks", e.target.value)}
-              className="w-full border rounded-lg p-2 text-sm"
-            />
-
-            <input
-              type="url"
-              placeholder="Proof URL"
-              value={item.proofUrl}
-              onChange={(e) => updateField(index, "proofUrl", e.target.value)}
-              className="w-full border rounded-lg p-2 text-sm"
-            />
-
-            {item.completedAt && (
-              <p className="text-xs text-gray-500">
-                Completed at: {new Date(item.completedAt).toLocaleString()}
-              </p>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <button

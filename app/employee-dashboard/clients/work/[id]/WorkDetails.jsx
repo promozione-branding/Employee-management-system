@@ -10,6 +10,7 @@ import {
   paidAdsChecklistTemplate,
   socialMediaChecklistTemplate,
   webDevelopmentChecklistTemplate,
+  checkFormControl,
 } from "@/config/employee";
 import { addCheckListService } from "@/service/employee-dashboard/work-details";
 import { CheckCircle2, Circle, Plus } from "lucide-react";
@@ -21,20 +22,86 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import GridForm from "@/components/layout/GridForm";
+import { initialCheckListData } from "@/config/employee/initialData";
 
 const WorkDetails = ({ workDetailId }) => {
   const [workDetailsData, setWorkDetailsData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [checkListPopFormData, setCheckListPopFormData] =
+    useState(initialCheckListData);
+  const [checkListOpen, setCheckListOpen] = useState(false);
+
+  console.log(
+    workDetailsData?.progressPercentage?.totalField,
+    "workDetailsData",
+  );
+
+  async function fetchWorkDetails() {
+    try {
+      if (!workDetailId) return;
+      const res = await getWorkDetailByIdService(workDetailId);
+
+      if (res?.success) {
+        setWorkDetailsData(res.data);
+      } else {
+        toast.error(res?.message || "Failed to fetch work details");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error?.response?.data?.message ||
+          "Error while fetching the work details",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleSubmit(checklistData) {
     try {
       const filledData = checklistData.filter((item) => item.completed);
 
-      const res = await addCheckListService(workDetailId, filledData);
+      // console.log({
+      //   checkList: filledData,
+      //   totalField: Math.max(
+      //     checklistData?.length || 0,
+      //     workDetailsData?.progressPercentage?.totalField || 0,
+      //   ),
+      // });
+
+      const res = await addCheckListService(workDetailId, {
+        checkList: filledData,
+        totalField: Math.max(
+          checklistData?.length || 0,
+          workDetailsData?.progressPercentage?.totalField || 0,
+        ),
+      });
 
       if (res.success) {
         toast.success(res.message || "Checklist updated successfully");
         setWorkDetailsData(res.data);
+        fetchWorkDetails();
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data?.message || "Error while add check list");
+    }
+  }
+
+  async function handlePopCheckList(e) {
+    e.preventDefault();
+
+    try {
+      const res = await addCheckListService(workDetailId, {
+        checkList: checkListPopFormData,
+        totalField: workDetailsData?.progressPercentage?.totalField + 1,
+      });
+      console.log(res, "res");
+      if (res.success) {
+        toast.success(res.message || "Checklist updated successfully");
+        setCheckListOpen(false);
       }
     } catch (error) {
       console.log(error);
@@ -43,27 +110,6 @@ const WorkDetails = ({ workDetailId }) => {
   }
 
   useEffect(() => {
-    async function fetchWorkDetails() {
-      try {
-        if (!workDetailId) return;
-        const res = await getWorkDetailByIdService(workDetailId);
-
-        if (res?.success) {
-          setWorkDetailsData(res.data);
-        } else {
-          toast.error(res?.message || "Failed to fetch work details");
-        }
-      } catch (error) {
-        console.error(error);
-        toast.error(
-          error?.response?.data?.message ||
-            "Error while fetching the work details",
-        );
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchWorkDetails();
   }, [workDetailId]);
 
@@ -73,7 +119,7 @@ const WorkDetails = ({ workDetailId }) => {
     return <p className="text-sm text-gray-500">No work details found.</p>;
   }
 
-  const { department, checklist, status, progressPercentage } = workDetailsData;
+  const { department, checklist, status } = workDetailsData;
 
   let selectedTemplate;
   if (department === "SEO") {
@@ -95,58 +141,66 @@ const WorkDetails = ({ workDetailId }) => {
           <div>
             <h2 className="text-xl font-semibold">{department} Work Details</h2>
             <p className="text-sm text-gray-500">
-              Status: {status} • Progress: {progressPercentage}%
+              {/* Status: {status} • Progress: {progressPercentage}% */}
             </p>
           </div>
 
           {/* Checklist */}
-          <div className="space-y-4">
+          <div className=" w-[80vw] mt-2">
             {checklist?.length === 0 && (
               <p className="text-sm text-gray-500">No checklist items.</p>
             )}
-
-            {checklist?.map((item) => (
-              <div
-                key={item.key}
-                className="flex items-center gap-3 border rounded-xl p-4"
-              >
-                {item.completed ? (
-                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                ) : (
-                  <Circle className="h-5 w-5 text-gray-300" />
-                )}
-                <span
-                  className={`text-sm ${
-                    item.completed ? "line-through text-gray-500" : ""
-                  }`}
+            <div className="grid grid-cols-8 gap-3">
+              {checklist?.map((item) => (
+                <div
+                  key={item.key}
+                  className="flex items-center gap-3 border rounded-xl p-2"
                 >
-                  {item.label}
-                </span>
-              </div>
-            ))}
+                
+                  <span
+                    className={`text-sm ${
+                      item.completed ? "line-through text-gray-500" : ""
+                    }`}
+                  >
+                    {item?.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div>
-          <Dialog>
-            <DialogTrigger>
+        <div className="mr-10">
+          <Dialog open={checkListOpen} onOpenChange={setCheckListOpen}>
+            <DialogTrigger className=" border-2 p-2 rounded-full border-emerald-500">
               <Plus />
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader>
+              <DialogHeader className={"hidden"}>
                 <DialogTitle>Are you absolutely sure?</DialogTitle>
                 <DialogDescription>
                   This action cannot be undone. This will permanently delete
                   your account and remove your data from our servers.
                 </DialogDescription>
               </DialogHeader>
+              <div>
+                <p className="text-center text-lg mb-2 font-medium">
+                  Check List
+                </p>
+                <GridForm
+                  formControls={checkFormControl}
+                  formData={checkListPopFormData}
+                  setFormData={setCheckListPopFormData}
+                  onSubmit={handlePopCheckList}
+                />
+              </div>
             </DialogContent>
           </Dialog>
         </div>
       </div>
 
       <div>
-        <SEOChecklistForm onSubmit={handleSubmit} template={selectedTemplate} />
+        <SEOChecklistForm onSubmit={handleSubmit} template={selectedTemplate} completed={checklist}/>
       </div>
     </div>
   );
