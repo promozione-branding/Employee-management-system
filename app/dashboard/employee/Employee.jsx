@@ -269,7 +269,7 @@ const Employee = () => {
               account and remove your data from our servers.
             </DialogDescription>
           </DialogHeader>
-          <p className="font-bold text-2xl text-center">Add Employee</p>
+          <p className="font-bold text-2xl text-center">Add User</p>
           <CommonForm
             formControls={employeeRegisterFormControl}
             formData={registerFormData}

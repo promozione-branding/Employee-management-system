@@ -32,7 +32,7 @@ const EmployeeSchema = new mongoose.Schema(
 
       designation: {
         type: String,
-        enum: ["SEO", "WEB_DEVELOPER", "SOCIAL_MEDIA", "ADS_MANAGER"],
+        enum: ["SEO", "WEB_DEVELOPER", "SOCIAL_MEDIA", "ADS_MANAGER","OTHER"],
         required: true,
       },
 

@@ -61,6 +61,7 @@ const ClientWork = ({ customerId }) => {
           totalField: 0,
         },
       };
+
       const res = await createWorkDetailsService(formData);
       if (res.success) {
         toast.success("Client assigned successfully");
@@ -139,6 +140,7 @@ const ClientWork = ({ customerId }) => {
                 </SelectItem>
                 <SelectItem value="ADS_MANAGER">Ads Management</SelectItem>
                 <SelectItem value="SOCIAL_MEDIA">Social Media</SelectItem>
+                <SelectItem value="OTHER">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>

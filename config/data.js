@@ -470,6 +470,7 @@ export const employeeBasicDetailsFormControl = [
       { id: "ADS_MANAGER", label: "Ads Manager" },
       { id: "WEB_DEVELOPER", label: "Web Development" },
       { id: "SOCIAL_MEDIA", label: "Social Media" },
+      { id: "OTHER", label: "Other" },
     ],
   },
   {

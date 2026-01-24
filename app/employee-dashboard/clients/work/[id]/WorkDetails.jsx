@@ -13,7 +13,7 @@ import {
   checkFormControl,
 } from "@/config/employee";
 import { addCheckListService } from "@/service/employee-dashboard/work-details";
-import { CheckCircle2, Circle, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -32,11 +32,6 @@ const WorkDetails = ({ workDetailId }) => {
   const [checkListPopFormData, setCheckListPopFormData] =
     useState(initialCheckListData);
   const [checkListOpen, setCheckListOpen] = useState(false);
-
-  console.log(
-    workDetailsData?.progressPercentage?.totalField,
-    "workDetailsData",
-  );
 
   async function fetchWorkDetails() {
     try {
@@ -62,14 +57,6 @@ const WorkDetails = ({ workDetailId }) => {
   async function handleSubmit(checklistData) {
     try {
       const filledData = checklistData.filter((item) => item.completed);
-
-      // console.log({
-      //   checkList: filledData,
-      //   totalField: Math.max(
-      //     checklistData?.length || 0,
-      //     workDetailsData?.progressPercentage?.totalField || 0,
-      //   ),
-      // });
 
       const res = await addCheckListService(workDetailId, {
         checkList: filledData,
@@ -98,10 +85,10 @@ const WorkDetails = ({ workDetailId }) => {
         checkList: checkListPopFormData,
         totalField: workDetailsData?.progressPercentage?.totalField + 1,
       });
-      console.log(res, "res");
       if (res.success) {
         toast.success(res.message || "Checklist updated successfully");
         setCheckListOpen(false);
+        fetchWorkDetails();
       }
     } catch (error) {
       console.log(error);
@@ -121,6 +108,7 @@ const WorkDetails = ({ workDetailId }) => {
 
   const { department, checklist, status } = workDetailsData;
 
+
   let selectedTemplate;
   if (department === "SEO") {
     selectedTemplate = seoChecklistTemplate;
@@ -134,7 +122,7 @@ const WorkDetails = ({ workDetailId }) => {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex justify-between">
+      <div className="relative">
         {/* Header */}
 
         <div>
@@ -156,14 +144,30 @@ const WorkDetails = ({ workDetailId }) => {
                   key={item.key}
                   className="flex items-center gap-3 border rounded-xl p-2"
                 >
-                
-                  <span
-                    className={`text-sm ${
-                      item.completed ? "line-through text-gray-500" : ""
-                    }`}
-                  >
-                    {item?.label}
-                  </span>
+                  {item?.proofUrl ? (
+                    <a
+                      href={
+                        item.proofUrl.startsWith("http")
+                          ? item.proofUrl
+                          : `https://${item.proofUrl}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`text-sm text-blue-500 hover:underline ${
+                        item.completed ? "line-through" : ""
+                      }`}
+                    >
+                      {item?.label}
+                    </a>
+                  ) : (
+                    <span
+                      className={`text-sm ${
+                        item.completed ? "line-through text-gray-500" : ""
+                      }`}
+                    >
+                      {item?.label}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -172,7 +176,7 @@ const WorkDetails = ({ workDetailId }) => {
 
         <div className="mr-10">
           <Dialog open={checkListOpen} onOpenChange={setCheckListOpen}>
-            <DialogTrigger className=" border-2 p-2 rounded-full border-emerald-500">
+            <DialogTrigger className=" border-2 p-2 rounded-full border-emerald-500 absolute top-10 right-10">
               <Plus />
             </DialogTrigger>
             <DialogContent>
@@ -199,9 +203,15 @@ const WorkDetails = ({ workDetailId }) => {
         </div>
       </div>
 
-      <div>
-        <SEOChecklistForm onSubmit={handleSubmit} template={selectedTemplate} completed={checklist}/>
-      </div>
+      {department === "OTHER" ? null : (
+        <div>
+          <SEOChecklistForm
+            onSubmit={handleSubmit}
+            template={selectedTemplate}
+            completed={checklist}
+          />
+        </div>
+      )}
     </div>
   );
 };

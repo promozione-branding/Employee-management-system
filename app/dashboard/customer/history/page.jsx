@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  Activity,
   BadgeIndianRupee,
   BanknoteArrowUp,
   NotebookTabs,
@@ -12,9 +13,14 @@ import {
 const HistoryPage = ({ customerId }) => {
   const cardData = [
     {
-      label: "Client",
+      label: "Client Profile",
       icon: <Users />,
       href: `/dashboard/customer/history/client-history/${customerId}`,
+    },
+    {
+      label: "Work Details",
+      icon: <Activity />,
+      href: `/dashboard/customer/history/work-detail/${customerId}`,
     },
     {
       label: "Sales",
