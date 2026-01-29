@@ -1,122 +1,163 @@
 "use client";
 
-import CreateCustomer from "./CreateCustomer";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
 } from "@/components/ui/sheet";
+import CommonForm from "@/components/layout/Form";
+import Loading from "@/components/layout/Loading";
 import {
+  addCustomerFormControl,
+} from "@/config/data";
+import {
+  initalCustomerFormData,
+} from "@/config/initialFormDate";
+import {
+  createCustomerServices,
+  editCustomerServices,
   deleteCustomerServices,
   getAllCustomerServices,
   getCustomerServices,
 } from "@/service/customer";
-import { Eye, FilePlusCorner, Network, SquarePen, Trash } from "lucide-react";
+import {
+  Eye,
+  FilePlusCorner,
+  Network,
+  SquarePen,
+  Trash,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const AllCustomer = () => {
-  const [customerList, setCustomerList] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [customerSiderbar, setCustomerSiderbar] = useState(false);
-  const [customerCreated, setCustomerCreated] = useState("");
-  const [customerDeleted, setCustomerDeleted] = useState("");
-  const [customerDetails, setCustomerDetails] = useState(null);
+const CustomerManager = () => {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState(initalCustomerFormData);
+  const [editingId, setEditingId] = useState(null);
 
-  async function handleDeleteCustomer(id) {
-    try {
-      const response = await deleteCustomerServices(id);
-      if (response.success) {
-        toast.success(response.message);
-        setCustomerDeleted(id);
-      }
-    } catch (error) {
-      toast.error(error.message);
-      console.log(error);
-    }
-  }
-
-  const fetchAllCustomer = async () => {
+  /* ---------------- Fetch ---------------- */
+  const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const response = await getAllCustomerServices();
-
-      if (response.success) {
-        toast.success("Customer list fetched");
-        setCustomerList(response.data);
-        setLoading(false);
-      }
-    } catch (error) {
+      const res = await getAllCustomerServices();
+      if (res.success) setCustomers(res.data);
+    } catch {
+      toast.error("Failed to fetch customers");
+    } finally {
       setLoading(false);
-      console.log(error);
-      toast.error(error.message);
     }
   };
 
-  async function getCustomerDetailsById(id) {
-    try {
-      const response = await getCustomerServices(id);
-      if (response.success) {
-        // toast.success("Customer details fetched");
-        setCustomerDetails(response.data);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message);
-    }
-  }
-
   useEffect(() => {
-    fetchAllCustomer();
-  }, [customerCreated, customerDeleted]);
+    fetchCustomers();
+  }, []);
+
+  /* ---------------- Create / Edit ---------------- */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    for (const c of addCustomerFormControl) {
+      if (
+        !["tanNo", "notes", "website", "meetingDate"].includes(c.name) &&
+        !formData[c.name]
+      ) {
+        return toast.error(`Please fill ${c.label}`);
+      }
+    }
+
+    try {
+      const res = editingId
+        ? await editCustomerServices(editingId, formData)
+        : await createCustomerServices(formData);
+
+      if (res.success) {
+        toast.success(res.message || "Saved successfully");
+        resetForm();
+        fetchCustomers();
+      }
+    } catch {
+      toast.error("Something went wrong");
+    }
+  };
+
+  /* ---------------- Edit ---------------- */
+  const handleEdit = async (id) => {
+    try {
+      const res = await getCustomerServices(id);
+      if (res.success) {
+        setFormData(res.data);
+        setEditingId(id);
+        setOpen(true);
+      }
+    } catch {
+      toast.error("Failed to load customer");
+    }
+  };
+
+  /* ---------------- Delete ---------------- */
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this customer?")) return;
+
+    try {
+      const res = await deleteCustomerServices(id);
+      if (res.success) {
+        toast.success(res.message);
+        fetchCustomers();
+      }
+    } catch {
+      toast.error("Delete failed");
+    }
+  };
+
+  /* ---------------- Helpers ---------------- */
+  const resetForm = () => {
+    setFormData(initalCustomerFormData);
+    setEditingId(null);
+    setOpen(false);
+  };
+
+  /* ---------------- UI ---------------- */
+  if (loading) return <Loading />;
 
   return (
     <div>
-      <p className="text-center font-bold text-2xl">All Customer</p>
+      <p className="text-center font-bold text-2xl">All Customers</p>
 
-      <Sheet
-        open={customerSiderbar}
-        onOpenChange={() => {
-          setCustomerSiderbar(!customerSiderbar);
-        }}
+      {/* Floating Add Button */}
+      <button
+        onClick={() => setOpen(true)}
+        className="fixed bottom-10 right-10 h-20 w-20 bg-blue-300 rounded-full flex items-center justify-center"
       >
-        <div
-          onClick={() => setCustomerSiderbar(!customerSiderbar)}
-          className="fixed bottom-10 right-10 h-20 w-20 bg-blue-300 flex items-center justify-center rounded-full"
-        >
-          <FilePlusCorner size={30} />
-        </div>
-        <SheetContent className={"p-5"}>
-          <SheetHeader className={"sr-only"}>
-            <SheetTitle>handleDeleteCustomer</SheetTitle>
-            <SheetDescription>dec</SheetDescription>
-          </SheetHeader>
-          <CreateCustomer
-            customerDetails={customerDetails}
-            setCustomerSiderbar={setCustomerSiderbar}
-            setCustomerCreated={setCustomerCreated}
+        <FilePlusCorner size={30} />
+      </button>
+
+      {/* Sheet */}
+      <Sheet open={open} onOpenChange={resetForm}>
+        <SheetContent className="p-5 overflow-y-auto">
+          <p className="font-semibold text-center text-2xl pb-5">
+            {editingId ? "Edit Customer" : "Create Customer"}
+          </p>
+
+          <CommonForm
+            formData={formData}
+            setFormData={setFormData}
+            formControls={addCustomerFormControl}
+            buttonText={editingId ? "Update" : "Add Client"}
+            onSubmit={handleSubmit}
           />
         </SheetContent>
       </Sheet>
 
-      {loading ? (
-        <div className="text-center mt-10 text-lg font-semibold text-gray-500">
-          Loading...
-        </div>
-      ) : customerList?.length === 0 ? (
-        <div className="mt-20 flex flex-col items-center justify-center text-center p-10 border-2 border-dashed rounded-lg text-gray-500">
-          <p className="text-xl font-semibold">No Customers Found</p>
-          <p className="mt-2">
-            Click on the plus icon in the bottom right to add your first
-            customer.
-          </p>
+      {/* Table */}
+      {!customers.length ? (
+        <div className="mt-20 text-center text-gray-500">
+          No customers found
         </div>
       ) : (
         <div className="mt-10">
-          <div className="grid grid-cols-6 gap-6 bg-zinc-200 py-3 px-3 rounded font-semibold">
+          <div className="grid grid-cols-6 gap-6 bg-zinc-200 p-3 font-semibold rounded">
             <div>Company</div>
             <div>Name</div>
             <div>Phone</div>
@@ -124,43 +165,34 @@ const AllCustomer = () => {
             <div>Address</div>
             <div>Actions</div>
           </div>
-          {customerList.map((item, idx) => {
-            return (
-              <div
-                key={item?._id}
-                className={`grid grid-cols-6 gap-3 py-3 px-3 hover:bg-white duration-300 border-b`}
-              >
-                <div>{item?.company}</div>
-                <div>{item?.name}</div>
-                <div>{item?.phone}</div>
-                <div>{item?.GSTIN}</div>
-                <div>{item?.Address?.slice(0, 20)}...</div>
-                <div className="flex items-center justify-left gap-5">
-                  <Link href={`/dashboard/customer/work/${item?._id}`}>
-                   <Network />
-                  </Link>
-                  <Link href={`/dashboard/customer/${item?._id}`}>
-                    <Eye />
-                  </Link>
-                  <div
-                    onClick={() => {
-                      getCustomerDetailsById(item?._id);
-                      setCustomerSiderbar(!customerSiderbar);
-                    }}
-                  >
-                    <SquarePen />
-                  </div>
-                  <div onClick={() => handleDeleteCustomer(item?._id)}>
-                    <Trash />
-                  </div>
-                </div>
+
+          {customers.map((c) => (
+            <div
+              key={c._id}
+              className="grid grid-cols-6 gap-3 p-3 border-b hover:bg-white"
+            >
+              <div>{c.company}</div>
+              <div>{c.name}</div>
+              <div>{c.phone}</div>
+              <div>{c.GSTIN}</div>
+              <div>{c.Address?.slice(0, 20)}...</div>
+
+              <div className="flex gap-4">
+                <Link href={`/dashboard/customer/work/${c._id}`}>
+                  <Network />
+                </Link>
+                <Link href={`/dashboard/customer/${c._id}`}>
+                  <Eye />
+                </Link>
+                <SquarePen onClick={() => handleEdit(c._id)} />
+                <Trash onClick={() => handleDelete(c._id)} />
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
 };
 
-export default AllCustomer;
+export default CustomerManager;

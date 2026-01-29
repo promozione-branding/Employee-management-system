@@ -50,7 +50,7 @@ export async function customerLedgerService(id) {
 export async function createCustomerProjectCycleService(formData) {
   const { data } = await axiosInstance.post(
     "/api/customer/project-cycle/create",
-    formData
+    formData,
   );
 
   return data;
@@ -58,7 +58,7 @@ export async function createCustomerProjectCycleService(formData) {
 
 export async function getCustomerProjectCycleService(id) {
   const { data } = await axiosInstance.get(
-    `/api/customer/project-cycle/get-client-project/${id}`
+    `/api/customer/project-cycle/get-client-project/${id}`,
   );
 
   return data;
@@ -67,14 +67,14 @@ export async function getCustomerProjectCycleService(id) {
 export async function updateCustomerProjectCycleService(id, formData) {
   const { data } = await axiosInstance.put(
     `/api/customer/project-cycle/get-client-project/${id}`,
-    formData
+    formData,
   );
   return data;
 }
 
 export async function deleteCustomerProjectCycleService(id) {
   const { data } = await axiosInstance.delete(
-    `/api/customer/project-cycle/get-client-project/${id}`
+    `/api/customer/project-cycle/get-client-project/${id}`,
   );
   return data;
 }
@@ -82,7 +82,7 @@ export async function deleteCustomerProjectCycleService(id) {
 export async function updateCustomerProjectPatchService(payload) {
   const { data } = await axiosInstance.patch(
     "/api/customer/project-cycle/update-duration",
-    payload
+    payload,
   );
   return data;
 }
@@ -90,7 +90,7 @@ export async function updateCustomerProjectPatchService(payload) {
 // meeting
 export async function SalesPeopleMeetingService() {
   const { data } = await axiosInstance.get(
-    "/api/customer/meeting/sales-person-dropdown"
+    "/api/customer/meeting/sales-person-dropdown",
   );
   return data;
 }
@@ -99,7 +99,7 @@ export async function SalesPeopleMeetingService() {
 
 export async function getClientHistoryService(id) {
   const { data } = await axiosInstance.get(
-    `/api/customer/history/customer/${id}`
+    `/api/customer/history/customer/${id}`,
   );
   return data;
 }
@@ -107,16 +107,16 @@ export async function getClientHistoryService(id) {
 // all delete customer
 export async function getAllDeleteCustomer() {
   const { data } = await axiosInstance.get(
-    "/api/customer/history/customer/deleted-customer"
+    "/api/customer/history/customer/deleted-customer",
   );
 
   return data;
 }
 
 // all history of client
-export async function getAllHistory(id) {
+export async function getAllHistory(id, page) {
   const { data } = await axiosInstance.get(
-    `/api/customer/history/customer/${id}`
+    `/api/customer/history/customer/${id}?page=${page}&limit=30`,
   );
 
   return data;

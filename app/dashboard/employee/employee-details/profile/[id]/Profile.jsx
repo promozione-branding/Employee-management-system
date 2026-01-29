@@ -4,6 +4,7 @@ import { Briefcase, Calendar, Mail, MapPin, Phone, User } from "lucide-react";
 import { getEmployeeProfileService } from "@/service/employee-dashboard/employee";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 const Profile = ({ employeeId }) => {
   const [loading, setLoading] = useState(true);
@@ -37,12 +38,14 @@ const Profile = ({ employeeId }) => {
         {/* Header Section */}
         <div className="bg-gray-50 p-8 border-b border-gray-100 flex flex-col md:flex-row items-center gap-6">
           <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md shrink-0">
-            <img
+            <Image
+              width={1000}
+              height={1000}
               src={
                 basicDetails?.profileImage || "https://via.placeholder.com/150"
               }
               alt={basicDetails?.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover "
             />
           </div>
           <div className="text-center md:text-left">

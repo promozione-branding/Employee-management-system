@@ -134,11 +134,11 @@ const WorkDetails = ({ workDetailId }) => {
           </div>
 
           {/* Checklist */}
-          <div className=" w-[80vw] mt-2">
+          <div className="w-[80vw] mt-2">
             {checklist?.length === 0 && (
               <p className="text-sm text-gray-500">No checklist items.</p>
             )}
-            <div className="grid grid-cols-8 gap-3">
+            <div className="flex flex-wrap gap-3">
               {checklist?.map((item) => (
                 <div
                   key={item.key}

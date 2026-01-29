@@ -5,18 +5,18 @@ import { createAuditLog } from "@/utils/createAuditLog";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { NextResponse } from "next/server";
 
-export async function GET(req, context) {
+export async function GET(req, { params }) {
   try {
     await connectDB();
 
-    const { id } = await context.params;
+    const { id } = await params;
 
     const proposal = await Proposal.findById(id);
 
     if (!proposal) {
       return Response.json(
         { success: false, message: "Proposal not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -25,13 +25,13 @@ export async function GET(req, context) {
         success: true,
         data: proposal,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log("GET Proposal by ID Error:", error);
     return Response.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -47,7 +47,7 @@ export async function DELETE(req, { params }) {
     if (!authUser) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -56,7 +56,7 @@ export async function DELETE(req, { params }) {
     if (!proposal) {
       return NextResponse.json(
         { success: false, message: "Proposal not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -89,13 +89,13 @@ export async function DELETE(req, { params }) {
         success: true,
         message: "Proposal deleted successfully",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("DELETE Proposal Error:", error);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -112,7 +112,7 @@ export async function PUT(req, { params }) {
     if (!authUser) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -121,7 +121,7 @@ export async function PUT(req, { params }) {
     if (!proposal) {
       return NextResponse.json(
         { success: false, message: "Proposal not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -158,7 +158,7 @@ export async function PUT(req, { params }) {
         message: "Proposal updated successfully",
         data: updatedProposal,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Edit Proposal API Error:", error);
@@ -167,7 +167,7 @@ export async function PUT(req, { params }) {
         success: false,
         message: "Server error while editing the proposal",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

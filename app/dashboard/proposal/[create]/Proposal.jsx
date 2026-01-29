@@ -46,7 +46,7 @@ const Proposal = ({ customerId }) => {
   // ---------------- Editing state ----------------
   const [editProposalServiceId, setEditProposalServiceId] = useState(null);
   const [proposalServiceEditData, setProposalServiceEditData] = useState(
-    initalServiceFormData
+    initalServiceFormData,
   );
 
   function calculationOfTotalAmount() {
@@ -61,7 +61,7 @@ const Proposal = ({ customerId }) => {
 
         return total + servicePrice;
       },
-      0
+      0,
     );
     return totalAfterServiceDiscounts;
   }
@@ -147,14 +147,14 @@ const Proposal = ({ customerId }) => {
     try {
       if (formData?.discount > 0 && formData?.discountPercentage > 0) {
         toast.error(
-          "Please use either a fixed discount or a percentage, not both."
+          "Please use either a fixed discount or a percentage, not both.",
         );
         return;
       }
 
       if (!formData.paymentMethod || !formData.validTill) {
         toast.error(
-          "Payment method and 'Valid Till' date are required to create the proposal."
+          "Payment method and 'Valid Till' date are required to create the proposal.",
         );
         return;
       }
@@ -214,7 +214,7 @@ const Proposal = ({ customerId }) => {
     try {
       const res = await editService(
         editProposalServiceId,
-        proposalServiceEditData
+        proposalServiceEditData,
       );
 
       if (res.success) {
@@ -259,7 +259,7 @@ const Proposal = ({ customerId }) => {
     const currentAmount = Number(partlyPaymentFormData.paymentAmount);
     const totalPaid = listOfPayments.reduce(
       (acc, curr) => acc + Number(curr.paymentAmount),
-      0
+      0,
     );
     const remainingBalance = grandTotal - totalPaid;
 
@@ -276,8 +276,8 @@ const Proposal = ({ customerId }) => {
     if (currentAmount > remainingBalance) {
       toast.error(
         `Amount cannot exceed remaining balance of ₹ ${remainingBalance.toLocaleString(
-          "en-IN"
-        )}`
+          "en-IN",
+        )}`,
       );
       return;
     }
@@ -515,7 +515,7 @@ const Proposal = ({ customerId }) => {
                 grandTotal -
                 listOfPayments.reduce(
                   (acc, curr) => acc + Number(curr.paymentAmount),
-                  0
+                  0,
                 )
               ).toLocaleString("en-IN")}
             </p>
@@ -547,7 +547,7 @@ const Proposal = ({ customerId }) => {
                         </button>
                       </div>
                     </div>
-                  )
+                  ),
                 )}
               </div>
             ) : (

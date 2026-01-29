@@ -23,7 +23,7 @@ export async function GET(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -33,7 +33,7 @@ export async function GET(req, context) {
         message: "Customer proposals fetched successfully",
         data: customer.proposals,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log(error);
@@ -45,7 +45,7 @@ export async function GET(req, context) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

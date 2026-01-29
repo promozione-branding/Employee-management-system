@@ -9,7 +9,17 @@ import {
   updateCustomerProjectCycleService,
   updateCustomerProjectPatchService,
 } from "@/service/customer";
-import { Pencil, Trash } from "lucide-react";
+import {
+  Building2,
+  Calendar,
+  Globe,
+  Mail,
+  MapPin,
+  Pencil,
+  Phone,
+  Trash,
+  User,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -45,14 +55,14 @@ const Customer = ({ customerId }) => {
                   startDate: projectFormData?.startDate,
                   endDate: projectFormData?.endDate,
                 }
-              : item
+              : item,
           );
 
         const res = await updateCustomerProjectCycleService(
           projectCycleData?.projectCycle?._id,
           {
             projectDuration: updatedProjectDuration,
-          }
+          },
         );
 
         if (res.success) {
@@ -138,7 +148,7 @@ const Customer = ({ customerId }) => {
   // delete
   async function handleDelete(id) {
     const isConfirmed = window.confirm(
-      "Are you sure you want to delete this project?"
+      "Are you sure you want to delete this project?",
     );
 
     if (!isConfirmed) return;
@@ -217,37 +227,95 @@ const Customer = ({ customerId }) => {
 
   return (
     <div className="flex gap-5">
-      <div className="border p-4 flex flex-col w-[30vw] rounded-lg">
-        <h2 className="text-xl font-semibold mb-2">{name}</h2>
-        <p className="my-2">
-          <strong>Company:</strong> {company}
-        </p>
-        <p className="my-2">
-          <strong>GSTIN:</strong> {GSTIN}
-        </p>
-        <p className="my-2">
-          <strong>TAN No:</strong> {tanNo || "NA"}
-        </p>
-        <p className="my-2">
-          <strong>Email:</strong> {email}
-        </p>
-        <p className="my-2">
-          <strong>Phone:</strong> {phone}
-        </p>
-        <p className="my-2">
-          <strong>Website:</strong> {website}
-        </p>
-        <p className="my-2">
-          <strong>SalesPersonName:</strong> {SalesPersonName}
-        </p>
-        <p className="my-2">
-          <strong>Address:</strong> {Address}, {city}, {state} - {pincode},{" "}
-          {country}
-        </p>
-        <p className="my-2">
-          <strong>Meeting Date:</strong>{" "}
-          {new Date(meetingDate).toLocaleDateString()}
-        </p>
+      <div className="bg-white border border-gray-200 shadow-sm flex flex-col w-[30vw] rounded-xl overflow-hidden h-fit">
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
+          <h2 className="text-xl font-bold text-gray-800">{name}</h2>
+          <div className="flex items-center gap-2 text-gray-500 mt-1">
+            <Building2 size={14} />
+            <p className="text-sm font-medium">{company}</p>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-5">
+          {/* Contact Details */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-gray-600">
+              <Mail size={16} className="text-gray-400" />
+              <p className="text-sm">{email}</p>
+            </div>
+            <div className="flex items-center gap-3 text-gray-600">
+              <Phone size={16} className="text-gray-400" />
+              <p className="text-sm">{phone}</p>
+            </div>
+            <div className="flex items-center gap-3 text-gray-600">
+              <Globe size={16} className="text-gray-400" />
+              <a
+                href={
+                  website?.startsWith("http") ? website : `https://${website}`
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm hover:text-blue-600 hover:underline truncate max-w-[200px]"
+              >
+                {website}
+              </a>
+            </div>
+          </div>
+
+          <div className="h-px bg-gray-100" />
+
+          {/* Business Details */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-gray-400 uppercase font-semibold mb-1">
+                GSTIN
+              </p>
+              <p className="text-sm font-medium text-gray-700">{GSTIN}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 uppercase font-semibold mb-1">
+                TAN No
+              </p>
+              <p className="text-sm font-medium text-gray-700">
+                {tanNo || "NA"}
+              </p>
+            </div>
+          </div>
+
+          <div className="h-px bg-gray-100" />
+
+          {/* Address */}
+          <div className="flex gap-3 text-gray-600">
+            <MapPin size={16} className="text-gray-400 shrink-0 mt-0.5" />
+            <p className="text-sm leading-relaxed">
+              {Address}, {city}, {state} - {pincode}, {country}
+            </p>
+          </div>
+
+          <div className="h-px bg-gray-100" />
+
+          {/* Meta Info */}
+          <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2 text-gray-500">
+                <User size={14} />
+                <span>Sales Person</span>
+              </div>
+              <span className="font-medium text-gray-800">
+                {SalesPersonName}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2 text-gray-500">
+                <Calendar size={14} />
+                <span>Meeting Date</span>
+              </div>
+              <span className="font-medium text-gray-800">
+                {new Date(meetingDate).toLocaleDateString()}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div>
@@ -388,7 +456,7 @@ const Customer = ({ customerId }) => {
                     </button>
                   </div>
                 </div>
-              )
+              ),
             )
           ) : (
             <p className="text-center text-gray-500 mt-10">

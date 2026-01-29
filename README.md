@@ -1,28 +1,33 @@
-name: Deploy Next.js to VPS
+import { Coffee, EllipsisVertical } from "lucide-react";
+import React from "react";
 
-on:
-  push:
-    branches:
-      - main
+const page = () => {
+  return (
+    <div>
+      {/* first section  */}
+      <section className="flex gap-5">
+        <div className="border px-4 py-5 rounded-xl">
+          <div className="flex flex-col gap-3">
+            <p className="font-medium text-lg">Sales Overview</p>
+            <div className="border flex justify-around rounded-lg px-2">
+              <span className="text-sm">1Y</span>
+              <span className="text-sm">1M</span>
+              <span className="text-sm">1W</span>
+            </div>
+          </div>
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+          <div>
+            <p>₹5,90,000</p>
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+            <span>
+              <div className="h-2 w-2 bg-red-500 rounded-full" />
+              Sale Today
+            </span>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
 
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            cd ${{ secrets.APP_DIR }}
-             git fetch origin
-             git reset --hard origin/main
-             npm install
-             npm run build
-             pm2 restart Employee-management-system
+export default page;
