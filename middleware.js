@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const PUBLIC_ROUTES = ["/login", "/register","/login-otp"];
+const PUBLIC_ROUTES = ["/login", "/register", "/login-otp"];
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET
-);
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function middleware(req) {
   const token = req.cookies.get("token")?.value;
@@ -23,14 +21,13 @@ export async function middleware(req) {
       if (payload.role === "admin") {
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
-      if (payload.role === "sales") {
-        return NextResponse.redirect(new URL("/sales-dashboard", req.url));
-      }
 
       if (payload.role === "employee") {
-        return NextResponse.redirect(
-          new URL("/employee-dashboard", req.url)
-        );
+        return NextResponse.redirect(new URL("/employee-dashboard", req.url));
+      }
+
+      if (payload.role === "sales") {
+        return NextResponse.redirect(new URL("/sales-dashboard", req.url));
       }
     } catch {
       return NextResponse.next();
@@ -52,17 +49,16 @@ export async function middleware(req) {
       }
 
       if (payload.role === "employee") {
-        return NextResponse.redirect(
-          new URL("/employee-dashboard", req.url)
-        );
+        return NextResponse.redirect(new URL("/employee-dashboard", req.url));
+      }
+      if (payload.role === "sales") {
+        return NextResponse.redirect(new URL("/sales-dashboard", req.url));
       }
     }
 
     // Admin-only routes
     if (pathname.startsWith("/dashboard") && payload.role !== "admin") {
-      return NextResponse.redirect(
-        new URL("/employee-dashboard", req.url)
-      );
+      return NextResponse.redirect(new URL("/employee-dashboard", req.url));
     }
 
     // Employee-only routes
@@ -73,6 +69,11 @@ export async function middleware(req) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
+    // Sales-only routes
+    if (pathname.startsWith("/sales-dashboard") && payload.role !== "sales") {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
     return NextResponse.next();
   } catch {
     return NextResponse.redirect(new URL("/login", req.url));
@@ -80,7 +81,5 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
