@@ -23,6 +23,9 @@ export async function middleware(req) {
       if (payload.role === "admin") {
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
+      if (payload.role === "sales") {
+        return NextResponse.redirect(new URL("/sales-dashboard", req.url));
+      }
 
       if (payload.role === "employee") {
         return NextResponse.redirect(
