@@ -46,7 +46,7 @@ const EmployeeWorkDetailSchema = new mongoose.Schema(
 
     department: {
       type: String,
-      enum: ["SEO", "WEB_DEVELOPER", "SOCIAL_MEDIA", "ADS_MANAGER","OTHER"],
+      enum: ["SEO", "WEB_DEVELOPER", "SOCIAL_MEDIA", "ADS_MANAGER","OTHER","SALES"],
       required: true,
       index: true,
     },

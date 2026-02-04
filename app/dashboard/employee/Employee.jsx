@@ -1,5 +1,5 @@
 "use client";
-import { FileUser, IdCard, SmilePlus, UserRoundPlus } from "lucide-react";
+import { IdCard,  UserRoundPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import CommonForm from "@/components/layout/Form";
 import {
-  employeeBasicDetailsFormControl,
   employeeRegisterFormControl,
 } from "@/config/data";
 import {
@@ -19,12 +18,11 @@ import {
   initialEmployeesBasicDetails,
 } from "@/config/initialFormDate";
 import toast from "react-hot-toast";
-import { createUserService, registerService } from "@/service/auth";
+import { createUserService } from "@/service/auth";
 import {
   checkEmployeeExists,
   createEmployeeProfile,
   getAllEmployee,
-  getAllEmployeeForDashboard,
 } from "@/service/employee-dashboard/employee";
 import Loading from "@/components/layout/Loading";
 import { useRouter } from "next/navigation";
@@ -188,43 +186,6 @@ const Employee = () => {
                             {employee?.basicDetails?.email}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
-                            {/* <Dialog>
-                              <DialogTrigger asChild>
-                                <button
-                                  onClick={() => setEmployeeId(employee._id)}
-                                  className="px-5 py-1 rounded-xl"
-                                >
-                                  <SmilePlus />
-                                </button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader className={"hidden"}>
-                                  <DialogTitle>
-                                    Are you absolutely sure?
-                                  </DialogTitle>
-                                  <DialogDescription>
-                                    This action cannot be undone. This will
-                                    permanently delete your account and remove
-                                    your data from our servers.
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div>
-                                  <p className="text-center mb-4 text-xl">
-                                    Add Employee Details
-                                  </p>
-                                  <GridForm
-                                    formControls={
-                                      employeeBasicDetailsFormControl
-                                    }
-                                    formData={formData}
-                                    setFormData={setFormData}
-                                    onSubmit={handleEmployeeBasicDetailSubmit}
-                                    buttonText="Create Profile"
-                                  />
-                                </div>
-                              </DialogContent>
-                            </Dialog> */}
-
                             <Link
                               href={`/dashboard/employee/employee-details/${employee._id}`}
                             >

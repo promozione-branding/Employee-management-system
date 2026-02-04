@@ -442,6 +442,7 @@ export const employeeRegisterFormControl = [
     options: [
       { id: "admin", label: "admin" },
       { id: "employee", label: "Employee" },
+      { id: "sales", label: "Sales" },
     ],
   },
 ];
@@ -470,6 +471,7 @@ export const employeeBasicDetailsFormControl = [
       { id: "ADS_MANAGER", label: "Ads Manager" },
       { id: "WEB_DEVELOPER", label: "Web Development" },
       { id: "SOCIAL_MEDIA", label: "Social Media" },
+      { id: "SALES", label: "Sales" },
       { id: "OTHER", label: "Other" },
     ],
   },
@@ -541,4 +543,3 @@ export const projectDurationFormControl = [
     type: "date",
   },
 ];
-

@@ -32,7 +32,14 @@ const EmployeeSchema = new mongoose.Schema(
 
       designation: {
         type: String,
-        enum: ["SEO", "WEB_DEVELOPER", "SOCIAL_MEDIA", "ADS_MANAGER","OTHER"],
+        enum: [
+          "SEO",
+          "WEB_DEVELOPER",
+          "SOCIAL_MEDIA",
+          "ADS_MANAGER",
+          "SALES",
+          "OTHER",
+        ],
         required: true,
       },
 
@@ -68,6 +75,21 @@ const EmployeeSchema = new mongoose.Schema(
         type: Date,
         default: Date.now,
       },
+    },
+
+    EmployeeCalendarId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "EmployeeCalendar",
+    },
+
+    employeeTodoId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "EmployeeTodo",
+    },
+
+    employeeReminderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "EmployeeReminder",
     },
   },
   { timestamps: true },

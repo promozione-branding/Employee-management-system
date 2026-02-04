@@ -1,0 +1,123 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import {
+  getReminderService,
+  createReminderService,
+} from "@/service/employee-dashboard/reminder";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Trash2, Bell } from "lucide-react";
+import toast from "react-hot-toast";
+
+const EmployeeReminder = ({ employeeId }) => {
+  const [reminders, setReminders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [description, setDescription] = useState("");
+  const [reminderAt, setReminderAt] = useState("");
+
+  const fetchReminders = async () => {
+    try {
+      setLoading(true);
+      const res = await getReminderService(employeeId);
+      setReminders(res?.data?.reminder || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreate = async () => {
+    try {
+      if (!description || !reminderAt) return;
+
+      const res = await createReminderService({
+        employeeId,
+        description,
+        reminderAt,
+      });
+
+      if (res.success) {
+        toast.success(res.message || "reminder create successfully");
+        setDescription("");
+        setReminderAt("");
+        fetchReminders();
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message || "error while create reminder");
+    }
+  };
+
+  //   const handleDelete = async (id) => {
+  //     await deleteReminderService(id);
+  //     fetchReminders();
+  //   };
+
+  useEffect(() => {
+    if (employeeId) fetchReminders();
+  }, [employeeId]);
+
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="flex items-center gap-2 mb-4">
+        <Bell className="text-blue-600" />
+        <h2 className="text-xl font-bold">Reminders</h2>
+      </div>
+
+      {/* Create Reminder */}
+      <div className="flex flex-col md:flex-row gap-3 mb-6">
+        <Input
+          placeholder="Reminder description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <Input
+          type="datetime-local"
+          value={reminderAt}
+          onChange={(e) => setReminderAt(e.target.value)}
+        />
+        <Button onClick={handleCreate}>Add</Button>
+      </div>
+
+      {/* List */}
+      {loading ? (
+        <p className="text-sm text-slate-500">Loading reminders...</p>
+      ) : reminders.length === 0 ? (
+        <p className="text-sm text-slate-500">No reminders added</p>
+      ) : (
+        <ul className="space-y-3">
+          {reminders.map((item) => (
+            <li
+              key={item._id}
+              className="flex items-center justify-between p-3 border rounded-lg"
+            >
+              <div>
+                <p className="font-medium">{item.description}</p>
+                <p className="text-xs text-slate-500">
+                  ⏰ {new Date(item.reminderAt).toLocaleString()}
+                </p>
+                {item.reminderSend && (
+                  <span className="text-green-600 text-xs font-semibold">
+                    ✔ Sent
+                  </span>
+                )}
+              </div>
+
+              {/* <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleDelete(item._id)}
+              >
+                <Trash2 className="text-red-500" size={18} />
+              </Button> */}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+export default EmployeeReminder;

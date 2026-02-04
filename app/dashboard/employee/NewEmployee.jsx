@@ -65,7 +65,6 @@ const NewEmployee = () => {
       },
     };
     try {
-      console.log(formDataValue,"formDataValue");
       const res = await createEmployeeProfile(formDataValue);
       if (res.success) {
         setFormData(initialEmployeesBasicDetails);

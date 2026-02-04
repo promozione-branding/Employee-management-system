@@ -1,7 +1,8 @@
 import React from "react";
+import SalesDashboardLayout from "./Layout";
 
 const page = () => {
-  return <div>Sales Dashboard</div>;
+  return <SalesDashboardLayout>Sales Dashboard</SalesDashboardLayout>;
 };
 
 export default page;
