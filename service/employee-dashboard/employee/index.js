@@ -79,3 +79,4 @@ export async function newEmployeeListService() {
   const { data } = await axiosInstance.get("/api/employee/new-employee");
   return data;
 }
+

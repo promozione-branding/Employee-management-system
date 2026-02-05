@@ -1,6 +1,8 @@
 import { connectDB } from "@/lib/db";
-import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
+import Employee from "@/models/employee/Employee";
 import { NextResponse } from "next/server";
+import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
+import Customer from "@/models/admin/Customer";
 
 export async function GET(req, { params }) {
   try {
@@ -8,16 +10,25 @@ export async function GET(req, { params }) {
 
     const { id } = await params;
 
-    const client = await EmployeeWorkDetail.find({ employeeId: id });
+    const clients = await Employee.findById(id)
+      .select("workDetails")
+      .populate({
+        path: "workDetails",
+        select: "clientId progressPercentage status",
+        populate: {
+          path: "clientId",
+          select: "name email company",
+        },
+      });
 
-    if (!client) {
+    if (!clients || clients.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          message: "client not found",
+          message: "No clients found",
         },
         {
-          status: 500,
+          status: 404,
         },
       );
     }
@@ -25,8 +36,8 @@ export async function GET(req, { params }) {
     return NextResponse.json(
       {
         success: true,
-        message: "client data",
-        data: client,
+        message: "Clients list",
+        data: clients,
       },
       {
         status: 200,
@@ -36,7 +47,7 @@ export async function GET(req, { params }) {
     console.log(error);
     return NextResponse.json(
       {
-        success: true,
+        success: false,
         message: "server error",
       },
       { status: 500 },

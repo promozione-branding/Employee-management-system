@@ -99,3 +99,12 @@ export const initialEmployeesBasicDetails = {
   gender: "",
   joiningDate: "",
 };
+
+
+export const initialAnnouncementFormData = {
+  title: "",
+  content: "",
+  targetDepartment: "ALL",
+  startDate: "",
+  endDate: "",
+};

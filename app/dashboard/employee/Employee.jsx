@@ -30,6 +30,7 @@ import GridForm from "@/components/layout/GridForm";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NewEmployee from "./NewEmployee";
+import Announcement from "./annoucement/page";
 
 const Employee = () => {
   const [registerFormData, setRegisterFormData] = useState(
@@ -149,6 +150,7 @@ const Employee = () => {
             <TabsList>
               <TabsTrigger value="employee">Employee</TabsTrigger>
               <TabsTrigger value="user">New Employee</TabsTrigger>
+              <TabsTrigger value="announcement">Announcement</TabsTrigger>
             </TabsList>
             <TabsContent value="employee">
               <div className="mt-6 bg-white shadow-sm rounded-lg overflow-hidden">
@@ -210,6 +212,9 @@ const Employee = () => {
             </TabsContent>
             <TabsContent value="user">
               <NewEmployee />
+            </TabsContent>
+            <TabsContent value="announcement">
+              <Announcement />
             </TabsContent>
           </Tabs>
         </>

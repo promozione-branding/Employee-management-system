@@ -570,3 +570,46 @@ export const checkFormControl = [
   },
 ];
 
+
+export const announcementFormControls = [
+  {
+    name: "title",
+    label: "Announcement Title",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter announcement title",
+  },
+  {
+    name: "content",
+    label: "Announcement Content",
+    componentType: "textarea",
+    placeholder: "Write announcement details here...",
+  },
+  {
+    name: "targetDepartment",
+    label: "Target Department",
+    componentType: "select",
+    options: [
+      { id: "ALL", label: "All Departments" },
+      { id: "SEO", label: "SEO" },
+      { id: "WEB_DEVELOPER", label: "Web Developer" },
+      { id: "SOCIAL_MEDIA", label: "Social Media" },
+      { id: "ADS_MANAGER", label: "Ads Manager" },
+      { id: "SALES", label: "Sales" },
+      { id: "OTHER", label: "Other" },
+    ],
+  },
+  {
+    name: "startDate",
+    label: "Start Date",
+    componentType: "input",
+    type: "date",
+  },
+  {
+    name: "endDate",
+    label: "End Date",
+    componentType: "input",
+    type: "date",
+  },
+];
+

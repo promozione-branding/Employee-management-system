@@ -8,78 +8,45 @@ export async function POST(req) {
     await connectDB();
     const { employeeId, calendar } = await req.json();
 
-    const calendarItem = Array.isArray(calendar) ? calendar : [calendar];
-
-    if (!calendarItem.length) {
+    if (!calendar || !calendar.title || !calendar.date) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "calendar data required",
-        },
-        { status: 400 },
+        { success: false, message: "Invalid calendar data" },
+        { status: 400 }
       );
     }
 
     const employee = await Employee.findById(employeeId);
-
     if (!employee) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Employee not found",
-        },
-        {
-          status: 404,
-        },
+        { success: false, message: "Employee not found" },
+        { status: 404 }
       );
     }
 
     let calendarData = await EmployeeCalendar.findOne({ employeeId });
 
     if (calendarData) {
-      calendarData.calendar.push(...calendarItem);
+      calendarData.calendar.push(calendar);
       await calendarData.save();
     } else {
       calendarData = await EmployeeCalendar.create({
         employeeId,
-        calendar: calendarItem,
+        calendar: [calendar],
       });
-
-      if (!calendarData) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "error while create the employee calendar",
-          },
-          {
-            status: 500,
-          },
-        );
-      }
 
       employee.EmployeeCalendarId = calendarData._id;
       await employee.save();
     }
 
     return NextResponse.json(
-      {
-        success: true,
-        message: "calendar add successfully",
-      },
-      {
-        status: 201,
-      },
+      { success: true, message: "Calendar event added successfully" },
+      { status: 201 }
     );
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return NextResponse.json(
-      {
-        success: false,
-        message: "server error",
-      },
-      {
-        status: 500,
-      },
+      { success: false, message: "Server error" },
+      { status: 500 }
     );
   }
 }

@@ -60,7 +60,7 @@ const EmployeeReminder = ({ employeeId }) => {
   }, [employeeId]);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex items-center gap-2 mb-4">
         <Bell className="text-blue-600" />
         <h2 className="text-xl font-bold">Reminders</h2>
@@ -87,7 +87,7 @@ const EmployeeReminder = ({ employeeId }) => {
       ) : reminders.length === 0 ? (
         <p className="text-sm text-slate-500">No reminders added</p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-3 lg:h-[40vh] overflow-y-auto">
           {reminders.map((item) => (
             <li
               key={item._id}

@@ -34,37 +34,38 @@ const EmployeeCalendar = ({ employeeId }) => {
 
   const handleAddEvent = async (e) => {
     e.preventDefault();
-    if (newEventTitle) {
-      const newEvent = {
-        title: newEventTitle,
-        start: selectedDate,
-        backgroundColor: newEventColor || "#3b82f6",
-      };
-      const updatedEvents = [...events, newEvent];
-      setEvents(updatedEvents);
-      setNewEventTitle("");
-      setNewEventColor("");
-      setIsDialogOpen(false);
 
-      const formData = {
-        employeeId: employeeId,
-        calendar: updatedEvents,
-      };
+    if (!newEventTitle || !selectedDate) return;
 
-     
-      try {
-        const res = await createCalendarService(formData);
+    const calendarItem = {
+      title: newEventTitle,
+      date: selectedDate,
+      backgroundColor: newEventColor || "#3b82f6",
+    };
 
-        if (res.success) {
-          toast.success(res.message || "Calendar event added");
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error(
-          error.response?.data?.message ||
-            "Error while create the event on calendar",
-        );
+    try {
+      const res = await createCalendarService({
+        employeeId,
+        calendar: calendarItem,
+      });
+
+      if (res.success) {
+        setEvents((prev) => [
+          ...prev,
+          { ...calendarItem, start: calendarItem.date },
+        ]);
+
+        toast.success(res.message || "Calendar event added");
+
+        setNewEventTitle("");
+        setNewEventColor("");
+        setIsDialogOpen(false);
       }
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error.response?.data?.message || "Error while creating calendar event",
+      );
     }
   };
 
@@ -86,14 +87,53 @@ const EmployeeCalendar = ({ employeeId }) => {
     }
   }
 
+  let tooltipEl = null;
+
+  const handleEventMouseEnter = (info) => {
+    tooltipEl = document.createElement("div");
+
+    tooltipEl.innerHTML = `
+  <strong>${info.event.title}</strong><br/>
+  ${info.event.start.toLocaleDateString()}
+`;
+
+    tooltipEl.style.position = "absolute";
+    tooltipEl.style.background = info.event.backgroundColor || "#111";
+    tooltipEl.style.color = "#fff";
+    tooltipEl.style.padding = "6px 10px";
+    tooltipEl.style.borderRadius = "6px";
+    tooltipEl.style.fontSize = "12px";
+    tooltipEl.style.pointerEvents = "none";
+    tooltipEl.style.zIndex = "9999";
+    tooltipEl.style.whiteSpace = "nowrap";
+
+    document.body.appendChild(tooltipEl);
+
+    info.el.addEventListener("mousemove", moveTooltip);
+  };
+
+  const moveTooltip = (e) => {
+    if (tooltipEl) {
+      tooltipEl.style.top = e.pageY + 10 + "px";
+      tooltipEl.style.left = e.pageX + 10 + "px";
+    }
+  };
+
+  const handleEventMouseLeave = (info) => {
+    info.el.removeEventListener("mousemove", moveTooltip);
+    if (tooltipEl) {
+      tooltipEl.remove();
+      tooltipEl = null;
+    }
+  };
 
   useEffect(() => {
     getCalendarItem();
   }, [employeeId]);
 
   return (
-    <div className="flex gap-2 items-start ">
-      <div className="mb-8 w-full  border rounded-lg">
+    <div className="flex gap-2 items-start lg:w-[50vw] w-full">
+      <div className="mb-8 border rounded-lg">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="calendar-wrapper">
             <FullCalendar
@@ -108,6 +148,8 @@ const EmployeeCalendar = ({ employeeId }) => {
               height="auto"
               contentHeight="auto"
               dateClick={handleDateClick}
+              eventMouseEnter={handleEventMouseEnter}
+              eventMouseLeave={handleEventMouseLeave}
             />
           </div>
         </div>

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, CheckCircle, Pencil } from "lucide-react";
 import toast from "react-hot-toast";
+import Loading from "@/components/layout/Loading";
 
 const EmployeeTodo = ({ employeeId }) => {
   const [todos, setTodos] = useState([]);
@@ -86,10 +87,10 @@ const EmployeeTodo = ({ employeeId }) => {
     if (employeeId) fetchTodos();
   }, [employeeId]);
 
-  if (loading) return <p className="text-sm text-gray-500">Loading todos...</p>;
+  if (loading) return <Loading />
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-5 mb-6">
+    <div className="bg-white rounded-lg shadow-md p-5 mb-6 lg:w-[50vw] w-full">
       <h2 className="text-lg font-semibold mb-4">My Todo List</h2>
 
       {/* Add Todo */}
@@ -106,7 +107,7 @@ const EmployeeTodo = ({ employeeId }) => {
       {todos.length === 0 ? (
         <p className="text-sm text-gray-500">No todos yet</p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-3 h-[60vh] overflow-y-auto">
           {todos.map((todo) => (
             <li
               key={todo._id}
