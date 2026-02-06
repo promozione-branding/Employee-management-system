@@ -132,7 +132,7 @@ const EmployeeCalendar = ({ employeeId }) => {
   }, [employeeId]);
 
   return (
-    <div className="flex gap-2 items-start lg:w-[50vw] w-full">
+    <div className="flex gap-2 items-start lg:w-[65vw] w-full">
       <div className="mb-8 border rounded-lg">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="calendar-wrapper">

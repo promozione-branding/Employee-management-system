@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import { Bell, Search, UserCircle, LogOut, Settings, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
@@ -9,9 +9,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/service/axiosInstance";
+import { useEmployee } from "./Layout";
 
 const EmployeeNavbar = () => {
-  const [basicEmployeeData, setBasicEmployeeData] = useState({});
+   const { basicEmployeeData } = useEmployee();
+
   const [openEmployeeDetails, setOpenEmployeeDetails] = useState(false);
   const router = useRouter();
 
@@ -27,22 +29,22 @@ const EmployeeNavbar = () => {
     }
   };
 
-  useEffect(() => {
-    async function getEmployeeDetails() {
-      try {
-        const res = await getEmployeeDetailsService();
-        if (res.success) {
-          setBasicEmployeeData(res.data);
-          sessionStorage.setItem("employeeData", JSON.stringify(res.data));
-          toast.success("employee details fetched");
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error("error while getting employee details");
-      }
-    }
-    getEmployeeDetails();
-  }, []);
+  // useEffect(() => {
+  //   async function getEmployeeDetails() {
+  //     try {
+  //       const res = await getEmployeeDetailsService();
+  //       if (res.success) {
+  //         setBasicEmployeeData(res.data);
+  //         sessionStorage.setItem("employeeData", JSON.stringify(res.data));
+  //         toast.success("employee details fetched");
+  //       }
+  //     } catch (error) {
+  //       console.log(error);
+  //       toast.error("error while getting employee details");
+  //     }
+  //   }
+  //   getEmployeeDetails();
+  // }, []);
 
   return (
     <div className="bg-white h-16 px-6 flex items-center justify-between border-b shadow-sm relative">

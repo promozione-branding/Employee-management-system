@@ -39,13 +39,12 @@ const AllEmployeeContact = () => {
     );
   }
 
-  console.log(contacts[0]?.basicDetails?.profileImage, "contacts");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-white px-5 py-5 m-5 rounded-xl lg:w-1/2">
       <h3 className="text-lg font-semibold">Employee Contacts</h3>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="flex flex-col gap-3 h-[50vh] overflow-y-scroll ">
         {contacts.map((employee) => (
           <div
             key={employee._id}

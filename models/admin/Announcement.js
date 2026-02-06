@@ -34,6 +34,10 @@ const AnnouncementSchema = new mongoose.Schema(
     endDate: {
       type: Date,
     },
+    sent: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );
