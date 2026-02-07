@@ -32,33 +32,33 @@ const SalesSidebar = ({ open, setOpen }) => {
 
   const navLinks = [
     {
-      href: "/employee-dashboard",
+      href: "/sales-dashboard",
       label: "Dashboard",
       icon: <LayoutDashboard size={24} />,
     },
     {
-      href: "/employee-dashboard/clients",
+      href: "/sales-dashboard/clients",
       label: "Client",
       icon: <UsersRound size={24} />,
     },
     {
-      href: "/employee-dashboard/attendance",
+      href: "/sales-dashboard/attendance",
       label: "Attendance",
       icon: <CalendarCheck size={24} />,
     },
 
     {
-      href: "/employee-dashboard/leaves",
+      href: "/sales-dashboard/leaves",
       label: "Leaves",
       icon: <FileText size={24} />,
     },
     {
-      href: "/employee-dashboard/projects",
+      href: "/sales-dashboard/projects",
       label: "Projects",
       icon: <Briefcase size={24} />,
     },
     {
-      href: "/employee-dashboard/profile",
+      href: "/sales-dashboard/profile",
       label: "Profile",
       icon: <User size={24} />,
     },

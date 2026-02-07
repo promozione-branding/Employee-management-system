@@ -1,5 +1,6 @@
 "use client";
 import CommonForm from "@/components/layout/Form";
+import { useEmployee } from "@/components/layout/sales-dashboard/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ServiceFormControl, addProposalFormControl } from "@/config/data";
@@ -9,6 +10,7 @@ import {
 } from "@/config/initialFormDate";
 import { getCustomerServices } from "@/service/customer";
 import { createProposelService } from "@/service/proposal";
+import { createProposalService } from "@/service/sales-dashboard/proposal";
 import {
   createServicesService,
   fetchProposalServiceById,
@@ -22,8 +24,9 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const Proposal = ({ customerId }) => {
+const CreateProposal = ({ customerId }) => {
   const navigate = useRouter();
+  const { basicEmployeeData } = useEmployee();
 
   // ---------------- STATE ----------------
   const [formData, setFormData] = useState(initialPerposelFormData);
@@ -80,6 +83,7 @@ const Proposal = ({ customerId }) => {
     paymentMethod: formData?.paymentMethod,
     totalAmount: calculationOfTotalAmount(),
     partlyPayment: listOfPayments,
+    dateOfProposal:formData?.dateOfProposal
   };
 
   async function fetchAllServices() {
@@ -173,18 +177,31 @@ const Proposal = ({ customerId }) => {
         return;
       }
 
-      const response = await createProposelService(propsalAllItemForm);
+      const formDataTemplate = {
+        salesExecutive: basicEmployeeData?._id,
+        ...propsalAllItemForm,
+      };
+
+      const response = await createProposalService(formDataTemplate);
+      console.log(response, "response");
       if (response.success) {
         toast.success("Proposal created successfully!");
         setFormData(initialPerposelFormData);
         setSelectedServices([]);
-        navigate.push(`/dashboard/proposal/pdf-download/${response.data._id}`);
+        navigate.push(
+          `/sales-dashboard/proposal/pdf-download/${response.data._id}`,
+        );
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message);
+      if (error.response?.data?.errors?.length) {
+        error.response.data.errors.forEach((err) => toast.error(err.message));
+      } else {
+        toast.error(error.response?.data?.message || "Something went wrong");
+      }
     }
   }
+  
   async function customerDetails() {
     try {
       const response = await getCustomerServices(customerId);
@@ -564,4 +581,4 @@ const Proposal = ({ customerId }) => {
   );
 };
 
-export default Proposal;
+export default CreateProposal;

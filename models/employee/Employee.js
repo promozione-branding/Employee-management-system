@@ -91,6 +91,10 @@ const EmployeeSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "EmployeeReminder",
     },
+    salesDetails: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SalesEmployee",
+    },
   },
   { timestamps: true },
 );

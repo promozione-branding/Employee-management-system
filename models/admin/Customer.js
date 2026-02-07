@@ -33,6 +33,10 @@ const CustomerSchema = new mongoose.Schema(
     meetingDate: { type: String },
     salesPersonEmail: { type: String },
     SalesPersonName: { type: String },
+    salesExecutive: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee",
+    },
     notes: [
       {
         type: String,

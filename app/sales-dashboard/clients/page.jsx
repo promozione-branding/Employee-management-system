@@ -1,50 +1,47 @@
 "use client";
 
-import {
-  Sheet,
-  SheetContent,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import CommonForm from "@/components/layout/Form";
 import Loading from "@/components/layout/Loading";
+import { initalCustomerFormData } from "@/config/initialFormDate";
 import {
-  addCustomerFormControl,
-} from "@/config/data";
-import {
-  initalCustomerFormData,
-} from "@/config/initialFormDate";
-import {
-  createCustomerServices,
   editCustomerServices,
   deleteCustomerServices,
-  getAllCustomerServices,
   getCustomerServices,
 } from "@/service/customer";
-import {
-  Eye,
-  FilePlusCorner,
-  Network,
-  SquarePen,
-  Trash,
-} from "lucide-react";
+import { Eye, FilePlusCorner, SquarePen, Trash } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { salesClientFC } from "@/config/sales/data";
+import { initialClientData } from "@/config/sales/initialFormData";
+import { useEmployee } from "@/components/layout/sales-dashboard/Layout";
+import {
+  createClientService,
+  getClientService,
+} from "@/service/sales-dashboard/client";
 
-const CustomerManager = () => {
+const Client = () => {
+  const { basicEmployeeData } = useEmployee();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState(initalCustomerFormData);
+  const [formData, setFormData] = useState(initialClientData);
   const [editingId, setEditingId] = useState(null);
 
   /* ---------------- Fetch ---------------- */
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const res = await getAllCustomerServices();
+      const res = await getClientService(basicEmployeeData?._id);
       if (res.success) setCustomers(res.data);
-    } catch {
-      toast.error("Failed to fetch customers");
+    } catch (error) {
+      console.log(error);
+      if (error.response?.data?.errors?.length) {
+        error.response.data.errors.forEach((err) => toast.error(err.message));
+      } else {
+        toast.error(error.response?.data?.message || "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -52,13 +49,13 @@ const CustomerManager = () => {
 
   useEffect(() => {
     fetchCustomers();
-  }, []);
+  }, [basicEmployeeData?._id]);
 
   /* ---------------- Create / Edit ---------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    for (const c of addCustomerFormControl) {
+    for (const c of salesClientFC) {
       if (
         !["tanNo", "notes", "website", "meetingDate"].includes(c.name) &&
         !formData[c.name]
@@ -67,18 +64,29 @@ const CustomerManager = () => {
       }
     }
 
+    const formDataTemplate = {
+      salesExecutive: basicEmployeeData?._id,
+      ...formData,
+    };
+
     try {
       const res = editingId
         ? await editCustomerServices(editingId, formData)
-        : await createCustomerServices(formData);
+        : await createClientService(formDataTemplate);
 
+      console.log(res, "res");
       if (res.success) {
         toast.success(res.message || "Saved successfully");
         resetForm();
         fetchCustomers();
       }
-    } catch {
-      toast.error("Something went wrong");
+    } catch (error) {
+      console.log(error);
+      if (error.response?.data?.errors?.length) {
+        error.response.data.errors.forEach((err) => toast.error(err.message));
+      } else {
+        toast.error(error.response?.data?.message || "Something went wrong");
+      }
     }
   };
 
@@ -98,7 +106,8 @@ const CustomerManager = () => {
 
   /* ---------------- Delete ---------------- */
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this customer?")) return;
+    if (!window.confirm("Are you sure you want to delete this customer?"))
+      return;
 
     try {
       const res = await deleteCustomerServices(id);
@@ -123,8 +132,6 @@ const CustomerManager = () => {
 
   return (
     <div>
-      <p className="text-center font-bold text-2xl">All Customers</p>
-
       {/* Floating Add Button */}
       <button
         onClick={() => setOpen(true)}
@@ -136,14 +143,14 @@ const CustomerManager = () => {
       {/* Sheet */}
       <Sheet open={open} onOpenChange={resetForm}>
         <SheetContent className="p-5 overflow-y-auto">
-          <p className="font-semibold text-center text-2xl pb-5">
+          <p className="font-semibold text-center text-lg">
             {editingId ? "Edit Customer" : "Create Customer"}
           </p>
 
           <CommonForm
             formData={formData}
             setFormData={setFormData}
-            formControls={addCustomerFormControl}
+            formControls={salesClientFC}
             buttonText={editingId ? "Update" : "Add Client"}
             onSubmit={handleSubmit}
           />
@@ -156,7 +163,7 @@ const CustomerManager = () => {
           No customers found
         </div>
       ) : (
-        <div className="mt-10">
+        <div className="">
           <div className="grid grid-cols-6 gap-6 bg-zinc-200 p-3 font-semibold rounded">
             <div>Company</div>
             <div>Name</div>
@@ -177,11 +184,8 @@ const CustomerManager = () => {
               <div>{c.GSTIN}</div>
               <div>{c.Address?.slice(0, 20)}...</div>
 
-              <div className="flex gap-4">
-                <Link href={`/dashboard/customer/work/${c._id}`}>
-                  <Network />
-                </Link>
-                <Link href={`/dashboard/customer/${c._id}`}>
+              <div className="flex gap-8">
+                <Link href={`/sales-dashboard/clients/${c._id}`}>
                   <Eye />
                 </Link>
                 <SquarePen onClick={() => handleEdit(c._id)} />
@@ -195,4 +199,4 @@ const CustomerManager = () => {
   );
 };
 
-export default CustomerManager;
+export default Client;

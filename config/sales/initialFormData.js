@@ -1,0 +1,16 @@
+export const initialClientData = {
+  name: "",
+  company: "",
+  GSTIN: "",
+  tanNo: "",
+  email: "",
+  phone: "",
+  website: "",
+  Address: "",
+  city: "",
+  state: "",
+  pincode: "",
+  country: "",
+  meetingDate: "",
+  notes: "",
+};

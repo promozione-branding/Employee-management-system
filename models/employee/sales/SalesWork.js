@@ -1,16 +1,15 @@
 import mongoose from "mongoose";
 
-const MeetingSchema = new mongoose.Schema(
+const SalesWorkSchema = new mongoose.Schema(
   {
+    employeeId: {
+      type: mongoose.Types.ObjectId,
+      required: true,
+      ref: "Employee",
+    },
     meetingUpdate: [
       new mongoose.Schema(
         {
-          salesPersonId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-          },
-          salesPerson: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
           clientId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Customer",
@@ -34,14 +33,12 @@ const MeetingSchema = new mongoose.Schema(
           },
         },
 
-        { timestamps: true, strictPopulate: false },
+        { timestamps: true },
       ),
     ],
   },
   { timestamps: true },
 );
-
-const Meeting =
-  mongoose.models.Meeting || mongoose.model("Meeting", MeetingSchema);
-
-export default Meeting;
+const SalesWork =
+  mongoose.models.SalesWork || mongoose.model("SalesWork", SalesWorkSchema);
+export default SalesWork;

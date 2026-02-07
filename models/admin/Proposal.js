@@ -15,6 +15,10 @@ const ProposalSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    salesExecutive: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee",
+    },
     clientName: { type: String, required: true },
     clientCompany: { type: String, required: true },
     clientAddress: { type: String, required: true },
@@ -52,7 +56,7 @@ const ProposalSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 ProposalSchema.pre("save", async function (next) {
@@ -65,7 +69,7 @@ ProposalSchema.pre("save", async function (next) {
     if (lastProposal && lastProposal.proposalNo) {
       const lastNumber = parseInt(
         lastProposal.proposalNo.replace("PROMOP", ""),
-        10
+        10,
       );
       nextProposalNumber = lastNumber + 1;
     }

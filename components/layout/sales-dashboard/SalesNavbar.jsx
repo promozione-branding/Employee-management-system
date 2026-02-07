@@ -9,9 +9,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/service/axiosInstance";
+import { useEmployee } from "./Layout";
 
 const SalesNavbar = () => {
-  const [basicEmployeeData, setBasicEmployeeData] = useState({});
+  const { basicEmployeeData } = useEmployee();
   const [openEmployeeDetails, setOpenEmployeeDetails] = useState(false);
   const router = useRouter();
 
@@ -27,29 +28,12 @@ const SalesNavbar = () => {
     }
   };
 
-  useEffect(() => {
-    async function getEmployeeDetails() {
-      try {
-        const res = await getEmployeeDetailsService();
-        if (res.success) {
-          setBasicEmployeeData(res.data);
-          sessionStorage.setItem("employeeData", JSON.stringify(res.data));
-          toast.success("employee details fetched");
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error("error while getting employee details");
-      }
-    }
-    getEmployeeDetails();
-  }, []);
+ 
 
   return (
     <div className="bg-white h-16 px-6 flex items-center justify-between border-b shadow-sm relative">
       <div className="flex items-center gap-4">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Sales Dashboard
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-800">Sales Dashboard</h2>
       </div>
 
       <div className="flex items-center gap-4">
