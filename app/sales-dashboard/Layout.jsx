@@ -1,13 +1,23 @@
-"use client";
+// "use client";
 
-import Layout, { EmployeeProvider } from "@/components/layout/sales-dashboard/Layout";
+// import Layout, { EmployeeProvider } from "@/components/layout/sales-dashboard/Layout";
 
-export const dynamic = "force-dynamic";
+// export const dynamic = "force-dynamic";
 
-export default function SalesDashboardLayout({ children }) {
+// export default function SalesDashboardLayout({ children }) {
+//   return (
+//     <EmployeeProvider>
+//       <Layout>{children}</Layout>
+//     </EmployeeProvider>
+//   );
+// }
+
+import React from 'react'
+
+const layout = () => {
   return (
-    <EmployeeProvider>
-      <Layout>{children}</Layout>
-    </EmployeeProvider>
-  );
+    <div>layout</div>
+  )
 }
+
+export default layout
