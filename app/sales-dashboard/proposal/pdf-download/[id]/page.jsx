@@ -1,9 +1,20 @@
-import ProposalPdf from './ProposalPdf'
+// import ProposalPdf from './ProposalPdf'
 
-const page = async({params}) => {
-  const {id} = await params;
+// const page = async({params}) => {
+//   const {id} = await params;
+//   return (
+//     <ProposalPdf id={id}/>
+//   )
+// }
+
+// export default page
+
+
+import React from 'react'
+
+const page = () => {
   return (
-    <ProposalPdf id={id}/>
+    <div>page</div>
   )
 }
 
