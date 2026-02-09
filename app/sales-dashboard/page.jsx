@@ -1,7 +1,40 @@
-import React from "react";
+"use client";
 
-const page = () => {
-  return <div>Sales Dashboard</div>;
+import { useContext, useEffect, useState } from "react";
+
+import EmployeeCalendar from "@/components/employee-dashboard/common/EmployeeCalendar";
+import EmployeeTodo from "@/components/employee-dashboard/common/EmployeeTodo";
+import Loading from "@/components/layout/Loading";
+import EmployeeReminder from "@/components/employee-dashboard/common/EmployeeReminder";
+import EmployeeClientsProgress from "@/components/employee-dashboard/common/EmployeeClientsProgress";
+import EmployeeAnnouncements from "@/components/employee-dashboard/common/Announcement";
+import RecentActivity from "@/components/employee-dashboard/common/RecentActivity";
+import AllEmployeeContact from "@/components/employee-dashboard/common/AllEmployeeContact";
+import { useEmployee } from "@/components/layout/sales-dashboard/Layout";
+
+const SalesDashboard = () => {
+  const { basicEmployeeData } = useEmployee();
+
+
+  return (
+    <div className="">
+      <div className="flex flex-col lg:flex-row">
+        <EmployeeCalendar employeeId={basicEmployeeData?._id} />
+        <EmployeeTodo employeeId={basicEmployeeData?._id} />
+      </div>
+
+      <div className="flex flex-col lg:flex-row lg:justify-around">
+        <EmployeeReminder employeeId={basicEmployeeData?._id} />
+        <EmployeeClientsProgress employeeId={basicEmployeeData?._id} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 mt-10">
+        <EmployeeAnnouncements />
+        <RecentActivity employeeId={basicEmployeeData?._id} />
+      </div>
+      <AllEmployeeContact />
+    </div>
+  );
 };
 
-export default page;
+export default SalesDashboard;
