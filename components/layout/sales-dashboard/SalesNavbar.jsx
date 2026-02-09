@@ -10,9 +10,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/service/axiosInstance";
 import { useEmployee } from "./Layout";
+import Loading from "../Loading";
 
 const SalesNavbar = () => {
-  const { basicEmployeeData } = useEmployee();
+  const { basicEmployeeData, loading } = useEmployee();
   const [openEmployeeDetails, setOpenEmployeeDetails] = useState(false);
   const router = useRouter();
 
@@ -28,7 +29,9 @@ const SalesNavbar = () => {
     }
   };
 
- 
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div className="bg-white h-16 px-6 flex items-center justify-between border-b shadow-sm relative">

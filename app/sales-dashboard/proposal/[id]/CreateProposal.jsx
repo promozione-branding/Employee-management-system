@@ -1,5 +1,6 @@
 "use client";
 import CommonForm from "@/components/layout/Form";
+import Loading from "@/components/layout/Loading";
 import { useEmployee } from "@/components/layout/sales-dashboard/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,7 @@ import toast from "react-hot-toast";
 
 const CreateProposal = ({ customerId }) => {
   const navigate = useRouter();
-  const { basicEmployeeData } = useEmployee();
+  const { basicEmployeeData,loading } = useEmployee();
 
   // ---------------- STATE ----------------
   const [formData, setFormData] = useState(initialPerposelFormData);
@@ -322,6 +323,10 @@ const CreateProposal = ({ customerId }) => {
     setFormData((prev) => ({ ...prev, services: serviceIds }));
   }, [selectedServices]);
 
+
+  if(loading){
+    return <Loading />
+  }
   return (
     <div className="w-full">
       <h1 className="font-bold text-2xl text-center my-5">Create Proposals</h1>

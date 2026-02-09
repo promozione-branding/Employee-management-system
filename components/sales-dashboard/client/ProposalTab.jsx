@@ -1,5 +1,6 @@
 "use client";
 
+import Loading from "@/components/layout/Loading";
 import { useEmployee } from "@/components/layout/sales-dashboard/Layout";
 
 import {
@@ -24,7 +25,7 @@ import toast from "react-hot-toast";
 const ProposalTab = ({ customerId }) => {
   const [listPropoasls, setListPropoasls] = useState([]);
   const [sendingInvoiceId, setSendingInvoiceId] = useState(null);
-  const { basicEmployeeData } = useEmployee();
+  const { basicEmployeeData,loading } = useEmployee();
 
   const router = useRouter();
 
@@ -85,6 +86,11 @@ const ProposalTab = ({ customerId }) => {
   useEffect(() => {
     getAllCustomerPropsals();
   }, []);
+
+
+  if(loading){
+    return <Loading />
+  }
 
   return (
     <div>

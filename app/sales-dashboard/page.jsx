@@ -13,9 +13,12 @@ import AllEmployeeContact from "@/components/employee-dashboard/common/AllEmploy
 import { useEmployee } from "@/components/layout/sales-dashboard/Layout";
 
 const SalesDashboard = () => {
-  const { basicEmployeeData } = useEmployee();
+  const { basicEmployeeData, loading } = useEmployee();
 
-
+  if (loading) {
+    return <Loading />;
+  }
+  
   return (
     <div className="">
       <div className="flex flex-col lg:flex-row">
