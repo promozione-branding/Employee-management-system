@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
 
 import EmployeeCalendar from "@/components/employee-dashboard/common/EmployeeCalendar";
 import EmployeeTodo from "@/components/employee-dashboard/common/EmployeeTodo";
@@ -18,7 +18,9 @@ const SalesDashboard = () => {
   if (loading) {
     return <Loading />;
   }
-  
+
+  if (!basicEmployeeData) return null;
+
   return (
     <div className="">
       <div className="flex flex-col lg:flex-row">

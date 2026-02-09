@@ -1,11 +1,9 @@
-import React from 'react'
-import Client from './Clients'
+"use client";
+
 export const dynamic = "force-dynamic";
 
-const page = () => {
-  return (
-   <Client />
-  )
-}
+import Client from "./Clients";
 
-export default page
+export default function Page() {
+  return <Client />;
+}

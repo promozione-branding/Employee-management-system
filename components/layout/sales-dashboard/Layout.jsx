@@ -9,10 +9,6 @@ import toast from "react-hot-toast";
 const EmployeeContext = createContext(null);
 
 export function EmployeeProvider({ children }) {
-  // const [basicEmployeeData, setBasicEmployeeData] = useState({
-  //   basicEmployeeData: null,
-  // });
-
   const [basicEmployeeData, setBasicEmployeeData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,8 +20,8 @@ export function EmployeeProvider({ children }) {
           setBasicEmployeeData(res.data);
           sessionStorage.setItem("employeeData", JSON.stringify(res.data));
         }
-      } catch (error) {
-        toast.error("error while getting employee details");
+      } catch {
+        toast.error("Error while getting employee details");
       } finally {
         setLoading(false);
       }
@@ -34,33 +30,25 @@ export function EmployeeProvider({ children }) {
   }, []);
 
   return (
-    <EmployeeContext.Provider value={{ basicEmployeeData,loading }}>
+    <EmployeeContext.Provider value={{ basicEmployeeData, loading }}>
       {children}
     </EmployeeContext.Provider>
   );
 }
 
-export const useEmployee = () => {
-  const ctx = useContext(EmployeeContext);
-  if (!ctx) {
-    throw new Error("useEmployee must be used inside EmployeeProvider");
-  }
-  return ctx;
-};
+export const useEmployee = () => useContext(EmployeeContext);
 
 const Layout = ({ children }) => {
   const [open, setOpen] = useState(true);
 
   return (
-    <EmployeeProvider>
-      <div className="flex min-h-screen bg-gray-100">
-        <SalesSidebar open={open} setOpen={setOpen} />
-        <div className="flex-1 flex flex-col h-screen overflow-hidden">
-          <SalesNavbar />
-          <main className="flex-1 overflow-y-auto p-6">{children}</main>
-        </div>
+    <div className="flex min-h-screen bg-gray-100">
+      <SalesSidebar open={open} setOpen={setOpen} />
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <SalesNavbar />
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
-    </EmployeeProvider>
+    </div>
   );
 };
 
