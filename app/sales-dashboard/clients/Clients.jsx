@@ -22,9 +22,9 @@ import {
 } from "@/service/sales-dashboard/client";
 
 const Client = () => {
-  const { basicEmployeeData } = useEmployee() ?? {};
+  const { basicEmployeeData, loading } = useEmployee();
   const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [clientLoading, setClientLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState(initialClientData);
   const [editingId, setEditingId] = useState(null);
@@ -32,10 +32,10 @@ const Client = () => {
   /* ---------------- Fetch ---------------- */
   const fetchCustomers = async () => {
     try {
-      setLoading(true);
+      setClientLoading(true);
       if (!basicEmployeeData?._id) {
         toast.error("error while fetching the customer");
-        setLoading(true);
+        setClientLoading(true);
         return;
       }
       const res = await getClientService(basicEmployeeData?._id);
@@ -48,7 +48,7 @@ const Client = () => {
         toast.error(error.response?.data?.message || "Something went wrong");
       }
     } finally {
-      setLoading(false);
+      setClientLoading(false);
     }
   };
 
@@ -79,7 +79,6 @@ const Client = () => {
         ? await editCustomerServices(editingId, formData)
         : await createClientService(formDataTemplate);
 
-      console.log(res, "res");
       if (res.success) {
         toast.success(res.message || "Saved successfully");
         resetForm();
@@ -133,7 +132,7 @@ const Client = () => {
   };
 
   /* ---------------- UI ---------------- */
-  if (loading) return <Loading />;
+  if (clientLoading || loading) return <Loading />;
 
   return (
     <div>

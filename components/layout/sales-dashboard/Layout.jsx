@@ -9,7 +9,12 @@ import toast from "react-hot-toast";
 const EmployeeContext = createContext(null);
 
 export function EmployeeProvider({ children }) {
-  const [basicEmployeeData, setBasicEmployeeData] = useState({});
+  // const [basicEmployeeData, setBasicEmployeeData] = useState({
+  //   basicEmployeeData: null,
+  // });
+
+  const [basicEmployeeData, setBasicEmployeeData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function getEmployeeDetails() {
@@ -18,24 +23,30 @@ export function EmployeeProvider({ children }) {
         if (res.success) {
           setBasicEmployeeData(res.data);
           sessionStorage.setItem("employeeData", JSON.stringify(res.data));
-          toast.success("employee details fetched");
         }
       } catch (error) {
-        console.log(error);
         toast.error("error while getting employee details");
+      } finally {
+        setLoading(false);
       }
     }
     getEmployeeDetails();
   }, []);
 
   return (
-    <EmployeeContext.Provider value={{ basicEmployeeData }}>
+    <EmployeeContext.Provider value={{ basicEmployeeData,loading }}>
       {children}
     </EmployeeContext.Provider>
   );
 }
 
-export const useEmployee = () => useContext(EmployeeContext);
+export const useEmployee = () => {
+  const ctx = useContext(EmployeeContext);
+  if (!ctx) {
+    throw new Error("useEmployee must be used inside EmployeeProvider");
+  }
+  return ctx;
+};
 
 const Layout = ({ children }) => {
   const [open, setOpen] = useState(true);
