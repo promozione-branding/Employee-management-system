@@ -1,17 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SalesSidebar from "./SalesSidebar";
 import SalesNavbar from "./SalesNavbar";
-import toast from "react-hot-toast";
-import SalesEmployeeBootstrap from "./saleEmployeeBootstrap";
+import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 
 const Layout = ({ children }) => {
   const [open, setOpen] = useState(true);
+  const fetchEmployee = useSalesEmployeeStore((s) => s.fetchEmployee);
+
+   useEffect(() => {
+    fetchEmployee();
+  }, [fetchEmployee]);
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <SalesEmployeeBootstrap />
       <SalesSidebar open={open} setOpen={setOpen} />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <SalesNavbar />

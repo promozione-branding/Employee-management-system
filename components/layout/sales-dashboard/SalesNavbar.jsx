@@ -21,7 +21,7 @@ const SalesNavbar = () => {
     try {
       await axiosInstance.get("/api/user/logout");
 
-      clearEmployee(); // 🔥 clear Zustand state
+      clearEmployee();
       sessionStorage.removeItem("employeeData");
 
       toast.success("Logged out successfully");
@@ -31,17 +31,15 @@ const SalesNavbar = () => {
     }
   };
 
-  if (loading) return <Loading />;
-  if (!employee) return null;
+if(loading){
+  return <Loading/>
+}
 
-  const basic = employee.basicDetails || {};
 
   return (
     <div className="bg-white h-16 px-6 flex items-center justify-between border-b shadow-sm relative">
       {/* Left */}
-      <h2 className="text-xl font-semibold text-gray-800">
-        Sales Dashboard
-      </h2>
+      <h2 className="text-xl font-semibold text-gray-800">Sales Dashboard</h2>
 
       {/* Right */}
       <div className="flex items-center gap-4">
@@ -71,10 +69,10 @@ const SalesNavbar = () => {
             height={32}
             alt="employee"
             className="rounded-full"
-            src={basic.profileImage || "https://github.com/shadcn.png"}
+            src={employee?.basicDetails?.profileImage || "https://github.com/shadcn.png"}
           />
           <span className="text-sm font-medium hidden sm:block capitalize">
-            {basic.name}
+            {employee?.basicDetails?.name}
           </span>
         </div>
       </div>
@@ -84,12 +82,10 @@ const SalesNavbar = () => {
         <div className="absolute top-16 right-6 z-50 w-64 bg-white rounded-xl shadow-xl border">
           <div className="p-4 border-b bg-gray-50">
             <p className="font-semibold capitalize">
-              {basic.name || "Employee"}
+              {employee?.basicDetails?.name || "Employee"}
             </p>
             <p className="text-xs text-gray-500 truncate">
-              {Array.isArray(basic.email)
-                ? basic.email[0]
-                : basic.email}
+              {Array.isArray(employee?.basicDetails?.email) ? employee?.basicDetails?.email[0] : employee?.basicDetails?.email}
             </p>
           </div>
 
@@ -125,6 +121,7 @@ const SalesNavbar = () => {
         </div>
       )}
     </div>
+
   );
 };
 
