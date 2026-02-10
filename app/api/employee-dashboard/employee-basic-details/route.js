@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { connectDB } from "@/lib/db";
 import Employee from "@/models/employee/Employee";
+import User from "@/models/admin/User";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 

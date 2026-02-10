@@ -1,6 +1,5 @@
 "use client";
 
-
 import EmployeeCalendar from "@/components/employee-dashboard/common/EmployeeCalendar";
 import EmployeeTodo from "@/components/employee-dashboard/common/EmployeeTodo";
 import Loading from "@/components/layout/Loading";
@@ -14,7 +13,7 @@ import { useEffect, useRef } from "react";
 
 const SalesDashboard = () => {
   const { employee, loading } = useSalesEmployeeStore();
- const fetchEmployee = useSalesEmployeeStore((s) => s.fetchEmployee);
+  const fetchEmployee = useSalesEmployeeStore((s) => s.fetchEmployee);
 
   const fetchedRef = useRef(false);
 
@@ -27,8 +26,6 @@ const SalesDashboard = () => {
 
   if (loading) return <Loading />;
   if (!employee) return null;
-
-
 
   return (
     <div className="">
@@ -48,12 +45,7 @@ const SalesDashboard = () => {
       </div>
       <AllEmployeeContact />
     </div>
-
   );
 };
 
 export default SalesDashboard;
-
-
-
-
