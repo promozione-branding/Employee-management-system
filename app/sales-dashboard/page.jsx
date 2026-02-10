@@ -9,19 +9,14 @@ import EmployeeAnnouncements from "@/components/employee-dashboard/common/Announ
 import RecentActivity from "@/components/employee-dashboard/common/RecentActivity";
 import AllEmployeeContact from "@/components/employee-dashboard/common/AllEmployeeContact";
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 const SalesDashboard = () => {
   const { employee, loading } = useSalesEmployeeStore();
   const fetchEmployee = useSalesEmployeeStore((s) => s.fetchEmployee);
 
-  const fetchedRef = useRef(false);
-
   useEffect(() => {
-    if (!fetchedRef.current) {
-      fetchedRef.current = true;
-      fetchEmployee();
-    }
+    fetchEmployee();
   }, []);
 
   if (loading) return <Loading />;
