@@ -1,23 +1,12 @@
-// "use client";
+"use client";
 
-// import Layout, { EmployeeProvider } from "@/components/layout/sales-dashboard/Layout";
+import Layout from "@/components/layout/sales-dashboard/Layout";
 
-// export const dynamic = "force-dynamic";
 
-// export default function SalesDashboardLayout({ children }) {
-//   return (
-//     <EmployeeProvider>
-//       <Layout>{children}</Layout>
-//     </EmployeeProvider>
-//   );
-// }
-
-import React from 'react'
-
-const layout = () => {
+export default function SalesDashboardLayout({ children }) {
   return (
-    <div>layout</div>
-  )
+      <Layout>{children}</Layout>
+  );
 }
 
-export default layout
+

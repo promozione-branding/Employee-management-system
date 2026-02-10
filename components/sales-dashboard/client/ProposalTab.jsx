@@ -1,7 +1,7 @@
 "use client";
 
 import Loading from "@/components/layout/Loading";
-import { useEmployee } from "@/components/layout/sales-dashboard/Layout";
+import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 
 import {
   deleteProposalService,
@@ -25,7 +25,7 @@ import toast from "react-hot-toast";
 const ProposalTab = ({ customerId }) => {
   const [listPropoasls, setListPropoasls] = useState([]);
   const [sendingInvoiceId, setSendingInvoiceId] = useState(null);
-  const { basicEmployeeData,loading } = useEmployee();
+  const { employee,loading } = useSalesEmployeeStore();
 
   const router = useRouter();
 
@@ -50,7 +50,7 @@ const ProposalTab = ({ customerId }) => {
 
   async function getAllCustomerPropsals() {
     try {
-      const allPropsals = await getProposalService(basicEmployeeData?._id);
+      const allPropsals = await getProposalService(employee?._id);
       if (allPropsals?.success) {
         toast.success("Proposal fetched");
         setListPropoasls(allPropsals.data);

@@ -48,7 +48,8 @@
     "react-hot-toast": "^2.6.0",
     "recharts": "^3.5.1",
     "tailwind-merge": "^3.4.0",
-    "to-words": "^4.9.0"
+    "to-words": "^4.9.0",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",

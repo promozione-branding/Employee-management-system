@@ -1,7 +1,6 @@
 "use client";
 import CommonForm from "@/components/layout/Form";
 import Loading from "@/components/layout/Loading";
-import { useEmployee } from "@/components/layout/sales-dashboard/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ServiceFormControl, addProposalFormControl } from "@/config/data";
@@ -9,6 +8,7 @@ import {
   initalServiceFormData,
   initialPerposelFormData,
 } from "@/config/initialFormDate";
+import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 import { getCustomerServices } from "@/service/customer";
 import { createProposelService } from "@/service/proposal";
 import { createProposalService } from "@/service/sales-dashboard/proposal";
@@ -27,7 +27,7 @@ import toast from "react-hot-toast";
 
 const CreateProposal = ({ customerId }) => {
   const navigate = useRouter();
-  const { basicEmployeeData,loading } = useEmployee();
+  const { employee,loading } = useSalesEmployeeStore();
 
   // ---------------- STATE ----------------
   const [formData, setFormData] = useState(initialPerposelFormData);
@@ -179,7 +179,7 @@ const CreateProposal = ({ customerId }) => {
       }
 
       const formDataTemplate = {
-        salesExecutive: basicEmployeeData?._id,
+        salesExecutive: employee?._id,
         ...propsalAllItemForm,
       };
 
