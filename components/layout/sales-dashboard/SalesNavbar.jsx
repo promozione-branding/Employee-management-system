@@ -8,14 +8,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/service/axiosInstance";
-import Loading from "../Loading";
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 
 const SalesNavbar = () => {
   const router = useRouter();
   const [openEmployeeDetails, setOpenEmployeeDetails] = useState(false);
 
-  const { employee, loading, clearEmployee } = useSalesEmployeeStore();
+  const { employee} = useSalesEmployeeStore();
 
   const handleLogout = async () => {
     try {
@@ -30,11 +29,6 @@ const SalesNavbar = () => {
       toast.error(error.response?.data?.message || "Logout failed");
     }
   };
-
-if(loading){
-  return <Loading/>
-}
-
 
   return (
     <div className="bg-white h-16 px-6 flex items-center justify-between border-b shadow-sm relative">
@@ -69,10 +63,13 @@ if(loading){
             height={32}
             alt="employee"
             className="rounded-full"
-            src={employee?.basicDetails?.profileImage || "https://github.com/shadcn.png"}
+            src={
+              employee?.basicDetails?.profileImage ||
+              "https://github.com/shadcn.png"
+            }
           />
           <span className="text-sm font-medium hidden sm:block capitalize">
-            {employee?.basicDetails?.name}
+            {employee?.basicDetails?.name || "Profile"}
           </span>
         </div>
       </div>
@@ -85,7 +82,9 @@ if(loading){
               {employee?.basicDetails?.name || "Employee"}
             </p>
             <p className="text-xs text-gray-500 truncate">
-              {Array.isArray(employee?.basicDetails?.email) ? employee?.basicDetails?.email[0] : employee?.basicDetails?.email}
+              {Array.isArray(employee?.basicDetails?.email)
+                ? employee?.basicDetails?.email[0]
+                : employee?.basicDetails?.email || "aalekh@promozione.com"}
             </p>
           </div>
 
@@ -121,7 +120,6 @@ if(loading){
         </div>
       )}
     </div>
-
   );
 };
 
