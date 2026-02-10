@@ -11,7 +11,7 @@ const Layout = ({ children }) => {
 
    useEffect(() => {
     fetchEmployee();
-  }, [fetchEmployee]);
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-gray-100">

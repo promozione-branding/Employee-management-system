@@ -14,11 +14,10 @@ import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 const SalesDashboard = () => {
   const { employee, loading } = useSalesEmployeeStore();
 
-  if (loading) {
-    return <Loading />;
-  }
+  if (loading) return <Loading />;
+  if (!employee) return null;
 
-  console.log(employee,"employee");
+
 
   return (
     <div className="">
