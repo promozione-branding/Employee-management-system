@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Announcement from "@/models/admin/Announcement";
-import { getAuthUser } from "@/lib/getAuthUser"; // if you already use auth
+import { getAuthUser } from "@/lib/getAuthUser";
+import User from "@/models/admin/User";
 
 export async function POST(req) {
   try {

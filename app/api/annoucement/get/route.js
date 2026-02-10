@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Announcement from "@/models/admin/Announcement";
 import Employee from "@/models/employee/Employee";
+import User from "@/models/admin/User";
 
 export async function GET(req) {
   try {
