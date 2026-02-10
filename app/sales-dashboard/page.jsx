@@ -14,29 +14,33 @@ import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 const SalesDashboard = () => {
   const { employee, loading } = useSalesEmployeeStore();
 
-  if (loading) return <Loading />;
-  if (!employee) return null;
+  console.log(employee,"employee");
+
+  // if (loading) return <Loading />;
+  // if (!employee) return null;
 
 
 
   return (
-    <div className="">
-      <div className="flex flex-col lg:flex-row">
-        <EmployeeCalendar employeeId={employee?._id} />
-        <EmployeeTodo employeeId={employee?._id} />
-      </div>
+    // <div className="">
+    //   <div className="flex flex-col lg:flex-row">
+    //     <EmployeeCalendar employeeId={employee?._id} />
+    //     <EmployeeTodo employeeId={employee?._id} />
+    //   </div>
 
-      <div className="flex flex-col lg:flex-row lg:justify-around">
-        <EmployeeReminder employeeId={employee?._id} />
-        <EmployeeClientsProgress employeeId={employee?._id} />
-      </div>
+    //   <div className="flex flex-col lg:flex-row lg:justify-around">
+    //     <EmployeeReminder employeeId={employee?._id} />
+    //     <EmployeeClientsProgress employeeId={employee?._id} />
+    //   </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 mt-10">
-        <EmployeeAnnouncements />
-        <RecentActivity employeeId={employee?._id} />
-      </div>
-      <AllEmployeeContact />
-    </div>
+    //   <div className="grid grid-cols-1 lg:grid-cols-2 mt-10">
+    //     <EmployeeAnnouncements />
+    //     <RecentActivity employeeId={employee?._id} />
+    //   </div>
+    //   <AllEmployeeContact />
+    // </div>
+
+    <div>page</div>
   );
 };
 
