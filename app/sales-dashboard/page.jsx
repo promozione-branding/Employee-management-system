@@ -10,37 +10,45 @@ import EmployeeAnnouncements from "@/components/employee-dashboard/common/Announ
 import RecentActivity from "@/components/employee-dashboard/common/RecentActivity";
 import AllEmployeeContact from "@/components/employee-dashboard/common/AllEmployeeContact";
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
+import { useEffect, useRef } from "react";
 
 const SalesDashboard = () => {
   const { employee, loading } = useSalesEmployeeStore();
+ const fetchEmployee = useSalesEmployeeStore((s) => s.fetchEmployee);
 
-  console.log(employee,"employee");
+  const fetchedRef = useRef(false);
 
-  // if (loading) return <Loading />;
-  // if (!employee) return null;
+  useEffect(() => {
+    if (!fetchedRef.current) {
+      fetchedRef.current = true;
+      fetchEmployee();
+    }
+  }, []);
+
+  if (loading) return <Loading />;
+  if (!employee) return null;
 
 
 
   return (
-    // <div className="">
-    //   <div className="flex flex-col lg:flex-row">
-    //     <EmployeeCalendar employeeId={employee?._id} />
-    //     <EmployeeTodo employeeId={employee?._id} />
-    //   </div>
+    <div className="">
+      <div className="flex flex-col lg:flex-row">
+        <EmployeeCalendar employeeId={employee?._id} />
+        <EmployeeTodo employeeId={employee?._id} />
+      </div>
 
-    //   <div className="flex flex-col lg:flex-row lg:justify-around">
-    //     <EmployeeReminder employeeId={employee?._id} />
-    //     <EmployeeClientsProgress employeeId={employee?._id} />
-    //   </div>
+      <div className="flex flex-col lg:flex-row lg:justify-around">
+        <EmployeeReminder employeeId={employee?._id} />
+        <EmployeeClientsProgress employeeId={employee?._id} />
+      </div>
 
-    //   <div className="grid grid-cols-1 lg:grid-cols-2 mt-10">
-    //     <EmployeeAnnouncements />
-    //     <RecentActivity employeeId={employee?._id} />
-    //   </div>
-    //   <AllEmployeeContact />
-    // </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 mt-10">
+        <EmployeeAnnouncements />
+        <RecentActivity employeeId={employee?._id} />
+      </div>
+      <AllEmployeeContact />
+    </div>
 
-    <div>page</div>
   );
 };
 
