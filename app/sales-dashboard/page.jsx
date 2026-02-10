@@ -18,7 +18,7 @@ const SalesDashboard = () => {
     return <Loading />;
   }
 
-  if (!employee) return null;
+  console.log(employee,"employee");
 
   return (
     <div className="">
