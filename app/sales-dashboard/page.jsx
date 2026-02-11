@@ -2,7 +2,6 @@
 
 import EmployeeCalendar from "@/components/employee-dashboard/common/EmployeeCalendar";
 import EmployeeTodo from "@/components/employee-dashboard/common/EmployeeTodo";
-import Loading from "@/components/layout/Loading";
 import EmployeeReminder from "@/components/employee-dashboard/common/EmployeeReminder";
 import EmployeeClientsProgress from "@/components/employee-dashboard/common/EmployeeClientsProgress";
 import EmployeeAnnouncements from "@/components/employee-dashboard/common/Announcement";
@@ -12,11 +11,9 @@ import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 import { useEffect } from "react";
 
 const SalesDashboard = () => {
-  const { employee, loading } = useSalesEmployeeStore();
+  const { employee } = useSalesEmployeeStore();
 
-  if (loading) return <Loading />;
-  if (!employee) return null;
-
+ 
   return (
     <div className="">
       <div className="flex flex-col lg:flex-row">
