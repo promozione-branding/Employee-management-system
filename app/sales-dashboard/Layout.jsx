@@ -1,6 +1,25 @@
-import Layout from "@/components/layout/sales-dashboard/Layout";
-import React from "react";
+"use client";
 
-export default function SalesDashboardLayout({ children }) {
-  return <Layout>{children}</Layout>;
+import SalesNavbar from "@/components/layout/sales-dashboard/SalesNavbar";
+import SalesSidebar from "@/components/layout/sales-dashboard/SalesSidebar";
+import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
+import React, { useEffect, useState } from "react";
+
+export default function SalesLayout({ children }) {
+  const [open, setOpen] = useState(false);
+  const fetchEmployee = useSalesEmployeeStore((s) => s.fetchEmployee);
+
+  useEffect(() => {
+    fetchEmployee();
+  }, []);
+
+  return (
+    <div className="flex min-h-screen bg-gray-100">
+      <SalesSidebar open={open} setOpen={setOpen} />
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <SalesNavbar />
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      </div>
+    </div>
+  );
 }
