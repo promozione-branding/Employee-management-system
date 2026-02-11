@@ -28,4 +28,4 @@ jobs:
             rm -rf .next
             npm install
             npm run build
-            pm2 restart Employee-management-system
+            pm2 restart ERP
