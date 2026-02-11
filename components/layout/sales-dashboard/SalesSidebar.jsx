@@ -15,19 +15,24 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import axiosInstance from "@/service/axiosInstance";
+import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 
 const SalesSidebar = ({ open, setOpen }) => {
   const router = useRouter();
 
+  const { clearEmployee } = useSalesEmployeeStore();
+
   const handleLogout = async () => {
     try {
       await axiosInstance.get("/api/user/logout");
+
+      clearEmployee();
       sessionStorage.removeItem("employeeData");
+
       toast.success("Logged out successfully");
       router.push("/login");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Logout failed.");
-      console.log(error);
+      toast.error(error.response?.data?.message || "Logout failed");
     }
   };
 

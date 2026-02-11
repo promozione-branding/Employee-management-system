@@ -14,7 +14,7 @@ const SalesNavbar = () => {
   const router = useRouter();
   const [openEmployeeDetails, setOpenEmployeeDetails] = useState(false);
 
-  const { employee} = useSalesEmployeeStore();
+  const { employee, clearEmployee } = useSalesEmployeeStore();
 
   const handleLogout = async () => {
     try {
