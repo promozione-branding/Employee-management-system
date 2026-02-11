@@ -13,10 +13,10 @@ import { useEffect } from "react";
 const SalesDashboard = () => {
   const { employee } = useSalesEmployeeStore();
 
- 
   return (
     <div className="">
-      <div className="flex flex-col lg:flex-row">
+      {employee?._id}
+      {/* <div className="flex flex-col lg:flex-row">
         <EmployeeCalendar employeeId={employee?._id} />
         <EmployeeTodo employeeId={employee?._id} />
       </div>
@@ -30,7 +30,7 @@ const SalesDashboard = () => {
         <EmployeeAnnouncements />
         <RecentActivity employeeId={employee?._id} />
       </div>
-      <AllEmployeeContact />
+      <AllEmployeeContact /> */}
     </div>
   );
 };

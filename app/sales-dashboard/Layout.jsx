@@ -8,10 +8,17 @@ import React, { useEffect, useState } from "react";
 export default function SalesLayout({ children }) {
   const [open, setOpen] = useState(false);
   const fetchEmployee = useSalesEmployeeStore((s) => s.fetchEmployee);
+  const { employee, loading } = useSalesEmployeeStore();
 
   useEffect(() => {
-    fetchEmployee();
+    if (!employee) {
+      fetchEmployee().then(() => {
+        console.log("Employee fetched");
+      });
+    }
   }, []);
+
+  if (loading) return null; 
 
   return (
     <div className="flex min-h-screen bg-gray-100">
