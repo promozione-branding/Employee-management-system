@@ -12,11 +12,29 @@ import {
   UsersRound,
 } from "lucide-react";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import axiosInstance from "@/service/axiosInstance";
+import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 
 const SalesSidebar = ({ open, setOpen }) => {
+  const router = useRouter();
 
+  const { clearEmployee } = useSalesEmployeeStore();
 
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.get("/api/user/logout");
+
+      clearEmployee();
+      sessionStorage.removeItem("employeeData");
+
+      toast.success("Logged out successfully");
+      router.push("/login");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Logout failed");
+    }
+  };
 
   const navLinks = [
     {
@@ -94,7 +112,7 @@ const SalesSidebar = ({ open, setOpen }) => {
           className={`justify-start gap-4 hover:bg-gray-500 hover:text-white w-full p-3 ${
             !open && "justify-center"
           }`}
-          // onClick={handleLogout}
+          onClick={handleLogout}
         >
           <LogOut size={24} />
           {open && <span className="ml-3">Logout</span>}
