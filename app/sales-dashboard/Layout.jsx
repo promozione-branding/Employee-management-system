@@ -1,11 +1,20 @@
-"use client";
+import SalesNavbar from "@/components/layout/sales-dashboard/SalesNavbar";
+import SalesSidebar from "@/components/layout/sales-dashboard/SalesSidebar";
 
-import Layout from "@/components/layout/sales-dashboard/Layout";
+export default function SalesDashboardLayout({ children }) {
+  return (
+    <div className="flex h-screen bg-gray-100">
+      {/* Sidebar */}
+      <SalesSidebar />
 
-import React, { useEffect, useState } from "react";
+      {/* Right Section */}
+      <div className="flex flex-col flex-1">
+        <SalesNavbar />
 
-export default function SalesLayout({ children }) {
-
-
-  return <Layout>{children}</Layout>;
+        <main className="flex-1 p-6 overflow-y-auto">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
 }
