@@ -2,7 +2,11 @@ import React from "react";
 import SalesDashboard from "./SalesDashboard";
 
 const page = () => {
-  return <SalesDashboard />;
+  return (
+   
+      <SalesDashboard />
+
+  );
 };
 
 export default page;

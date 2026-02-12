@@ -10,9 +10,7 @@ const SalesNavbar = () => {
   return (
     <div className="bg-white h-16 px-6 flex items-center justify-between border-b shadow-sm relative">
       {/* Left */}
-      <h2 className="text-xl font-semibold text-gray-800">
-        Sales Dashboard
-      </h2>
+      <h2 className="text-xl font-semibold text-gray-800">Sales Dashboard</h2>
 
       {/* Right */}
       <div className="flex items-center gap-4">
