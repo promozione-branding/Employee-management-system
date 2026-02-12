@@ -13,11 +13,7 @@ import { useEffect } from "react";
 
 const SalesDashboard = () => {
   const { employee, loading } = useSalesEmployeeStore();
-  const fetchEmployee = useSalesEmployeeStore((s) => s.fetchEmployee);
 
-  useEffect(() => {
-    fetchEmployee();
-  }, []);
 
   if (loading) return <Loading />;
   if (!employee) return null;

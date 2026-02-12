@@ -3,13 +3,14 @@ import mongoose from "mongoose";
 const SalesWorkSchema = new mongoose.Schema(
   {
     employeeId: {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "Employee",
     },
     meetingUpdate: [
       new mongoose.Schema(
         {
+          salesPerson: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
           clientId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Customer",
@@ -32,7 +33,6 @@ const SalesWorkSchema = new mongoose.Schema(
             default: false,
           },
         },
-
         { timestamps: true },
       ),
     ],

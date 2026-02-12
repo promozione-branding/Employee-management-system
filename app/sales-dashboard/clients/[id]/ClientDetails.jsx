@@ -1,5 +1,6 @@
 import CustomerTab from "@/components/sales-dashboard/client/CustomerTab";
 import ProposalTab from "@/components/sales-dashboard/client/ProposalTab";
+import UpdateTab from "@/components/sales-dashboard/client/UpdateTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ClientDetails = ({ customerId }) => {
@@ -17,13 +18,12 @@ const ClientDetails = ({ customerId }) => {
         <TabsContent value="proposal">
           <ProposalTab customerId={customerId} />
         </TabsContent>
-        <TabsContent value="meeting">meeting</TabsContent>
+        <TabsContent value="meeting">
+          <UpdateTab  customerId={customerId}/>
+        </TabsContent>
       </Tabs>
     </div>
   );
 };
 
 export default ClientDetails;
-
-
-
