@@ -1,10 +1,23 @@
-"use client"
+"use client";
 
 import SalesNavbar from "@/components/layout/sales-dashboard/SalesNavbar";
 import SalesSidebar from "@/components/layout/sales-dashboard/SalesSidebar";
+import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 export default function SalesDashboardLayout({ children }) {
-  console.log("i am layout");
+  const data = useSalesEmployeeStore((s) => s.fetchEmployee);
+
+  useEffect(() => {
+    try {
+      data();
+    } catch (error) {
+      console.log(error);
+      toast.success("error");
+    }
+  }, []);
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
