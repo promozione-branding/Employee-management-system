@@ -10,16 +10,25 @@ import RecentActivity from "@/components/employee-dashboard/common/RecentActivit
 import AllEmployeeContact from "@/components/employee-dashboard/common/AllEmployeeContact";
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 import { useEffect } from "react";
+import TodayMeeting from "@/components/sales-dashboard/dashboard-cards/TodayMeeting";
+import Shemar from "@/components/layout/Skeleton";
+import RecentActivitySales from "@/components/sales-dashboard/dashboard-cards/RecentActivitySales";
+import DailyCall from "@/components/sales-dashboard/dashboard-cards/DailyCall";
 
 const SalesDashboard = () => {
   const { employee, loading } = useSalesEmployeeStore();
 
-
-  if (loading) return <Loading />;
+  if (loading) return <Shemar />;
   if (!employee) return null;
 
   return (
     <div className="">
+      <DailyCall />
+      <div className="flex flex-col lg:flex-row gap-4 mb-5">
+        <TodayMeeting />
+        <RecentActivitySales />
+      </div>
+
       <div className="flex flex-col lg:flex-row">
         <EmployeeCalendar employeeId={employee?._id} />
         <EmployeeTodo employeeId={employee?._id} />

@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
+import axiosInstance from "@/service/axiosInstance";
 import {
   LayoutDashboard,
   CalendarCheck,
@@ -12,11 +14,14 @@ import {
   UsersRound,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
+
 
 const SalesSidebar = () => {
   const [open, setOpen] = useState(false);
-
+ const router = useRouter();
   const navLinks = [
     {
       href: "/sales-dashboard",
@@ -50,6 +55,22 @@ const SalesSidebar = () => {
       icon: <User size={24} />,
     },
   ];
+
+  const { clearEmployee } = useSalesEmployeeStore();
+
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.get("/api/user/logout");
+
+      clearEmployee();
+      sessionStorage.removeItem("employeeData");
+
+      toast.success("Logged out successfully");
+      router.push("/login");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Logout failed");
+    }
+  };
 
   return (
     <div
@@ -93,7 +114,7 @@ const SalesSidebar = () => {
           className={`justify-start gap-4 hover:bg-gray-500 hover:text-white w-full p-3 ${
             !open && "justify-center"
           }`}
-          // onClick={handleLogout}
+          onClick={handleLogout}
         >
           <LogOut size={24} />
           {open && <span className="ml-3">Logout</span>}

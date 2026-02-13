@@ -30,7 +30,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
 
   const { employee } = useSalesEmployeeStore();
 
-
   const [callForm, setCallForm] = useState({
     status: "",
     note: "",
@@ -116,7 +115,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     setLoading(true);
 
     const formData = {
-      salesPersonId: salesPersonId || "",
+      salesPersonId: employee?.user?._id || "",
       salesPerson: selectEmail.map((item) => item?._id),
 
       clientId: customerId,
@@ -170,7 +169,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     setLoading(true);
 
     const formData = {
-      salesPersonId: salesPersonId || "",
+      salesPersonId: employee?.user?._id || "",
       salesPerson: selectEmail.map((item) => item?._id),
       clientId: customerId,
       updateType: "meeting",
@@ -217,7 +216,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     setLoading(true);
 
     const formData = {
-      salesPersonId: salesPersonId || "",
+      salesPersonId: employee?.user?._id || "",
       salesPerson: selectEmail.map((item) => item?._id),
 
       clientId: customerId,
@@ -271,7 +270,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     setLoading(true);
 
     const formData = {
-      salesPersonId: salesPersonId || "",
+      salesPersonId: employee?.user?._id || "",
       salesPerson: selectEmail.map((item) => item?._id),
 
       clientId: customerId,
@@ -317,7 +316,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     setLoading(true);
 
     const formData = {
-      salesPersonId: salesPersonId || "",
+      salesPersonId: employee?.user?._id || "",
       salesPerson: selectEmail.map((item) => item?._id),
 
       clientId: customerId,

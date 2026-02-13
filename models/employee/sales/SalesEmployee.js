@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const SalesEmployeeSchema = new mongoose.Schema(
   {
     employeeId: {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "Employee",
     },
@@ -21,7 +21,7 @@ const SalesEmployeeSchema = new mongoose.Schema(
     ],
 
     SaleWork: {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "SalesWork",
     },
   },

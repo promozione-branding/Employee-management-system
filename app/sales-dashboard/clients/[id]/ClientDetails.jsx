@@ -19,7 +19,7 @@ const ClientDetails = ({ customerId }) => {
           <ProposalTab customerId={customerId} />
         </TabsContent>
         <TabsContent value="meeting">
-          <UpdateTab  customerId={customerId}/>
+          <UpdateTab customerId={customerId}/>
         </TabsContent>
       </Tabs>
     </div>
