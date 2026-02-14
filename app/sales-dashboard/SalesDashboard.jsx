@@ -14,6 +14,8 @@ import TodayMeeting from "@/components/sales-dashboard/dashboard-cards/TodayMeet
 import Shemar from "@/components/layout/Skeleton";
 import RecentActivitySales from "@/components/sales-dashboard/dashboard-cards/RecentActivitySales";
 import DailyCall from "@/components/sales-dashboard/dashboard-cards/DailyCall";
+import TodaySalesReminder from "@/components/sales-dashboard/dashboard-cards/TodayReminder";
+import ProposalSend from "@/components/sales-dashboard/dashboard-cards/ProposalSend";
 
 const SalesDashboard = () => {
   const { employee, loading } = useSalesEmployeeStore();
@@ -24,6 +26,10 @@ const SalesDashboard = () => {
   return (
     <div className="">
       <DailyCall />
+      <div className="flex flex-col lg:flex-row gap-4 mb-5">
+        <ProposalSend />
+        <TodaySalesReminder />
+      </div>
       <div className="flex flex-col lg:flex-row gap-4 mb-5">
         <TodayMeeting />
         <RecentActivitySales />

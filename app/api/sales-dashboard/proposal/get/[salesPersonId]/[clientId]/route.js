@@ -6,11 +6,14 @@ export async function GET(req, { params }) {
   try {
     await connectDB();
 
-    const { id } = await params;
+    const { salesPersonId, clientId } = await params;
 
-    const items = await Proposal.find({ salesExecutive: id })
+    const items = await Proposal.find({
+      salesExecutive: salesPersonId,
+      clientId,
+    })
       .select(
-        "clientName clientCompany dateOfProposal GSTIN totalAmount proposalNo",
+        "clientName clientCompany dateOfProposal GSTIN totalAmount proposalNo proposalSent",
       )
       .sort({ createdAt: -1 });
 

@@ -29,8 +29,8 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
   const [selectEmail, setSelectEmail] = useState([]);
 
   const { employee } = useSalesEmployeeStore();
-
-  const [callForm, setCallForm] = useState({
+  
+ const [callForm, setCallForm] = useState({
     status: "",
     note: "",
     reminderTime: "",
@@ -388,6 +388,8 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     }
     CheckNewMeet();
   }, [customerId]);
+
+
 
   useEffect(() => {
     async function salesPeopleMail() {

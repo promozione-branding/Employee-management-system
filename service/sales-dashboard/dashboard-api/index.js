@@ -20,3 +20,19 @@ export async function dailyCallService(id) {
   );
   return data;
 }
+
+export async function todayReminderService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/sales-dashboard/dashboard-api/today-reminder/${id}`,
+  );
+
+  return data;
+}
+
+export async function proposalByEmployeeService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/sales-dashboard/dashboard-api/proposal-send/${id}`,
+  );
+
+  return data;
+}

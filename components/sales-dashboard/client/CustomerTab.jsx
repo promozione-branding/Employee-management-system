@@ -23,7 +23,7 @@ import {
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const CustomerTab = ({ customerId }) => {
+const CustomerTab = ({ customerId,salesPersonId }) => {
   const [customerDetails, setCustomerDetails] = useState(null);
   const [projectCycleData, setProjectCycleData] = useState(null);
   const [loadingProjectCycle, setLoadingProjectCycle] = useState(false);
@@ -35,6 +35,7 @@ const CustomerTab = ({ customerId }) => {
     startDate: "",
     endDate: "",
   });
+
 
   const handleProjectSubmit = async (e) => {
     e.preventDefault();
@@ -125,7 +126,7 @@ const CustomerTab = ({ customerId }) => {
         setCustomerDetails(response.data);
       }
     } catch (error) {
-      console.log(error, "hello error");
+      console.log(error);
       toast.error(error?.response?.data?.message);
     }
   };

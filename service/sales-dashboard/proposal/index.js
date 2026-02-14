@@ -8,9 +8,9 @@ export async function createProposalService(formData) {
   return data;
 }
 
-export async function getProposalService(id) {
+export async function getProposalService(salesPersonId, clientId) {
   const { data } = await axiosInstance.get(
-    `/api/sales-dashboard/proposal/get/${id}`,
+    `/api/sales-dashboard/proposal/get/${salesPersonId}/${clientId}`,
   );
   return data;
 }

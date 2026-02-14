@@ -7,7 +7,7 @@ const ProposalSchema = new mongoose.Schema(
       unique: true,
     },
     clientId: {
-      type: mongoose.Schema.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
       required: true,
     },
@@ -55,6 +55,10 @@ const ProposalSchema = new mongoose.Schema(
         paymentAmount: { type: Number },
       },
     ],
+    proposalSent: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

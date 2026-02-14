@@ -38,7 +38,7 @@ export function EmployeeProvider({ children }) {
 export const useEmployee = () => useContext(EmployeeContext);
 
 const Layout = ({ children }) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   return (
     <EmployeeProvider>

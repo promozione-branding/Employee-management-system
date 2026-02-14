@@ -29,6 +29,8 @@ const Client = () => {
   const [editingId, setEditingId] = useState(null);
   const { employee, loading } = useSalesEmployeeStore();
 
+  
+
   /* ---------------- Fetch ---------------- */
   const fetchCustomers = async () => {
     try {
@@ -135,6 +137,8 @@ const Client = () => {
   /* ---------------- UI ---------------- */
   if (loading || clientLoading) return <Loading />;
 
+
+
   return (
     <div>
       {/* Floating Add Button */}
@@ -190,7 +194,7 @@ const Client = () => {
               <div>{c.Address?.slice(0, 20)}...</div>
 
               <div className="flex gap-8">
-                <Link href={`/sales-dashboard/clients/${c._id}`}>
+                <Link href={`/sales-dashboard/clients/${c._id}/${employee?._id}`}>
                   <Eye />
                 </Link>
                 <SquarePen onClick={() => handleEdit(c._id)} />

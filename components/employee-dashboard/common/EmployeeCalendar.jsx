@@ -71,13 +71,15 @@ const EmployeeCalendar = ({ employeeId }) => {
 
   async function getCalendarItem() {
     try {
-      const res = await getCalendarService(employeeId);
-      if (res.success) {
-        const events = res.data.calendar.map((item) => ({
-          ...item,
-          start: item.date,
-        }));
-        setEvents(events);
+      if (employeeId) {
+        const res = await getCalendarService(employeeId);
+        if (res.success) {
+          const events = res.data.calendar.map((item) => ({
+            ...item,
+            start: item.date,
+          }));
+          setEvents(events);
+        }
       }
     } catch (error) {
       console.log(error);

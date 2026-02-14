@@ -22,10 +22,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const ProposalTab = ({ customerId }) => {
+const ProposalTab = ({ customerId, salesPersonId }) => {
   const [listPropoasls, setListPropoasls] = useState([]);
   const [sendingInvoiceId, setSendingInvoiceId] = useState(null);
-  const { employee,loading } = useSalesEmployeeStore();
+  const { employee, loading } = useSalesEmployeeStore();
 
   const router = useRouter();
 
@@ -36,6 +36,7 @@ const ProposalTab = ({ customerId }) => {
     try {
       const res = await sendProposalPdfEmailService({ proposalId });
       if (res.success) {
+        getAllCustomerPropsals();
         toast.success("Email sent successfully!", { id: toastId });
       } else {
         throw new Error(res.message || "Failed to send email.");
@@ -50,7 +51,7 @@ const ProposalTab = ({ customerId }) => {
 
   async function getAllCustomerPropsals() {
     try {
-      const allPropsals = await getProposalService(employee?._id);
+      const allPropsals = await getProposalService(salesPersonId, customerId);
       if (allPropsals?.success) {
         toast.success("Proposal fetched");
         setListPropoasls(allPropsals.data);
@@ -80,16 +81,14 @@ const ProposalTab = ({ customerId }) => {
     }
   }
 
-
- 
+  console.log(employee?.user?._id);
 
   useEffect(() => {
     getAllCustomerPropsals();
   }, []);
 
-
-  if(loading){
-    return <Loading />
+  if (loading) {
+    return <Loading />;
   }
 
   return (
@@ -151,9 +150,9 @@ const ProposalTab = ({ customerId }) => {
                 <button
                   disabled={sendingInvoiceId === item?._id}
                   onClick={() => sendEmailHandler(item?._id)}
-                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={` border-black h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed ${item?.proposalSent ? "border-1 border-blue-400 " : "bg-gray-200 border-black"}`}
                 >
-                  <Mail />
+                  {item?.proposalSent ? <Mail color="#2e7eff" /> : <Mail />}
                 </button>
                 <Link
                   href={`/sales-dashboard/proposal/edit-proposal/${item?._id}`}
@@ -167,8 +166,6 @@ const ProposalTab = ({ customerId }) => {
                 >
                   <Trash2 />
                 </div>
-
-             
               </div>
             </div>
           ))}
