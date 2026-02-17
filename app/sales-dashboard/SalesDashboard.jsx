@@ -45,7 +45,7 @@ const SalesDashboard = () => {
         <EmployeeClientsProgress employeeId={employee?._id} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 mt-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 mt-10 gap-5">
         <EmployeeAnnouncements />
         <RecentActivity employeeId={employee?._id} />
       </div>

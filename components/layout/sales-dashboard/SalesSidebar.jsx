@@ -12,16 +12,16 @@ import {
   Menu,
   Briefcase,
   UsersRound,
+  CircleUserRound,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-
 const SalesSidebar = () => {
   const [open, setOpen] = useState(false);
- const router = useRouter();
+  const router = useRouter();
   const navLinks = [
     {
       href: "/sales-dashboard",
@@ -33,26 +33,25 @@ const SalesSidebar = () => {
       label: "Client",
       icon: <UsersRound size={24} />,
     },
-    {
-      href: "/sales-dashboard/attendance",
-      label: "Attendance",
-      icon: <CalendarCheck size={24} />,
-    },
-
-    {
-      href: "/sales-dashboard/leaves",
-      label: "Leaves",
-      icon: <FileText size={24} />,
-    },
-    {
-      href: "/sales-dashboard/projects",
-      label: "Projects",
-      icon: <Briefcase size={24} />,
-    },
+    // {
+    //   href: "/sales-dashboard/attendance",
+    //   label: "Attendance",
+    //   icon: <CalendarCheck size={24} />,
+    // },
+    // {
+    //   href: "/sales-dashboard/leaves",
+    //   label: "Leaves",
+    //   icon: <FileText size={24} />,
+    // },
+    // {
+    //   href: "/sales-dashboard/projects",
+    //   label: "Projects",
+    //   icon: <Briefcase size={24} />,
+    // },
     {
       href: "/sales-dashboard/profile",
       label: "Profile",
-      icon: <User size={24} />,
+      icon: <CircleUserRound size={60} />,
     },
   ];
 
@@ -90,7 +89,7 @@ const SalesSidebar = () => {
         </Button>
       </div>
 
-      <nav className="flex flex-col gap-2 flex-grow">
+      <nav className="flex flex-col gap-2 grow">
         {navLinks.map((link) => (
           <Button
             key={link.href}
@@ -100,7 +99,10 @@ const SalesSidebar = () => {
               !open && "justify-center"
             }`}
           >
-            <Link href={link.href} className="flex items-center w-full">
+            <Link
+              href={link.href}
+              className="flex items-center w-full hover:border"
+            >
               {link.icon}
               {open && <span className="ml-3">{link.label}</span>}
             </Link>

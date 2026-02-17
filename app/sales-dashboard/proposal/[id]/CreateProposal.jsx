@@ -26,7 +26,7 @@ import toast from "react-hot-toast";
 
 const CreateProposal = ({ customerId }) => {
   const navigate = useRouter();
-  const { employee,loading } = useSalesEmployeeStore();
+  const { employee, loading } = useSalesEmployeeStore();
 
   // ---------------- STATE ----------------
   const [formData, setFormData] = useState(initialPerposelFormData);
@@ -83,7 +83,7 @@ const CreateProposal = ({ customerId }) => {
     paymentMethod: formData?.paymentMethod,
     totalAmount: calculationOfTotalAmount(),
     partlyPayment: listOfPayments,
-    dateOfProposal:formData?.dateOfProposal
+    dateOfProposal: formData?.dateOfProposal,
   };
 
   async function fetchAllServices() {
@@ -201,7 +201,7 @@ const CreateProposal = ({ customerId }) => {
       }
     }
   }
-  
+
   async function customerDetails() {
     try {
       const response = await getCustomerServices(customerId);
@@ -278,7 +278,8 @@ const CreateProposal = ({ customerId }) => {
       (acc, curr) => acc + Number(curr.paymentAmount),
       0,
     );
-    const remainingBalance = grandTotal - totalPaid;
+    const remainingBalance =
+      (tanNo ? grandTotal - tdsAmount : grandTotal) - totalPaid;
 
     if (!partlyPaymentFormData.paymentDuration) {
       toast.error("Please select a payment duration");
@@ -322,9 +323,8 @@ const CreateProposal = ({ customerId }) => {
     setFormData((prev) => ({ ...prev, services: serviceIds }));
   }, [selectedServices]);
 
-
-  if(loading){
-    return <Loading />
+  if (loading) {
+    return <Loading />;
   }
   return (
     <div className="w-full">
@@ -486,7 +486,12 @@ const CreateProposal = ({ customerId }) => {
 
                   <div className="flex justify-between font-bold text-lg text-gray-900 border-t pt-2 mt-2">
                     <span>Total Amount</span>
-                    <span>₹ {grandTotal.toLocaleString("en-IN")}</span>
+                    <span>
+                      {(tanNo
+                        ? grandTotal - tdsAmount
+                        : grandTotal
+                      ).toLocaleString("en-IN")}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -533,7 +538,7 @@ const CreateProposal = ({ customerId }) => {
             <p className="text-sm text-gray-500">
               Balance: ₹{" "}
               {(
-                grandTotal -
+                (tanNo ? grandTotal - tdsAmount : grandTotal) -
                 listOfPayments.reduce(
                   (acc, curr) => acc + Number(curr.paymentAmount),
                   0,

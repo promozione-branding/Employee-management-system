@@ -237,6 +237,7 @@ const Proposal = ({ customerId }) => {
   const grandTotal = totalService + gstAmount;
   const tdsAmount = totalService * 0.02;
 
+
   useEffect(() => {
     customerDetails();
     fetchAllServices();
@@ -261,7 +262,7 @@ const Proposal = ({ customerId }) => {
       (acc, curr) => acc + Number(curr.paymentAmount),
       0,
     );
-    const remainingBalance = grandTotal - totalPaid;
+    const remainingBalance = (tanNo ? grandTotal - tdsAmount : grandTotal) - totalPaid;
 
     if (!partlyPaymentFormData.paymentDuration) {
       toast.error("Please select a payment duration");
@@ -465,7 +466,12 @@ const Proposal = ({ customerId }) => {
 
                   <div className="flex justify-between font-bold text-lg text-gray-900 border-t pt-2 mt-2">
                     <span>Total Amount</span>
-                    <span>₹ {grandTotal.toLocaleString("en-IN")}</span>
+                    <span>
+                      {(tanNo
+                        ? grandTotal - tdsAmount
+                        : grandTotal
+                      ).toLocaleString("en-IN")}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -512,7 +518,7 @@ const Proposal = ({ customerId }) => {
             <p className="text-sm text-gray-500">
               Balance: ₹{" "}
               {(
-                grandTotal -
+                (tanNo ? grandTotal - tdsAmount : grandTotal) -
                 listOfPayments.reduce(
                   (acc, curr) => acc + Number(curr.paymentAmount),
                   0,
