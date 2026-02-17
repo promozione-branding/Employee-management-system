@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Proposal from "@/models/admin/Proposal";
 import { validateCreateProposal } from "@/lib/validation/sales/proposal";
 import SalesEmployee from "@/models/employee/sales/SalesEmployee";
+import Customer from "@/models/admin/Customer";
 
 export async function POST(req) {
   try {
@@ -26,6 +27,10 @@ export async function POST(req) {
 
     // Create proposal
     const proposal = await Proposal.create(value);
+
+    await Customer.findByIdAndUpdate(proposal.clientId, {
+      $push: { proposals: proposal._id },
+    });
 
     // Link proposal to sales employee (if provided)
     if (proposal.salesExecutive) {

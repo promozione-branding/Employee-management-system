@@ -36,6 +36,8 @@ const TodaySalesReminder = () => {
     }
   }, [employee]);
 
+  console.log(todayReminderData[0]);
+
   if (loading) {
     return (
       <div className="w-full bg-white p-4 rounded-lg shadow-sm border border-gray-200">
@@ -63,7 +65,7 @@ const TodaySalesReminder = () => {
                     {activity.clientName}
                   </h3>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {new Date(activity.createdAt).toLocaleString([], {
+                    {new Date(activity.reminderAt).toLocaleString([], {
                       month: "short",
                       day: "numeric",
                       hour: "2-digit",

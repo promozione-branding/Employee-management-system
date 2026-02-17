@@ -2,11 +2,11 @@ import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
 import Proposal from "@/models/admin/Proposal";
 
-export async function GET(req, context) {
+export async function GET(req, { params }) {
   try {
     await connectDB();
 
-    const { id } = await context.params;
+    const { id } = await params;
 
     // Find the customer by ID and populate the 'proposals' field
     const customer = await Customer.findById(id).populate({
