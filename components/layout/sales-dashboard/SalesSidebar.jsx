@@ -13,6 +13,7 @@ import {
   Briefcase,
   UsersRound,
   CircleUserRound,
+  Activity,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -32,6 +33,11 @@ const SalesSidebar = () => {
       href: "/sales-dashboard/clients",
       label: "Client",
       icon: <UsersRound size={24} />,
+    },
+    {
+      href: "/sales-dashboard/activity",
+      label: "Activity",
+      icon: <Activity size={24} />,
     },
     // {
     //   href: "/sales-dashboard/attendance",

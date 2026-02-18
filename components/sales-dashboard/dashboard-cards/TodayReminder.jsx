@@ -36,7 +36,6 @@ const TodaySalesReminder = () => {
     }
   }, [employee]);
 
-  console.log(todayReminderData[0]);
 
   if (loading) {
     return (
@@ -52,7 +51,7 @@ const TodaySalesReminder = () => {
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 lg:w-1/2 mb-4">
       <h2 className="text-lg font-bold text-gray-800 mb-4">Today Reminder</h2>
-      <div className="flex flex-col gap-3 overflow-y-auto max-h-[300px] custom-scrollbar">
+      <div className="flex flex-col gap-3 overflow-y-auto max-h-[400px] custom-scrollbar">
         {todayReminderData?.length > 0 ? (
           todayReminderData.map((activity) => (
             <div
@@ -65,11 +64,13 @@ const TodaySalesReminder = () => {
                     {activity.clientName}
                   </h3>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {new Date(activity.reminderAt).toLocaleString([], {
+                    {new Date(activity.reminderAt).toLocaleString("en-IN", {
                       month: "short",
                       day: "numeric",
                       hour: "2-digit",
                       minute: "2-digit",
+                      hour12: true,
+                      timeZone: "UTC",
                     })}
                   </p>
                 </div>

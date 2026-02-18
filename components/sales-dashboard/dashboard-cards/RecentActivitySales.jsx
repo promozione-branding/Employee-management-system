@@ -14,7 +14,9 @@ const RecentActivitySales = () => {
 
   async function fetchRecentActivity() {
     try {
-      const res = await recentActivityService(employee?.user?._id);
+      const res = await recentActivityService(employee?._id);
+
+      console.log(employee, "res");
       if (res.success) {
         setLoading(false);
         setRecentData(res?.data);
@@ -52,49 +54,43 @@ const RecentActivitySales = () => {
       <h2 className="text-lg font-bold text-gray-800 mb-4">Recent Activity</h2>
       <div className="flex flex-col gap-3 overflow-y-auto max-h-[300px] custom-scrollbar">
         {recentData?.length > 0 ? (
-          recentData.map((activity) => (
+          recentData.map((activity, index) => (
             <div
-              key={activity._id}
+              key={activity.refId || index}
               className="p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors"
             >
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-semibold text-gray-700 text-sm">
-                    {activity.clientName}
+                    {activity.title}
                   </h3>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {new Date(activity.createdAt).toLocaleString([], {
+                    {new Date(activity.createdAt).toLocaleString("en-IN", {
                       month: "short",
                       day: "numeric",
                       hour: "2-digit",
                       minute: "2-digit",
+                      hour12: true,
                     })}
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full capitalize ${
-                      activity.updateType === "call"
+                      activity.type === "proposal"
                         ? "bg-blue-100 text-blue-600"
-                        : activity.updateType === "meeting"
-                          ? "bg-purple-100 text-purple-600"
+                        : activity.type === "customer"
+                          ? "bg-green-100 text-green-600"
                           : "bg-gray-100 text-gray-600"
                     }`}
                   >
-                    {activity.updateType}
+                    {activity.type}
                   </span>
-                  {activity.status && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full capitalize bg-yellow-50 text-yellow-600 border border-yellow-100">
-                      {activity.status.replace("-", " ")}
-                    </span>
-                  )}
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full capitalize bg-yellow-50 text-yellow-600 border border-yellow-100">
+                    {activity.action}
+                  </span>
                 </div>
               </div>
-              {activity.note && (
-                <div className="mt-2 text-sm text-gray-600 bg-white p-2 rounded border border-gray-100">
-                  <p className="line-clamp-2">{activity.note}</p>
-                </div>
-              )}
             </div>
           ))
         ) : (

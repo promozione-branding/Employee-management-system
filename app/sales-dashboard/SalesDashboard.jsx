@@ -42,14 +42,18 @@ const SalesDashboard = () => {
 
       <div className="flex flex-col lg:flex-row lg:justify-around">
         <EmployeeReminder employeeId={employee?._id} />
-        <EmployeeClientsProgress employeeId={employee?._id} />
+        <AllEmployeeContact />
+
+        {/* hidden  */}
+        {/* <EmployeeClientsProgress employeeId={employee?._id} /> */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 mt-10 gap-5">
         <EmployeeAnnouncements />
-        <RecentActivity employeeId={employee?._id} />
+
+        {/* hidden  */}
+        {/* <RecentActivity employeeId={employee?._id} /> */}
       </div>
-      <AllEmployeeContact />
     </div>
   );
 };
