@@ -1,9 +1,11 @@
 "use client";
 
+import { useEmployeeStore } from "@/lib/store/EmployeeStore";
 import { useState, useEffect } from "react";
 
 export default function SEOChecklistForm({ onSubmit, template, completed }) {
   const [checklist, setChecklist] = useState(template);
+  const { employee } = useEmployeeStore();
 
   useEffect(() => {
     if (completed?.length) {
@@ -23,7 +25,7 @@ export default function SEOChecklistForm({ onSubmit, template, completed }) {
           ? {
               ...item,
               completed: !item.completed,
-              completedBy: 122,
+              completedBy: employee?._id,
               completedAt: !item.completed ? new Date().toISOString() : null,
             }
           : item,

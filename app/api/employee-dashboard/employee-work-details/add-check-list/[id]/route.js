@@ -42,6 +42,7 @@ export async function PATCH(req, { params }) {
           key: item.key,
           label: item.label,
           completed: item.completed ?? false,
+          completedBy: item.completedBy,
           completedAt: item.completed ? new Date() : null,
           remarks: item.remarks ?? "",
           proofUrl: item.proofUrl ?? "",

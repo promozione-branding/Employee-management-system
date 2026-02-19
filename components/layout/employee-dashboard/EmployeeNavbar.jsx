@@ -9,10 +9,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/service/axiosInstance";
-import { useEmployee } from "./Layout";
+import { useEmployeeStore } from "@/lib/store/EmployeeStore";
 
 const EmployeeNavbar = () => {
-   const { basicEmployeeData } = useEmployee();
+   const { employee } = useEmployeeStore();
 
   const [openEmployeeDetails, setOpenEmployeeDetails] = useState(false);
   const router = useRouter();
@@ -80,13 +80,13 @@ const EmployeeNavbar = () => {
               alt="employeeImage"
               className=" rounded-full"
               src={
-                basicEmployeeData?.basicDetails?.profileImage ||
+                employee?.basicDetails?.profileImage ||
                 "https://github.com/shadcn.png"
               }
             />
           </div>
           <span className="text-sm font-medium hidden sm:block capitalize">
-            {basicEmployeeData?.basicDetails?.name}
+            {employee?.basicDetails?.name}
           </span>
         </div>
       </div>
@@ -97,12 +97,12 @@ const EmployeeNavbar = () => {
         <div className="absolute top-16 right-6 z-50 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-300">
           <div className="p-4 border-b border-gray-100 bg-gray-50/50">
             <p className="font-semibold text-gray-800 capitalize">
-              {basicEmployeeData?.basicDetails?.name || "Employee"}
+              {employee?.basicDetails?.name || "Employee"}
             </p>
             <p className="text-xs text-gray-500 mt-0.5 truncate">
-              {Array.isArray(basicEmployeeData?.basicDetails?.email)
-                ? basicEmployeeData?.basicDetails?.email[0]
-                : basicEmployeeData?.basicDetails?.email ||
+              {Array.isArray(employee?.basicDetails?.email)
+                ? employee?.basicDetails?.email[0]
+                : employee?.basicDetails?.email ||
                   "employee@promozione.com"}
             </p>
           </div>

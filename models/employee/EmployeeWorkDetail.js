@@ -28,7 +28,6 @@ const ChecklistItemSchema = new mongoose.Schema(
       ref: "Employee",
     },
   },
-  { _id: false },
 );
 
 const EmployeeWorkDetailSchema = new mongoose.Schema(
