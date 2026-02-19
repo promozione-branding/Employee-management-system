@@ -23,6 +23,7 @@ export default function SEOChecklistForm({ onSubmit, template, completed }) {
           ? {
               ...item,
               completed: !item.completed,
+              completedBy: 122,
               completedAt: !item.completed ? new Date().toISOString() : null,
             }
           : item,

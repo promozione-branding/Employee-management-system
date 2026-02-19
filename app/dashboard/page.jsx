@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -46,6 +46,9 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import { MyClient } from "@/components/admin-dashboard/dashboard/MyClient";
+import KPI from "@/components/admin-dashboard/dashboard/KPI";
+import Employees from "@/components/admin-dashboard/dashboard/Employees";
 
 const Dashboard = () => {
   const [events, setEvents] = useState([
@@ -108,45 +111,16 @@ const Dashboard = () => {
     { week: "Week 4", performance: 85, target: 85 },
   ];
 
-  // KPI Cards Data
-  const kpiCards = [
-    {
-      title: "Total Revenue",
-      value: "$312,400",
-      change: "+12.5%",
-      isPositive: true,
-      icon: IndianRupee,
-      bgColor: "bg-blue-50",
-      iconColor: "text-blue-600",
-    },
-    {
-      title: "Total Customers",
-      value: "467",
-      change: "+8.2%",
-      isPositive: true,
-      icon: Users,
-      bgColor: "bg-green-50",
-      iconColor: "text-green-600",
-    },
-    {
-      title: "Active Projects",
-      value: "42",
-      change: "+3.1%",
-      isPositive: true,
-      icon: FileText,
-      bgColor: "bg-purple-50",
-      iconColor: "text-purple-600",
-    },
-    {
-      title: "Work Details",
-      value: "89.2%",
-      change: "-2.3%",
-      isPositive: false,
-      icon: Activity,
-      bgColor: "bg-orange-50",
-      iconColor: "text-orange-600",
-    },
-  ];
+ 
+
+  async function fetchClientCount() {
+    try {
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {}, []);
 
   return (
     <div className="min-h-screen">
@@ -159,37 +133,10 @@ const Dashboard = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {kpiCards.map((card, index) => {
-          const Icon = card.icon;
-          return (
-            <div
-              key={index}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`${card.bgColor} p-3 rounded-lg`}>
-                  <Icon className={`${card.iconColor} w-6 h-6`} />
-                </div>
-                <div
-                  className={`flex items-center gap-1 ${card.isPositive ? "text-green-600" : "text-red-600"}`}
-                >
-                  {card.isPositive ? (
-                    <ArrowUpRight size={16} />
-                  ) : (
-                    <ArrowDownRight size={16} />
-                  )}
-                  <span className="text-sm font-semibold">{card.change}</span>
-                </div>
-              </div>
-              <h3 className="text-slate-600 text-sm font-medium mb-1">
-                {card.title}
-              </h3>
-              <p className="text-2xl font-bold text-slate-900">{card.value}</p>
-            </div>
-          );
-        })}
-      </div>
+    <KPI />
+
+    {/* employee  */}
+    <Employees />
 
       {/* Calendar Section */}
       <div className="flex gap-2 items-start">
@@ -219,118 +166,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        <div className="lg:w-1/2">
-          <div className="bg-white rounded-lg shadow-md p-6 h-full">
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-slate-900 mb-2">
-                My Clients
-              </h2>
-              <p className="text-slate-600 text-sm">
-                Active clients and their status
-              </p>
-            </div>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {[
-                {
-                  id: 1,
-                  name: "Acme Corporation",
-                  contact: "John Anderson",
-                  email: "john@acme.com",
-                  status: "Active",
-                  value: "$45,000",
-                  icon: Building,
-                  color: "bg-blue-50",
-                  iconColor: "text-blue-600",
-                },
-                {
-                  id: 2,
-                  name: "Tech Innovations",
-                  contact: "Sarah Tech",
-                  email: "sarah@techinno.com",
-                  status: "Active",
-                  value: "$32,500",
-                  icon: Code,
-                  color: "bg-purple-50",
-                  iconColor: "text-purple-600",
-                },
-                {
-                  id: 3,
-                  name: "Global Solutions",
-                  contact: "Mike Global",
-                  email: "mike@globalsol.com",
-                  status: "Pending",
-                  value: "$28,000",
-                  icon: Globe,
-                  color: "bg-yellow-50",
-                  iconColor: "text-yellow-600",
-                },
-                {
-                  id: 4,
-                  name: "Creative Studios",
-                  contact: "Emma Creative",
-                  email: "emma@creative.com",
-                  status: "Active",
-                  value: "$56,200",
-                  icon: Palette,
-                  color: "bg-pink-50",
-                  iconColor: "text-pink-600",
-                },
-                {
-                  id: 5,
-                  name: "StartUp Hub",
-                  contact: "David Hub",
-                  email: "david@startuphub.com",
-                  status: "Active",
-                  value: "$19,500",
-                  icon: Rocket,
-                  color: "bg-green-50",
-                  iconColor: "text-green-600",
-                },
-              ].map((client) => {
-                const ClientIcon = client.icon;
-                return (
-                  <div
-                    key={client.id}
-                    className={`${client.color} p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`${client.iconColor} p-2 bg-white rounded-lg`}
-                      >
-                        <ClientIcon size={24} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className="font-semibold text-slate-900 truncate">
-                            {client.name}
-                          </h3>
-                          <span
-                            className={`text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap ${
-                              client.status === "Active"
-                                ? "bg-green-200 text-green-800"
-                                : "bg-yellow-200 text-yellow-800"
-                            }`}
-                          >
-                            {client.status}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-600 mt-1">
-                          {client.contact}
-                        </p>
-                        <p className="text-xs text-slate-500 truncate">
-                          {client.email}
-                        </p>
-                        <p className="text-sm font-bold text-slate-900 mt-2">
-                          {client.value}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+       <MyClient />
       </div>
 
       {/* Charts Section */}

@@ -20,7 +20,7 @@ const EmployeeDetailsDashboard = ({employeeId}) => {
       label: "Task",
       icon: <ListTodo size={24} />,
       description: "Manage assigned tasks",
-      href:""
+      href:`/dashboard/employee/employee-details/employee-task/${employeeId}`
     },
     {
       label: "Clients",

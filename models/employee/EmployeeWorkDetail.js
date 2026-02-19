@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 const ChecklistItemSchema = new mongoose.Schema(
   {
     key: {
-      type: String, 
+      type: String,
       required: true,
     },
     label: {
-      type: String, 
+      type: String,
       required: true,
     },
     completed: {
@@ -21,7 +21,11 @@ const ChecklistItemSchema = new mongoose.Schema(
       type: String,
     },
     proofUrl: {
-      type: String, 
+      type: String,
+    },
+    completedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee",
     },
   },
   { _id: false },
@@ -46,7 +50,14 @@ const EmployeeWorkDetailSchema = new mongoose.Schema(
 
     department: {
       type: String,
-      enum: ["SEO", "WEB_DEVELOPER", "SOCIAL_MEDIA", "ADS_MANAGER","OTHER","SALES"],
+      enum: [
+        "SEO",
+        "WEB_DEVELOPER",
+        "SOCIAL_MEDIA",
+        "ADS_MANAGER",
+        "OTHER",
+        "SALES",
+      ],
       required: true,
       index: true,
     },
@@ -65,7 +76,7 @@ const EmployeeWorkDetailSchema = new mongoose.Schema(
     progressPercentage: {
       departmentType: {
         type: String,
-        enum: ["SEO", "WEB_DEVELOPER", "SOCIAL_MEDIA", "ADS_MANAGER","OTHER"],
+        enum: ["SEO", "WEB_DEVELOPER", "SOCIAL_MEDIA", "ADS_MANAGER", "OTHER"],
       },
       completeField: {
         type: Number,

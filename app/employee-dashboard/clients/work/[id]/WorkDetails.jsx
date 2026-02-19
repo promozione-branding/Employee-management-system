@@ -57,8 +57,7 @@ const WorkDetails = ({ workDetailId }) => {
   async function handleSubmit(checklistData) {
     try {
       const filledData = checklistData.filter((item) => item.completed);
-
-      const res = await addCheckListService(workDetailId, {
+      console.log(workDetailId, {
         checkList: filledData,
         totalField: Math.max(
           checklistData?.length || 0,
@@ -66,11 +65,19 @@ const WorkDetails = ({ workDetailId }) => {
         ),
       });
 
-      if (res.success) {
-        toast.success(res.message || "Checklist updated successfully");
-        setWorkDetailsData(res.data);
-        fetchWorkDetails();
-      }
+      // const res = await addCheckListService(workDetailId, {
+      //   checkList: filledData,
+      //   totalField: Math.max(
+      //     checklistData?.length || 0,
+      //     workDetailsData?.progressPercentage?.totalField || 0,
+      //   ),
+      // });
+
+      // if (res.success) {
+      //   toast.success(res.message || "Checklist updated successfully");
+      //   setWorkDetailsData(res.data);
+      //   fetchWorkDetails();
+      // }
     } catch (error) {
       console.log(error);
       toast.error(error.response.data?.message || "Error while add check list");
@@ -107,7 +114,6 @@ const WorkDetails = ({ workDetailId }) => {
   }
 
   const { department, checklist, status } = workDetailsData;
-
 
   let selectedTemplate;
   if (department === "SEO") {
