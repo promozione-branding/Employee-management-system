@@ -41,22 +41,22 @@ const EmployeeSidebar = ({ open, setOpen }) => {
       label: "Client",
       icon: <UsersRound size={24} />,
     },
-    {
-      href: "/employee-dashboard/attendance",
-      label: "Attendance",
-      icon: <CalendarCheck size={24} />,
-    },
+    // {
+    //   href: "/employee-dashboard/attendance",
+    //   label: "Attendance",
+    //   icon: <CalendarCheck size={24} />,
+    // },
 
-    {
-      href: "/employee-dashboard/leaves",
-      label: "Leaves",
-      icon: <FileText size={24} />,
-    },
-    {
-      href: "/employee-dashboard/projects",
-      label: "Projects",
-      icon: <Briefcase size={24} />,
-    },
+    // {
+    //   href: "/employee-dashboard/leaves",
+    //   label: "Leaves",
+    //   icon: <FileText size={24} />,
+    // },
+    // {
+    //   href: "/employee-dashboard/projects",
+    //   label: "Projects",
+    //   icon: <Briefcase size={24} />,
+    // },
     {
       href: "/employee-dashboard/profile",
       label: "Profile",

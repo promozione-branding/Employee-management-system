@@ -16,6 +16,7 @@ import RecentActivitySales from "@/components/sales-dashboard/dashboard-cards/Re
 import DailyCall from "@/components/sales-dashboard/dashboard-cards/DailyCall";
 import TodaySalesReminder from "@/components/sales-dashboard/dashboard-cards/TodayReminder";
 import ProposalSend from "@/components/sales-dashboard/dashboard-cards/ProposalSend";
+import CurrentMonthDealValue from "@/components/sales-dashboard/dashboard-cards/CurrentMonthDealValue";
 
 const SalesDashboard = () => {
   const { employee, loading } = useSalesEmployeeStore();
@@ -25,8 +26,11 @@ const SalesDashboard = () => {
 
   return (
     <div className="">
-      <DailyCall />
-      <div className="flex flex-col lg:flex-row gap-4 mb-5">
+      <div className="flex gap-3">
+        <DailyCall />
+        <CurrentMonthDealValue />
+      </div>
+      {/* <div className="flex flex-col lg:flex-row gap-4 mb-5">
         <ProposalSend />
         <TodaySalesReminder />
       </div>
@@ -38,18 +42,18 @@ const SalesDashboard = () => {
       <div className="flex flex-col lg:flex-row">
         <EmployeeCalendar employeeId={employee?._id} />
         <EmployeeTodo employeeId={employee?._id} />
-      </div>
+      </div> */}
 
       <div className="flex flex-col lg:flex-row lg:justify-around">
-        <EmployeeReminder employeeId={employee?._id} />
-        <AllEmployeeContact />
+        {/* <EmployeeReminder employeeId={employee?._id} />
+        <AllEmployeeContact /> */}
 
         {/* hidden  */}
         {/* <EmployeeClientsProgress employeeId={employee?._id} /> */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 mt-10 gap-5">
-        <EmployeeAnnouncements />
+        {/* <EmployeeAnnouncements /> */}
 
         {/* hidden  */}
         {/* <RecentActivity employeeId={employee?._id} /> */}

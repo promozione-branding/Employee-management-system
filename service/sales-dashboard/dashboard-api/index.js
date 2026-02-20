@@ -36,3 +36,13 @@ export async function proposalByEmployeeService(id) {
 
   return data;
 }
+
+// current month deal value of sales
+
+export async function currentMonthDealValue(id) {
+  const { data } = await axiosInstance.get(
+    `/api/sales-dashboard/dashboard-api/current-month-deal-value/${id}`,
+  );
+
+  return data;
+}

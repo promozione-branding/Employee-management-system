@@ -1,4 +1,3 @@
-
 import { connectDB } from "@/lib/db";
 import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
 import { NextResponse } from "next/server";
@@ -13,20 +12,22 @@ export async function GET(req, { params }) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, message: "Invalid employee id" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const objectId = new mongoose.Types.ObjectId(id);
 
     const work = await EmployeeWorkDetail.find({
-      employeeId: { $in: [objectId] }, 
+      employeeId: { $in: [objectId] },
       checklist: {
         $elemMatch: {
-          completedBy: objectId, 
+          completedBy: objectId,
         },
       },
-    }).lean(); 
+    })
+      .populate({ path: "clientId", select: "name company" })
+      .lean();
 
     return NextResponse.json(
       {
@@ -34,7 +35,7 @@ export async function GET(req, { params }) {
         message: "Success",
         data: work,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error(error);
@@ -44,7 +45,7 @@ export async function GET(req, { params }) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

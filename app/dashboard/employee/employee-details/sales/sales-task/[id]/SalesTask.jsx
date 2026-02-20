@@ -1,16 +1,11 @@
 "use client";
-
+import SalesCustomerTab from "@/components/admin-dashboard/employee/sales-work/SalesCustomerTab";
+import SalesProposalTab from "@/components/admin-dashboard/employee/sales-work/SalesProposalTab";
+import SalesUpdateTab from "@/components/admin-dashboard/employee/sales-work/SalesUpdateTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React from "react";
-import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
-import UpdateTab from "@/components/sales-dashboard/activity/UpdateTab";
-import CustomerTab from "@/components/sales-dashboard/activity/CustomerTab";
-import ProposalTab from "@/components/sales-dashboard/activity/ProposalTab";
 
-const Activity = () => {
-  const { employee } = useSalesEmployeeStore();
-
-
+const SalesTask = ({ employeeId }) => {
   return (
     <div>
       <Tabs defaultValue="updates" className="">
@@ -20,17 +15,17 @@ const Activity = () => {
           <TabsTrigger value="proposal">Proposal</TabsTrigger>
         </TabsList>
         <TabsContent value="updates">
-          <UpdateTab userId={employee?.user?._id} />
+          <SalesUpdateTab employeeId={employeeId} />
         </TabsContent>
         <TabsContent value="customer">
-          <CustomerTab employeeId={employee?._id} />
+          <SalesCustomerTab employeeId={employeeId} />
         </TabsContent>
         <TabsContent value="proposal">
-          <ProposalTab employeeId={employee?._id} />
+          <SalesProposalTab employeeId={employeeId} />
         </TabsContent>
       </Tabs>
     </div>
   );
 };
 
-export default Activity;
+export default SalesTask;
