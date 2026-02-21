@@ -1,26 +1,24 @@
 "use client";
 
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
-import {
-  currentMonthDealValue,
-} from "@/service/sales-dashboard/dashboard-api";
-import { HandCoins } from "lucide-react";
+import { currentMonthRevenueService } from "@/service/sales-dashboard/dashboard-api";
+import { BanknoteArrowUp, HandCoins } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-const CurrentMonthDealValue = () => {
+const CurrentMonthRevenue = () => {
   const { employee } = useSalesEmployeeStore();
   const [loading, setLoading] = useState(true);
   const [callData, setCallData] = useState(null);
 
-  async function fetchCurrentMonthDealValue() {
+  async function fetchCurrentMonthRevenue() {
     try {
-      const res = await currentMonthDealValue(employee?._id);
+      const res = await currentMonthRevenueService(employee?._id);
       console.log(res);
       if (res.success) {
-        setCallData(res.data);
+        setCallData(res.revenue);
       }
     } catch (error) {
       console.log(error);
@@ -32,7 +30,7 @@ const CurrentMonthDealValue = () => {
 
   useEffect(() => {
     if (employee?._id) {
-      fetchCurrentMonthDealValue();
+      fetchCurrentMonthRevenue();
     }
   }, []);
 
@@ -55,7 +53,7 @@ const CurrentMonthDealValue = () => {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-            Month Deal Value
+            Current Month Revenue
           </p>
           <div className="mt-1 flex items-baseline">
             <span className="text-3xl font-bold text-gray-900">
@@ -63,12 +61,12 @@ const CurrentMonthDealValue = () => {
             </span>
           </div>
         </div>
-        <div className="p-3 bg-emerald-50 rounded-full">
-          <HandCoins className="text-emerald-500" />
+        <div className="p-3 bg-yellow-50 rounded-full">
+          <BanknoteArrowUp className="text-yellow-500" />
         </div>
       </div>
     </div>
   );
 };
 
-export default CurrentMonthDealValue;
+export default CurrentMonthRevenue;

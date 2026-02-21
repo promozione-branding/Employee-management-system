@@ -127,18 +127,16 @@ const SideBar = ({ children }) => {
               >
                 <UserCircle size={24} className="text-gray-600" />
               </div>
-              <span className="text-sm font-medium hidden sm:block">
-                Aalekh
-              </span>
+              <span className="text-sm font-medium hidden sm:block">Admin</span>
             </div>
           </div>
 
           {userMenuOpen && (
             <div className="absolute top-16 right-6 z-50 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-300">
               <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-                <p className="font-semibold text-gray-800 capitalize">Aalekh</p>
+                <p className="font-semibold text-gray-800 capitalize">Admin</p>
                 <p className="text-xs text-gray-500 mt-0.5 truncate">
-                  aalekh@promozione.com
+                  admin@promozione.com
                 </p>
               </div>
 

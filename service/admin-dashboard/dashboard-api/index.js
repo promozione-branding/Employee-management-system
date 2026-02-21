@@ -16,7 +16,7 @@ export async function allClientCountService() {
   return data;
 }
 
-export async function allEmployeeService(){
+export async function allEmployeeService() {
   const { data } = await axiosInstance.get(
     "/api/admin-dashboard-api/total-employee",
   );
@@ -24,9 +24,25 @@ export async function allEmployeeService(){
   return data;
 }
 
-export async function teamMemberService(){
+export async function teamMemberService() {
   const { data } = await axiosInstance.get(
     "/api/admin-dashboard-api/team-members",
+  );
+
+  return data;
+}
+
+export async function currentMonthDealValueService() {
+  const { data } = await axiosInstance.get(
+    "/api/admin-dashboard-api/current-month-deal-value",
+  );
+
+  return data;
+}
+
+export async function currentMonthRevenueService() {
+  const { data } = await axiosInstance.get(
+    "/api/admin-dashboard-api/current-month-revenue",
   );
 
   return data;

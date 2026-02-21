@@ -46,3 +46,23 @@ export async function currentMonthDealValue(id) {
 
   return data;
 }
+
+
+// current month revenue 
+export async function currentMonthRevenueService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/sales-dashboard/dashboard-api/current-month-revenue/${id}`,
+  );
+
+  return data;
+}
+
+export async function totalClientCount(id) {
+  const { data } = await axiosInstance.get(
+    `/api/sales-dashboard/dashboard-api/total-client/${id}`,
+  );
+
+  return data;
+}
+
+

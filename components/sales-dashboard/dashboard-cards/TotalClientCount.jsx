@@ -1,26 +1,24 @@
 "use client";
 
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
-import {
-  currentMonthDealValue,
-} from "@/service/sales-dashboard/dashboard-api";
-import { HandCoins } from "lucide-react";
+import { totalClientCount } from "@/service/sales-dashboard/dashboard-api";
+import { ShieldUser } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-const CurrentMonthDealValue = () => {
+const TotalClientCount = () => {
   const { employee } = useSalesEmployeeStore();
   const [loading, setLoading] = useState(true);
   const [callData, setCallData] = useState(null);
 
-  async function fetchCurrentMonthDealValue() {
+  async function fetchClientsCount() {
     try {
-      const res = await currentMonthDealValue(employee?._id);
+      const res = await totalClientCount(employee?._id);
       console.log(res);
       if (res.success) {
-        setCallData(res.data);
+        setCallData(res.client);
       }
     } catch (error) {
       console.log(error);
@@ -32,7 +30,7 @@ const CurrentMonthDealValue = () => {
 
   useEffect(() => {
     if (employee?._id) {
-      fetchCurrentMonthDealValue();
+      fetchClientsCount();
     }
   }, []);
 
@@ -55,20 +53,18 @@ const CurrentMonthDealValue = () => {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-            Month Deal Value
+            Total Clients
           </p>
           <div className="mt-1 flex items-baseline">
-            <span className="text-3xl font-bold text-gray-900">
-              ₹ {callData.toLocaleString("en-IN")}
-            </span>
+            <span className="text-3xl font-bold text-gray-900">{callData}</span>
           </div>
         </div>
-        <div className="p-3 bg-emerald-50 rounded-full">
-          <HandCoins className="text-emerald-500" />
+        <div className="p-3 bg-violet-50 rounded-full">
+          <ShieldUser className="text-violet-500" />
         </div>
       </div>
     </div>
   );
 };
 
-export default CurrentMonthDealValue;
+export default TotalClientCount;

@@ -3,6 +3,8 @@
 import {
   allClientCountService,
   allEmployeeService,
+  currentMonthDealValueService,
+  currentMonthRevenueService,
 } from "@/service/admin-dashboard/dashboard-api";
 import {
   Activity,
@@ -14,13 +16,14 @@ import {
   Users,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
 // KPI Cards Data
 
 export default function KPI() {
   const [clientCount, setClientCount] = useState(0);
   const [employeeCount, setEmployeeCount] = useState(0);
+  const [totalDealValue, setTotalDealValue] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
 
   async function fetchCount() {
     try {
@@ -37,8 +40,29 @@ export default function KPI() {
     try {
       const res = await allEmployeeService();
       if (res.success) {
-        console.log(res);
         setEmployeeCount(res.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function fetchDealValue() {
+    try {
+      const res = await currentMonthDealValueService();
+      if (res.success) {
+        setTotalDealValue(res.revenue);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function fetchCurrentRevenue() {
+    try {
+      const res = await currentMonthRevenueService();
+      if (res.success) {
+        setTotalRevenue(res.revenue);
       }
     } catch (error) {
       console.log(error);
@@ -48,6 +72,8 @@ export default function KPI() {
   useEffect(() => {
     fetchCount();
     fetchEmployee();
+    fetchDealValue();
+    fetchCurrentRevenue();
   }, []);
 
   return (
@@ -63,10 +89,13 @@ export default function KPI() {
           </div>
         </div>
         <h3 className="text-slate-600 text-sm font-medium mb-1">
-          Total Revenue
+          Month Deal Value
         </h3>
-        <p className="text-2xl font-bold text-slate-900">$312,400</p>
+        <p className="text-2xl font-bold text-slate-900">
+          ₹ {totalDealValue.toLocaleString("en-IN")}
+        </p>
       </div>
+
       <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="bg-green-50 p-3 rounded-lg">
@@ -82,6 +111,7 @@ export default function KPI() {
         </h3>
         <p className="text-2xl font-bold text-slate-900">{clientCount || 0}</p>
       </div>
+
       <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="bg-purple-50 p-3 rounded-lg">
@@ -93,9 +123,11 @@ export default function KPI() {
           </div>
         </div>
         <h3 className="text-slate-600 text-sm font-medium mb-1">
-          Active Projects
+          Month Revenue
         </h3>
-        <p className="text-2xl font-bold text-slate-900">42</p>
+        <p className="text-2xl font-bold text-slate-900">
+          ₹ {totalRevenue.toLocaleString("en-IN")}
+        </p>
       </div>
       <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
         <div className="flex items-center justify-between mb-4">

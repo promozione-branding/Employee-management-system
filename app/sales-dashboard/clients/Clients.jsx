@@ -1,8 +1,9 @@
 "use client";
 
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 import CommonForm from "@/components/layout/Form";
-import Loading from "@/components/layout/Loading";
 import { initalCustomerFormData } from "@/config/initialFormDate";
 import {
   editCustomerServices,
@@ -28,8 +29,6 @@ const Client = () => {
   const [formData, setFormData] = useState(initialClientData);
   const [editingId, setEditingId] = useState(null);
   const { employee, loading } = useSalesEmployeeStore();
-
-  
 
   /* ---------------- Fetch ---------------- */
   const fetchCustomers = async () => {
@@ -106,7 +105,8 @@ const Client = () => {
         setEditingId(id);
         setOpen(true);
       }
-    } catch {
+    } catch (error) {
+      console.log(error);
       toast.error("Failed to load customer");
     }
   };
@@ -122,7 +122,8 @@ const Client = () => {
         toast.success(res.message);
         fetchCustomers();
       }
-    } catch {
+    } catch (error) {
+      console.log(error);
       toast.error("Delete failed");
     }
   };
@@ -135,9 +136,36 @@ const Client = () => {
   };
 
   /* ---------------- UI ---------------- */
-  if (loading || clientLoading) return <Loading />;
-
-
+  if (loading || clientLoading) {
+    return (
+      <div className="w-full">
+        <div className="grid grid-cols-6 gap-6 bg-zinc-200 p-3 font-semibold rounded">
+          <div>Company</div>
+          <div>Name</div>
+          <div>Phone</div>
+          <div>GST</div>
+          <div>Address</div>
+          <div>Actions</div>
+        </div>
+        <div className="space-y-2 mt-2">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="grid grid-cols-6 gap-3 p-3 border-b">
+              <Skeleton className="h-4 w-[80%]" />
+              <Skeleton className="h-4 w-[60%]" />
+              <Skeleton className="h-4 w-[70%]" />
+              <Skeleton className="h-4 w-[50%]" />
+              <Skeleton className="h-4 w-[90%]" />
+              <div className="flex gap-8">
+                <Skeleton className="h-5 w-5" />
+                <Skeleton className="h-5 w-5" />
+                <Skeleton className="h-5 w-5" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -194,7 +222,9 @@ const Client = () => {
               <div>{c.Address?.slice(0, 20)}...</div>
 
               <div className="flex gap-8">
-                <Link href={`/sales-dashboard/clients/${c._id}/${employee?._id}`}>
+                <Link
+                  href={`/sales-dashboard/clients/${c._id}/${employee?._id}`}
+                >
                   <Eye />
                 </Link>
                 <SquarePen onClick={() => handleEdit(c._id)} />
