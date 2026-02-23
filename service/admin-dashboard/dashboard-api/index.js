@@ -47,3 +47,23 @@ export async function currentMonthRevenueService() {
 
   return data;
 }
+
+
+export async function recentActivityService() {
+  const { data } = await axiosInstance.get(
+    "/api/admin-dashboard-api/recent-activity",
+  );
+
+  return data;
+}
+
+
+export async function getAnnouncementService() {
+  const { data } = await axiosInstance.get(
+    "/api/annoucement/get",
+  );
+
+  return data;
+}
+
+

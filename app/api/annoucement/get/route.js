@@ -11,7 +11,7 @@ export async function GET(req) {
     const announcements = await Announcement.find()
       .populate("author", "username email")
       .sort({ createdAt: -1 })
-      .limit(3);
+      .limit(20)
 
     return NextResponse.json(
       {

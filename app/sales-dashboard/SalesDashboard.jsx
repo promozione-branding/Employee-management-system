@@ -28,12 +28,19 @@ const SalesDashboard = () => {
 
   return (
     <div className="">
-      <div className="flex gap-3">
+       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <DailyCall />
         <CurrentMonthDealValue />
         <CurrentMonthRevenue />
         <TotalClientCount />
       </div>
+
+
+   <div className="flex flex-col lg:flex-row mt-5 gap-5">
+        <EmployeeCalendar employeeId={employee?._id} />
+        <EmployeeTodo employeeId={employee?._id} />
+      </div>
+
       <div className="flex flex-col lg:flex-row gap-4 mb-5">
         <ProposalSend />
         <TodaySalesReminder />
@@ -43,24 +50,21 @@ const SalesDashboard = () => {
         <RecentActivitySales />
       </div>
 
-      <div className="flex flex-col lg:flex-row">
-        <EmployeeCalendar employeeId={employee?._id} />
-        <EmployeeTodo employeeId={employee?._id} />
-      </div>
+   
 
       <div className="flex flex-col lg:flex-row lg:justify-around">
         <EmployeeReminder employeeId={employee?._id} />
         <AllEmployeeContact />
 
-        {/* hidden  */}
-        {/* <EmployeeClientsProgress employeeId={employee?._id} /> */}
+      {/* hidden  */}
+      {/* <EmployeeClientsProgress employeeId={employee?._id} /> */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 mt-10 gap-5">
         <EmployeeAnnouncements />
 
-        {/* hidden  */}
-        {/* <RecentActivity employeeId={employee?._id} /> */}
+      {/* hidden  */}
+      {/* <RecentActivity employeeId={employee?._id} /> */}
       </div>
     </div>
   );

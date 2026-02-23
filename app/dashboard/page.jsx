@@ -49,6 +49,8 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { MyClient } from "@/components/admin-dashboard/dashboard/MyClient";
 import KPI from "@/components/admin-dashboard/dashboard/KPI";
 import Employees from "@/components/admin-dashboard/dashboard/Employees";
+import RecentActivity from "@/components/admin-dashboard/dashboard/RecentActivity";
+import Announcement from "@/components/admin-dashboard/dashboard/Announcement";
 
 const Dashboard = () => {
   const [events, setEvents] = useState([
@@ -111,8 +113,6 @@ const Dashboard = () => {
     { week: "Week 4", performance: 85, target: 85 },
   ];
 
- 
-
   async function fetchClientCount() {
     try {
     } catch (error) {
@@ -133,40 +133,19 @@ const Dashboard = () => {
       </div>
 
       {/* KPI Cards */}
-    <KPI />
+      <KPI />
 
-    {/* employee  */}
-    <Employees />
+      {/* employee  */}
+      <Employees />
 
       {/* Calendar Section */}
-      <div className="flex gap-2 items-start">
-        <div className="mb-8 w-full lg:w-1/2 border rounded-lg">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-slate-900 mb-2">
-                Schedule & Events
-              </h2>
-              <p className="text-slate-600 text-sm">
-                View and manage your upcoming events and meetings
-              </p>
-            </div>
-            <div className="calendar-wrapper ">
-              <FullCalendar
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                initialView="dayGridMonth"
-                headerToolbar={{
-                  left: "prev,next today",
-                  center: "title",
-                  right: "dayGridMonth,timeGridWeek,timeGridDay",
-                }}
-                events={events}
-                height="auto"
-                contentHeight="auto"
-              />
-            </div>
-          </div>
-        </div>
-       <MyClient />
+      <div className="flex gap-2 items-start lg:h-[70vh]">
+        <RecentActivity />
+        <MyClient />
+      </div>
+
+      <div className="my-4">
+        <Announcement />
       </div>
 
       {/* Charts Section */}

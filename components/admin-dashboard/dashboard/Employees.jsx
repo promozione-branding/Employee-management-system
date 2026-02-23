@@ -36,7 +36,7 @@ const Employees = () => {
   }, []);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div className="bg-white rounded-lg shadow-md p-6 mb-8 border">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Team Members</h2>

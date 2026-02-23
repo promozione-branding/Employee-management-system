@@ -90,7 +90,7 @@ const EmployeeTodo = ({ employeeId }) => {
   if (loading) return <Loading />
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-5 mb-6 lg:w-[35vw] w-full">
+    <div className="bg-white rounded-lg shadow-md p-5 mb-6 lg:w-[40vw] h-full">
       <h2 className="text-lg font-semibold mb-4">My Todo List</h2>
 
       {/* Add Todo */}
@@ -100,7 +100,7 @@ const EmployeeTodo = ({ employeeId }) => {
           value={newTodo}
           onChange={(e) => setNewTodo(e.target.value)}
         />
-        <Button onClick={handleAddTodo}>Add</Button>
+        <Button onClick={handleAddTodo} className={"bg-orange-600"}>Add</Button>
       </div>
 
       {/* Todo List */}

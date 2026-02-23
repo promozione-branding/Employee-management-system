@@ -1,19 +1,18 @@
-import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
 import Proposal from "@/models/admin/Proposal";
-import SaleWork from "@/models/employee/sales/SalesWork";
+import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
+import SalesWork from "@/models/employee/sales/SalesWork";
+import { NextResponse } from "next/server";
+import Employee from "@/models/employee/Employee";
 
-export async function GET(req, { params }) {
+
+export async function GET(req) {
   try {
     await connectDB();
 
-    const { id } = await params;
-
     /* -------------------- CUSTOMER ACTIVITY -------------------- */
-    const customers = await Customer.find({
-      salesExecutive: id,
-    })
+    const customers = await Customer.find()
       .sort({ createdAt: -1 })
       .limit(5)
       .select("_id name company createdAt");
@@ -26,10 +25,30 @@ export async function GET(req, { params }) {
       createdAt: c.createdAt,
     }));
 
+    /* -------------------- Employee ACTIVITY -------------------- */
+    const employeeWork = await EmployeeWorkDetail.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: ["employeeId", "clientId"],
+        select: ["basicDetails.name", "name"],
+      })
+      .limit(5);
+
+    const employeeActivity = employeeWork.map((c) => {
+      const employeeNames = c.employeeId
+        ?.map((e) => e.basicDetails.name)
+        .join(", ");
+      return {
+        type: "employee",
+        action: "worked",
+        title: `${employeeNames || "An employee"} worked on a ${c.department} task for ${c.clientId?.name || "a customer"}`,
+        refId: c._id,
+        createdAt: c.createdAt,
+      };
+    });
+
     /* -------------------- PROPOSAL ACTIVITY -------------------- */
-    const proposals = await Proposal.find({
-      salesExecutive: id,
-    })
+    const proposals = await Proposal.find({})
       .populate({
         path: "clientId", // must match schema field
         select: "name company",
@@ -49,9 +68,7 @@ export async function GET(req, { params }) {
     }));
 
     /* -------------------- SALE WORK ACTIVITY -------------------- */
-    const saleWorks = await SaleWork.find({
-      employeeId: id,
-    })
+    const saleWorks = await SalesWork.find({})
       .populate({
         path: "clientId",
         select: "name company",
@@ -73,19 +90,27 @@ export async function GET(req, { params }) {
     const activities = [
       ...customerActivity,
       ...proposalActivity,
+      ...saleWorkActivity,
+      ...employeeActivity,
     ];
 
     activities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    return NextResponse.json({
-      success: true,
-      data: activities.slice(0, 10),
-    });
+    return NextResponse.json(
+      {
+        data: activities,
+        success: true,
+        message: "Success",
+      },
+      { status: 200 },
+    );
   } catch (error) {
     console.error(error);
-
     return NextResponse.json(
-      { success: false, message: "Server error" },
+      {
+        success: false,
+        message: "Server error",
+      },
       { status: 500 },
     );
   }

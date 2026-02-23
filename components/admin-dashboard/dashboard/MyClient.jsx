@@ -34,15 +34,13 @@ export const MyClient = () => {
   ];
 
   return (
-    <div className="lg:w-1/2">
-      <Link href={"/dashboard/customer"} className="bg-white rounded-lg shadow-md p-6 h-full hover:shadow-2xl block">
+    <div className="lg:w-1/2 ">
+      <Link href={"/dashboard/customer"} className="bg-white shadow-md border p-5 h-full  block rounded-lg">
         <div className="mb-6">
           <h2 className="text-xl font-bold text-slate-900 mb-2">My Clients</h2>
-          <p className="text-slate-600 text-sm">
-            Active clients and their status
-          </p>
+         
         </div>
-        <div className="space-y-3 max-h-96 overflow-y-auto ">
+        <div className="space-y-3 max-h-80 overflow-y-auto ">
           {clients.length > 0 ? (
             clients.map((client, index) => {
               const { icon, color, iconColor } = icons[index % icons.length];

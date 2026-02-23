@@ -30,15 +30,14 @@ const CurrentMonthDealValue = () => {
     }
   }
 
-  useEffect(() => {
-    if (employee?._id) {
-      fetchCurrentMonthDealValue();
-    }
-  }, []);
+ useEffect(() => {
+  if (!employee?._id) return;
+  fetchCurrentMonthDealValue();
+}, [employee?._id]);
 
   if (loading) {
     return (
-      <div className="mb-5 bg-white p-4 rounded-lg shadow-sm border border-gray-200 w-full sm:w-1/2 lg:w-1/4">
+      <div className="mb-5 bg-white p-4 rounded-lg shadow-sm border border-gray-200 w-full ">
         <div className="flex justify-between items-center">
           <div>
             <Skeleton height={16} width={100} className="mb-2" />
@@ -51,7 +50,7 @@ const CurrentMonthDealValue = () => {
   }
 
   return (
-    <div className="mb-5 bg-white p-4 rounded-lg shadow-sm border border-gray-200 w-full sm:w-1/2 lg:w-1/4 hover:shadow-md transition-shadow">
+    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 w-full h-full hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
@@ -63,8 +62,8 @@ const CurrentMonthDealValue = () => {
             </span>
           </div>
         </div>
-        <div className="p-3 bg-emerald-50 rounded-full">
-          <HandCoins className="text-emerald-500" />
+        <div className="p-3 bg-orange-50 rounded-full">
+          <HandCoins className="text-orange-600" />
         </div>
       </div>
     </div>

@@ -47,7 +47,7 @@ const DailyCall = () => {
   }
 
   return (
-    <div className="mb-5 bg-white p-4 rounded-lg shadow-sm border border-gray-200 w-full sm:w-1/2 lg:w-1/4 hover:shadow-md transition-shadow">
+    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 w-full h-full hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
@@ -59,10 +59,10 @@ const DailyCall = () => {
             </span>
           </div>
         </div>
-        <div className="p-3 bg-blue-50 rounded-full">
+        <div className="p-3 bg-orange-50 rounded-full">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-blue-600"
+            className="h-6 w-6 text-orange-600"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
