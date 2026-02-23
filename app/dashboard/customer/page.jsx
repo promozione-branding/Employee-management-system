@@ -1,17 +1,10 @@
 "use client";
 
-import {
-  Sheet,
-  SheetContent,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import CommonForm from "@/components/layout/Form";
 import Loading from "@/components/layout/Loading";
-import {
-  addCustomerFormControl,
-} from "@/config/data";
-import {
-  initalCustomerFormData,
-} from "@/config/initialFormDate";
+import { addCustomerFormControl } from "@/config/data";
+import { initalCustomerFormData } from "@/config/initialFormDate";
 import {
   createCustomerServices,
   editCustomerServices,
@@ -19,13 +12,7 @@ import {
   getAllCustomerServices,
   getCustomerServices,
 } from "@/service/customer";
-import {
-  Eye,
-  FilePlusCorner,
-  Network,
-  SquarePen,
-  Trash,
-} from "lucide-react";
+import { Eye, FilePlusCorner, Network, SquarePen, Trash } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -98,7 +85,8 @@ const CustomerManager = () => {
 
   /* ---------------- Delete ---------------- */
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this customer?")) return;
+    if (!window.confirm("Are you sure you want to delete this customer?"))
+      return;
 
     try {
       const res = await deleteCustomerServices(id);
@@ -157,25 +145,31 @@ const CustomerManager = () => {
         </div>
       ) : (
         <div className="mt-10">
-          <div className="grid grid-cols-6 gap-6 bg-zinc-200 p-3 font-semibold rounded">
+          <div className="grid grid-cols-7 gap-6 bg-zinc-200 p-3 font-semibold rounded">
             <div>Company</div>
             <div>Name</div>
             <div>Phone</div>
             <div>GST</div>
             <div>Address</div>
+            <div>Sales</div>
             <div>Actions</div>
           </div>
 
           {customers.map((c) => (
             <div
               key={c._id}
-              className="grid grid-cols-6 gap-3 p-3 border-b hover:bg-white"
+              className="grid grid-cols-7 gap-3 p-3 border-b hover:bg-white"
             >
               <div>{c.company}</div>
               <div>{c.name}</div>
               <div>{c.phone}</div>
               <div>{c.GSTIN}</div>
               <div>{c.Address?.slice(0, 20)}...</div>
+              <div className="capitalize">
+                {c?.salesExecutive?.basicDetails?.name
+                  ? c?.salesExecutive?.basicDetails?.name
+                  : "------"}
+              </div>
 
               <div className="flex gap-4">
                 <Link href={`/dashboard/customer/work/${c._id}`}>

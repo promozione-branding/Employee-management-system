@@ -4,13 +4,13 @@ import { createAuditLog } from "@/utils/createAuditLog";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { NextResponse } from "next/server";
 
-export async function GET(req, context) {
+export async function GET(req, {params}) {
   try {
     await connectDB();
 
-    const { id } = await context.params;
+    const { id } = await params;
 
-    const customer = await Customer.findById(id);
+    const customer = await Customer.findById(id).populate({path:"salesExecutive",select:"basicDetails.name"});
 
     if (!customer) {
       return NextResponse.json(

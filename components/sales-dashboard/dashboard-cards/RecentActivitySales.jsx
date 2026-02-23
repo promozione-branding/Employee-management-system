@@ -2,6 +2,7 @@
 
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 import { recentActivityService } from "@/service/sales-dashboard/dashboard-api";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
@@ -55,43 +56,45 @@ const RecentActivitySales = () => {
       <div className="flex flex-col gap-3 overflow-y-auto max-h-[300px] custom-scrollbar">
         {recentData?.length > 0 ? (
           recentData.map((activity, index) => (
-            <div
+            <Link
+              href={`/sales-dashboard/proposal/pdf-download/${activity.refId}`}
               key={activity.refId || index}
-              className="p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors"
             >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold text-gray-700 text-sm">
-                    {activity.title}
-                  </h3>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {new Date(activity.createdAt).toLocaleString("en-IN", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                  </p>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full capitalize ${
-                      activity.type === "proposal"
-                        ? "bg-blue-100 text-blue-600"
-                        : activity.type === "customer"
-                          ? "bg-green-100 text-green-600"
-                          : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {activity.type}
-                  </span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full capitalize bg-yellow-50 text-yellow-600 border border-yellow-100">
-                    {activity.action}
-                  </span>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-gray-700 text-sm">
+                      {activity.title}
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {new Date(activity.createdAt).toLocaleString("en-IN", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full capitalize ${
+                        activity.type === "proposal"
+                          ? "bg-blue-100 text-blue-600"
+                          : activity.type === "customer"
+                            ? "bg-green-100 text-green-600"
+                            : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {activity.type}
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full capitalize bg-yellow-50 text-yellow-600 border border-yellow-100">
+                      {activity.action}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))
         ) : (
           <div className="flex flex-col items-center justify-center py-8 text-gray-400">

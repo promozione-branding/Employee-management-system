@@ -223,6 +223,7 @@ const Customer = ({ customerId }) => {
     tanNo,
     email,
     SalesPersonName,
+    salesExecutive
   } = customerDetails;
 
   return (
@@ -301,8 +302,8 @@ const Customer = ({ customerId }) => {
                 <User size={14} />
                 <span>Sales Person</span>
               </div>
-              <span className="font-medium text-gray-800">
-                {SalesPersonName}
+              <span className="font-medium text-gray-800 capitalize">
+                {SalesPersonName || salesExecutive?.basicDetails?.name}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">

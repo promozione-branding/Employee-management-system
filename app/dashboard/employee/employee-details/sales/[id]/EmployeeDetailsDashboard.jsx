@@ -2,41 +2,43 @@
 import { CalendarCheck, ListTodo, User, Users } from "lucide-react";
 import Link from "next/link";
 
-const EmployeeDetailsDashboard = ({employeeId}) => {
+const EmployeeDetailsDashboard = ({ employeeId }) => {
   const cardList = [
     {
       label: "Profile",
       icon: <User size={24} />,
       description: "View personal details",
-      href:`/dashboard/employee/employee-details/profile/${employeeId}`
+      href: `/dashboard/employee/employee-details/profile/${employeeId}`,
     },
     {
       label: "Attendance",
       icon: <CalendarCheck size={24} />,
       description: "Track attendance logs",
-      href:""
+      href: "",
     },
     {
       label: "Task",
       icon: <ListTodo size={24} />,
       description: "Manage assigned tasks",
-      href:`/dashboard/employee/employee-details/sales/sales-task/${employeeId}`
+      href: `/dashboard/employee/employee-details/sales/sales-task/${employeeId}`,
     },
     {
       label: "Clients",
       icon: <Users size={24} />,
       description: "View assigned clients",
-      href:""
+      href: `/dashboard/employee/employee-details/sales/client/${employeeId}`,
     },
   ];
 
   return (
     <div>
-      <h2 className="font-bold text-2xl text-center mb-5">Employee Dashboard</h2>
+      <h2 className="font-bold text-2xl text-center mb-5">
+        Employee Dashboard
+      </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {cardList.map((card, index) => (
           <Link
-          href={card?.href}
+            href={card?.href}
             key={index}
             className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group"
           >

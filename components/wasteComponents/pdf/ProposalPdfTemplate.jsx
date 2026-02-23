@@ -25,7 +25,7 @@ const ProposalPdfTemplate = ({ data }) => {
   // Format the date for display
   const proposalDate = new Date(data.dateOfProposal).toLocaleDateString(
     "en-GB",
-    { day: "numeric", month: "long", year: "numeric" },
+    { day: "numeric", month: "long", year: "numeric" }
   );
 
   const formatIndianCurrency = (num) => {
@@ -95,7 +95,7 @@ const ProposalPdfTemplate = ({ data }) => {
   const discountShow = data.services.some(
     (service) =>
       (service.discountAmount !== null && service.discountAmount > 0) ||
-      (service.discountPercentage !== null && service.discountPercentage > 0),
+      (service.discountPercentage !== null && service.discountPercentage > 0)
   );
 
   // total Amount in words
@@ -162,10 +162,10 @@ const ProposalPdfTemplate = ({ data }) => {
                 {service.discountAmount
                   ? formatIndianCurrency(service.discountAmount)
                   : service.discountPercentage && service.amount
-                    ? formatIndianCurrency(
-                        (service.amount * service.discountPercentage) / 100,
-                      )
-                    : ""}
+                  ? formatIndianCurrency(
+                      (service.amount * service.discountPercentage) / 100
+                    )
+                  : ""}
               </Text>
 
               <View style={styles.colAmt}>
@@ -183,11 +183,11 @@ const ProposalPdfTemplate = ({ data }) => {
                 <Text style={styles.colAmt}>
                   {service?.discountAmount
                     ? formatIndianCurrency(
-                        service?.amount - service?.discountAmount,
+                        service?.amount - service?.discountAmount
                       )
                     : formatIndianCurrency(
                         service?.amount -
-                          (service.amount * service.discountPercentage) / 100,
+                          (service.amount * service.discountPercentage) / 100
                       )}
                 </Text>
               </View>
@@ -254,7 +254,7 @@ const ProposalPdfTemplate = ({ data }) => {
           <Text style={[styles.totalValueInWords]}>{totalAmountInWords}</Text>
         </View>
 
-        {data?.partlyPayment?.length > 0 &&
+        {data?.partlyPayment?.length &&
           data?.partlyPayment.map(({ _id, paymentAmount, paymentDuration }) => (
             <View style={styles.totalBox} key={_id}>
               <Text style={styles.totalLabel}></Text>
@@ -369,50 +369,10 @@ const ProposalPdfTemplate = ({ data }) => {
 
         {/* WEBSITE */}
         <View style={styles.sectionBox}>
-          <Text style={styles.sectionTitle}>Website Development</Text>
+          <Text style={styles.sectionTitle}>Website</Text>
           <View style={styles.deliverablesRow}>
             <View style={styles.deliverableColumn}>
               <Text style={styles.deliverableTitle}>Deliverables</Text>
-            </View>
-
-            <View style={styles.deliverableList}>
-              <Text style={styles.deliverableContent}>
-                • Coding based Web development
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Product Addition - upto 150 Products
-              </Text>
-              <Text style={styles.deliverableContent}>• Graphic Designing</Text>
-              <Text style={styles.deliverableContent}>• Free Domain</Text>
-              <Text style={styles.deliverableContent}>
-                • 3 Banner for Hero Section
-              </Text>
-              <Text style={styles.deliverableContent}>• Blog Building</Text>
-              <Text style={styles.deliverableContent}>
-                • Custom UI & UX (No Templates)
-              </Text>
-              <Text style={styles.deliverableContent}>• 1 year Hosting</Text>
-              <Text style={styles.deliverableContent}>
-                • One keyword Ranking on Google’s 1st page
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Core web vitals optimization
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Advanced page speed optimization
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Image compression & Lazy loading
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Google tag manager setup
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Monthly website health report
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Priority Support SCA
-              </Text>
             </View>
             <View style={styles.deliverableList}>
               <Text style={styles.deliverableContent}>• Corporate Website</Text>
@@ -434,22 +394,6 @@ const ProposalPdfTemplate = ({ data }) => {
               <Text style={styles.deliverableContent}>
                 • Mobile Friendly Website
               </Text>
-              <Text style={styles.deliverableContent}>
-                • Daily/ Weekly automated backups
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • HTTPS + Security Headers
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Lead Capture Forms
-              </Text>
-              <Text style={styles.deliverableContent}>• CTA Optimization</Text>
-              <Text style={styles.deliverableContent}>
-                • Whatsapp Chat Integration
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Click to Call for mobile users
-              </Text>
             </View>
           </View>
         </View>
@@ -463,62 +407,51 @@ const ProposalPdfTemplate = ({ data }) => {
             </View>
             <View style={styles.deliverableList}>
               <Text style={styles.deliverableContent}>
-                • Posting and Account handling
+                • 2 weekly Posts + Festive Posts
               </Text>
               <Text style={styles.deliverableContent}>
-                • Infographic Posts - 3 per week
+                • Facebook Account Management
               </Text>
               <Text style={styles.deliverableContent}>
-                • Reels - 1 per week
-              </Text>
-              <Text style={styles.deliverableContent}>• Festive posts</Text>
-              <Text style={styles.deliverableContent}>
-                • Monthly social content calender
+                • Facebook Page Management
               </Text>
               <Text style={styles.deliverableContent}>
-                • Platform wise strategy - Instagram, Facebook, Youtube &
-                Linkedin
+                • Instagram Account Management
               </Text>
               <Text style={styles.deliverableContent}>
-                • Hashtag research and strategy
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Custom posts and templates
+                • Youtube Account Management
               </Text>
             </View>
+          </View>
+        </View>
 
+        {/* design */}
+        <View style={styles.sectionBox}>
+          <Text style={styles.sectionTitle}>Designing</Text>
+          <View style={styles.deliverablesRow}>
+            <View style={styles.deliverableColumn}>
+              <Text style={styles.deliverableTitle}>Deliverables</Text>
+            </View>
             <View style={styles.deliverableList}>
+              <Text style={styles.deliverableContent}>• Logo Design</Text>
               <Text style={styles.deliverableContent}>
-                • “Google my business” posts
+                • AI Graphic Designs
+              </Text>
+              <Text style={styles.deliverableContent}>• Content Creation</Text>
+              <Text style={styles.deliverableContent}>
+                • Product Visualization
               </Text>
               <Text style={styles.deliverableContent}>
-                • Community Management
+                • Search Engine Friendly
               </Text>
-              <Text style={styles.deliverableContent}>
-                • Post sharing in multiple communities
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Comment and DM engagement handling
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Content performance insights
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Monthly performance reports
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Reach, Engagement and Follower growth analysis
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Promotional campaigns and Offer posts
-              </Text>
+              <Text style={styles.deliverableContent}>• Customized layout</Text>
             </View>
           </View>
         </View>
 
         {/* SEO */}
         <View style={styles.sectionBox}>
-          <Text style={styles.sectionTitle}>Organic Search Growth</Text>
+          <Text style={styles.sectionTitle}>Search Engine Optimization</Text>
           <View style={styles.deliverablesRow}>
             <View style={styles.deliverableColumn}>
               <Text style={styles.deliverableTitle}>Deliverables</Text>
@@ -529,8 +462,6 @@ const ProposalPdfTemplate = ({ data }) => {
               <Text style={styles.deliverableContent}>
                 • Google Search Console
               </Text>
-            </View>
-            <View style={styles.deliverableList}>
               <Text style={styles.deliverableContent}>
                 • On page & Off page SEO
               </Text>
@@ -541,133 +472,19 @@ const ProposalPdfTemplate = ({ data }) => {
             </View>
           </View>
         </View>
-
-        {/* Google Ads Management */}
-        <View style={styles.sectionBoxForGoogleAds}>
-          <Text style={styles.sectionTitle}>Google Ads Management</Text>
-          <View style={styles.deliverablesRow}>
-            <View style={styles.deliverableColumn}>
-              <Text style={styles.deliverableTitle}>Deliverables</Text>
-            </View>
-            <View style={styles.deliverableList}>
-              <Text style={styles.deliverableContent}>• Ads account setup</Text>
-              <Text style={styles.deliverableContent}>
-                • Landing Page for specific targeting
-              </Text>
-              <Text style={styles.deliverableContent}>• Content Creation</Text>
-              <Text style={styles.deliverableContent}>
-                • Strategy and setup
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Keyword research and Intent mapping
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Competitors’ Ads analysis
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Google Analytics Integration
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Conversion tracking setup
-              </Text>
-            </View>
-
-            <View style={styles.deliverableList}>
-              <Text style={styles.deliverableContent}>
-                • Responsive Search Ads
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Negative Keyword Management
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • A/B Testing of ad copies
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Cost per Lead optimization
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Landing Page optimization
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Daily bid and budget optimization
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Keyword optimization
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Daily performance report sharing
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Meta Ads Management */}
-        <View style={styles.sectionBox}>
-          <Text style={styles.sectionTitle}>Meta Ads Management</Text>
-          <View style={styles.deliverablesRow}>
-            <View style={styles.deliverableColumn}>
-              <Text style={styles.deliverableTitle}>Deliverables</Text>
-            </View>
-            <View style={styles.deliverableList}>
-              <Text style={styles.deliverableContent}>
-                • Meta Business Manager setup
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Funnel based Ads strategy
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Competitor creative analysis
-              </Text>
-              <Text style={styles.deliverableContent}>• Audience research</Text>
-              <Text style={styles.deliverableContent}>
-                • Facebook Pixel and Conversion API setup
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Ad account configuration
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Ad creative designing
-              </Text>
-            </View>
-            <View style={styles.deliverableList}>
-              <Text style={styles.deliverableContent}>
-                • Ad creative designing
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Creative A/B Testing
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Daily Performance Monitoring and Report sharing
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • CPC/CPA optimization
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Whatsapp integration based configuration
-              </Text>
-            </View>
-          </View>
-        </View>
       </Page>
 
       {/* page 3 */}
 
       <Page size="A4" style={[styles.page, { height: "1000px" }]}>
-        <Image
-          src={
-            "https://res.cloudinary.com/ddfglmkbd/image/upload/v1765437572/logo2_wznumr.png"
-          }
-          style={styles.watermark}
-        />
+        <Image src={"/blog/logo2.png"} style={styles.watermark} />
 
         {/* HEADER */}
         <View style={styles.headerContainer}>
           <View style={styles.leftHeader2}>
             <Image
               style={styles.logoSmall}
-              src={
-                "https://res.cloudinary.com/ddfglmkbd/image/upload/v1765862267/Logo-Company_2_xnnz7x.png"
-              }
+              src={"/blog/Logo-Company (2).png"}
             />
           </View>
 
@@ -773,6 +590,13 @@ export default ProposalPdfTemplate;
 
 const styles = StyleSheet.create({
   page: {
+    // marginTop: 0,
+    // padding: "0 20px",
+    // fontSize: 10,
+    // fontFamily: "Helvetica",
+    // lineHeight: 1.5,
+    // position: "relative",
+
     padding: "0px 40px",
     fontSize: 10,
     fontFamily: "Helvetica",
@@ -931,6 +755,7 @@ const styles = StyleSheet.create({
   totalValueInWords: {
     width: "60%",
     textAlign: "right",
+    // fontStyle: "",
     fontSize: 8,
   },
 
@@ -951,8 +776,8 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 20,
-    marginBottom: 10,
-    marginTop: 10,
+    marginBottom:10,
+    marginTop:10,
     objectFit: "cover",
   },
 
@@ -978,6 +803,7 @@ const styles = StyleSheet.create({
     borderColor: "#333",
 
     color: "#fff",
+    // marginBottom: 6,
     textAlign: "center",
     backgroundColor: "#828080ff",
   },
@@ -990,13 +816,14 @@ const styles = StyleSheet.create({
   },
   deliverablesRow: {
     flexDirection: "row",
-    width: "90%",
+    width: "60%",
 
     gap: 15,
   },
 
   deliverableColumn: {
-    width: "40%",
+    width: "25%",
+    // grey bg (as in your screenshot)
     padding: 4,
     borderRightWidth: 1,
     borderColor: "#d3cece",
@@ -1004,14 +831,14 @@ const styles = StyleSheet.create({
   },
 
   deliverableTitle: {
-    width: "40%",
+    width: "25%",
     fontWeight: "bold",
     justifyContent: "center",
     alignItems: "center",
     marginTop: 20,
   },
   deliverableList: {
-    width: "100%", // width for bullet points
+    width: "75%", // width for bullet points
   },
   deliverableContent: {
     // marginBottom: 1,       // spacing between bullets
@@ -1062,14 +889,5 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     lineHeight: 1.4,
     textAlign: "justify",
-  },
-
-  // for the service in the pdf of google search
-
-  sectionBoxForGoogleAds: {
-    marginTop: 60,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
   },
 });

@@ -2,6 +2,7 @@
 
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 import { proposalByEmployeeService } from "@/service/sales-dashboard/dashboard-api";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
@@ -49,29 +50,31 @@ const ProposalSend = () => {
       <div className="flex flex-col gap-3 overflow-y-auto max-h-[400px] custom-scrollbar">
         {proposalData?.length > 0 ? (
           proposalData.map((proposal) => (
-            <div
+            <Link
               key={proposal._id}
-              className="p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors"
+              href={`/sales-dashboard/proposal/pdf-download/${proposal._id}`}
             >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold text-gray-700 text-sm">
-                    {proposal.clientName}
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    {proposal.clientCompany}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                    {proposal.proposalNo}
-                  </span>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(proposal.dateOfProposal).toLocaleDateString()}
-                  </p>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-gray-700 text-sm">
+                      {proposal.clientName}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {proposal.clientCompany}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                      {proposal.proposalNo}
+                    </span>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {new Date(proposal.dateOfProposal).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))
         ) : (
           <div className="flex flex-col items-center justify-center py-6 text-gray-400">
