@@ -49,7 +49,7 @@ const TodayMeeting = () => {
   }
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 max-h-[400px] lg:w-1/2">
+    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 max-h-[400px] lg:w-1/3">
       <h2 className="text-lg font-bold text-gray-800 mb-4">Today's Meetings</h2>
       <div className="flex flex-col gap-3 overflow-y-auto  custom-scrollbar">
         {todayMeetingData?.length > 0 ? (
@@ -66,7 +66,7 @@ const TodayMeeting = () => {
                   className={`text-xs px-2 py-0.5 rounded-full capitalize inline-block mt-1 ${
                     meeting.updateType === "call"
                       ? "bg-blue-100 text-blue-600"
-                      : "bg-purple-100 text-purple-600"
+                      : "bg-purple-100 text-orange-600"
                   }`}
                 >
                   {meeting.updateType}

@@ -1,5 +1,5 @@
 "use client";
-import { IdCard,  UserRoundPlus } from "lucide-react";
+import { IdCard, UserRoundPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -10,9 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import CommonForm from "@/components/layout/Form";
-import {
-  employeeRegisterFormControl,
-} from "@/config/data";
+import { employeeRegisterFormControl } from "@/config/data";
 import {
   initialEmployeeRegisterFormData,
   initialEmployeesBasicDetails,
@@ -145,15 +143,15 @@ const Employee = () => {
       {employeeLoading ? (
         <Loading />
       ) : (
-        <>
-          <Tabs defaultValue="employee" className="">
+        <div className="flex w-full ">
+          <Tabs defaultValue="employee" className="w-[90vw]">
             <TabsList>
               <TabsTrigger value="employee">Employee</TabsTrigger>
               <TabsTrigger value="user">New Employee</TabsTrigger>
               <TabsTrigger value="announcement">Announcement</TabsTrigger>
             </TabsList>
-            <TabsContent value="employee">
-              <div className="mt-6 bg-white shadow-sm rounded-lg overflow-hidden">
+            <TabsContent value="employee" className={""}>
+              <div className="mt-6 bg-white shadow-sm rounded-lg ">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
@@ -217,11 +215,37 @@ const Employee = () => {
               <Announcement />
             </TabsContent>
           </Tabs>
-        </>
+
+          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+            <DialogTrigger asChild>
+              <div className="border-2 border-blue-500 p-3 rounded-full flex items-center justify-center h-12 w-12">
+                <UserRoundPlus />
+              </div>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader className={"hidden"}>
+                <DialogTitle>Are you absolutely sure?</DialogTitle>
+                <DialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  your account and remove your data from our servers.
+                </DialogDescription>
+              </DialogHeader>
+              <p className="font-bold text-2xl text-center">Add User</p>
+              <CommonForm
+                formControls={employeeRegisterFormControl}
+                formData={registerFormData}
+                setFormData={setRegisterFormData}
+                onSubmit={handleRegister}
+                buttonText={"Add"}
+                isBtnDisabled={loading}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       )}
 
       {/* for new User  */}
-      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+      {/* <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogTrigger asChild>
           <div className="absolute bottom-20 right-20 border-2 border-black p-3 rounded-full flex items-center justify-center">
             <UserRoundPlus />
@@ -245,7 +269,7 @@ const Employee = () => {
             isBtnDisabled={loading}
           />
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 };

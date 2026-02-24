@@ -18,68 +18,15 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  TrendingUp,
-  Users,
-  FileText,
-  DollarSign,
-  Activity,
-  ArrowUpRight,
-  ArrowDownRight,
-  IndianRupee,
-  Building,
-  Code,
-  Globe,
-  Palette,
-  Rocket,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
 import { MyClient } from "@/components/admin-dashboard/dashboard/MyClient";
 import KPI from "@/components/admin-dashboard/dashboard/KPI";
 import Employees from "@/components/admin-dashboard/dashboard/Employees";
 import RecentActivity from "@/components/admin-dashboard/dashboard/RecentActivity";
 import Announcement from "@/components/admin-dashboard/dashboard/Announcement";
+import TodayMeeting from "@/components/admin-dashboard/dashboard/TodayMeeting";
 
 const Dashboard = () => {
-  const [events, setEvents] = useState([
-    {
-      id: "1",
-      title: "Client Meeting",
-      start: new Date().toISOString().split("T")[0],
-      backgroundColor: "#3b82f6",
-      borderColor: "#1e40af",
-    },
-    {
-      id: "2",
-      title: "Project Deadline",
-      start: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0],
-      backgroundColor: "#ef4444",
-      borderColor: "#7f1d1d",
-    },
-    {
-      id: "3",
-      title: "Team Sync",
-      start: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0],
-      backgroundColor: "#10b981",
-      borderColor: "#065f46",
-    },
-  ]);
 
   // Revenue Data
   const revenueData = [
@@ -113,15 +60,6 @@ const Dashboard = () => {
     { week: "Week 4", performance: 85, target: 85 },
   ];
 
-  async function fetchClientCount() {
-    try {
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  useEffect(() => {}, []);
-
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -139,24 +77,24 @@ const Dashboard = () => {
       <Employees />
 
       {/* Calendar Section */}
-      <div className="flex gap-2 items-start lg:h-[70vh]">
+      <div className="flex gap-10 items-start lg:h-[70vh]">
         <RecentActivity />
         <MyClient />
       </div>
 
-      <div className="my-4">
+      <div className="flex gap-10 items-start lg:h-[70vh] my-4">
         <Announcement />
+        <TodayMeeting />
       </div>
 
       {/* Charts Section */}
-      <Tabs defaultValue="revenue" className="mb-8">
+      {/* <Tabs defaultValue="revenue" className="mb-8">
         <TabsList className="bg-white border-b">
           <TabsTrigger value="revenue">Revenue</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="distribution">Distribution</TabsTrigger>
         </TabsList>
 
-        {/* Revenue Chart */}
         <TabsContent value="revenue">
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="mb-6">
@@ -205,7 +143,6 @@ const Dashboard = () => {
           </div>
         </TabsContent>
 
-        {/* Performance Chart */}
         <TabsContent value="performance">
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="mb-6">
@@ -253,10 +190,8 @@ const Dashboard = () => {
           </div>
         </TabsContent>
 
-        {/* Distribution Charts */}
         <TabsContent value="distribution">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Customer Distribution */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-slate-900 mb-2">
@@ -287,7 +222,6 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Project Status */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-slate-900 mb-2">
@@ -325,78 +259,9 @@ const Dashboard = () => {
             </div>
           </div>
         </TabsContent>
-      </Tabs>
+      </Tabs> */}
 
-      {/* Bottom Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity */}
-        <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">
-            Recent Activity
-          </h2>
-          <div className="space-y-4">
-            {[
-              {
-                title: "New customer onboarded",
-                time: "2 hours ago",
-                icon: "👤",
-              },
-              {
-                title: "Invoice #INV-2024-001 created",
-                time: "4 hours ago",
-                icon: "📄",
-              },
-              {
-                title: 'Project "Website Redesign" completed',
-                time: "1 day ago",
-                icon: "✅",
-              },
-              {
-                title: "Meeting scheduled with client",
-                time: "1 day ago",
-                icon: "📅",
-              },
-            ].map((activity, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-4 pb-4 border-b last:border-b-0"
-              >
-                <div className="text-2xl">{activity.icon}</div>
-                <div className="flex-1">
-                  <p className="text-slate-900 font-medium">{activity.title}</p>
-                  <p className="text-slate-500 text-sm">{activity.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">Quick Stats</h2>
-          <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <p className="text-slate-600 text-sm font-medium mb-1">
-                Avg. Deal Value
-              </p>
-              <p className="text-2xl font-bold text-blue-600">$12,450</p>
-            </div>
-            <div className="p-4 bg-green-50 rounded-lg">
-              <p className="text-slate-600 text-sm font-medium mb-1">
-                Conversion Rate
-              </p>
-              <p className="text-2xl font-bold text-green-600">34.5%</p>
-            </div>
-            <div className="p-4 bg-purple-50 rounded-lg">
-              <p className="text-slate-600 text-sm font-medium mb-1">
-                Avg. Response Time
-              </p>
-              <p className="text-2xl font-bold text-purple-600">2.4 hrs</p>
-            </div>
-            <Button className="w-full mt-2">View Full Report</Button>
-          </div>
-        </div>
-      </div>
+     
     </div>
   );
 };

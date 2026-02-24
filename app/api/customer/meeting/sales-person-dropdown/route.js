@@ -7,7 +7,7 @@ export async function GET(req) {
     await connectDB();
 
     const salesPeople = await User.find({
-      role: { $in: ["admin", "manager"] },
+      role: { $in: ["sales"] },
     }).select("email");
 
     return NextResponse.json({

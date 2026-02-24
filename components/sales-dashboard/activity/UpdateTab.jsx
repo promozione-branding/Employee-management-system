@@ -13,7 +13,6 @@ const UpdateTab = ({ userId }) => {
   async function fetchUpdates() {
     try {
       const res = await callUpdatesService(userId);
-      console.log(res, "res");
       if (res.success) {
         setLoading(false);
         setUpdates(res.data);

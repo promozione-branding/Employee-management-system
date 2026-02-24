@@ -129,17 +129,16 @@
 }
 
 /* FullCalendar Styling */
-.calendar-wrapper {
-  @apply text-slate-900;
-
+/* .calendar-wrapper {
+  @apply text-slate-900 ;
 }
 
 .calendar-wrapper :where(.fc) {
-  @apply font-sans md:text-sm;
+  @apply font-sans md:text-sm ;
 }
 
 .calendar-wrapper :where(.fc .fc-button-primary) {
-  @apply bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700 transition-colors;
+  @apply bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700 transition-colors ;
 }
 
 .calendar-wrapper
@@ -172,9 +171,108 @@
 }
 
 .calendar-wrapper :where(.fc-col-header-cell) {
-  @apply bg-slate-100 py-3 text-slate-700 font-semibold border-slate-200;
+  @apply bg-slate-100 py-3 text-slate-800 font-semibold border-slate-200;
 }
 
 .calendar-wrapper :where(.fc .fc-daygrid-day-number) {
   @apply text-slate-700 font-semibold;
+} */
+
+/* 1. MAIN WRAPPER - Controls overall calendar size */
+.calendar-wrapper {
+  @apply text-slate-900 w-96 h-92; /* w-64=256px wide, h-72=288px tall - CHANGE THESE for size */
+  /* Options: w-48 h-56 (very small), w-72 h-80 (medium), w-96 h-96 (large) */
+}
+
+/* 2. BASE CALENDAR - Controls font and global spacing */
+.calendar-wrapper :where(.fc) {
+  @apply font-sans text-[10px] leading-tight; /* text-xs=12px font, leading-tight=compact line height */
+  /* For even smaller: text-[10px], for larger: text-sm */
+}
+
+/* 3. NAVIGATION BUTTONS (prev/next/today) */
+.calendar-wrapper :where(.fc .fc-button-primary) {
+  @apply bg-red-600 hover:bg-red-700 border-red-600 hover:border-red-700 
+         transition-colors px-1.5 py-0.5 text-xs rounded-md font-medium;
+  /* px-1.5 py-0.5 = very compact buttons, text-xs=small text */
+}
+
+.calendar-wrapper
+  :where(.fc .fc-button-primary:not(:disabled).fc-button-active) {
+  @apply bg-blue-700 border-blue-700 shadow-sm; /* Active/pressed state */
+}
+
+.calendar-wrapper :where(.fc .fc-button-primary:disabled) {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* 4. HEADER ROW (Sun Mon Tue etc.) */
+.calendar-wrapper :where(.fc-col-header-cell) {
+  @apply bg-slate-100 py-1 px-2 text-slate-800 font-semibold border-blue-200 
+         text-xs border-b; /* py-1=4px top/bottom padding = SHORT header */
+  /* Make taller: py-2, Shorter: py-0.5 */
+}
+
+/* 5. DAY CELLS - Most important for compact look */
+.calendar-wrapper :where(.fc .fc-daygrid-day) {
+  @apply hover:bg-slate-50 transition-colors h-5 border-r border-b border-slate-100;
+  /* h-12=48px tall rows (CHANGE THIS for row height), border-r/b=grid lines */
+  /* Options: h-10=40px (very compact), h-14=56px (spacious) */
+}
+
+.calendar-wrapper :where(.fc .fc-daygrid-day.fc-day-other) {
+  @apply opacity-40 bg-slate-50; /* Previous/next month days - more faded */
+}
+
+.calendar-wrapper :where(.fc .fc-daygrid-day.fc-day-today) {
+  @apply bg-blue-50 border-2 border-blue-200 ring-2 ring-blue-100;
+  /* Today highlight - customize colors here */
+}
+
+/* 6. DAY NUMBERS (1, 2, 3 etc.) */
+.calendar-wrapper :where(.fc .fc-daygrid-day-number) {
+  @apply text-slate-700 font-semibold text-xs mt-0.5; /* mt-0.5=slight top spacing */
+  /* Larger numbers: text-sm, Smaller: text-[10px] */
+}
+
+/* 7. EVENTS/STACKED EVENTS */
+.calendar-wrapper :where(.fc .fc-daygrid-event) {
+  @apply rounded text-xs leading-3 mb-0.5 px-1 py-0.5 max-h-5; 
+  /* Shorter events: max-h-4 (16px), Taller: max-h-6 (24px) */
+}
+
+.calendar-wrapper :where(.fc .fc-daygrid-event-harness) {
+  @apply max-h-10 p-0.5; /* Harness = event container, max-h-10=40px total events space */
+}
+
+/* 8. EVENT TITLES */
+.calendar-wrapper :where(.fc-event-title) {
+  @apply font-semibold text-[10px] px-1 py-0.5 truncate; /* truncate=ellipsis if too long */
+}
+
+/* 9. MONTH TITLE */
+.calendar-wrapper :where(.fc-toolbar-title) {
+  @apply text-sm font-bold text-slate-900 tracking-tight;
+  /* Smaller title: text-xs, Larger: text-base */
+}
+
+/* 10. SCROLLBAR (if events overflow) */
+.calendar-wrapper :where(.fc-scroller-harness) {
+  @apply max-h-64 lg:max-h-72; /* Limits scrollable area height */
+}
+
+/* 11. VERTICAL BORDERS between days */
+.calendar-wrapper :where(.fc .fc-daygrid-day-frame) {
+  @apply border-r border-slate-100 last:border-r-0; /* Clean vertical lines */
+}
+
+/* 12. RESPONSIVE - Mobile adjustments */
+@media (max-width: 640px) {
+  .calendar-wrapper {
+    @apply w-full h-64; /* Full width on mobile */
+  }
+
+  .calendar-wrapper :where(.fc .fc-daygrid-day) {
+    @apply h-10; /* Even shorter rows on mobile */
+  }
 }

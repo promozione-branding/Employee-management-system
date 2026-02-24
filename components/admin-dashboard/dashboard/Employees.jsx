@@ -64,7 +64,7 @@ const Employees = () => {
         </div>
       ) : employees.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6">
-          {employees.slice(0, 6).map((employee) => (
+          {employees.map((employee) => (
             <Link
               href={
                 employee.designation === "SALES"
@@ -96,18 +96,7 @@ const Employees = () => {
               </p>
             </Link>
           ))}
-          {employees.length > 6 && (
-            <div className="flex flex-col items-center justify-center text-center cursor-pointer group">
-              <div className="w-16 h-16 mb-3 rounded-full bg-slate-50 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-500 group-hover:border-blue-500 group-hover:text-blue-600 transition-colors">
-                <span className="text-sm font-bold">
-                  +{employees.length - 6}
-                </span>
-              </div>
-              <span className="text-sm font-medium text-slate-600 group-hover:text-blue-600">
-                View More
-              </span>
-            </div>
-          )}
+        
         </div>
       ) : (
         <div className="text-center py-8 text-slate-500">

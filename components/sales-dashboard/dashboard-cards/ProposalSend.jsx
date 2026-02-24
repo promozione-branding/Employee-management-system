@@ -45,9 +45,9 @@ const ProposalSend = () => {
   }
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-5 hover:shadow-md transition-shadow lg:w-1/2">
+    <div className="bg-white  p-4 rounded-lg shadow-sm border border-gray-200  hover:shadow-md transition-shadow lg:w-1/3">
       <h2 className="text-lg font-bold text-gray-700 mb-4">Proposals Sent</h2>
-      <div className="flex flex-col gap-3 overflow-y-auto max-h-[400px] custom-scrollbar">
+      <div className="flex flex-col gap-3 overflow-y-auto custom-scrollbar ">
         {proposalData?.length > 0 ? (
           proposalData.map((proposal) => (
             <Link

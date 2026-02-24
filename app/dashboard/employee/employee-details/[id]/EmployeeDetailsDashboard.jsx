@@ -10,12 +10,12 @@ const EmployeeDetailsDashboard = ({employeeId}) => {
       description: "View personal details",
       href:`/dashboard/employee/employee-details/profile/${employeeId}`
     },
-    {
-      label: "Attendance",
-      icon: <CalendarCheck size={24} />,
-      description: "Track attendance logs",
-      href:""
-    },
+    // {
+    //   label: "Attendance",
+    //   icon: <CalendarCheck size={24} />,
+    //   description: "Track attendance logs",
+    //   href:""
+    // },
     {
       label: "Task",
       icon: <ListTodo size={24} />,
@@ -26,7 +26,7 @@ const EmployeeDetailsDashboard = ({employeeId}) => {
       label: "Clients",
       icon: <Users size={24} />,
       description: "View assigned clients",
-      href:""
+      href:`/dashboard/employee/employee-details/client/${employeeId}`
     },
   ];
 

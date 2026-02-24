@@ -49,7 +49,7 @@ const EmployeeAnnouncements = () => {
             <p>No announcements available.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 h-[60vh] overflow-auto">
             {announcements.map((announcement) => (
               <div
                 key={announcement._id}

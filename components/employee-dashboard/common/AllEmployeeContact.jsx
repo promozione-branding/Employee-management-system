@@ -41,7 +41,7 @@ const AllEmployeeContact = () => {
 
 
   return (
-    <div className="space-y-4 bg-white px-5 py-5 m-5 rounded-xl lg:w-1/2">
+    <div className="space-y-4 bg-white px-5 py-5  rounded-xl lg:h-[68vh] shadow-lg">
       <h3 className="text-lg font-semibold">Employee Contacts</h3>
 
       <div className="flex flex-col gap-3 h-[50vh] overflow-y-scroll ">

@@ -90,7 +90,7 @@ const EmployeeTodo = ({ employeeId }) => {
   if (loading) return <Loading />
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-5 mb-6 lg:w-[40vw] h-full">
+    <div className="bg-white rounded-lg shadow-md p-5 mb-6 lg:w-[40vw] lg:h-[68vh]">
       <h2 className="text-lg font-semibold mb-4">My Todo List</h2>
 
       {/* Add Todo */}
@@ -105,7 +105,7 @@ const EmployeeTodo = ({ employeeId }) => {
 
       {/* Todo List */}
       {todos.length === 0 ? (
-        <p className="text-sm text-gray-500">No todos yet</p>
+        <p className="text-sm text-gray-500 lg:h-92">No todos yet</p>
       ) : (
         <ul className="space-y-3 h-[60vh] overflow-y-auto">
           {todos.map((todo) => (
