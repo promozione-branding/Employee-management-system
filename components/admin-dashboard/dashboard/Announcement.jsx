@@ -30,7 +30,7 @@ const Announcement = () => {
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-md p-6 border h-full lg:w-1/2">
+      <div className="bg-[#f3eaea] rounded-lg shadow-md p-6 border h-full lg:w-full">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="bg-blue-50 p-2 rounded-lg">

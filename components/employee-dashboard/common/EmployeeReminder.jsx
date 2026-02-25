@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, Bell } from "lucide-react";
 import toast from "react-hot-toast";
+import Skeleton from "react-loading-skeleton";
 
 const EmployeeReminder = ({ employeeId }) => {
   const [reminders, setReminders] = useState([]);
@@ -60,7 +61,7 @@ const EmployeeReminder = ({ employeeId }) => {
   }, [employeeId]);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 lg:h-[68vh]">
+    <div className="bg-white rounded-lg shadow-md p-6 lg:h-[68vh] lg:w-1/2">
       <div className="flex items-center gap-2 mb-4">
         <Bell className="text-blue-600" />
         <h2 className="text-xl font-bold">Reminders</h2>
@@ -83,7 +84,14 @@ const EmployeeReminder = ({ employeeId }) => {
 
       {/* List */}
       {loading ? (
-        <p className="text-sm text-slate-500">Loading reminders...</p>
+        <ul className="space-y-3 lg:h-[40vh] overflow-hidden">
+          {[...Array(4)].map((_, i) => (
+            <li key={i} className="p-3 border rounded-lg">
+              <Skeleton height={20} width="70%" />
+              <Skeleton height={14} width="40%" className="mt-2" />
+            </li>
+          ))}
+        </ul>
       ) : reminders.length === 0 ? (
         <p className="text-sm text-slate-500">No reminders added</p>
       ) : (

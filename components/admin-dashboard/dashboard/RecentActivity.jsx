@@ -35,7 +35,7 @@ function RecentActivity() {
   };
 
   return (
-    <div className="lg:w-1/2 bg-white rounded-lg shadow-md p-6 border">
+    <div className="lg:w-full bg-[#f3eaea] rounded-lg shadow-md p-6 border">
       <h2 className="text-xl font-bold text-slate-900 mb-4">Recent Activity</h2>
       <div className="space-y-4 max-h-80 overflow-y-auto">
         {loading ? (

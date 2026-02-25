@@ -190,3 +190,140 @@ const CustomerManager = () => {
 };
 
 export default CustomerManager;
+
+// here is the new client list page
+
+// "use client";
+
+// import { Button } from "@/components/ui/button";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+// import { FunnelPlus, Plus } from "lucide-react";
+// import { Sheet, SheetContent } from "@/components/ui/sheet";
+// import CommonForm from "@/components/layout/Form";
+// import Loading from "@/components/layout/Loading";
+// import { addCustomerFormControl } from "@/config/data";
+// import { initalCustomerFormData } from "@/config/initialFormDate";
+// import {
+//   createCustomerServices,
+//   editCustomerServices,
+//   deleteCustomerServices,
+//   getAllCustomerServices,
+//   getCustomerServices,
+// } from "@/service/customer";
+// import { Eye, FilePlusCorner, Network, SquarePen, Trash } from "lucide-react";
+// import Link from "next/link";
+// import { useEffect, useState } from "react";
+// import toast from "react-hot-toast";
+
+// const CustomerManager = () => {
+//   const [customers, setCustomers] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [open, setOpen] = useState(false);
+//   const [formData, setFormData] = useState(initalCustomerFormData);
+//   const [editingId, setEditingId] = useState(null);
+
+//   /* ---------------- Fetch ---------------- */
+//   const fetchCustomers = async () => {
+//     try {
+//       setLoading(true);
+//       const res = await getAllCustomerServices();
+//       if (res.success) setCustomers(res.data);
+//     } catch {
+//       toast.error("Failed to fetch customers");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchCustomers();
+//   }, []);
+//   return (
+//     <div className="flex flex-col gap-2 md:gap-5 lg:gap-1">
+//       {/* client List header  */}
+//       <div className="md:flex md:justify-between md:items-center md:px-10 md:py-2">
+//         <div className="text-2xl font-medium">Clients</div>
+
+//         <div className="md:flex gap-5 lg:gap-10 hidden">
+//           <div className="flex gap-2 items-center">
+//             <p className="font-semibold">Showing</p>
+//             <Select>
+//               <SelectTrigger className="w-[90px] bg-white">
+//                 <SelectValue placeholder="Clients" />
+//               </SelectTrigger>
+//               <SelectContent>
+//                 <SelectGroup>
+//                   <SelectItem value="10">10</SelectItem>
+//                   <SelectItem value="20">20</SelectItem>
+//                   <SelectItem value="30">30</SelectItem>
+//                 </SelectGroup>
+//               </SelectContent>
+//             </Select>
+//           </div>
+
+//           <Button className={"bg-white text-black hover:bg-gray-200"}>
+//             <FunnelPlus /> Filter
+//           </Button>
+
+//           <Button className={"text-white bg-blue-500 hover:bg-blue-600"}>
+//             <Plus size={30} /> Add New Client
+//           </Button>
+//         </div>
+//       </div>
+
+//       {/* client list  */}
+//       <div className=" bg-white h-[78vh] rounded-2xl lg:h-[70vh] shadow-lg border ">
+//         {/* heading  */}
+//         <div className="grid grid-cols-7 gap-4 text-gray-500 border-b-2 py-3 font-semibold">
+//           <p className="pl-5">Name</p>
+//           <p className="text-center">Company</p>
+//           <p className="text-center">GSTIN</p>
+//           <p className="text-center">Phone</p>
+//           <p className="text-center">Sales</p>
+//           <p className="text-center">Address</p>
+//           <p className="text-center">Action</p>
+//         </div>
+
+//         {/* list  */}
+
+//         {customers.map(
+//           ({ company, name, phone, GSTIN, Address, salesExecutive, _id }) => (
+//             <Link
+//               href={`/dashboard/customer/${_id}`}
+//               key={_id}
+//               className="grid grid-cols-7 gap-4  border-b py-3"
+//             >
+//               <p className="pl-5">{name}</p>
+//               <p className="text-center">{company}</p>
+//               <p className="text-center">{GSTIN}</p>
+//               <p className="text-center">{phone}</p>
+//               <p className="text-center capitalize">
+//                 {salesExecutive?.basicDetails?.name
+//                   ? salesExecutive?.basicDetails?.name
+//                   : "------"}
+//               </p>
+//               <p className="text-center">{Address?.slice(0, 20)}...</p>
+//               <div className="flex gap-7 justify-center">
+//                 <Link href={`/dashboard/customer/work/${_id}`}>
+//                   <Network />
+//                 </Link>
+        
+//                 <SquarePen />
+//                 <Trash />
+//               </div>
+//             </Link>
+//           ),
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default CustomerManager;

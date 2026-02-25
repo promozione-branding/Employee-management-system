@@ -516,31 +516,7 @@ const ProposalPdfTemplate = ({ data }) => {
           </View>
         </View>
 
-        {/* SEO */}
-        <View style={styles.sectionBox}>
-          <Text style={styles.sectionTitle}>Organic Search Growth</Text>
-          <View style={styles.deliverablesRow}>
-            <View style={styles.deliverableColumn}>
-              <Text style={styles.deliverableTitle}>Deliverables</Text>
-            </View>
-            <View style={styles.deliverableList}>
-              <Text style={styles.deliverableContent}>• Google Analytics</Text>
-              <Text style={styles.deliverableContent}>• Meta Integration</Text>
-              <Text style={styles.deliverableContent}>
-                • Google Search Console
-              </Text>
-            </View>
-            <View style={styles.deliverableList}>
-              <Text style={styles.deliverableContent}>
-                • On page & Off page SEO
-              </Text>
-              <Text style={styles.deliverableContent}>
-                • Backlinks Creation
-              </Text>
-              <Text style={styles.deliverableContent}>• Website Ranking</Text>
-            </View>
-          </View>
-        </View>
+        
 
         {/* Google Ads Management */}
         <View style={styles.sectionBoxForGoogleAds}>
@@ -597,6 +573,43 @@ const ProposalPdfTemplate = ({ data }) => {
               <Text style={styles.deliverableContent}>
                 • Daily performance report sharing
               </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* SEO */}
+        <View style={styles.sectionBox}>
+          <Text style={styles.sectionTitle}>Organic Search Growth</Text>
+          <View style={styles.deliverablesRow}>
+            <View style={styles.deliverableColumn}>
+              <Text style={styles.deliverableTitle}>Deliverables</Text>
+            </View>
+            <View style={styles.deliverableList}>
+              <Text style={styles.deliverableContent}>• Pan India Targeting</Text>
+              <Text style={styles.deliverableContent}>• Keyword Strategy</Text>
+              <Text style={styles.deliverableContent}>• 1st Page Ranking</Text>
+              <Text style={styles.deliverableContent}>• On-page Optimization</Text>
+              <Text style={styles.deliverableContent}>• Content Enhancement</Text>
+              <Text style={styles.deliverableContent}>• Authority Builder</Text>
+              <Text style={styles.deliverableContent}>• Technical Optimization</Text>
+              <Text style={styles.deliverableContent}>• Search Monitoring</Text>
+              <Text style={styles.deliverableContent}>• Ranking Tracking</Text>
+              <Text style={styles.deliverableContent}>• Month Reporting</Text>
+              <Text style={styles.deliverableContent}>• Keyword Strategy</Text>
+              <Text style={styles.deliverableContent}>• Google Analytics</Text>
+              <Text style={styles.deliverableContent}>• Meta Integration</Text>
+              <Text style={styles.deliverableContent}>
+                • Google Search Console
+              </Text>
+            </View>
+            <View style={styles.deliverableList}>
+              <Text style={styles.deliverableContent}>
+                • On page & Off page SEO
+              </Text>
+              <Text style={styles.deliverableContent}>
+                • Backlinks Creation
+              </Text>
+              <Text style={styles.deliverableContent}>• Website Ranking</Text>
             </View>
           </View>
         </View>

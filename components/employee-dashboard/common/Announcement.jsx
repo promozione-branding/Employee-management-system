@@ -3,7 +3,7 @@
 import { announcementService } from "@/service/employee-dashboard/dashboard";
 import { useEffect, useState } from "react";
 import { Calendar, User, X, Bell, AlertCircle } from "lucide-react";
-import Loading from "@/components/layout/Loading";
+import Skeleton from "react-loading-skeleton";
 
 const EmployeeAnnouncements = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -29,15 +29,29 @@ const EmployeeAnnouncements = () => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6 min-h-[200px] flex items-center justify-center">
-        <Loading />
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6 lg:h-[68vh]">
+        <div className="flex items-center gap-2 mb-4">
+          <Skeleton circle height={24} width={24} />
+          <Skeleton height={24} width={180} />
+        </div>
+        <div className="space-y-3 overflow-hidden">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="p-4 border rounded-lg">
+              <div className="flex justify-between mb-2">
+                <Skeleton width="60%" height={20} />
+                <Skeleton width={80} height={20} />
+              </div>
+              <Skeleton count={2} />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6 lg:h-[68vh]">
         <div className="flex items-center gap-2 mb-4">
           <Bell className="text-blue-600" size={24} />
           <h2 className="text-xl font-bold text-slate-800">Announcements</h2>
@@ -49,7 +63,7 @@ const EmployeeAnnouncements = () => {
             <p>No announcements available.</p>
           </div>
         ) : (
-          <div className="space-y-3 h-[60vh] overflow-auto">
+          <div className="space-y-3 h-[50vh] overflow-auto">
             {announcements.map((announcement) => (
               <div
                 key={announcement._id}
@@ -89,7 +103,9 @@ const EmployeeAnnouncements = () => {
                 <div className="flex items-center gap-2 text-sm text-slate-500 mt-2">
                   <Calendar size={14} />
                   <span>
-                    {new Date(selectedAnnouncement.startDate).toLocaleDateString()}
+                    {new Date(
+                      selectedAnnouncement.startDate,
+                    ).toLocaleDateString()}
                     {selectedAnnouncement.endDate &&
                       ` - ${new Date(selectedAnnouncement.endDate).toLocaleDateString()}`}
                   </span>
@@ -137,4 +153,3 @@ const EmployeeAnnouncements = () => {
 };
 
 export default EmployeeAnnouncements;
-

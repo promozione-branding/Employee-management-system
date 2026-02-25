@@ -78,7 +78,7 @@ export default function KPI() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
+      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
         <div className="flex items-center justify-between mb-4">
           <div className="bg-blue-50 p-3 rounded-lg">
             <IndianRupee className="text-blue-600 w-6 h-6" />
@@ -96,7 +96,7 @@ export default function KPI() {
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
+      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
         <div className="flex items-center justify-between mb-4">
           <div className="bg-green-50 p-3 rounded-lg">
             <Users className="text-green-600 w-6 h-6" />
@@ -112,7 +112,7 @@ export default function KPI() {
         <p className="text-2xl font-bold text-slate-900">{clientCount || 0}</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
+      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
         <div className="flex items-center justify-between mb-4">
           <div className="bg-purple-50 p-3 rounded-lg">
             <FileText className="text-purple-600 w-6 h-6" />
@@ -129,7 +129,7 @@ export default function KPI() {
           ₹ {totalRevenue.toLocaleString("en-IN")}
         </p>
       </div>
-      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
+      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
         <div className="flex items-center justify-between mb-4">
           <div className="bg-orange-50 p-3 rounded-lg">
             <IdCardLanyard className="text-orange-600 w-6 h-6" />

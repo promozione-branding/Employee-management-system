@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { allEmployeeContactService } from "@/service/employee-dashboard/dashboard";
 import { Mail, User } from "lucide-react";
-import Loading from "@/components/layout/Loading";
+import Skeleton from "react-loading-skeleton";
 import Image from "next/image";
 
 const AllEmployeeContact = () => {
@@ -28,7 +28,29 @@ const AllEmployeeContact = () => {
   }, []);
 
   if (loading) {
-    return <Loading />;
+    return (
+      <div className="space-y-4 bg-white px-5 py-5  rounded-xl lg:h-[68vh] shadow-lg">
+        <Skeleton height={24} width={200} className="mb-4" />
+
+        <div className="flex flex-col gap-3 h-[50vh] overflow-y-hidden ">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="rounded-lg border p-4">
+              <div className="flex items-start gap-3">
+                <Skeleton circle height={50} width={50} />
+                <div className="flex-1">
+                  <Skeleton height={20} width="60%" />
+                  <Skeleton height={14} width="40%" className="mt-1" />
+                  <div className="mt-2 flex items-center gap-2">
+                    <Skeleton circle width={16} height={16} />
+                    <Skeleton height={16} width="80%" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (!contacts.length) {
@@ -38,7 +60,6 @@ const AllEmployeeContact = () => {
       </p>
     );
   }
-
 
   return (
     <div className="space-y-4 bg-white px-5 py-5  rounded-xl lg:h-[68vh] shadow-lg">

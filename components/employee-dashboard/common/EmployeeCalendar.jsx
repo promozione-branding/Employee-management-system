@@ -80,9 +80,6 @@ const EmployeeCalendar = ({ employeeId }) => {
       }
     } catch (error) {
       console.log(error);
-      toast.error(
-        error.response?.data?.message || "Error while get calendar items",
-      );
     }
   }
 

@@ -471,3 +471,4 @@ const Customer = ({ customerId }) => {
 };
 
 export default Customer;
+

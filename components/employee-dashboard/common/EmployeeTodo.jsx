@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, CheckCircle, Pencil } from "lucide-react";
 import toast from "react-hot-toast";
-import Loading from "@/components/layout/Loading";
+import Skeleton from "react-loading-skeleton";
 
 const EmployeeTodo = ({ employeeId }) => {
   const [todos, setTodos] = useState([]);
@@ -87,7 +87,20 @@ const EmployeeTodo = ({ employeeId }) => {
     if (employeeId) fetchTodos();
   }, [employeeId]);
 
-  if (loading) return <Loading />
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-5 mb-6 lg:w-[40vw] lg:h-[68vh]">
+        <Skeleton height={24} width={150} className="mb-4" />
+        <div className="flex gap-2 mb-4">
+          <Skeleton height={36} className="flex-1" />
+          <Skeleton height={36} width={70} />
+        </div>
+        <ul className="space-y-3">
+          <Skeleton height={48} count={5} />
+        </ul>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-5 mb-6 lg:w-[40vw] lg:h-[68vh]">
@@ -100,7 +113,9 @@ const EmployeeTodo = ({ employeeId }) => {
           value={newTodo}
           onChange={(e) => setNewTodo(e.target.value)}
         />
-        <Button onClick={handleAddTodo} className={"bg-orange-600"}>Add</Button>
+        <Button onClick={handleAddTodo} className={"bg-orange-600"}>
+          Add
+        </Button>
       </div>
 
       {/* Todo List */}

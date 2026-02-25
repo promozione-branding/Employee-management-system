@@ -27,7 +27,6 @@ import Announcement from "@/components/admin-dashboard/dashboard/Announcement";
 import TodayMeeting from "@/components/admin-dashboard/dashboard/TodayMeeting";
 
 const Dashboard = () => {
-
   // Revenue Data
   const revenueData = [
     { month: "Jan", revenue: 40000, expenses: 24000, profit: 16000 },
@@ -77,15 +76,14 @@ const Dashboard = () => {
       <Employees />
 
       {/* Calendar Section */}
-      <div className="flex gap-10 items-start lg:h-[70vh]">
+      <div className="grid grid-cols-2 gap-5 lg:h-[70vh]">
         <RecentActivity />
         <MyClient />
-      </div>
-
-      <div className="flex gap-10 items-start lg:h-[70vh] my-4">
         <Announcement />
         <TodayMeeting />
       </div>
+
+      <div className="flex gap-10 items-start lg:h-[70vh] my-4"></div>
 
       {/* Charts Section */}
       {/* <Tabs defaultValue="revenue" className="mb-8">
@@ -260,8 +258,6 @@ const Dashboard = () => {
           </div>
         </TabsContent>
       </Tabs> */}
-
-     
     </div>
   );
 };

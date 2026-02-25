@@ -34,8 +34,8 @@ export const MyClient = () => {
   ];
 
   return (
-    <div className="lg:w-1/2 ">
-      <Link href={"/dashboard/customer"} className="bg-white shadow-md border p-5 h-full  block rounded-lg">
+    <div className="lg:w-full">
+      <Link href={"/dashboard/customer"} className="bg-[#f3eaea] shadow-md border p-5 h-full  block rounded-lg">
         <div className="mb-6">
           <h2 className="text-xl font-bold text-slate-900 mb-2">My Clients</h2>
          

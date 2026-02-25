@@ -14,6 +14,7 @@ export async function GET(req, { params }) {
       return NextResponse.json(
         {
           message: "there is no employee calendar found",
+          success: false,
         },
         {
           status: 404,

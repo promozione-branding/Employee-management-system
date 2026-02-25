@@ -1,6 +1,6 @@
 "use client";
 
-import Loading from "@/components/layout/Loading";
+import Skeleton from "react-loading-skeleton";
 import { employeeClientService } from "@/service/employee-dashboard/dashboard";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -32,11 +32,39 @@ const EmployeeClientsProgress = ({ employeeId }) => {
   }, [employeeId]);
 
   if (loading) {
-    return <Loading />;
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6 lg:h-[68vh] lg:w-1/3">
+        <Skeleton height={28} width={180} className="mb-4" />
+        <div className="space-y-4 overflow-hidden">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="border rounded-lg p-4">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <Skeleton height={20} width={140} />
+                  <Skeleton height={14} width={100} className="mt-1" />
+                </div>
+                <Skeleton height={24} width={80} borderRadius={20} />
+              </div>
+              <div className="flex flex-col gap-2 mb-4">
+                <Skeleton height={14} width={200} />
+                <Skeleton height={14} width={160} />
+              </div>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <Skeleton height={12} width={60} />
+                  <Skeleton height={12} width={90} />
+                </div>
+                <Skeleton height={8} borderRadius={999} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6 lg:w-1/2">
+    <div className="bg-white rounded-lg shadow-md p-6 lg:h-[68vh] lg:w-1/3">
       <h2 className="text-xl font-bold mb-4 text-slate-800">Client Progress</h2>
       {employeeClientData.length === 0 ? (
         <p className="text-slate-500">No active clients found.</p>
@@ -54,7 +82,6 @@ const EmployeeClientsProgress = ({ employeeId }) => {
                 key={_id}
                 className="border rounded-lg p-4 hover:bg-slate-50 transition-colors"
               >
-
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h3 className="font-semibold text-lg text-slate-800">

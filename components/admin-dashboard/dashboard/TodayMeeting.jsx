@@ -39,7 +39,7 @@ const TodayMeeting = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 border h-full lg:w-1/2">
+    <div className="bg-[#f3eaea] rounded-lg shadow-md p-6 border h-full lg:w-full">
       <div className="flex items-center gap-2 mb-4">
         <div className="bg-purple-50 p-2 rounded-lg">
           <Calendar className="w-5 h-5 text-purple-600" />
