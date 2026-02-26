@@ -89,7 +89,7 @@ const EmployeeTodo = ({ employeeId }) => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-5 mb-6 lg:w-[40vw] lg:h-[68vh]">
+      <div className="bg-white rounded-lg shadow-md p-5 mb-6 lg:w-[40vw] lg:h-92">
         <Skeleton height={24} width={150} className="mb-4" />
         <div className="flex gap-2 mb-4">
           <Skeleton height={36} className="flex-1" />
@@ -103,7 +103,7 @@ const EmployeeTodo = ({ employeeId }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-5 mb-6 lg:w-[40vw] lg:h-[68vh]">
+    <div className="bg-[#f3eaea] rounded-lg shadow-md p-5 mb-6 lg:w-[40vw] lg:h-[68vh]">
       <h2 className="text-lg font-semibold mb-4">My Todo List</h2>
 
       {/* Add Todo */}

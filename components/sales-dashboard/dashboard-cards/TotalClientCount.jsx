@@ -49,7 +49,7 @@ const TotalClientCount = () => {
   }
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 w-full h-full hover:shadow-md transition-shadow">
+    <div className="bg-[#f3eaea] p-4 rounded-lg shadow-sm border border-gray-200 w-full h-full hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">

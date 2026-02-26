@@ -51,7 +51,7 @@ const EmployeeAnnouncements = () => {
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6 lg:h-[68vh]">
+      <div className="bg-[#f3eaea] rounded-lg shadow-md p-6 mb-6 lg:h-[68vh]">
         <div className="flex items-center gap-2 mb-4">
           <Bell className="text-blue-600" size={24} />
           <h2 className="text-xl font-bold text-slate-800">Announcements</h2>

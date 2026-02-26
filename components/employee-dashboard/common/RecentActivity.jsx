@@ -52,7 +52,7 @@ function RecentActivity({ employeeId }) {
   }
 
   return (
-    <div className="space-y-3 px-5 bg-white mx-2 py-3 rounded-lg lg:w-1/2">
+    <div className="space-y-3 px-5 bg-[#f3eaea] mx-2 py-3 rounded-lg lg:w-1/2">
       <h3 className="text-lg font-semibold">Recent Activity</h3>
 
       {activity.length === 0 ? (

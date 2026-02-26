@@ -18,7 +18,7 @@ const SalesDashboardLayout = ({ children }) => {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-white">
       <SalesSidebar open={open} setOpen={setOpen} />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <SalesNavbar />

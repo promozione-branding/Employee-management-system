@@ -49,7 +49,7 @@ const TodaySalesReminder = () => {
   }
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 lg:w-1/2 mb-4 lg:h-[68vh]">
+    <div className="bg-[#f3eaea] p-4 rounded-lg shadow-sm border border-gray-200 lg:w-1/2 mb-4 lg:h-[68vh]">
       <h2 className="text-lg font-bold text-gray-800 mb-4">Today Reminder</h2>
       <div className="flex flex-col gap-3 overflow-y-auto max-h-[340px] custom-scrollbar">
         {todayReminderData?.length > 0 ? (

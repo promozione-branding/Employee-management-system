@@ -180,7 +180,7 @@
 
 /* 1. MAIN WRAPPER - Controls overall calendar size */
 .calendar-wrapper {
-  @apply text-slate-900 w-96 h-92; /* w-64=256px wide, h-72=288px tall - CHANGE THESE for size */
+  @apply text-slate-900 w-96 h-92 lg:h-[60vh]; /* w-64=256px wide, h-72=288px tall - CHANGE THESE for size */
   /* Options: w-48 h-56 (very small), w-72 h-80 (medium), w-96 h-96 (large) */
 }
 

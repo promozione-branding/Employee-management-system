@@ -44,19 +44,15 @@ const SalesDashboard = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 mb-5">
-        <TodaySalesReminder />
         <EmployeeReminder employeeId={employee?._id} />
         <AllEmployeeContact />
+        <EmployeeAnnouncements />
       </div>
 
-   
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 mt-10 gap-5">
-        <EmployeeAnnouncements />
-
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 mt-10 gap-5"> */}
         {/* hidden  */}
         {/* <RecentActivity employeeId={employee?._id} /> */}
-      </div>
+      {/* </div> */}
     </div>
   );
 };

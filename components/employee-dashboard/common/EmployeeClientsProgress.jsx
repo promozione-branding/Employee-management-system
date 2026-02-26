@@ -64,7 +64,7 @@ const EmployeeClientsProgress = ({ employeeId }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 lg:h-[68vh] lg:w-1/3">
+    <div className="bg-[#f3eaea] rounded-lg shadow-md p-6 lg:h-[68vh] lg:w-1/3">
       <h2 className="text-xl font-bold mb-4 text-slate-800">Client Progress</h2>
       {employeeClientData.length === 0 ? (
         <p className="text-slate-500">No active clients found.</p>

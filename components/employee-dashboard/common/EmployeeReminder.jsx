@@ -61,7 +61,7 @@ const EmployeeReminder = ({ employeeId }) => {
   }, [employeeId]);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 lg:h-[68vh] lg:w-1/2">
+    <div className="bg-[#f3eaea] rounded-lg shadow-md p-6 lg:h-[68vh] lg:w-1/2">
       <div className="flex items-center gap-2 mb-4">
         <Bell className="text-blue-600" />
         <h2 className="text-xl font-bold">Reminders</h2>
