@@ -156,20 +156,7 @@ export const addCustomerFormControl = [
     componentType: "input",
     type: "date",
   },
-  {
-    label: "Sales Person Email",
-    name: "salesPersonEmail",
-    componentType: "input",
-    type: "email",
-    placeholder: "Enter sales Person Email",
-  },
-  {
-    label: "Sales Person Name",
-    name: "SalesPersonName",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Sales Person name",
-  },
+  
   {
     label: "Notes",
     name: "notes",

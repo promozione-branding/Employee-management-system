@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/db";
-import Proposal from "@/models/admin/Proposal";
-import Service from "@/models/admin/Service";
+import Proposal from "@/models/admin/proposal/Proposal";
+import Service from "@/models/admin/proposal/Service";
 
 export async function GET(req, context) {
   try {
@@ -20,7 +20,7 @@ export async function GET(req, context) {
           success: false,
           message: "Server error while fetching proposal Pdf data",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -36,7 +36,7 @@ export async function GET(req, context) {
         success: false,
         message: "Server error while fetching proposal Pdf data",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

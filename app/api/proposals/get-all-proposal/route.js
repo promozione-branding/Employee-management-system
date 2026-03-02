@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Proposal from "@/models/admin/Proposal";
+import Proposal from "@/models/admin/proposal/Proposal";
 
 export async function GET() {
   try {
@@ -7,7 +7,7 @@ export async function GET() {
 
     const items = await Proposal.find()
       .select(
-        "clientName clientCompany dateOfProposal GSTIN totalAmount proposalNo"
+        "clientName clientCompany dateOfProposal GSTIN totalAmount proposalNo",
       )
       .sort({ createdAt: -1 });
 
@@ -16,7 +16,7 @@ export async function GET() {
         success: true,
         data: items,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log("GET API Error:", error);
@@ -25,7 +25,7 @@ export async function GET() {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

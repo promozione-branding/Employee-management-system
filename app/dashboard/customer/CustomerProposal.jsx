@@ -42,14 +42,18 @@ const CustomerProposal = ({ customerId }) => {
   const [firstEntryOfLedger, setFirstEntryOfLedger] = useState(true);
   const [ledgerData, setLedgerData] = useState(null);
 
+  // for cc mail to send proposal
+  const [ccMail, setCcMail] = useState("");
+
   const router = useRouter();
 
-  async function sendEmailHandler(proposalId) {
+  async function sendEmailHandler(e, proposalId) {
+    e.preventDefault();
     if (sendingInvoiceId) return;
     setSendingInvoiceId(proposalId);
     const toastId = toast.loading("Sending email...");
     try {
-      const res = await sendProposalPdfEmailService({ proposalId });
+      const res = await sendProposalPdfEmailService({proposalId, email:ccMail});
       if (res.success) {
         toast.success("Email sent successfully!", { id: toastId });
       } else {
@@ -57,7 +61,7 @@ const CustomerProposal = ({ customerId }) => {
       }
     } catch (error) {
       console.error("sendEmailHandler error:", error);
-      toast.error(error.message || "An error occurred.", { id: toastId });
+      toast.error(error.response.data.message || "An error occurred.", { id: toastId });
     } finally {
       setSendingInvoiceId(null);
     }
@@ -79,7 +83,7 @@ const CustomerProposal = ({ customerId }) => {
 
   async function handleDeleteProposal(id) {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this proposal?"
+      "Are you sure you want to delete this proposal?",
     );
     if (confirmed) {
       try {
@@ -169,7 +173,7 @@ const CustomerProposal = ({ customerId }) => {
       console.log(error);
       toast.error(
         error?.response?.data?.message ||
-          "Error while add proposal in the ledger"
+          "Error while add proposal in the ledger",
       );
     }
   }
@@ -321,13 +325,38 @@ const CustomerProposal = ({ customerId }) => {
                 >
                   <Download />
                 </Link>
-                <button
-                  disabled={sendingInvoiceId === item?._id}
-                  onClick={() => sendEmailHandler(item?._id)}
-                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Mail />
-                </button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button
+                      // disabled={sendingInvoiceId === item?._id}
+                      // onClick={() => sendEmailHandler(item?._id)}
+                      className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Mail />
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add Email</DialogTitle>
+                      <DialogDescription>
+                        That is the CC Email option
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <form
+                      className="flex gap-3"
+                      onSubmit={(e) => sendEmailHandler(e, item?._id)}
+                    >
+                      <Input
+                        type={"email"}
+                        value={ccMail}
+                        onChange={(e) => setCcMail(e.target.value)}
+                      />
+                      <Button type="submit">Send</Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
                 <Link
                   href={`/dashboard/proposal/edit-proposal/${item?._id}`}
                   className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"

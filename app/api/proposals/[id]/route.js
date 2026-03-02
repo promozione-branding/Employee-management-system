@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Proposal from "@/models/admin/Proposal";
+import Proposal from "@/models/admin/proposal/Proposal";
 import Customer from "@/models/admin/Customer";
 import { createAuditLog } from "@/utils/createAuditLog";
 import { getAuthUser } from "@/lib/getAuthUser";

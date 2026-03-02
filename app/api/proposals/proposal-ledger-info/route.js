@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Proposal from "@/models/admin/Proposal";
+import Proposal from "@/models/admin/proposal/Proposal";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
@@ -8,7 +8,7 @@ export async function POST(req) {
     const { proposalId } = await req.json();
 
     const findProposal = await Proposal.findById(proposalId).select(
-      "proposalNo tanNo totalAmount clientId"
+      "proposalNo tanNo totalAmount clientId",
     );
 
     if (!findProposal) {
@@ -17,7 +17,7 @@ export async function POST(req) {
           success: false,
           message: "Proposal not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -26,7 +26,7 @@ export async function POST(req) {
         success: true,
         data: findProposal,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log(error);
@@ -35,7 +35,7 @@ export async function POST(req) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

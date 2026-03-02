@@ -1,7 +1,7 @@
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
 import Ledger from "@/models/admin/Ledger";
-import Proposal from "@/models/admin/Proposal";
+import Proposal from "@/models/admin/proposal/Proposal";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { createAuditLog } from "@/utils/createAuditLog";
 import Customer from "@/models/admin/Customer";
@@ -24,7 +24,7 @@ export async function GET(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -36,7 +36,7 @@ export async function GET(req, context) {
       },
       {
         status: 200,
-      }
+      },
     );
   } catch (error) {
     console.log(error);
@@ -47,7 +47,7 @@ export async function GET(req, context) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
@@ -105,7 +105,7 @@ export async function PUT(req, { params }) {
     if (!authUser) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -114,7 +114,7 @@ export async function PUT(req, { params }) {
     if (!ledger) {
       return NextResponse.json(
         { success: false, message: "Ledger not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -160,7 +160,7 @@ export async function PUT(req, { params }) {
         success: false,
         message: "Server error while adding ledger entry",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

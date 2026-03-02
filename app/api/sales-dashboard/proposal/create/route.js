@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import Proposal from "@/models/admin/Proposal";
+import Proposal from "@/models/admin/proposal/Proposal";
 import { validateCreateProposal } from "@/lib/validation/sales/proposal";
 import SalesEmployee from "@/models/employee/sales/SalesEmployee";
 import Customer from "@/models/admin/Customer";

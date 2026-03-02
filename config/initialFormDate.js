@@ -48,6 +48,7 @@ export const initalCustomerFormData = {
   salesPersonEmail: "",
   SalesPersonName: "",
   notes: "",
+  salesExecutive:""
 };
 
 export const initalServiceFormData = {

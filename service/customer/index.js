@@ -121,3 +121,12 @@ export async function getAllHistory(id, page) {
 
   return data;
 }
+
+// all delete customer
+export async function getAllSalesService() {
+  const { data } = await axiosInstance.get(
+    "/api/customer/create/sales-person",
+  );
+
+  return data;
+}

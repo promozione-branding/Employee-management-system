@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Proposal from "@/models/admin/Proposal";
+import Proposal from "@/models/admin/proposal/Proposal";
 import { NextResponse } from "next/server";
 
 export async function PUT(req, { params }) {
@@ -13,13 +13,13 @@ export async function PUT(req, { params }) {
     const updateProposalLedgerEntry = await Proposal.findByIdAndUpdate(
       id,
       { ledgerEntry },
-      { new: true }
+      { new: true },
     );
 
     if (!updateProposalLedgerEntry) {
       return NextResponse.json(
         { success: false, message: "Proposal not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -29,7 +29,7 @@ export async function PUT(req, { params }) {
         message: "Proposal ledger entry successfully",
         data: updateProposalLedgerEntry,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log(error);
@@ -40,7 +40,7 @@ export async function PUT(req, { params }) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

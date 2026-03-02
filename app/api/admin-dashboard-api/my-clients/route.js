@@ -1,8 +1,8 @@
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
 import { NextResponse } from "next/server";
-import Proposal from "@/models/admin/Proposal";
-import Service from "@/models/admin/Service";
+import Proposal from "@/models/admin/proposal/Proposal";
+import Service from "@/models/admin/proposal/Service";
 
 export async function GET(req) {
   try {

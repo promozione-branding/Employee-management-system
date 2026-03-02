@@ -38,6 +38,14 @@ const AnnouncementSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    accept: {
+      type: Boolean,
+      default: false,
+    },
+    acknowled: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

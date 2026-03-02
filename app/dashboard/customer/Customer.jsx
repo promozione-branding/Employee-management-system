@@ -226,6 +226,7 @@ const Customer = ({ customerId }) => {
     salesExecutive
   } = customerDetails;
 
+
   return (
     <div className="flex gap-5">
       <div className="bg-white border border-gray-200 shadow-sm flex flex-col w-[30vw] rounded-xl overflow-hidden h-fit">

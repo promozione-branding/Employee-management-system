@@ -1,11 +1,10 @@
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
-import Proposal from "@/models/admin/Proposal";
+import Proposal from "@/models/admin/proposal/Proposal";
 import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
 import SalesWork from "@/models/employee/sales/SalesWork";
 import { NextResponse } from "next/server";
 import Employee from "@/models/employee/Employee";
-
 
 export async function GET(req) {
   try {

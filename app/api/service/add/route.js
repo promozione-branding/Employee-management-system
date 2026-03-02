@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Service from "@/models/admin/Service";
+import Service from "@/models/admin/proposal/Service";
 
 export async function POST(req) {
   try {
@@ -38,7 +38,7 @@ export async function POST(req) {
       },
       {
         status: 201,
-      }
+      },
     );
   } catch (error) {
     console.error("Create services error", error);
@@ -50,7 +50,7 @@ export async function POST(req) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

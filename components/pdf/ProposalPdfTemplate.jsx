@@ -517,8 +517,7 @@ const ProposalPdfTemplate = ({ data }) => {
                 • Monthly social content calender
               </Text>
               <Text style={styles.deliverableContent}>
-                • Platform wise strategy - Instagram, Facebook, Youtube &
-                Linkedin
+                • Platform wise strategy-IG, FB, YT & Linkedin
               </Text>
               <Text style={styles.deliverableContent}>
                 • Hashtag research and strategy
@@ -530,7 +529,7 @@ const ProposalPdfTemplate = ({ data }) => {
 
             <View style={styles.deliverableList}>
               <Text style={styles.deliverableContent}>
-                • “Google my business” posts
+                • Google my business posts
               </Text>
               <Text style={styles.deliverableContent}>
                 • Community Management
@@ -548,8 +547,11 @@ const ProposalPdfTemplate = ({ data }) => {
                 • Monthly performance reports
               </Text>
               <Text style={styles.deliverableContent}>
-                • Reach, Engagement and Follower growth analysis
+                • Engagement and follower insights
               </Text>
+              {/* <Text style={styles.deliverableContent}>
+                • Reach, Engagement and Follower growth analysis
+              </Text> */}
               <Text style={styles.deliverableContent}>
                 • Promotional campaigns and Offer posts
               </Text>
@@ -697,8 +699,11 @@ const ProposalPdfTemplate = ({ data }) => {
               <Text style={styles.deliverableContent}>
                 • Creative A/B Testing
               </Text>
-              <Text style={styles.deliverableContent}>
+              {/* <Text style={styles.deliverableContent}>
                 • Daily Performance Monitoring and Report sharing
+              </Text> */}
+              <Text style={styles.deliverableContent}>
+                • Daily performance monitoring & reporting
               </Text>
               <Text style={styles.deliverableContent}>
                 • CPC/CPA optimization

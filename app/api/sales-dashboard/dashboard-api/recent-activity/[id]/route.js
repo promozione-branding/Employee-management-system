@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
-import Proposal from "@/models/admin/Proposal";
+import Proposal from "@/models/admin/proposal/Proposal";
 import SaleWork from "@/models/employee/sales/SalesWork";
 
 export async function GET(req, { params }) {
@@ -70,10 +70,7 @@ export async function GET(req, { params }) {
 
     /* -------------------- MERGE -------------------- */
 
-    const activities = [
-      ...customerActivity,
-      ...proposalActivity,
-    ];
+    const activities = [...customerActivity, ...proposalActivity];
 
     activities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 

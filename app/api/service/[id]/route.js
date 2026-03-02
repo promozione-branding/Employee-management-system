@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Service from "@/models/admin/Service";
+import Service from "@/models/admin/proposal/Service";
 
 export async function GET(req, context) {
   try {
@@ -16,7 +16,7 @@ export async function GET(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
     return Response.json({
@@ -33,7 +33,7 @@ export async function GET(req, context) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
@@ -53,7 +53,7 @@ export async function DELETE(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
     return Response.json({
@@ -70,7 +70,7 @@ export async function DELETE(req, context) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
@@ -93,7 +93,7 @@ export async function PUT(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
     return Response.json({
@@ -110,7 +110,7 @@ export async function PUT(req, context) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

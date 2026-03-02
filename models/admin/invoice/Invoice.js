@@ -47,23 +47,29 @@ const InvoiceSchema = new mongoose.Schema(
       unique: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 InvoiceSchema.pre("save", async function (next) {
   if (this.isNew) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const datePrefix = `${year}${month}${day}`;
+
     const lastInvoice = await this.constructor
-      .findOne()
-      .sort({ createdAt: -1 });
+      .findOne({
+        invoiceNo: { $regex: `^${datePrefix}` },
+      })
+      .sort({ invoiceNo: -1 });
+
     let nextInvoiceNumber = 1;
     if (lastInvoice && lastInvoice.invoiceNo) {
-      const lastNumber = parseInt(
-        lastInvoice.invoiceNo.replace("PROMO", ""),
-        10
-      );
+      const lastNumber = parseInt(lastInvoice.invoiceNo.slice(-2), 10);
       nextInvoiceNumber = lastNumber + 1;
     }
-    this.invoiceNo = `PROMO${String(nextInvoiceNumber).padStart(4, "0")}`;
+    this.invoiceNo = `${datePrefix}${String(nextInvoiceNumber).padStart(2, "0")}`;
   }
 
   next();

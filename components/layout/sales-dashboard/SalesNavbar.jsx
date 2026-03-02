@@ -50,10 +50,10 @@ const SalesNavbar = () => {
         </div>
 
         {/* Notification */}
-        <Button variant="ghost" size="icon" className="relative">
+        {/* <Button variant="ghost" size="icon" className="relative">
           <Bell size={20} />
           <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 animate-caret-blink" />
-        </Button>
+        </Button> */}
 
         {/* Profile */}
         <div

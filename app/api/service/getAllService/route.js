@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Service from "@/models/admin/Service";
+import Service from "@/models/admin/proposal/Service";
 
 export async function GET() {
   try {
@@ -12,7 +12,7 @@ export async function GET() {
         success: true,
         data: items,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log("GET service API Error:", error);
@@ -21,7 +21,7 @@ export async function GET() {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
