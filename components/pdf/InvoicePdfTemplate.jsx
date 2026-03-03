@@ -172,7 +172,7 @@ const Invoice = ({ data }) => {
           })}
 
           {/* taxable amount */}
-          {tanNo && (
+          {/* {tanNo && (
             <View style={styles.tableRow}>
               <Text style={[styles.tableCell, { flex: 0.5 }]}></Text>
               <Text
@@ -194,7 +194,7 @@ const Invoice = ({ data }) => {
                 {formatIndianCurrency(tdsAmount)}
               </Text>
             </View>
-          )}
+          )} */}
 
           {/* cgst row */}
           <View style={styles.tableRow}>

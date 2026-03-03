@@ -6,6 +6,7 @@ import LedgerDetails from "../ledger/LedgerDetails";
 import MeetingDashboard from "../meeting/MeetingDashboard";
 import MeetingHistory from "../meeting/meetingHistory/MeetingHistory";
 import HistoryPage from "../history/page";
+import Attachment from "@/components/admin-dashboard/tabs/Attachment";
 
 const CustomerDashboard = ({ customerId, salesPersonId }) => {
   return (
@@ -18,6 +19,7 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
           <TabsTrigger value="ledger">Ledger</TabsTrigger>
           <TabsTrigger value="meeting">Update</TabsTrigger>
           <TabsTrigger value="meetingHistory">History</TabsTrigger>
+          <TabsTrigger value="attachment">Attachment</TabsTrigger>
         </TabsList>
         <TabsContent value="Customer">
           <Customer customerId={customerId} />
@@ -40,6 +42,9 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
         <TabsContent value="meetingHistory">
           <HistoryPage customerId={customerId} />
           {/* <MeetingHistory customerId={customerId} /> */}
+        </TabsContent>
+        <TabsContent value="attachment">
+          <Attachment />
         </TabsContent>
       </Tabs>
     </div>

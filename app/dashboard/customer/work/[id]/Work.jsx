@@ -131,7 +131,7 @@ const ClientWork = ({ customerId }) => {
           <div>
             <p className="text-lg font-medium mb-2">Domains of Work</p>
             <Select onValueChange={(value) => setSelectedDomain(value)}>
-              <SelectTrigger className="w-[20vw]">
+              <SelectTrigger>
                 <SelectValue placeholder="Select Domain" />
               </SelectTrigger>
               <SelectContent>
@@ -141,7 +141,6 @@ const ClientWork = ({ customerId }) => {
                 </SelectItem>
                 <SelectItem value="ADS_MANAGER">Ads Management</SelectItem>
                 <SelectItem value="SOCIAL_MEDIA">Social Media</SelectItem>
-                <SelectItem value="SALES">Sales</SelectItem>
                 <SelectItem value="OTHER">Other</SelectItem>
               </SelectContent>
             </Select>

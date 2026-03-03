@@ -27,6 +27,8 @@ function RecentActivity() {
     fetchRecentActivity();
   }, []);
 
+  console.log(activities);
+
   const activityIcons = {
     customer: <UserPlus className="w-5 h-5 text-blue-500" />,
     proposal: <FileText className="w-5 h-5 text-green-500" />,
@@ -66,12 +68,18 @@ function RecentActivity() {
                 <p className="text-slate-900 font-medium text-sm">
                   {activity.title}
                 </p>
-                {/* <p className="text-slate-500 text-xs flex items-center gap-1 mt-1">
+                <p className="text-slate-700 text-xs flex items-center gap-1 mt-1">
                   <Clock size={12} />
-                  {formatDistanceToNow(new Date(activity.createdAt), {
-                    addSuffix: true,
+                  {/* {activity.createdAt} */}
+
+                  {new Date(activity.createdAt).toLocaleString("en-IN", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
                   })}
-                </p> */}
+                </p>
               </div>
             </div>
           ))

@@ -5,19 +5,24 @@ import { getClientHistoryService } from "@/service/customer";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+const formatValue = (value) => {
+  if (value === null || value === undefined) return "N/A";
+  if (typeof value === "object") return JSON.stringify(value, null, 2);
+  return String(value);
+};
+
 const ClientHistory = ({ customerId }) => {
   const [loading, setLoading] = useState(true);
   const [clientHistoryData, setClientHistoryData] = useState([]);
-
-  console.log(clientHistoryData, "clientHistoryData");
+  const [pagination, setPagination] = useState(null);
 
   useEffect(() => {
     async function getClientHistory() {
       try {
         const res = await getClientHistoryService(customerId);
         if (res.success) {
-          setLoading(false);
           setClientHistoryData(res.data);
+          setPagination(res.pagination || null);
           toast.success(res.message || "Client history fetched");
         }
       } catch (error) {
@@ -27,6 +32,8 @@ const ClientHistory = ({ customerId }) => {
           error.response.data.message ||
             "Error while fetching the client history"
         );
+      } finally {
+        setLoading(false);
       }
     }
     getClientHistory();
@@ -44,10 +51,13 @@ const ClientHistory = ({ customerId }) => {
                 key={history._id}
                 className="bg-white shadow rounded-lg p-4 border border-gray-200"
               >
-                <div className="flex justify-between items-start mb-4 border-b pb-2">
+                <div className="flex flex-wrap justify-between items-start gap-3 mb-4 border-b pb-3">
                   <div>
                     <span className="inline-block px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full">
                       {history.action}
+                    </span>
+                    <span className="ml-2 inline-block px-2 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">
+                      {history.entityType || "N/A"}
                     </span>
                     <span className="ml-2 text-sm text-gray-500">
                       {new Date(history.createdAt).toLocaleString()}
@@ -63,8 +73,31 @@ const ClientHistory = ({ customerId }) => {
                   </div>
                 </div>
 
-                <div className="mt-2">
-                  <div className="grid grid-cols-3 gap-4 text-xs font-semibold text-gray-500 uppercase mb-2">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm mb-4">
+                  <p className="text-gray-600">
+                    <span className="font-semibold text-gray-800">History ID:</span>{" "}
+                    {history._id}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-semibold text-gray-800">Client ID:</span>{" "}
+                    {history.clientId || "N/A"}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-semibold text-gray-800">Entity ID:</span>{" "}
+                    {history.entityId || "N/A"}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-semibold text-gray-800">Updated At:</span>{" "}
+                    {history.updatedAt ? new Date(history.updatedAt).toLocaleString() : "N/A"}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-semibold text-gray-800">Version:</span>{" "}
+                    {history.__v ?? "N/A"}
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 text-xs font-semibold text-gray-500 uppercase">
                     <div>Field</div>
                     <div>Old Value</div>
                     <div>New Value</div>
@@ -72,16 +105,21 @@ const ClientHistory = ({ customerId }) => {
                   {history.changes?.map((change) => (
                     <div
                       key={change._id}
-                      className="grid grid-cols-3 gap-4 text-sm py-2 border-t border-gray-100"
+                      className="grid grid-cols-1 lg:grid-cols-3 gap-3 text-sm py-3 border border-gray-100 rounded-md p-3"
                     >
                       <div className="font-medium text-gray-700">
-                        {change.field}
+                        <p>{change.field}</p>
+                        <p className="text-xs text-gray-500 mt-1">{change._id}</p>
                       </div>
-                      <div className="text-red-500 break-words">
-                        {String(change.oldValue)}
+                      <div className="text-red-600 break-words">
+                        <pre className="whitespace-pre-wrap break-words text-xs bg-red-50 rounded-md p-2 border border-red-100">
+                          {formatValue(change.oldValue)}
+                        </pre>
                       </div>
                       <div className="text-green-600 break-words">
-                        {String(change.newValue)}
+                        <pre className="whitespace-pre-wrap break-words text-xs bg-green-50 rounded-md p-2 border border-green-100">
+                          {formatValue(change.newValue)}
+                        </pre>
                       </div>
                     </div>
                   ))}
@@ -91,6 +129,28 @@ const ClientHistory = ({ customerId }) => {
           ) : (
             <div className="text-center text-gray-500 py-8">
               No history found
+            </div>
+          )}
+
+          {pagination && (
+            <div className="bg-white border rounded-lg p-3 text-sm text-gray-700 flex flex-wrap gap-4">
+              <p>
+                <span className="font-semibold">Page:</span> {pagination.page}
+              </p>
+              <p>
+                <span className="font-semibold">Limit:</span> {pagination.limit}
+              </p>
+              <p>
+                <span className="font-semibold">Total:</span> {pagination.total}
+              </p>
+              <p>
+                <span className="font-semibold">Total Pages:</span>{" "}
+                {pagination.totalPages}
+              </p>
+              <p>
+                <span className="font-semibold">Has Next:</span>{" "}
+                {pagination.hasNext ? "Yes" : "No"}
+              </p>
             </div>
           )}
         </div>

@@ -36,6 +36,8 @@ const CustomerManager = () => {
   const [editingId, setEditingId] = useState(null);
   const [fetchSales, setFetchSales] = useState([]);
 
+  console.log(customers[0], "customers");
+
   /* ---------------- Fetch ---------------- */
   async function fetchSalesPerson() {
     try {
@@ -219,11 +221,12 @@ const CustomerManager = () => {
                 <p>{company}</p>
                 <p className="">{GSTIN}</p>
                 <p className="text-center">{phone}</p>
-                <p className="text-center capitalize">
-                  {salesExecutive?.basicDetails?.name
-                    ? salesExecutive?.basicDetails?.name
-                    : SalesPersonName}
-                </p>
+                <div className="text-center capitalize flex gap-2">
+                  {/* {salesExecutive[0]?.basicDetails?.name} */}
+                  {salesExecutive.map((item) => (
+                    <p key={item?._id} className="bg-orange-200 px-2 py-1 rounded-lg">{item?.basicDetails?.name}</p>
+                  ))}
+                </div>
                 {/* <p className="text-center">{Address?.slice(0, 20)}...</p> */}
                 <div className="flex gap-5 justify-center">
                   <Link href={`/dashboard/customer/work/${_id}`}>

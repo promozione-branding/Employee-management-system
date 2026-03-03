@@ -54,17 +54,19 @@ const CreateInvoice = ({ id }) => {
       0
     );
 
-    let tdsAmount = 0;
+    // let tdsAmount = 0;
 
-    if (tanNo?.length !== 0) {
-      tdsAmount = totalServicePrice * 0.02;
-    }
+    // if (tanNo?.length !== 0) {
+    //   tdsAmount = totalServicePrice * 0.02;
+    // }
 
     const taxAmount = totalServicePrice * 0.18;
 
-    const totalAmount = tanNo?.length
-      ? taxAmount + totalServicePrice - tdsAmount
-      : taxAmount + totalServicePrice;
+    // const totalAmount = tanNo?.length
+    //   ? taxAmount + totalServicePrice - tdsAmount
+    //   : taxAmount + totalServicePrice;
+
+    const totalAmount =  taxAmount + totalServicePrice;
 
     return totalAmount;
   }
