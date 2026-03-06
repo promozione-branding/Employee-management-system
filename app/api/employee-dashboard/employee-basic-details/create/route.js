@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db";
 import Employee from "@/models/employee/Employee";
 import { NextResponse } from "next/server";
 import User from "@/models/admin/User";
+import { isValidSubDesignation } from "@/config/employeeDesignation";
 
 export async function POST(req) {
   try {
@@ -14,7 +15,9 @@ export async function POST(req) {
       !body?.basicDetails?.phone ||
       !body?.basicDetails?.address ||
       !body?.basicDetails?.gender ||
-      !body?.basicDetails?.email
+      !body?.basicDetails?.email ||
+      !body?.basicDetails?.subDesignation ||
+      !body?.basicDetails?.authRole
     ) {
       return NextResponse.json(
         {
@@ -25,7 +28,21 @@ export async function POST(req) {
       );
     }
 
-    // 🆕 CREATE EMPLOYEE
+    if (
+      !isValidSubDesignation(
+        body.basicDetails.designation,
+        body.basicDetails.subDesignation,
+      )
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid sub designation for selected designation",
+        },
+        { status: 400 },
+      );
+    }
+
     const employee = await Employee.create(body);
 
     if (employee?.user) {
@@ -43,7 +60,6 @@ export async function POST(req) {
   } catch (error) {
     console.error("CREATE EMPLOYEE ERROR:", error);
 
-    // 🛑 DUPLICATE KEY ERROR (employeeId)
     if (error.code === 11000) {
       return NextResponse.json(
         {

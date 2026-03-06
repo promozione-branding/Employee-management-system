@@ -93,6 +93,8 @@ export const initialEmployeesBasicDetails = {
   employeeId:"",
   name: "",
   designation: "",
+  subDesignation: "",
+  authRole: "",
   phone: "",
   address: "",
   email: "",

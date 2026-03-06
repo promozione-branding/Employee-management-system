@@ -28,7 +28,11 @@ const InvoiceSchema = new mongoose.Schema(
       type: String,
     },
     services: [
-      { type: mongoose.Schema.ObjectId, ref: "InvoiceService", required: true },
+      {
+        serviceName: String,
+        HSN: String,
+        price: Number,
+      },
     ],
     taxType: {
       type: String,

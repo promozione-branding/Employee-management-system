@@ -17,6 +17,7 @@ import {
 import Loading from "@/components/layout/Loading";
 
 const CreateLedgerPage = ({ customerId }) => {
+  const IFSC_REGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
   const [paymentMethod, setPaymentMethod] = useState("");
   const [formData, setFormData] = useState({});
   const [proposalDetails, setProposalDetails] = useState(null);
@@ -58,6 +59,8 @@ const CreateLedgerPage = ({ customerId }) => {
       toast.error(error.message);
     }
   }
+
+  
   const proposalDataEntriesData =
     ledgerData?.ledger?.entries?.filter(
       (item) => item?.voucher === "Proposal"
@@ -75,7 +78,8 @@ const CreateLedgerPage = ({ customerId }) => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    const normalizedValue = id === "ifscCode" ? value.toUpperCase() : value;
+    setFormData((prev) => ({ ...prev, [id]: normalizedValue }));
   };
 
   // for the proposal entry
@@ -86,6 +90,14 @@ const CreateLedgerPage = ({ customerId }) => {
       paymentMethod,
       ...formData,
     };
+    if (
+      submissionData?.paymentMethod === "cheque" &&
+      submissionData?.ifscCode &&
+      !IFSC_REGEX.test(submissionData.ifscCode)
+    ) {
+      toast.error("Invalid IFSC Code");
+      return;
+    }
 
     const formDataLedger = {
       customerId: proposalDetails?.clientId,
@@ -192,6 +204,15 @@ const CreateLedgerPage = ({ customerId }) => {
       paymentMethod,
       ...formData,
     };
+
+    if (
+      submissionData?.paymentMethod === "cheque" &&
+      submissionData?.ifscCode &&
+      !IFSC_REGEX.test(submissionData.ifscCode)
+    ) {
+      toast.error("Invalid IFSC Code");
+      return;
+    }
 
     if (
       Number(submissionData?.amount) >

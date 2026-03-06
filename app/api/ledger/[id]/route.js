@@ -6,11 +6,11 @@ import { getAuthUser } from "@/lib/getAuthUser";
 import { createAuditLog } from "@/utils/createAuditLog";
 import Customer from "@/models/admin/Customer";
 
-export async function GET(req, context) {
+export async function GET(req, {params}) {
   try {
     await connectDB();
 
-    const { id } = await context.params;
+    const { id } = await params;
 
     const findLedger = await Ledger.findById(id).populate({
       path: "proposalIds",
@@ -155,10 +155,22 @@ export async function PUT(req, { params }) {
     });
   } catch (error) {
     console.error("Ledger update error:", error);
+
+    if (error?.name === "ValidationError") {
+      const firstError = Object.values(error.errors || {})[0];
+      return NextResponse.json(
+        {
+          success: false,
+          message: firstError?.message || "Validation failed",
+        },
+        { status: 400 },
+      );
+    }
+
     return NextResponse.json(
       {
         success: false,
-        message: "Server error while adding ledger entry",
+        message: error?.message || "Server error while adding ledger entry",
       },
       { status: 500 },
     );

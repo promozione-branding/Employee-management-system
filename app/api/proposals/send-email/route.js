@@ -13,9 +13,7 @@ export async function POST(req) {
     
     const { proposalId, email } = await req.json();
 
-    const proposal = await Proposal.findOneAndUpdate({
-      _id: proposalId,
-    })
+    const proposal = await Proposal.findById(proposalId)
       .populate({
         path: "services",
         model: "Service",
@@ -54,10 +52,9 @@ export async function POST(req) {
     });
 
     // 4. Send email with attachment
-    const emailValue = await transporter.sendMail({
+    const mailOptions = {
       from: `"promozione branding proposal" <inquiry.promozione@gmail.com>`,
       to: proposal?.clientId?.email,
-      cc: email,
       subject: `Your Proposal from Promozione Branding - #${proposal?.proposalNo}`,
       html: `
         <p>Dear ${proposal?.clientName},</p>
@@ -79,7 +76,13 @@ export async function POST(req) {
           contentType: "application/pdf",
         },
       ],
-    });
+    };
+
+    if (email?.trim()) {
+      mailOptions.cc = email.trim();
+    }
+
+    await transporter.sendMail(mailOptions);
 
     proposal.proposalSent = true;
     await proposal.save();
@@ -94,7 +97,7 @@ export async function POST(req) {
     return Response.json(
       {
         success: false,
-        message: "Error while sending mail",
+        message: error?.message || "Error while sending mail",
       },
       { status: 500 },
     );

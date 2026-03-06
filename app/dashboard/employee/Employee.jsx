@@ -1,5 +1,5 @@
 "use client";
-import { IdCard, UserRoundPlus } from "lucide-react";
+import { IdCard, UserRoundPen, UserRoundPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -185,7 +185,12 @@ const Employee = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {employee?.basicDetails?.email}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center gap-8">
+                            <Link
+                              href={`/dashboard/employee/employee-details/edit-basic-details/${employee._id}`}
+                            >
+                              <UserRoundPen />
+                            </Link>
                             <Link
                               href={`/dashboard/employee/employee-details/${employee._id}`}
                             >

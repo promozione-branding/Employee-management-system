@@ -1,3 +1,9 @@
+import {
+  EMPLOYEE_AUTH_ROLE_OPTIONS,
+  EMPLOYEE_DESIGNATION_OPTIONS,
+  getSubDesignationOptions,
+} from "./employeeDesignation";
+
 export const addProposalFormControl = [
   {
     label: "Date Of Proposal",
@@ -434,7 +440,7 @@ export const employeeRegisterFormControl = [
   },
 ];
 
-export const employeeBasicDetailsFormControl = [
+export const getEmployeeBasicDetailsFormControl = (designation = "") => [
   {
     label: "EmployeeId",
     name: "employeeId",
@@ -453,13 +459,27 @@ export const employeeBasicDetailsFormControl = [
     label: "Designation",
     name: "designation",
     componentType: "select",
+    options: EMPLOYEE_DESIGNATION_OPTIONS,
+  },
+  {
+    label: "Sub Designation",
+    name: "subDesignation",
+    componentType: "select",
+    options: getSubDesignationOptions(designation),
+  },
+  {
+    label: "Auth Role",
+    name: "authRole",
+    componentType: "select",
+    options: EMPLOYEE_AUTH_ROLE_OPTIONS,
+  },
+  {
+    label: "Gender",
+    name: "gender",
+    componentType: "select",
     options: [
-      { id: "SEO", label: "SEO" },
-      { id: "ADS_MANAGER", label: "Ads Manager" },
-      { id: "WEB_DEVELOPER", label: "Web Development" },
-      { id: "SOCIAL_MEDIA", label: "Social Media" },
-      { id: "SALES", label: "Sales" },
-      { id: "OTHER", label: "Other" },
+      { id: "MALE", label: "Male" },
+      { id: "FEMALE", label: "Female" },
     ],
   },
   {
@@ -472,7 +492,7 @@ export const employeeBasicDetailsFormControl = [
   {
     label: "Address",
     name: "address",
-    componentType: "textarea",
+    componentType: "input",
     type: "text",
   },
   {
@@ -488,21 +508,15 @@ export const employeeBasicDetailsFormControl = [
     type: "date",
   },
   {
-    label: "Gender",
-    name: "gender",
-    componentType: "select",
-    options: [
-      { id: "MALE", label: "Male" },
-      { id: "FEMALE", label: "Female" },
-    ],
-  },
-  {
     label: "Joining Date",
     name: "joiningDate",
     componentType: "input",
     type: "date",
   },
 ];
+
+export const employeeBasicDetailsFormControl =
+  getEmployeeBasicDetailsFormControl();
 
 export const projectDurationFormControl = [
   {

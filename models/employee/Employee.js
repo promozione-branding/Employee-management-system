@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { isValidSubDesignation } from "@/config/employeeDesignation";
 
 const EmployeeSchema = new mongoose.Schema(
   {
@@ -41,6 +42,29 @@ const EmployeeSchema = new mongoose.Schema(
           "OTHER",
         ],
         required: true,
+      },
+      subDesignation: {
+        type: String,
+        required: true,
+        validate: {
+          validator: function (value) {
+            const designation =
+              this?.designation || this?.basicDetails?.designation;
+            return isValidSubDesignation(designation, value);
+          },
+          message: "Invalid subDesignation for selected designation",
+        },
+      },
+      authRole: {
+        type: String,
+        enum: [
+          "INTERN",
+          "EXECUTIVE",
+          "SR_EXECUTIVE",
+          "ASSISTANCE_MANAGER",
+          "MANAGER",
+          "SR_MANAGER",
+        ],
       },
 
       phone: {

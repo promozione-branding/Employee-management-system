@@ -17,7 +17,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { employeeBasicDetailsFormControl } from "@/config/data";
+import { getEmployeeBasicDetailsFormControl } from "@/config/data";
+import { getSubDesignationOptions } from "@/config/employeeDesignation";
 import { initialEmployeesBasicDetails } from "@/config/initialFormDate";
 
 const NewEmployee = () => {
@@ -25,6 +26,27 @@ const NewEmployee = () => {
   const [userId, setUserId] = useState("");
   const [newEmployeeList, setNewEmployeeList] = useState([]);
   const [formData, setFormData] = useState(initialEmployeesBasicDetails);
+  const employeeBasicDetailsFormControl = getEmployeeBasicDetailsFormControl(
+    formData.designation,
+  );
+
+  function handleFormDataChange(nextFormData) {
+    const isDesignationChanged =
+      nextFormData.designation !== formData.designation;
+    if (!isDesignationChanged) {
+      setFormData(nextFormData);
+      return;
+    }
+
+    const hasValidSubDesignation = getSubDesignationOptions(
+      nextFormData.designation,
+    ).some((option) => option.id === nextFormData.subDesignation);
+
+    setFormData({
+      ...nextFormData,
+      subDesignation: hasValidSubDesignation ? nextFormData.subDesignation : "",
+    });
+  }
 
   async function fetchNewEmployee() {
     try {
@@ -46,6 +68,8 @@ const NewEmployee = () => {
       !formData.employeeId ||
       !formData.name ||
       !formData.designation ||
+      !formData.subDesignation ||
+      !formData.authRole ||
       !formData.phone ||
       !formData.address ||
       !formData.email ||
@@ -124,7 +148,7 @@ const NewEmployee = () => {
                       <GridForm
                         formControls={employeeBasicDetailsFormControl}
                         formData={formData}
-                        setFormData={setFormData}
+                        setFormData={handleFormDataChange}
                         onSubmit={handleSubmit}
                         buttonText="Create Profile"
                       />

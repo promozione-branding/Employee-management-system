@@ -1,9 +1,84 @@
+// import { connectDB } from "@/lib/db";
+// import Ledger from "@/models/admin/Ledger";
+// import Customer from "@/models/admin/Customer";
+// import { NextResponse } from "next/server";
+// import { getAuthUser } from "@/lib/getAuthUser";
+// import { createAuditLog } from "@/utils/createAuditLog";
+
+// export async function POST(req) {
+//   try {
+//     await connectDB();
+
+//     // 🔐 AUTH USER
+//     const authUser = await getAuthUser(req);
+//     if (!authUser) {
+//       return NextResponse.json(
+//         { success: false, message: "Unauthorized" },
+//         { status: 401 }
+//       );
+//     }
+
+//     const data = await req.json();
+
+//     // 🧾 FIND CUSTOMER
+//     const findCustomer = await Customer.findById(data.customerId);
+//     if (!findCustomer) {
+//       return NextResponse.json(
+//         {
+//           success: false,
+//           message: "Customer with provided customerId not found",
+//         },
+//         { status: 404 }
+//       );
+//     }
+
+//     // 🆕 CREATE LEDGER
+//     const newLedger = await Ledger.create(data);
+
+//     // 📝 CREATE AUDIT HISTORY
+//     const { _id } = await createAuditLog({
+//       clientId: findCustomer._id,
+//       entityType: "Ledger",
+//       entityId: newLedger._id,
+//       action: "CREATE",
+//       oldData: null,
+//       newData: newLedger.toObject(),
+//       userId: authUser._id,
+//     });
+
+//     // 🔗 ATTACH LEDGER TO CUSTOMER
+//     findCustomer.ledger = newLedger._id;
+//     findCustomer.history.push(_id);
+//     await findCustomer.save();
+
+//     return NextResponse.json(
+//       {
+//         success: true,
+//         message: "Ledger created successfully",
+//         data: newLedger,
+//       },
+//       { status: 201 }
+//     );
+//   } catch (error) {
+//     console.error("Error while creating ledger", error);
+//     return NextResponse.json(
+//       {
+//         success: false,
+//         message: "Server error",
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
 import { connectDB } from "@/lib/db";
 import Ledger from "@/models/admin/Ledger";
 import Customer from "@/models/admin/Customer";
 import { NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { createAuditLog } from "@/utils/createAuditLog";
+import { ledgerValidationSchema } from "@/lib/validation/admin/ledger"; 
 
 export async function POST(req) {
   try {
@@ -14,26 +89,39 @@ export async function POST(req) {
     if (!authUser) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    const data = await req.json();
+    const body = await req.json();
+
+    // ✅ JOI VALIDATION
+    const { error, value } = ledgerValidationSchema.validate(body);
+
+    if (error) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: error.details[0].message,
+        },
+        { status: 400 },
+      );
+    }
 
     // 🧾 FIND CUSTOMER
-    const findCustomer = await Customer.findById(data.customerId);
+    const findCustomer = await Customer.findById(value.customerId);
     if (!findCustomer) {
       return NextResponse.json(
         {
           success: false,
           message: "Customer with provided customerId not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // 🆕 CREATE LEDGER
-    const newLedger = await Ledger.create(data);
+    const newLedger = await Ledger.create(value);
 
     // 📝 CREATE AUDIT HISTORY
     const { _id } = await createAuditLog({
@@ -49,6 +137,7 @@ export async function POST(req) {
     // 🔗 ATTACH LEDGER TO CUSTOMER
     findCustomer.ledger = newLedger._id;
     findCustomer.history.push(_id);
+
     await findCustomer.save();
 
     return NextResponse.json(
@@ -57,16 +146,17 @@ export async function POST(req) {
         message: "Ledger created successfully",
         data: newLedger,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error while creating ledger", error);
+
     return NextResponse.json(
       {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

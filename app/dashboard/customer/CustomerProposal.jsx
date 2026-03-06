@@ -53,7 +53,10 @@ const CustomerProposal = ({ customerId }) => {
     setSendingInvoiceId(proposalId);
     const toastId = toast.loading("Sending email...");
     try {
-      const res = await sendProposalPdfEmailService({proposalId, email:ccMail});
+      const res = await sendProposalPdfEmailService({
+        proposalId,
+        email: ccMail,
+      });
       if (res.success) {
         toast.success("Email sent successfully!", { id: toastId });
       } else {
@@ -61,7 +64,9 @@ const CustomerProposal = ({ customerId }) => {
       }
     } catch (error) {
       console.error("sendEmailHandler error:", error);
-      toast.error(error.response.data.message || "An error occurred.", { id: toastId });
+      toast.error(error.response.data.message || "An error occurred.", {
+        id: toastId,
+      });
     } finally {
       setSendingInvoiceId(null);
     }
