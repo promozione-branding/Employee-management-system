@@ -3,9 +3,11 @@
 import Link from "next/link";
 import {
   Activity,
+  Album,
   BadgeIndianRupee,
   BanknoteArrowUp,
   NotebookTabs,
+  TableProperties,
   Users,
   Volleyball,
 } from "lucide-react";
@@ -16,6 +18,16 @@ const HistoryPage = ({ customerId }) => {
       label: "Client Profile",
       icon: <Users />,
       href: `/dashboard/customer/history/client-history/${customerId}`,
+    },
+    {
+      label: "Client Proposals",
+      icon: <TableProperties />,
+      href: `/dashboard/customer/history/client-proposal/${customerId}`,
+    },
+    {
+      label: "Client Invoice",
+      icon: <Album />,
+      href: `/dashboard/customer/history/client-invoice/${customerId}`,
     },
     {
       label: "Work Details",

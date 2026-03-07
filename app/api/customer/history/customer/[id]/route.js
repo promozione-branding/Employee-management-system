@@ -12,7 +12,9 @@ export async function GET(req, { params }) {
     const clientHistory = await AuditHistory.find({
       entityType: "Customer",
       entityId: id,
-    }).sort({ createdAt: -1 });
+    })
+      .populate({ path: "changedBy", select: "username email" })
+      .sort({ createdAt: -1 });
 
     return NextResponse.json(
       {

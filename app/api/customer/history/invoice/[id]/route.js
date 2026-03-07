@@ -11,7 +11,7 @@ export async function GET(req, { params }) {
     const { id } = await params;
 
     const proposalHistory = await AuditHistory.find({
-      entityType: "Proposal",
+      entityType: "Invoice",
       clientId: id,
     })
       .populate({ path: "changedBy", select: "username email" })

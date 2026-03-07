@@ -6,3 +6,17 @@ export async function GetClientWorkDetailHistory(id) {
   );
   return data;
 }
+
+export async function getClientProposalHistoryService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/customer/history/proposal/${id}`,
+  );
+  return data;
+}
+
+export async function getClientInoviceHistoryService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/customer/history/invoice/${id}`,
+  );
+  return data;
+}
