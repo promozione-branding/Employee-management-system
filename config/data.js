@@ -162,7 +162,7 @@ export const addCustomerFormControl = [
     componentType: "input",
     type: "date",
   },
-  
+
   {
     label: "Notes",
     name: "notes",
@@ -448,6 +448,74 @@ export const getEmployeeBasicDetailsFormControl = (designation = "") => [
     type: "text",
     placeholder: "Enter Your employeeId",
   },
+  {
+    label: "Name",
+    name: "name",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter Your Name",
+  },
+  {
+    label: "Designation",
+    name: "designation",
+    componentType: "select",
+    options: EMPLOYEE_DESIGNATION_OPTIONS,
+  },
+  {
+    label: "Sub Designation",
+    name: "subDesignation",
+    componentType: "select",
+    options: getSubDesignationOptions(designation),
+  },
+  {
+    label: "Auth Role",
+    name: "authRole",
+    componentType: "select",
+    options: EMPLOYEE_AUTH_ROLE_OPTIONS,
+  },
+  {
+    label: "Gender",
+    name: "gender",
+    componentType: "select",
+    options: [
+      { id: "MALE", label: "Male" },
+      { id: "FEMALE", label: "Female" },
+    ],
+  },
+  {
+    label: "Phone",
+    name: "phone",
+    componentType: "input",
+    type: "tel",
+    placeholder: "Enter Your Phone",
+  },
+  {
+    label: "Address",
+    name: "address",
+    componentType: "input",
+    type: "text",
+  },
+  {
+    label: "Email",
+    name: "email",
+    componentType: "input",
+    type: "email",
+  },
+  {
+    label: "Date of Birth",
+    name: "dob",
+    componentType: "input",
+    type: "date",
+  },
+  {
+    label: "Joining Date",
+    name: "joiningDate",
+    componentType: "input",
+    type: "date",
+  },
+];
+
+export const editEmployeeBasicDetailsFormControl = (designation = "") => [
   {
     label: "Name",
     name: "name",

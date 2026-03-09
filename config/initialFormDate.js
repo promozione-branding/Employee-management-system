@@ -48,7 +48,7 @@ export const initalCustomerFormData = {
   salesPersonEmail: "",
   SalesPersonName: "",
   notes: "",
-  salesExecutive:""
+  salesExecutive: "",
 };
 
 export const initalServiceFormData = {
@@ -90,7 +90,7 @@ export const initialEmployeeRegisterFormData = {
 };
 
 export const initialEmployeesBasicDetails = {
-  employeeId:"",
+  employeeId: "",
   name: "",
   designation: "",
   subDesignation: "",
@@ -103,6 +103,18 @@ export const initialEmployeesBasicDetails = {
   joiningDate: "",
 };
 
+export const initialEmployeesBasicDetailsEdit = {
+  name: "",
+  designation: "",
+  subDesignation: "",
+  authRole: "",
+  phone: "",
+  address: "",
+  email: "",
+  dob: "",
+  gender: "",
+  joiningDate: "",
+};
 
 export const initialAnnouncementFormData = {
   title: "",

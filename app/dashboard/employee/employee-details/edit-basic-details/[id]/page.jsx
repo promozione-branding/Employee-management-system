@@ -1,9 +1,9 @@
-import React from 'react'
+import EditBasicDetail from "./EditBasicDetail";
 
-const page = () => {
-  return (
-    <div>page</div>
-  )
-}
+const page = async ({ params }) => {
+  const { id } = await params;
 
-export default page
+  return <EditBasicDetail employeeId={id} />;
+};
+
+export default page;

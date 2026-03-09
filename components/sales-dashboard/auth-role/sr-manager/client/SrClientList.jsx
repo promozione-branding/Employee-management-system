@@ -21,21 +21,20 @@ import {
   deleteCustomerServices,
   getAllCustomerServices,
   getCustomerServices,
-  getAllSalesService
+  getAllSalesService,
 } from "@/service/customer";
 import { Eye, Network, SquarePen, Trash } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const CustomerManager = () => {
+const SrClientList = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState(initalCustomerFormData);
   const [editingId, setEditingId] = useState(null);
   const [fetchSales, setFetchSales] = useState([]);
-
 
   /* ---------------- Fetch ---------------- */
   async function fetchSalesPerson() {
@@ -223,15 +222,19 @@ const CustomerManager = () => {
                 <div className="text-center capitalize flex gap-2">
                   {/* {salesExecutive[0]?.basicDetails?.name} */}
                   {salesExecutive.map((item) => (
-                    <p key={item?._id} className="bg-orange-200 px-2 py-1 rounded-lg">{item?.basicDetails?.name}</p>
+                    <p
+                      key={item?._id}
+                      className="bg-orange-200 px-2 py-1 rounded-lg"
+                    >
+                      {item?.basicDetails?.name}
+                    </p>
                   ))}
                 </div>
-                {/* <p className="text-center">{Address?.slice(0, 20)}...</p> */}
                 <div className="flex gap-5 justify-center">
                   <Link href={`/dashboard/customer/work/${_id}`}>
                     <Network />
                   </Link>
-                  <Link href={`/dashboard/customer/${_id}`}>
+                  <Link href={`/sales-dashboard/clients/${_id}`}>
                     <Eye />
                   </Link>
                   <SquarePen onClick={() => handleEdit(_id)} />
@@ -264,4 +267,4 @@ const CustomerManager = () => {
   );
 };
 
-export default CustomerManager;
+export default SrClientList;

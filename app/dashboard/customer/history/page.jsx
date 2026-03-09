@@ -39,11 +39,11 @@ const HistoryPage = ({ customerId }) => {
       icon: <BanknoteArrowUp />,
       href: `/dashboard/customer/history/sales-history/${customerId}`,
     },
-    {
-      label: "All History",
-      icon: <Volleyball />,
-      href: `/dashboard/customer/history/all-history/${customerId}`,
-    },
+    // {
+    //   label: "All History",
+    //   icon: <Volleyball />,
+    //   href: `/dashboard/customer/history/all-history/${customerId}`,
+    // },
   ];
 
   return (

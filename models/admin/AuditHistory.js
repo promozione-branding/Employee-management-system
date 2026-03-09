@@ -9,7 +9,7 @@ const AuditHistorySchema = new mongoose.Schema(
     entityType: {
       type: String,
       required: true,
-      enum: ["Customer", "Proposal", "Invoice", "Meeting", "Ledger", "User"],
+      enum: ["Customer", "Proposal", "Invoice", "Meeting", "Ledger", "User","Employee"],
     },
 
     entityId: {
