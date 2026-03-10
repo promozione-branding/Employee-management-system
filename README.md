@@ -100,1019 +100,423 @@ NODE_ENV=development
 # - For Cloudinary, get API keys at https://cloudinary.com/users/register
 # - For email, ensure less secure app access is enabled or use app-specific passwords if required.
 ```
-
-
-<!-- create ledger form  -->
-
-
-
 "use client";
-import {
-  createLedgerService,
-  fetchingProposalsInfo,
-  ledgerEntriesService,
-} from "@/service/ledger";
+
+import Loading from "@/components/layout/Loading";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { getProposalDetail } from "@/service/customer/proposal";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { customerLedgerService } from "@/service/customer";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import Loading from "@/components/layout/Loading";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  createServicesService,
+  deleteService,
+  editService,
+  fetchProposalServiceById,
+  getAllService,
+} from "@/service/service";
+import { Edit, Trash } from "lucide-react";
+import CommonForm from "@/components/layout/Form";
+import { ServiceFormControl } from "@/config/data";
+import { initalServiceFormData } from "@/config/initialFormDate";
+import { Button } from "@/components/ui/button";
+import { editProposalService } from "@/service/proposal";
+import { useRouter } from "next/navigation";
 
-const CreateLedgerPage = ({ customerId }) => {
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [formData, setFormData] = useState({});
-  const [proposalDetails, setProposalDetails] = useState(null);
-  const [ledgerData, setLedgerData] = useState(null);
-  const [firstLedgerEntry, setFirstLedgerEntry] = useState(false);
+const EditPropsal = ({ id }) => {
+  const [proposalFormData, setProposalFormData] = useState({
+    clientName: "",
+    clientCompany: "",
+    clientAddress: "",
+    dateOfProposal: "",
+    GSTIN: "",
+    tanNo: "",
+    validTill: "",
+    paymentMethod: "",
+  });
+
+  const [loadingProposalDetails, setLoadingProposalDetails] = useState(true);
+  const [proposalDetail, setProposalDetail] = useState({});
+
+  const [servicesItem, setServicesItem] = useState([]);
+  const [selectedServices, setSelectedServices] = useState([]);
+
+  const [editProposalServiceId, setEditProposalServiceId] = useState(null);
+  const [proposalServiceEditData, setProposalServiceEditData] = useState(
+    initalServiceFormData,
+  );
+  const [serviceFormData, setServiceFormData] = useState(initalServiceFormData);
   const router = useRouter();
 
-  // loading
-  const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
-  const [loadingForLedgerDetails, setLoadingForLedgerDetails] = useState(true);
+  // this is the main form
+  async function handleEditForm(e) {
+    e.preventDefault();
 
-  async function fetchProposalInformation() {
+    const filledItems = {};
+
+    for (const key in proposalFormData) {
+      if (Object.hasOwn(proposalFormData, key) && proposalFormData[key]) {
+        filledItems[key] = proposalFormData[key];
+      }
+    }
+
+    if (selectedServices.length > 0) {
+      filledItems.services = selectedServices.map((item) => item._id);
+    }
+
+    // console.log(filledItems, "filledItems");
+
     try {
-      const res = await fetchingProposalsInfo(proposalId);
+      // const res = await editProposalService(id, filledItems);
+      // if (res.success) {
+      //   toast.success(res.message || "Proposal Edit successfully");
+      //   router.push("/dashboard/customer")
+      // }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message || "");
+    }
+  }
+
+  async function fetchProposalDetails() {
+    try {
+      const res = await getProposalDetail(id);
       if (res.success) {
-        setLoadingForProposalInfo(false);
-        setProposalDetails(res.data);
-        fetchLedgerDetails(res?.data?.clientId);
+        setProposalDetail(res.data);
+        setLoadingProposalDetails(false);
       }
     } catch (error) {
       console.log(error);
-      setLoadingForProposalInfo(true);
       toast.error(
-        error.message || "error while fetching the proposal Information"
+        error.response.data.message ||
+          "Error while fetching the proposal details",
       );
     }
   }
 
-  async function fetchLedgerDetails(id) {
+  const handleProposalFormChange = (e) => {
+    const { name, value } = e.target;
+    setProposalFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handlePaymentMethodChange = (value) => {
+    setProposalFormData((prev) => ({
+      ...prev,
+      paymentMethod: value,
+    }));
+  };
+
+  async function fetchAllServices() {
     try {
-      const res = await customerLedgerService(id);
-      if (res.success) {
-        setLoadingForLedgerDetails(false);
-        setLedgerData(res.data);
+      const response = await getAllService();
+      if (response.success) {
+        setServicesItem(response.data);
+        toast.success("All Services Fetched");
       }
     } catch (error) {
       console.log(error);
-      setLoadingForLedgerDetails(false);
       toast.error(error.message);
     }
   }
 
-  
-  const proposalDataEntriesData =
-    ledgerData?.ledger?.entries?.filter(
-      (item) => item?.voucher === "Proposal"
-    ) || [];
-
-  const paymentDataList =
-    ledgerData?.ledger?.entries?.filter((item) =>
-      ["upi", "card", "net banking", "cheque"].includes(item?.voucher)
-    ) || [];
-
-  const handlePaymentMethodChange = (e) => {
-    setPaymentMethod(e.target.value);
-    setFormData({});
-  };
-
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  // for the proposal entry
-  const handleSubmit = async (e) => {
+  async function handleService(e) {
     e.preventDefault();
-
-    const submissionData = {
-      paymentMethod,
-      ...formData,
-    };
-
-    const formDataLedger = {
-      customerId: proposalDetails?.clientId,
-      proposalIds: (prev) => [...prev, proposalDetails?._id],
-
-      entries: [
-        {
-          date: submissionData?.entryDate,
-          voucher: submissionData?.paymentMethod,
-          debit: 0,
-          credit: 0,
-          balance:
-            proposalDetails?.totalAmount +
-            proposalDetails?.totalAmount * 0.18 -
-            (proposalDetails?.tanNo ? proposalDetails?.totalAmount * 0.02 : 0),
-          particular: {
-            description: `Proposal #${proposalDetails?.proposalNo}`,
-            items: [
-              {
-                subDescription: "18% GST",
-                price: proposalDetails?.totalAmount * 0.18,
-              },
-              {
-                subDescription: "Service Amount",
-                price: proposalDetails?.totalAmount,
-              },
-              ...(proposalDetails?.tanNo
-                ? [
-                    {
-                      subDescription: "2% TDS",
-                      price: proposalDetails?.totalAmount * 0.02,
-                    },
-                  ]
-                : []),
-              {
-                subDescription: "Total Amount",
-                price:
-                  proposalDetails?.totalAmount +
-                  proposalDetails?.totalAmount * 0.18 -
-                  (proposalDetails?.tanNo
-                    ? proposalDetails?.totalAmount * 0.02
-                    : 0),
-              },
-            ],
-          },
-          chequeDetails:
-            submissionData?.paymentMethod === "cheque"
-              ? {
-                  chequeNumber: submissionData?.chequeNumber,
-                  accountNo: submissionData?.accountNo,
-                  chequeDate: submissionData?.chequeDate,
-                  chequeAmount: submissionData?.amount,
-                  bankName: submissionData?.bankName,
-                  branchName: submissionData?.branchName,
-                  ifscCode: submissionData?.ifscCode,
-                }
-              : {},
-          net_banking:
-            submissionData?.paymentMethod === "net-banking"
-              ? {
-                  transactionId: submissionData?.transactionId,
-                  transactionDate: submissionData?.transactionDate,
-                  transactionAmount: submissionData?.amount,
-                }
-              : {},
-          upi:
-            submissionData?.paymentMethod === "upi"
-              ? {
-                  upi_id: submissionData?.upiId,
-                  payerName: submissionData?.payerName,
-                  transactionId: submissionData?.upiTransactionId,
-                }
-              : {},
-          credit_debit_card:
-            submissionData?.paymentMethod === "card"
-              ? {
-                  card_type: submissionData?.cardType,
-                  cardLastNo: submissionData?.last4Digits,
-                  bankName: submissionData?.issuingBank,
-                  cardHolderName: submissionData?.cardholderName,
-                }
-              : {},
-        },
-      ],
-    };
-
     try {
-      const res = await createLedgerService(formDataLedger);
-      if (res.success) {
-        toast.success("Ledger Entry create successfully");
-        router.push("/dashboard/customer");
+      if (
+        !serviceFormData.serviceTitle ||
+        !serviceFormData.amount ||
+        !serviceFormData.duration
+      ) {
+        toast.error("please fill the service details");
+        return;
+      }
+
+      if (serviceFormData?.discountPercentage > 40) {
+        toast.error("Discount can't be more than 40%");
+      }
+
+      if (
+        serviceFormData.discountAmount &&
+        serviceFormData.discountPercentage
+      ) {
+        toast.error("Can't use both discount Amount and Percentage");
+        return;
+      }
+
+      if (serviceFormData.discountPercentage > 40) {
+        toast.error("Discount can't be more than 40 Percentage");
+        return;
+      }
+
+      if (serviceFormData.discountAmount > serviceFormData.amount) {
+        toast.error("Discount can't be more than service Amount");
+      }
+
+      const response = await createServicesService(serviceFormData);
+      if (response.success) {
+        toast.success(response.message);
+        setServiceFormData(initalServiceFormData);
+        fetchAllServices();
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message || "Error while create ledger");
+      toast.success(error.message);
     }
+  }
+
+  const handleSelectService = (service) => {
+    setSelectedServices((prevSelected) => {
+      const isSelected = prevSelected.some((s) => s._id === service._id);
+      if (isSelected) {
+        return prevSelected.filter((s) => s._id !== service._id);
+      } else {
+        return [...prevSelected, service];
+      }
+    });
   };
 
-  // this is the main entry function
-  async function handleEntrySubmit(e) {
+  async function handleDeleteService(id) {
+    const confirm = window.confirm("Are you sure to delete the service");
+    if (confirm) {
+      const res = await deleteService(id);
+      if (res.success) {
+        fetchAllServices();
+      }
+    }
+  }
+
+  async function getProposalServiceIdForEdit(id) {
+    setEditProposalServiceId(id);
+
+    const res = await fetchProposalServiceById(id);
+    if (res.success) {
+      setProposalServiceEditData(res?.data);
+    }
+  }
+
+  async function handleEditProposalService(e) {
     e.preventDefault();
 
-    const submissionData = {
-      paymentMethod,
-      ...formData,
-    };
-
-    if (
-      Number(submissionData?.amount) >
-      ledgerData?.ledger?.entries?.at(-1)?.balance
-    ) {
-      toast.error(
-        `Balance is less than the Amount. remaining balance ${ledgerData.ledger?.entries
-          .at(-1)
-          .balance.toLocaleString("en-IN")} `
+    try {
+      const res = await editService(
+        editProposalServiceId,
+        proposalServiceEditData,
       );
-      return;
-    }
-
-    const formDataLedger = {
-      date: submissionData?.entryDate,
-      voucher: submissionData?.paymentMethod,
-      debit: 0,
-      credit: Number(submissionData?.amount),
-      balance: Number(
-        ledgerData?.ledger?.entries?.at(-1)?.balance - submissionData?.amount
-      ),
-      particular: {
-        description: submissionData?.description,
-        items: [
-          {
-            subDescription: "18% GST",
-            price: submissionData?.amount * 0.18,
-          },
-          ...(proposalDetails?.tanNo
-            ? [
-                {
-                  subDescription: "2% TDS",
-                  price: submissionData?.amount * 0.02,
-                },
-              ]
-            : []),
-          {
-            subDescription: "Total Amount",
-            price: Number(submissionData?.amount),
-          },
-        ],
-      },
-      chequeDetails:
-        submissionData?.paymentMethod === "cheque"
-          ? {
-              chequeNumber: submissionData?.chequeNumber,
-              accountNo: submissionData?.accountNo,
-              chequeDate: submissionData?.chequeDate,
-              chequeAmount: submissionData?.amount,
-              bankName: submissionData?.bankName,
-              branchName: submissionData?.branchName,
-              ifscCode: submissionData?.ifscCode,
-            }
-          : {},
-      net_banking:
-        submissionData?.paymentMethod === "net-banking"
-          ? {
-              transactionId: submissionData?.transactionId,
-              transactionDate: submissionData?.transactionDate,
-              transactionAmount: submissionData?.amount,
-            }
-          : {},
-      upi:
-        submissionData?.paymentMethod === "upi"
-          ? {
-              upi_id: submissionData?.upiId,
-              payerName: submissionData?.payerName,
-              transactionId: submissionData?.upiTransactionId,
-            }
-          : {},
-      credit_debit_card:
-        submissionData?.paymentMethod === "card"
-          ? {
-              card_type: submissionData?.cardType,
-              cardLastNo: submissionData?.last4Digits,
-              bankName: submissionData?.issuingBank,
-              cardHolderName: submissionData?.cardholderName,
-            }
-          : {},
-    };
-
-    try {
-      const res = await ledgerEntriesService(ledgerData?.ledger?._id, {
-        entriesData: formDataLedger,
-      });
 
       if (res.success) {
-        setPaymentMethod("");
-        setFormData({});
-        router.push("/dashboard/customer");
+        toast.success("Service Updated successfully");
+        setProposalServiceEditData(initalServiceFormData);
+        fetchAllServices();
+        setEditProposalServiceId(null);
+      } else {
+        toast.error(res.message || "Failed to update service");
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message || "Error while create entries");
+      toast.error(error.message || "Error updating services");
     }
   }
 
   useEffect(() => {
-    // fetchProposalInformation();
-    if (customerId !== "") {
-      fetchLedgerDetails(customerId);
+    fetchProposalDetails();
+    fetchAllServices();
+  }, [id]);
+
+  useEffect(() => {
+    if (proposalDetail && Object.keys(proposalDetail).length > 0) {
+      setSelectedServices([]);
     }
-  }, [customerId]);
+  }, [proposalDetail]);
 
-  const renderChequeForm = () => (
-    <div className="grid grid-cols-2 gap-3">
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="description"
-        >
-          Particular Description
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="description"
-          type="text"
-          placeholder="Enter Particular description"
-          value={formData.description || ""}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="chequeNumber"
-        >
-          Cheque Number
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="chequeNumber"
-          type="text"
-          placeholder="Enter Cheque Number"
-          value={formData.chequeNumber || ""}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="chequeDate"
-        >
-          Cheque Date
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="chequeDate"
-          type="date"
-          value={formData.chequeDate || ""}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="amount"
-        >
-          Amount
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="amount"
-          type="number"
-          placeholder="Enter Amount"
-          value={formData.amount || ""}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="accountNo"
-        >
-          Account No
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="accountNo"
-          type="number"
-          placeholder="Enter Account No"
-          value={formData.accountNo || ""}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="bankName"
-        >
-          Bank Name
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="bankName"
-          type="text"
-          placeholder="Enter Bank Name"
-          value={formData.bankName || ""}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="branchName"
-        >
-          Branch Name
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="branchName"
-          type="text"
-          placeholder="Enter Branch Name"
-          value={formData.branchName || ""}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="ifscCode"
-        >
-          IFSC Code
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="ifscCode"
-          type="text"
-          placeholder="Enter IFSC Code"
-          value={formData.ifscCode || ""}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="entryDate"
-        >
-          Entry Date
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="entryDate"
-          type="date"
-          value={formData.entryDate || ""}
-          onChange={handleChange}
-          required
-        />
-      </div>
-    </div>
-  );
-
-  const renderNetBankingForm = () => (
-    <div className="grid grid-cols-2 gap-3">
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="description"
-        >
-          Particular Description
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="description"
-          type="text"
-          placeholder="Enter Particular description"
-          value={formData.description || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="transactionId"
-        >
-          Transaction ID / UTR
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="transactionId"
-          type="text"
-          placeholder="Enter Transaction ID / UTR"
-          value={formData.transactionId || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="transactionDate"
-        >
-          Transaction Date
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="transactionDate"
-          type="date"
-          value={formData.transactionDate || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="amount"
-        >
-          Amount
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="amount"
-          type="number"
-          placeholder="Enter Amount"
-          value={formData.amount || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="entryDate"
-        >
-          Entry Date
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="entryDate"
-          type="date"
-          value={formData.entryDate || ""}
-          onChange={handleChange}
-        />
-      </div>
-    </div>
-  );
-
-  const renderUpiForm = () => (
-    <div className="grid grid-cols-2 gap-3">
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="description"
-        >
-          Particular Description
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="description"
-          type="text"
-          placeholder="Enter Particular description"
-          value={formData.description || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="upiId"
-        >
-          UPI ID
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="upiId"
-          type="text"
-          placeholder="Enter UPI ID"
-          value={formData.upiId || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="payerName"
-        >
-          Payer Name
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="payerName"
-          type="text"
-          placeholder="Enter Payer Name"
-          value={formData.payerName || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="amount"
-        >
-          Amount
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="amount"
-          type="number"
-          placeholder="Enter Amount"
-          value={formData.amount || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="upiTransactionId"
-        >
-          UPI Transaction ID / UTR
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="upiTransactionId"
-          type="text"
-          placeholder="Enter UPI Transaction ID / UTR"
-          value={formData.upiTransactionId || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="entryDate"
-        >
-          Entry Date
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="entryDate"
-          type="date"
-          value={formData.entryDate || ""}
-          onChange={handleChange}
-        />
-      </div>
-    </div>
-  );
-
-  const renderCardForm = () => (
-    <div className="grid grid-cols-2 gap-3">
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="description"
-        >
-          Particular Description
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="description"
-          type="text"
-          placeholder="Enter Particular description"
-          value={formData.description || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="cardType"
-        >
-          Card Type
-        </label>
-        <select
-          id="cardType"
-          className="shadow border rounded w-full py-2 px-3 text-gray-700"
-          value={formData.cardType || ""}
-          onChange={handleChange}
-        >
-          <option value="">Select Card Type</option>
-          <option value="credit">Credit Card</option>
-          <option value="debit">Debit Card</option>
-        </select>
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="last4Digits"
-        >
-          Last 4 Digits
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="last4Digits"
-          type="text"
-          maxLength="4"
-          placeholder="Enter Last 4 Digits"
-          value={formData.last4Digits || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="issuingBank"
-        >
-          Issuing Bank
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="issuingBank"
-          type="text"
-          placeholder="Enter Issuing Bank"
-          value={formData.issuingBank || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="cardholderName"
-        >
-          Cardholder Name
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="cardholderName"
-          type="text"
-          placeholder="Enter Cardholder Name"
-          value={formData.cardholderName || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="entryDate"
-        >
-          Entry Date
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="entryDate"
-          type="date"
-          value={formData.entryDate || ""}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="amount"
-        >
-          Amount
-        </label>
-        <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          id="amount"
-          type="number"
-          placeholder="Enter Amount"
-          value={formData.amount || ""}
-          onChange={handleChange}
-        />
-      </div>
-    </div>
-  );
-
-  const renderEntryDetails = (item) => {
-    if (!item) return null;
-
-    switch (item.voucher) {
-      case "cheque":
-        return (
-          <>
-            {item.chequeDetails?.chequeNumber && (
-              <div>Cheque Number : {item.chequeDetails.chequeNumber}</div>
-            )}
-            {item.chequeDetails?.chequeDate && (
-              <div>
-                Cheque Date :{" "}
-                {new Date(item.chequeDetails.chequeDate).toLocaleDateString(
-                  "en-GB"
-                )}
-              </div>
-            )}
-            {item.chequeDetails?.bankName && (
-              <div>Bank Name : {item.chequeDetails.bankName}</div>
-            )}
-            {item.chequeDetails?.branchName && (
-              <div>Branch Name : {item.chequeDetails.branchName}</div>
-            )}
-            {item.chequeDetails?.ifscCode && (
-              <div>IFSC Code : {item.chequeDetails.ifscCode}</div>
-            )}
-          </>
-        );
-      case "net-banking":
-        return (
-          <>
-            {item.net_banking?.transactionId && (
-              <div>Transaction ID : {item.net_banking.transactionId}</div>
-            )}
-            {item.net_banking?.transactionDate && (
-              <div>
-                Transaction Date :{" "}
-                {new Date(item.net_banking.transactionDate).toLocaleDateString(
-                  "en-GB"
-                )}
-              </div>
-            )}
-          </>
-        );
-      case "upi":
-        return (
-          <>
-            {item.upi?.upi_id && <div>UPI ID : {item.upi.upi_id}</div>}
-            {item.upi?.payerName && (
-              <div>Payer Name : {item.upi.payerName}</div>
-            )}
-            {item.upi?.transactionId && (
-              <div>Transaction ID : {item.upi.transactionId}</div>
-            )}
-          </>
-        );
-      case "card":
-        return (
-          <>
-            {item.credit_debit_card?.card_type && (
-              <div>Card Type : {item.credit_debit_card.card_type}</div>
-            )}
-            {item.credit_debit_card?.cardLastNo && (
-              <div>Last 4 Digits : {item.credit_debit_card.cardLastNo}</div>
-            )}
-            {item.credit_debit_card?.bankName && (
-              <div>Issuing Bank : {item.credit_debit_card.bankName}</div>
-            )}
-            {item.credit_debit_card?.cardHolderName && (
-              <div>
-                Cardholder Name : {item.credit_debit_card.cardHolderName}
-              </div>
-            )}
-          </>
-        );
-      default:
-        return <div>No details available for this transaction type.</div>;
-    }
-  };
+  if (loadingProposalDetails) {
+    return <Loading />;
+  }
 
   return (
-    <>
-      {loadingForLedgerDetails ? (
-        <Loading />
-      ) : (
-        <div className="flex gap-5 flex-col md:flex-row lg:px-20">
-          <div className="p-2 md:w-1/2">
-            <h1 className="text-2xl font-bold text-center mb-2">
-              Transation Details
-            </h1>
-            <form
-              className="bg-white shadow-md rounded-xl px-8 pt-6 pb-8 mb-4"
-              onSubmit={handleEntrySubmit}
-            >
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="paymentMethod"
-                >
-                  Method of Payment
-                </label>
-                <select
-                  id="paymentMethod"
-                  onChange={handlePaymentMethodChange}
-                  value={paymentMethod}
-                  className="shadow border rounded w-full py-2 px-3 text-gray-700"
-                >
-                  <option value="">Select a method</option>
-                  <option value="cheque">Cheque</option>
-                  <option value="net-banking">Net Banking</option>
-                  <option value="upi">UPI</option>
-                  <option value="card">Credit/Debit Card</option>
-                </select>
-              </div>
-              {paymentMethod === "cheque" && renderChequeForm()}
-              {paymentMethod === "net-banking" && renderNetBankingForm()}
-              {paymentMethod === "upi" && renderUpiForm()}
-              {paymentMethod === "card" && renderCardForm()}
-              {paymentMethod && (
+    <div className="flex gap-5">
+      <div className="">
+        <form onSubmit={handleEditForm}>
+          <div className="grid grid-cols-2 gap-2 px-3 py-2">
+            <div className="flex flex-col gap-2">
+              <Label>Client Name</Label>
+              <Input
+                name="clientName"
+                value={proposalFormData.clientName}
+                onChange={handleProposalFormChange}
+                placeholder="Client Name"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Client Company</Label>
+              <Input
+                name="clientCompany"
+                value={proposalFormData.clientCompany}
+                onChange={handleProposalFormChange}
+                placeholder="Client Company"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Client Address</Label>
+              <Input
+                name="clientAddress"
+                value={proposalFormData.clientAddress}
+                onChange={handleProposalFormChange}
+                placeholder="Client Address"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>GSTIN</Label>
+              <Input
+                name="GSTIN"
+                value={proposalFormData.GSTIN}
+                onChange={handleProposalFormChange}
+                placeholder="GSTIN"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>TAN No</Label>
+              <Input
+                name="tanNo"
+                value={proposalFormData.tanNo}
+                onChange={handleProposalFormChange}
+                placeholder="TAN No"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Date Of Proposal</Label>
+              <Input
+                type="date"
+                name="dateOfProposal"
+                value={proposalFormData.dateOfProposal}
+                onChange={handleProposalFormChange}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Valid Till</Label>
+              <Input
+                type="date"
+                name="validTill"
+                value={proposalFormData.validTill}
+                onChange={handleProposalFormChange}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Payment Method</Label>
+              <Select
+                value={proposalFormData.paymentMethod}
+                onValueChange={handlePaymentMethodChange}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Payment Method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upi">UPI</SelectItem>
+                  <SelectItem value="card">Card</SelectItem>
+                  <SelectItem value="net banking">Net Banking</SelectItem>
+                  <SelectItem value="cheque">Cheque</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <Button type="submit" className={"w-full"}>
+            Edit Proposals
+          </Button>
+        </form>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 py-3 ">
+          {!servicesItem.length ? (
+            <div className="flex items-center justify-center bg-red-500 border-2 border-dashed border-gray-400 rounded-lg p-4 text-white hover:bg-red-500 transition-colors duration-200">
+              Add some service
+            </div>
+          ) : (
+            servicesItem.map((item) => (
+              <div key={item?._id} className="flex flex-col">
                 <button
-                  type="submit"
-                  className="bg-blue-500 hover:bg-blue-700 text-white w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  onClick={() => handleSelectService(item)}
+                  className={`group block rounded-t-lg p-4 border shadow-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                    selectedServices.some((s) => s?._id === item?._id)
+                      ? "bg-blue-100 border-blue-400"
+                      : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
+                  }`}
                 >
-                  Submit
-                </button>
-              )}
-            </form>
-          </div>
-
-          <div className="md:w-1/2 flex flex-col gap-5">
-            <div>
-              <div className="grid grid-cols-2 gap-2">
-                {proposalDataEntriesData.length > 0 &&
-                  proposalDataEntriesData.map((item) => (
-                    <div
-                      key={item?._id}
-                      className="border p-3 rounded-lg bg-white shadow-sm"
-                    >
-                      <p className="font-bold text-center mb-2 border-b pb-1">
-                        {item?.particular?.description?.split(" ")[1]}
+                  <div className="text-center">
+                    <p className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors py-2">
+                      {item?.serviceTitle}
+                    </p>
+                    {item?.description && (
+                      <p className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors border-t py-2">
+                        {item?.description}
                       </p>
+                    )}
+                  </div>
 
-                      <div className="text-sm space-y-1">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Service Amount</span>
-                          <span className="font-medium">
-                            ₹
-                            {item?.particular?.items
-                              ?.find(
-                                (i) => i?.subDescription === "Service Amount"
-                              )
-                              ?.price?.toLocaleString("en-IN")}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">GST (18%)</span>
-                          <span className="font-medium">
-                            ₹
-                            {item?.particular?.items
-                              ?.find((i) => i?.subDescription === "18% GST")
-                              ?.price?.toLocaleString("en-IN")}
-                          </span>
-                        </div>
-                        {item?.particular?.items?.find(
-                          (i) => i?.subDescription === "2% TDS"
-                        ) && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">TDS (2%)</span>
-                            <span className="font-medium">
-                              ₹
-                              {item?.particular?.items
-                                ?.find((i) => i?.subDescription === "2% TDS")
-                                ?.price?.toLocaleString("en-IN")}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex justify-between font-bold border-t pt-1 mt-1">
-                          <span>Total</span>
-                          <span>
-                            ₹
-                            {item?.particular?.items
-                              ?.find(
-                                (i) => i?.subDescription === "Total Amount"
-                              )
-                              ?.price?.toLocaleString("en-IN")}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
+                  {item?.discountPercentage ? (
+                    <p>Discount Percentage : {item?.discountPercentage}%</p>
+                  ) : (
+                    <p>
+                      Discount Amount : ₹{" "}
+                      {item?.discountAmount?.toLocaleString("en-IN")}
+                    </p>
+                  )}
 
-              <div className="font-bold text-right mt-2">
-                Proposal Total : ₹{" "}
-                {proposalDataEntriesData
-                  ?.reduce((acc, item) => {
-                    const amount = item?.particular?.items?.find(
-                      (i) => i?.subDescription === "Total Amount"
-                    )?.price;
-                    return acc + (amount || 0);
-                  }, 0)
-                  .toLocaleString("en-IN")}
-              </div>
-            </div>
-            <div className="border-t-2">
-              {ledgerData?.ledger?.entries?.length > 1 && (
-                <div>
-                  <Accordion
-                    type="single"
-                    collapsible
-                    className="w-full"
-                    defaultValue="item-1"
+                  <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
+                    <span>{item?.duration}</span>
+                    <span className="font-bold text-gray-700">
+                      ₹ {item?.amount?.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                </button>
+
+                <div className="flex justify-between px-4 py-3 border rounded-b-2xl ">
+                  <div
+                    onClick={() => getProposalServiceIdForEdit(item?._id)}
+                    className="bg-blue-300 p-2 rounded-full cursor-pointer"
                   >
-                    {paymentDataList.map((item) => (
-                      <AccordionItem value={item?._id} key={item?._id}>
-                        <AccordionTrigger>
-                          <div className="flex gap-10 w-full text-left">
-                            <div className="capitalize w-1/4">
-                              {item?.voucher}
-                            </div>
-                            <div className="text-blue-400 w-1/4">
-                              ₹ {item?.credit?.toLocaleString("en-IN")}
-                            </div>
-                            <div className="w-1/4">
-                              {new Date(item?.date).toLocaleDateString("en-GB")}
-                            </div>
-                            <div className="w-1/4">
-                              ₹ {item?.balance?.toLocaleString("en-IN")}
-                            </div>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="grid grid-cols-2 gap-4 text-balance">
-                          {renderEntryDetails(item)}
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
+                    <Edit />
+                  </div>
+                  <div
+                    onClick={() => handleDeleteService(item?._id)}
+                    className="bg-red-300 p-2 rounded-full cursor-pointer"
+                  >
+                    <Trash />
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+            ))
+          )}
         </div>
-      )}
-    </>
+      </div>
+
+      <div className="w-1/3">
+        <CommonForm
+          formControls={ServiceFormControl}
+          formData={
+            editProposalServiceId ? proposalServiceEditData : serviceFormData
+          }
+          setFormData={
+            editProposalServiceId
+              ? setProposalServiceEditData
+              : setServiceFormData
+          }
+          onSubmit={
+            editProposalServiceId ? handleEditProposalService : handleService
+          }
+          buttonText={editProposalServiceId ? "Edit Service" : "Add Service"}
+        />
+      </div>
+    </div>
   );
 };
 
-export default CreateLedgerPage;
-
-
-mongodb+srv://aalekhdb:HLP5wHDMZSAdri3m@cluster0.imxvstt.mongodb.net/
+export default EditPropsal;

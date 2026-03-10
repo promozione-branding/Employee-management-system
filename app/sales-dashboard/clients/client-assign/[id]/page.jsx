@@ -1,9 +1,9 @@
-import EditProposal from "./EditPropsal";
+import ClientAssign from "./ClientAssign";
 
 const page = async ({ params }) => {
   const { id } = await params;
 
-  return <EditProposal id={id}/>;
+  return <ClientAssign clientId={id} />;
 };
 
 export default page;

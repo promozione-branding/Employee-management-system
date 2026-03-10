@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import {
   createServicesService,
   deleteService,
@@ -20,6 +21,7 @@ import {
   fetchProposalServiceById,
   getAllService,
 } from "@/service/service";
+
 import { Edit, Trash } from "lucide-react";
 import CommonForm from "@/components/layout/Form";
 import { ServiceFormControl } from "@/config/data";
@@ -29,16 +31,7 @@ import { editProposalService } from "@/service/proposal";
 import { useRouter } from "next/navigation";
 
 const EditPropsal = ({ id }) => {
-  const [proposalFormData, setProposalFormData] = useState({
-    clientName: "",
-    clientCompany: "",
-    clientAddress: "",
-    dateOfProposal: "",
-    GSTIN: "",
-    tanNo: "",
-    validTill: "",
-    paymentMethod: "",
-  });
+  const router = useRouter();
 
   const [loadingProposalDetails, setLoadingProposalDetails] = useState(true);
   const [proposalDetail, setProposalDetail] = useState({});
@@ -50,139 +43,206 @@ const EditPropsal = ({ id }) => {
   const [proposalServiceEditData, setProposalServiceEditData] = useState(
     initalServiceFormData,
   );
-  const [serviceFormData, setServiceFormData] = useState(initalServiceFormData);
-  const router = useRouter()
 
-  // this is the main form
+  const [serviceFormData, setServiceFormData] = useState(initalServiceFormData);
+
+  const [proposalFormData, setProposalFormData] = useState({
+    clientName: "",
+    clientCompany: "",
+    clientAddress: "",
+    dateOfProposal: "",
+    GSTIN: "",
+    tanNo: "",
+    validTill: "",
+    paymentMethod: "",
+  });
+
+  const [listOfPayments, setListOfPayments] = useState([]);
+  const [partlyPaymentFormData, setPartlyPaymentFormData] = useState({
+    paymentDuration: "",
+    paymentAmount: "",
+  });
+
+  function formatDate(date) {
+    if (!date) return "";
+    return new Date(date).toISOString().split("T")[0];
+  }
+
+  /* ---------------- SERVICE CALCULATION ---------------- */
+
+  function calculationOfTotalAmount() {
+    return selectedServices.reduce((total, service) => {
+      let servicePrice = service.amount;
+
+      if (service.discountAmount) {
+        servicePrice -= service.discountAmount;
+      } else if (service.discountPercentage) {
+        servicePrice -= (service.amount * service.discountPercentage) / 100;
+      }
+
+      return total + servicePrice;
+    }, 0);
+  }
+
+  const totalService = calculationOfTotalAmount();
+  const gstAmount = totalService * 0.18;
+  const grandTotal = totalService + gstAmount;
+  const tdsAmount = totalService * 0.02;
+
+  const finalTotal = proposalFormData.tanNo
+    ? grandTotal - tdsAmount
+    : grandTotal;
+
+  /* ---------------- HANDLE EDIT SUBMIT ---------------- */
+
   async function handleEditForm(e) {
     e.preventDefault();
 
     const filledItems = {};
 
     for (const key in proposalFormData) {
-      if (Object.hasOwn(proposalFormData, key) && proposalFormData[key]) {
+      if (proposalFormData[key]) {
         filledItems[key] = proposalFormData[key];
       }
     }
 
-    if (selectedServices.length > 0) {
-      filledItems.services = selectedServices.map((item) => item._id);
-    }
+    filledItems.services = selectedServices.map((s) => s._id);
+    filledItems.totalAmount = totalService;
+    filledItems.partlyPayment = listOfPayments;
 
     try {
       const res = await editProposalService(id, filledItems);
+
       if (res.success) {
-        toast.success(res.message || "Proposal Edit successfully");
-        router.push("/dashboard/customer")
+        toast.success("Proposal Updated");
+        router.push("/dashboard/customer");
+      } else {
+        toast.error(res.message);
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.response.data.message || "");
+      toast.error("Update failed");
     }
   }
+
+  /* ---------------- FETCH PROPOSAL ---------------- */
 
   async function fetchProposalDetails() {
     try {
       const res = await getProposalDetail(id);
+
       if (res.success) {
-        setProposalDetail(res.data);
+        const data = res.data;
+
+        setProposalDetail(data);
+
+        setProposalFormData({
+          clientName: data.clientName || "",
+          clientCompany: data.clientCompany || "",
+          clientAddress: data.clientAddress || "",
+          GSTIN: data.GSTIN || "",
+          tanNo: data.tanNo || "",
+          paymentMethod: data.paymentMethod || "",
+          dateOfProposal: formatDate(data.dateOfProposal),
+          validTill: formatDate(data.validTill),
+        });
+
+        setSelectedServices(data.services || []);
+        setListOfPayments(data.partlyPayment || []);
+
         setLoadingProposalDetails(false);
       }
     } catch (error) {
-      console.log(error);
-      toast.error(
-        error.response.data.message ||
-          "Error while fetching the proposal details",
-      );
+      toast.error("Error fetching proposal");
     }
   }
-
-  const handleProposalFormChange = (e) => {
-    const { name, value } = e.target;
-    setProposalFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handlePaymentMethodChange = (value) => {
-    setProposalFormData((prev) => ({
-      ...prev,
-      paymentMethod: value,
-    }));
-  };
 
   async function fetchAllServices() {
     try {
       const response = await getAllService();
       if (response.success) {
         setServicesItem(response.data);
-        toast.success("All Services Fetched");
       }
     } catch (error) {
-      console.log(error);
       toast.error(error.message);
     }
   }
 
-  async function handleService(e) {
-    e.preventDefault();
-    try {
-      if (
-        !serviceFormData.serviceTitle ||
-        !serviceFormData.amount ||
-        !serviceFormData.duration
-      ) {
-        toast.error("please fill the service details");
-        return;
-      }
-
-      if (serviceFormData?.discountPercentage > 40) {
-        toast.error("Discount can't be more than 40%");
-      }
-
-      if (
-        serviceFormData.discountAmount &&
-        serviceFormData.discountPercentage
-      ) {
-        toast.error("Can't use both discount Amount and Percentage");
-        return;
-      }
-
-      if (serviceFormData.discountPercentage > 40) {
-        toast.error("Discount can't be more than 40 Percentage");
-        return;
-      }
-
-      if (serviceFormData.discountAmount > serviceFormData.amount) {
-        toast.error("Discount can't be more than service Amount");
-      }
-
-      const response = await createServicesService(serviceFormData);
-      if (response.success) {
-        toast.success(response.message);
-        setServiceFormData(initalServiceFormData);
-        fetchAllServices();
-      }
-    } catch (error) {
-      console.log(error);
-      toast.success(error.message);
-    }
-  }
+  /* ---------------- SELECT SERVICE ---------------- */
 
   const handleSelectService = (service) => {
-    setSelectedServices((prevSelected) => {
-      const isSelected = prevSelected.some((s) => s._id === service._id);
-      if (isSelected) {
-        return prevSelected.filter((s) => s._id !== service._id);
+    setSelectedServices((prev) => {
+      const exists = prev.some((s) => s._id === service._id);
+
+      if (exists) {
+        return prev.filter((s) => s._id !== service._id);
       } else {
-        return [...prevSelected, service];
+        return [...prev, service];
       }
     });
   };
 
+  /* ---------------- PARTIAL PAYMENT ---------------- */
+
+  function handleAddPayment(e) {
+    e.preventDefault();
+
+    const amount = Number(partlyPaymentFormData.paymentAmount);
+
+    if (!partlyPaymentFormData.paymentDuration) {
+      toast.error("Select payment duration");
+      return;
+    }
+
+    if (amount <= 0) {
+      toast.error("Amount must be greater than 0");
+      return;
+    }
+
+    const paid = listOfPayments.reduce(
+      (acc, curr) => acc + Number(curr.paymentAmount),
+      0,
+    );
+
+    const remaining = finalTotal - paid;
+
+    if (amount > remaining) {
+      toast.error(`Cannot exceed remaining ₹${remaining}`);
+      return;
+    }
+
+    setListOfPayments([partlyPaymentFormData, ...listOfPayments]);
+
+    setPartlyPaymentFormData({
+      paymentDuration: "",
+      paymentAmount: "",
+    });
+  }
+
+  function handleDeletePayment(index) {
+    setListOfPayments((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  /* ---------------- SERVICES CRUD ---------------- */
+
+  async function handleService(e) {
+    e.preventDefault();
+
+    try {
+      const res = await createServicesService(serviceFormData);
+
+      if (res.success) {
+        toast.success(res.message);
+        setServiceFormData(initalServiceFormData);
+        fetchAllServices();
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+
   async function handleDeleteService(id) {
-    const confirm = window.confirm("Are you sure to delete the service");
+    const confirm = window.confirm("Delete service?");
+
     if (confirm) {
       const res = await deleteService(id);
       if (res.success) {
@@ -195,31 +255,24 @@ const EditPropsal = ({ id }) => {
     setEditProposalServiceId(id);
 
     const res = await fetchProposalServiceById(id);
+
     if (res.success) {
-      setProposalServiceEditData(res?.data);
+      setProposalServiceEditData(res.data);
     }
   }
 
   async function handleEditProposalService(e) {
     e.preventDefault();
 
-    try {
-      const res = await editService(
-        editProposalServiceId,
-        proposalServiceEditData,
-      );
+    const res = await editService(
+      editProposalServiceId,
+      proposalServiceEditData,
+    );
 
-      if (res.success) {
-        toast.success("Service Updated successfully");
-        setProposalServiceEditData(initalServiceFormData);
-        fetchAllServices();
-        setEditProposalServiceId(null);
-      } else {
-        toast.error(res.message || "Failed to update service");
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message || "Error updating services");
+    if (res.success) {
+      toast.success("Service updated");
+      setEditProposalServiceId(null);
+      fetchAllServices();
     }
   }
 
@@ -228,198 +281,183 @@ const EditPropsal = ({ id }) => {
     fetchAllServices();
   }, [id]);
 
-  useEffect(() => {
-    if (proposalDetail && Object.keys(proposalDetail).length > 0) {
-      // setProposalFormData({
-      //   clientName: proposalDetail.clientName || "",
-      //   clientCompany: proposalDetail.clientCompany || "",
-      //   clientAddress: proposalDetail.clientAddress || "",
-      //   dateOfProposal: proposalDetail.dateOfProposal?.split("T")[0] || "",
-      //   GSTIN: proposalDetail.GSTIN || "",
-      //   tanNo: proposalDetail.tanNo || "",
-      //   validTill: proposalDetail.validTill?.split("T")[0] || "",
-      //   paymentMethod: proposalDetail.paymentMethod || "",
-      // });
-      setSelectedServices(proposalDetail.services || []);
-    }
-  }, [proposalDetail]);
-
-  if (loadingProposalDetails) {
-    return <Loading />;
-  }
+  if (loadingProposalDetails) return <Loading />;
 
   return (
-    <div className="flex gap-5">
-      <div className="">
-        <form onSubmit={handleEditForm}>
-          <div className="grid grid-cols-2 gap-2 px-3 py-2">
-            <div className="flex flex-col gap-2">
-              <Label>Client Name</Label>
-              <Input
-                name="clientName"
-                value={proposalFormData.clientName}
-                onChange={handleProposalFormChange}
-                placeholder="Client Name"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>Client Company</Label>
-              <Input
-                name="clientCompany"
-                value={proposalFormData.clientCompany}
-                onChange={handleProposalFormChange}
-                placeholder="Client Company"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>Client Address</Label>
-              <Input
-                name="clientAddress"
-                value={proposalFormData.clientAddress}
-                onChange={handleProposalFormChange}
-                placeholder="Client Address"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>GSTIN</Label>
-              <Input
-                name="GSTIN"
-                value={proposalFormData.GSTIN}
-                onChange={handleProposalFormChange}
-                placeholder="GSTIN"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>TAN No</Label>
-              <Input
-                name="tanNo"
-                value={proposalFormData.tanNo}
-                onChange={handleProposalFormChange}
-                placeholder="TAN No"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>Date Of Proposal</Label>
-              <Input
-                type="date"
-                name="dateOfProposal"
-                value={proposalFormData.dateOfProposal}
-                onChange={handleProposalFormChange}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>Valid Till</Label>
-              <Input
-                type="date"
-                name="validTill"
-                value={proposalFormData.validTill}
-                onChange={handleProposalFormChange}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>Payment Method</Label>
-              <Select
-                value={proposalFormData.paymentMethod}
-                onValueChange={handlePaymentMethodChange}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Payment Method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="upi">UPI</SelectItem>
-                  <SelectItem value="card">Card</SelectItem>
-                  <SelectItem value="net banking">Net Banking</SelectItem>
-                  <SelectItem value="cheque">Cheque</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+    <div className="grid grid-cols-3 gap-5">
+      {/* LEFT SIDE */}
+      <div className="col-span-2">
+        <form onSubmit={handleEditForm} className="grid grid-cols-2 gap-3">
+          <div>
+            <Label>Client Name</Label>
+            <Input
+              name="clientName"
+              value={proposalFormData.clientName}
+              onChange={(e) =>
+                setProposalFormData({
+                  ...proposalFormData,
+                  clientName: e.target.value,
+                })
+              }
+            />
           </div>
 
-          <Button type="submit" className={"w-full"}>
-            Edit Proposals
-          </Button>
+          <div>
+            <Label>Client Company</Label>
+            <Input
+              name="clientCompany"
+              value={proposalFormData.clientCompany}
+              onChange={(e) =>
+                setProposalFormData({
+                  ...proposalFormData,
+                  clientCompany: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <div>
+            <Label>GSTIN</Label>
+            <Input
+              name="GSTIN"
+              value={proposalFormData.GSTIN}
+              onChange={(e) =>
+                setProposalFormData({
+                  ...proposalFormData,
+                  GSTIN: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <div>
+            <Label>TAN No</Label>
+            <Input
+              name="tanNo"
+              value={proposalFormData.tanNo}
+              onChange={(e) =>
+                setProposalFormData({
+                  ...proposalFormData,
+                  tanNo: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <Button className="col-span-2 mt-3">Update Proposal</Button>
         </form>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 py-3 ">
-          {!servicesItem.length ? (
-            <div className="flex items-center justify-center bg-red-500 border-2 border-dashed border-gray-400 rounded-lg p-4 text-white hover:bg-red-500 transition-colors duration-200">
-              Add some service
-            </div>
-          ) : (
-            servicesItem.map((item) => (
-              <div key={item?._id} className="flex flex-col">
-                <button
-                  onClick={() => handleSelectService(item)}
-                  className={`group block rounded-t-lg p-4 border shadow-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                    selectedServices.some((s) => s?._id === item?._id)
-                      ? "bg-blue-100 border-blue-400"
-                      : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
-                  }`}
-                >
-                  <div className="text-center">
-                    <p className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors py-2">
-                      {item?.serviceTitle}
-                    </p>
-                    {item?.description && (
-                      <p className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors border-t py-2">
-                        {item?.description}
-                      </p>
-                    )}
-                  </div>
+        {/* SERVICES */}
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          {servicesItem.map((item) => (
+            <div key={item._id} className="border rounded-lg p-4">
+              <button
+                type="button"
+                onClick={() => handleSelectService(item)}
+                className={`w-full text-left ${
+                  selectedServices.some((s) => s._id === item._id)
+                    ? "bg-blue-100"
+                    : ""
+                }`}
+              >
+                <p className="font-semibold">{item.serviceTitle}</p>
+                <p>{item.description}</p>
+                <p>₹ {item.amount}</p>
+              </button>
 
-                  {item?.discountPercentage ? (
-                    <p>Discount Percentage : {item?.discountPercentage}%</p>
-                  ) : (
-                    <p>
-                      Discount Amount : ₹{" "}
-                      {item?.discountAmount?.toLocaleString("en-IN")}
-                    </p>
-                  )}
+              <div className="flex justify-between mt-2">
+                <Edit
+                  size={18}
+                  className="cursor-pointer"
+                  onClick={() => getProposalServiceIdForEdit(item._id)}
+                />
 
-                  <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
-                    <span>{item?.duration}</span>
-                    <span className="font-bold text-gray-700">
-                      ₹ {item?.amount?.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                </button>
-
-                <div className="flex justify-between px-4 py-3 border rounded-b-2xl ">
-                  <div
-                    onClick={() => getProposalServiceIdForEdit(item?._id)}
-                    className="bg-blue-300 p-2 rounded-full cursor-pointer"
-                  >
-                    <Edit />
-                  </div>
-                  <div
-                    onClick={() => handleDeleteService(item?._id)}
-                    className="bg-red-300 p-2 rounded-full cursor-pointer"
-                  >
-                    <Trash />
-                  </div>
-                </div>
+                <Trash
+                  size={18}
+                  className="cursor-pointer"
+                  onClick={() => handleDeleteService(item._id)}
+                />
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="w-1/3">
-        <CommonForm
-          formControls={ServiceFormControl}
-          formData={
-            editProposalServiceId ? proposalServiceEditData : serviceFormData
-          }
-          setFormData={
-            editProposalServiceId
-              ? setProposalServiceEditData
-              : setServiceFormData
-          }
-          onSubmit={
-            editProposalServiceId ? handleEditProposalService : handleService
-          }
-          buttonText={editProposalServiceId ? "Edit Service" : "Add Service"}
-        />
+      {/* RIGHT SIDE */}
+      <div>
+        {/* PAYMENT SUMMARY */}
+
+        <div className="bg-white p-4 rounded-lg shadow border mb-4">
+          <h2 className="font-bold mb-3">Payment Summary</h2>
+
+          <div className="flex justify-between">
+            <span>Subtotal</span>
+            <span>₹ {totalService}</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span>GST 18%</span>
+            <span>₹ {gstAmount}</span>
+          </div>
+
+          {proposalFormData.tanNo && (
+            <div className="flex justify-between">
+              <span>TDS 2%</span>
+              <span>₹ {tdsAmount}</span>
+            </div>
+          )}
+
+          <div className="flex justify-between font-bold border-t mt-2 pt-2">
+            <span>Total</span>
+            <span>₹ {finalTotal}</span>
+          </div>
+        </div>
+
+        {/* PARTIAL PAYMENT */}
+
+        <form onSubmit={handleAddPayment} className="flex flex-col gap-2">
+          <select
+            value={partlyPaymentFormData.paymentDuration}
+            onChange={(e) =>
+              setPartlyPaymentFormData({
+                ...partlyPaymentFormData,
+                paymentDuration: e.target.value,
+              })
+            }
+          >
+            <option value="">Select Duration</option>
+            <option value="Advance Payment">Advance Payment</option>
+            <option value="After 30 Days">After 30 Days</option>
+            <option value="After 60 Days">After 60 Days</option>
+          </select>
+
+          <Input
+            type="number"
+            placeholder="Amount"
+            value={partlyPaymentFormData.paymentAmount}
+            onChange={(e) =>
+              setPartlyPaymentFormData({
+                ...partlyPaymentFormData,
+                paymentAmount: e.target.value,
+              })
+            }
+          />
+
+          <Button>Add Payment</Button>
+        </form>
+
+        {listOfPayments.map((item, index) => (
+          <div key={index} className="flex justify-between border p-2 mt-2">
+            <span>{item.paymentDuration}</span>
+            <span>₹ {item.paymentAmount}</span>
+
+            <Trash
+              size={16}
+              className="cursor-pointer"
+              onClick={() => handleDeletePayment(index)}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );

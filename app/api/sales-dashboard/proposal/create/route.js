@@ -4,6 +4,7 @@ import Proposal from "@/models/admin/proposal/Proposal";
 import { validateCreateProposal } from "@/lib/validation/sales/proposal";
 import SalesEmployee from "@/models/employee/sales/SalesEmployee";
 import Customer from "@/models/admin/Customer";
+import Service from "@/models/admin/proposal/Service";
 
 export async function POST(req) {
   try {
@@ -25,8 +26,39 @@ export async function POST(req) {
       );
     }
 
+    // 🟢 SNAPSHOT SERVICES (MAIN FIX)
+    let proposalServices = [];
+
+    if (value.services && value.services.length > 0) {
+      const serviceDocs = await Service.find({
+        _id: { $in: value.services },
+      });
+
+      proposalServices = serviceDocs.map((s) => ({
+        serviceId: s._id,
+        serviceTitle: s.serviceTitle,
+        amount: s.amount,
+        duration: s.duration,
+        description: s.description,
+        discountAmount: s.discountAmount || 0,
+        discountPercentage: s.discountPercentage || 0,
+        finalAmount:
+          s.amount -
+          (s.discountAmount || 0) -
+          ((s.discountPercentage || 0) / 100) * s.amount,
+      }));
+    }
+
+    console.log({
+      ...value,
+      services: proposalServices,
+    });
+
     // Create proposal
-    const proposal = await Proposal.create(value);
+    const proposal = await Proposal.create({
+      ...value,
+      services: proposalServices,
+    });
 
     await Customer.findByIdAndUpdate(proposal.clientId, {
       $push: { proposals: proposal._id },

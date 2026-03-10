@@ -231,7 +231,7 @@ const SrClientList = () => {
                   ))}
                 </div>
                 <div className="flex gap-5 justify-center">
-                  <Link href={`/dashboard/customer/work/${_id}`}>
+                  <Link href={`/sales-dashboard/clients/client-assign/${_id}`}>
                     <Network />
                   </Link>
                   <Link href={`/sales-dashboard/clients/${_id}`}>
@@ -247,7 +247,6 @@ const SrClientList = () => {
       </div>
 
       {/* sheet for create the client  */}
-
       <Sheet open={open} onOpenChange={resetForm}>
         <SheetContent className="p-5 overflow-y-auto">
           <p className="font-semibold text-center text-2xl pb-5">

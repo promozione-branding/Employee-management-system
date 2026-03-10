@@ -183,7 +183,6 @@ const CreateProposal = ({ customerId }) => {
       };
 
       const response = await createProposalService(formDataTemplate);
-      console.log(response, "response");
       if (response.success) {
         toast.success("Proposal created successfully!");
         setFormData(initialPerposelFormData);

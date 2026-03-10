@@ -1,9 +1,9 @@
-import EditProposal from "./EditPropsal";
+import CreateInvoice from "./CreateInvoice";
 
 const page = async ({ params }) => {
   const { id } = await params;
 
-  return <EditProposal id={id}/>;
+  return <CreateInvoice id={id} />;
 };
 
 export default page;

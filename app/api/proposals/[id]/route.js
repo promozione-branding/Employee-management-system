@@ -4,6 +4,7 @@ import Customer from "@/models/admin/Customer";
 import { createAuditLog } from "@/utils/createAuditLog";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { NextResponse } from "next/server";
+import Service from "@/models/admin/proposal/Proposal";
 
 export async function GET(req, { params }) {
   try {
@@ -105,7 +106,6 @@ export async function PUT(req, { params }) {
     await connectDB();
 
     const { id } = await params;
-    const body = await req.json();
 
     // 🔐 AUTH USER
     const authUser = await getAuthUser(req);
@@ -116,7 +116,9 @@ export async function PUT(req, { params }) {
       );
     }
 
-    // 🔍 FIND PROPOSAL
+    const data = await req.json();
+
+    // 🔎 FIND PROPOSAL
     const proposal = await Proposal.findById(id);
     if (!proposal) {
       return NextResponse.json(
@@ -125,31 +127,57 @@ export async function PUT(req, { params }) {
       );
     }
 
-    // 🧾 BEFORE SNAPSHOT
     const oldData = proposal.toObject();
 
-    // 🔄 UPDATE FIELDS
-    Object.keys(body).forEach((key) => {
-      proposal[key] = body[key] ?? proposal[key];
-    });
+    // 🟢 SNAPSHOT SERVICES AGAIN
+    let proposalServices = proposal.services;
 
-    const updatedProposal = await proposal.save();
+    if (data.services && data.services.length > 0) {
+      const serviceDocs = await Service.find({
+        _id: { $in: data.services },
+      });
 
-    // 📝 CREATE AUDIT HISTORY
-    const { _id } = await createAuditLog({
-      clientId: proposal.clientId, // VERY IMPORTANT
+      proposalServices = serviceDocs.map((s) => ({
+        serviceId: s._id,
+        serviceTitle: s.serviceTitle,
+        amount: s.amount,
+        duration: s.duration,
+        description: s.description,
+        discountAmount: s.discountAmount || 0,
+        discountPercentage: s.discountPercentage || 0,
+        finalAmount:
+          s.amount -
+          (s.discountAmount || 0) -
+          ((s.discountPercentage || 0) / 100) * s.amount,
+      }));
+    }
+
+    // ✏️ UPDATE PROPOSAL
+    const updatedProposal = await Proposal.findByIdAndUpdate(
+      id,
+      {
+        ...data,
+        services: proposalServices,
+      },
+      { new: true },
+    );
+
+    // 🧾 CREATE AUDIT HISTORY
+    const audit = await createAuditLog({
+      clientId: updatedProposal.clientId,
       entityType: "Proposal",
-      entityId: proposal._id,
+      entityId: updatedProposal._id,
       action: "UPDATE",
       oldData,
       newData: updatedProposal.toObject(),
       userId: authUser._id,
     });
 
-    const customer = await Customer.findById(proposal.clientId);
-    if (customer) {
-      customer.history.push(_id);
-      await customer.save();
+    // 🔗 LINK HISTORY TO CUSTOMER
+    if (audit?._id) {
+      await Customer.findByIdAndUpdate(updatedProposal.clientId, {
+        $push: { history: audit._id },
+      });
     }
 
     return NextResponse.json(
@@ -161,11 +189,13 @@ export async function PUT(req, { params }) {
       { status: 200 },
     );
   } catch (error) {
-    console.error("Edit Proposal API Error:", error);
+    console.error("UPDATE PROPOSAL API ERROR:", error);
+
     return NextResponse.json(
       {
         success: false,
-        message: "Server error while editing the proposal",
+        message: "Server Error",
+        error: error.message,
       },
       { status: 500 },
     );
