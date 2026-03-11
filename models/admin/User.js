@@ -32,8 +32,12 @@ const UserSchema = new mongoose.Schema(
     // NEW OTP FIELDS
     loginOTP: String,
     loginOTPExpiry: Date,
+
+    // PASSWORD RESET OTP
+    resetPasswordOTP: String,
+    resetPasswordOTPExpiry: Date,
   },
-  { timestamps: true, strictPopulate: false }
+  { timestamps: true, strictPopulate: false },
 );
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);

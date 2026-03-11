@@ -456,13 +456,13 @@ export const getEmployeeBasicDetailsFormControl = (designation = "") => [
     placeholder: "Enter Your Name",
   },
   {
-    label: "Designation",
+    label: "Department",
     name: "designation",
     componentType: "select",
     options: EMPLOYEE_DESIGNATION_OPTIONS,
   },
   {
-    label: "Sub Designation",
+    label: "Sub Department",
     name: "subDesignation",
     componentType: "select",
     options: getSubDesignationOptions(designation),

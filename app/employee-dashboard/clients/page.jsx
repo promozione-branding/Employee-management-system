@@ -5,14 +5,12 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import Loading from "@/components/layout/Loading";
 import { getEmployeeAssignedClientService } from "@/service/employee-dashboard/employee";
+import { ChartNetwork, SquareChartGantt } from "lucide-react";
 
 const ClientsPage = () => {
   const [clients, setClients] = useState([]);
   const [employeeDetails, setEmployeeDetails] = useState({});
   const [loading, setLoading] = useState(true);
-
-
-
 
   useEffect(() => {
     async function getEmployeeClientList() {
@@ -119,14 +117,19 @@ const ClientsPage = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(client.updatedAt).toLocaleDateString()}
                   </td>
-                  {/* <td className="px-10  py-4 whitespace-nowrap text-sm text-gray-500">
-                    10 % hard code
-                  </td> */}
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-4">
                     <Link
+                      title="Work History"
+                      href={`/employee-dashboard/clients/work-history/${client._id}`}
+                    >
+                      <SquareChartGantt />
+                    </Link>
+                    <Link
+                      title="Work"
                       href={`/employee-dashboard/clients/work/${client._id}`}
                     >
-                      Work Update
+                      <ChartNetwork />
                     </Link>
                   </td>
                 </tr>

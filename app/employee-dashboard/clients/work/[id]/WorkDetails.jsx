@@ -56,15 +56,7 @@ const WorkDetails = ({ workDetailId }) => {
 
   async function handleSubmit(checklistData) {
     try {
-      const filledData = checklistData.filter((item) => item.completed);
-      // console.log( {
-      //   checkList: filledData,
-      //   totalField: Math.max(
-      //     checklistData?.length || 0,
-      //     workDetailsData?.progressPercentage?.totalField || 0,
-      //   ),
-      // });
-
+      const filledData = checklistData.filter((item) => item?.completed);
       const res = await addCheckListService(workDetailId, {
         checkList: filledData,
         totalField: Math.max(
@@ -135,7 +127,6 @@ const WorkDetails = ({ workDetailId }) => {
           <div>
             <h2 className="text-xl font-semibold">{department} Work Details</h2>
             <p className="text-sm text-gray-500">
-              {/* Status: {status} • Progress: {progressPercentage}% */}
             </p>
           </div>
 

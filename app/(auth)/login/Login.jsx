@@ -7,6 +7,7 @@ import { loginFormControl } from "@/config/data";
 import { loginFormData } from "@/config/initialFormDate";
 import toast from "react-hot-toast";
 import { loginService } from "@/service/auth";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.log(error);
-      toast.error(error?.response?.data?.message ||  "Error while login");
+      toast.error(error?.response?.data?.message || "Error while login");
       setLoading(false);
     }
   };
@@ -69,9 +70,20 @@ export default function LoginPage() {
             Register
           </a>
         </p>
-        <a href="/login-otp" className="flex justify-center mt-4 font-medium text-blue-600 text-sm">
-          Login with OTP{" "}
-        </a>
+        <div className="flex justify-between">
+          <a
+            href="/login-otp"
+            className="flex justify-center mt-4 font-medium text-blue-600 text-sm"
+          >
+            Login with OTP{" "}
+          </a>
+          <Link
+            href="/forgot-password"
+            className="flex justify-center mt-4 font-medium text-red-600 text-sm"
+          >
+            Forgot Password
+          </Link>
+        </div>
       </div>
     </div>
   );

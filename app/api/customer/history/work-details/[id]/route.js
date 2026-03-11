@@ -14,10 +14,16 @@ export async function GET(req, { params }) {
       .select("workDetails")
       .populate({
         path: "workDetails",
-        populate: {
-          path: "employeeId",
-          select: "basicDetails.name basicDetails.designation",
-        },
+        populate: [
+          {
+            path: "employeeId",
+            select: "basicDetails.name basicDetails.designation",
+          },
+          {
+            path: "checklist.completedBy",
+            select: "basicDetails.name",
+          },
+        ],
       });
 
     if (!customerWorkDetailsHistory) {

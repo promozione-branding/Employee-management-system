@@ -161,6 +161,9 @@ const WorkDetail = ({ customerId }) => {
                           Remarks
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          CompletedBy
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Proof
                         </th>
                       </tr>
@@ -189,6 +192,9 @@ const WorkDetail = ({ customerId }) => {
                           </td>
                           <td className="px-4 py-3 text-sm text-gray-500 max-w-xs truncate">
                             {item.remarks || "-"}
+                          </td>
+                          <td className="px-4 py-3 text-sm font-medium max-w-xs truncate capitalize text-black">
+                            {item?.completedBy?.basicDetails?.name || "-"}
                           </td>
                           <td className="px-4 py-3 text-sm text-blue-600">
                             {item.proofUrl ? (

@@ -90,6 +90,7 @@ export default function SEOChecklistForm({ onSubmit, template, completed }) {
               <input
                 placeholder="Remarks"
                 value={item.remarks}
+                required={item.completed}
                 onChange={(e) => updateField(index, "remarks", e.target.value)}
                 className="w-full border rounded-lg p-2 text-sm"
                 disabled={isSaved}

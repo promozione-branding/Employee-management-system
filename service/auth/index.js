@@ -24,3 +24,19 @@ export async function createUserService(formData) {
   const { data } = await axiosInstance.post("/api/user/create-user", formData);
   return data;
 }
+
+export async function forgotPasswordService(formData) {
+  const { data } = await axiosInstance.post(
+    "/api/user/forgot-password",
+    formData,
+  );
+  return data;
+}
+
+export async function resetPasswordService(formData) {
+  const { data } = await axiosInstance.post(
+    "/api/user/reset-password",
+    formData,
+  );
+  return data;
+}
