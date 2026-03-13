@@ -3,6 +3,7 @@
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 import { totalClientCount } from "@/service/sales-dashboard/dashboard-api";
 import { ShieldUser } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
@@ -49,7 +50,7 @@ const TotalClientCount = () => {
   }
 
   return (
-    <div className="bg-[#f3eaea] p-4 rounded-lg shadow-sm border border-gray-200 w-full h-full hover:shadow-md transition-shadow">
+    <Link href={"/sales-dashboard/clients"}  className="bg-[#f3eaea] p-4 rounded-lg shadow-sm border border-gray-200 w-full h-full hover:shadow-md transition-shadow block">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
@@ -63,7 +64,7 @@ const TotalClientCount = () => {
           <ShieldUser className="text-orange-500" />
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

@@ -8,6 +8,7 @@ import EmployeeAnnouncements from "@/components/employee-dashboard/common/Announ
 import RecentActivity from "@/components/employee-dashboard/common/RecentActivity";
 import AllEmployeeContact from "@/components/employee-dashboard/common/AllEmployeeContact";
 import { useEmployeeStore } from "@/lib/store/EmployeeStore";
+import EmployeeAssigedClient from "@/components/employee-dashboard/common/EmployeeAssigedClient";
 
 const EmployeeDashboard = () => {
   const { employee } = useEmployeeStore();
@@ -22,6 +23,7 @@ const EmployeeDashboard = () => {
 
       <div className="flex flex-col lg:flex-row gap-6">
         <EmployeeReminder employeeId={employee?._id} />
+        <EmployeeAssigedClient employeeId={employee?._id} />
         <RecentActivity employeeId={employee?._id} />
       </div>
 

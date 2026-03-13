@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { allEmployeeContactService } from "@/service/employee-dashboard/dashboard";
-import { Mail, User } from "lucide-react";
+import { Mail, Phone, User } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import Image from "next/image";
 
@@ -98,6 +98,15 @@ const AllEmployeeContact = () => {
                     className="text-blue-600 hover:underline"
                   >
                     {employee.basicDetails?.email}
+                  </a>
+                </div>
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <a
+                    href={`tel:${employee.basicDetails?.phone}`}
+                    className="text-black hover:underline"
+                  >
+                    {employee.basicDetails?.phone}
                   </a>
                 </div>
               </div>

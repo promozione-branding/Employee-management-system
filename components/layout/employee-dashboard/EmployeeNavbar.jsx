@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import {
   Bell,
   Search,
-  UserCircle,
   LogOut,
   Settings,
   User,
@@ -13,28 +12,44 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
-import { getEmployeeDetailsService } from "@/service/employee-dashboard/employee";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/service/axiosInstance";
 import { useEmployeeStore } from "@/lib/store/EmployeeStore";
-import { getTeamUpdateService } from "@/service/team-update";
+import { noticationAnnouncementService } from "@/service/employee-dashboard/announcement";
 
 const EmployeeNavbar = () => {
   const { employee } = useEmployeeStore();
 
   const [openEmployeeDetails, setOpenEmployeeDetails] = useState(false);
   const [openNotification, setOpenNotification] = useState(false);
-  const [teamUpdateList, setTeamUpdateList] = useState([]);
+  const [notification, setNotification] = useState(false);
+  const [notificationList, setNotificationList] = useState([]);
 
   const router = useRouter();
 
-  const employeeEmails = Array.isArray(employee?.basicDetails?.email)
-    ? employee.basicDetails.email.filter(Boolean)
-    : employee?.basicDetails?.email
-      ? [employee.basicDetails.email]
-      : [];
+  const designation_value = employee?.basicDetails?.designation;
+
+  async function fetchAnnouncement() {
+    try {
+      if (designation_value === undefined) return;
+      const res = await noticationAnnouncementService(
+        designation_value
+      );
+      console.log(res, "res");
+      if (res?.success) {
+        setNotification(res?.data?.length > 0);
+        setNotificationList(res?.data);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message ||
+          "error while fetching the announcement",
+      );
+    }
+  }
 
   const handleLogout = async () => {
     try {
@@ -48,33 +63,11 @@ const EmployeeNavbar = () => {
     }
   };
 
-  async function fetchTeamUpdate() {
-    try {
-      const res = await getTeamUpdateService();
-      if (res.success) {
-        const filteredUpdates = (res.data || []).filter((update) => {
-          if (!Array.isArray(update?.recipients) || !update.recipients.length) {
-            return true;
-          }
-
-          return update.recipients.some((recipient) =>
-            employeeEmails.includes(recipient),
-          );
-        });
-
-        setTeamUpdateList(filteredUpdates);
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Logout failed.");
-      console.log(error);
-    }
-  }
-
   useEffect(() => {
-    if (employeeEmails.length) {
-      fetchTeamUpdate();
-    }
-  }, [employee?.basicDetails?.email]);
+    if (designation_value === undefined) return;
+
+    fetchAnnouncement();
+  }, [designation_value]);
 
   return (
     <div className="bg-white h-16 px-6 flex items-center justify-between border-b shadow-sm relative">
@@ -98,26 +91,24 @@ const EmployeeNavbar = () => {
           variant="ghost"
           size="icon"
           className="relative"
-          onClick={() =>
-            setOpenNotification((prev) => {
-              setOpenEmployeeDetails(false);
-              return !prev;
-            })
-          }
+          onClick={() => {
+            setOpenEmployeeDetails(false);
+            setOpenNotification((prev) => !prev);
+          }}
         >
           <Bell size={20} />
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
+          {notification && (
+            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+          )}
         </Button>
 
         <div className="flex items-center gap-2 border-l pl-4 ml-2">
           <div
             className="h-8 w-8  flex items-center justify-center cursor-pointer"
-            onClick={() =>
-              setOpenEmployeeDetails((prev) => {
-                setOpenNotification(false);
-                return !prev;
-              })
-            }
+            onClick={() => {
+              setOpenNotification(false);
+              setOpenEmployeeDetails((prev) => !prev);
+            }}
           >
             <Image
               width="1000"
@@ -187,51 +178,41 @@ const EmployeeNavbar = () => {
       {openNotification && (
         <div className="absolute top-16 right-16 z-50 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-300 max-h-[80vh] flex flex-col">
           <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-            <h3 className="font-semibold text-gray-800">Team Updates</h3>
-            <Link href={"/employee-dashboard/team-update"} className="bg-blue-100 text-blue-600 text-xs px-2 py-2 rounded-full">
-              <Plus />
-            </Link>
+            <h3 className="font-semibold text-gray-800">Notifications</h3>
+            <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
+              {notificationList.length} New
+            </span>
           </div>
-
-          <div className="overflow-y-auto">
-            {teamUpdateList.length > 0 ? (
-              teamUpdateList.map((update) => (
-                <div
-                  key={update._id}
-                  className="p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors"
+          <div className="overflow-y-auto p-2 space-y-2">
+            {notificationList.length > 0 ? (
+              notificationList.map((item) => (
+                <Link
+                  href={"/employee-dashboard/announcement"}
+                  key={item._id}
+                  className="block p-3 bg-white border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer group"
                 >
-                  <div className="flex justify-between items-start mb-1">
-                    <h4 className="font-medium text-sm text-gray-900">
-                      {update.title}
+                  <div className="flex justify-between items-start mb-1 gap-2">
+                    <h4 className="font-medium text-gray-800 text-sm line-clamp-2 group-hover:text-blue-600 transition-colors">
+                      {item.title}
                     </h4>
-                    <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">
-                      {new Date(update.createdAt).toLocaleDateString()}
+                    <span className="text-[10px] text-gray-400 whitespace-nowrap mt-0.5">
+                      {new Date(item.startDate).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mb-2 line-clamp-2">
-                    {update.description}
-                  </p>
-                  {Array.isArray(update.recipients) &&
-                  update.recipients.length > 0 ? (
-                    <p className="text-[11px] text-gray-400 mb-2 line-clamp-2">
-                      To: {update.recipients.join(", ")}
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <div className="bg-gray-100 p-1 rounded-full">
+                      <User size={10} className="text-gray-500" />
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {item.author?.username || "Admin"}
                     </p>
-                  ) : null}
-                  {update.link && (
-                    <a
-                      href={update.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium"
-                    >
-                      View Link <ExternalLink size={10} />
-                    </a>
-                  )}
-                </div>
+                  </div>
+                </Link>
               ))
             ) : (
-              <div className="p-8 text-center text-gray-500">
-                <p className="text-sm">No new updates</p>
+              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                <Bell size={32} className="mb-2 opacity-20" />
+                <p className="text-sm">No new notifications</p>
               </div>
             )}
           </div>
