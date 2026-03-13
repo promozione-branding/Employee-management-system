@@ -1,0 +1,272 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { FunnelPlus, Plus } from "lucide-react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import CommonForm from "@/components/layout/Form";
+import Loading from "@/components/layout/Loading";
+import { addCustomerFormControl } from "@/config/data";
+import { initalCustomerFormData } from "@/config/initialFormDate";
+import {
+  createCustomerServices,
+  editCustomerServices,
+  deleteCustomerServices,
+  getAllCustomerServices,
+  getCustomerServices,
+  getAllSalesService,
+} from "@/service/customer";
+import { Eye, Network, SquarePen, Trash } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+
+const CustomerManager = () => {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState(initalCustomerFormData);
+  const [editingId, setEditingId] = useState(null);
+  const [fetchSales, setFetchSales] = useState([]);
+
+  /* ---------------- Fetch ---------------- */
+  async function fetchSalesPerson() {
+    try {
+      const res = await getAllSalesService();
+      if (res.success) {
+        setFetchSales(res.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /* ---------------- Fetch ---------------- */
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      const res = await getAllCustomerServices();
+      if (res.success) setCustomers(res.data);
+    } catch {
+      toast.error("Failed to fetch customers");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomers();
+    // fetchSalesPerson();
+  }, []);
+
+  /* ---------------- putting the into client list ---------------- */
+  const salesPerson = {
+    label: "salesExecutive",
+    name: "salesExecutive",
+    componentType: "select",
+    options: fetchSales.map(({ basicDetails, _id }) => ({
+      id: _id,
+      label: basicDetails?.name,
+    })),
+  };
+
+  const customerFormControls = [...addCustomerFormControl, salesPerson];
+
+  /* ---------------- Create / Edit ---------------- */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    for (const c of customerFormControls) {
+      if (
+        !["tanNo", "notes", "website", "meetingDate"].includes(c.name) &&
+        !formData[c.name]
+      ) {
+        return toast.error(`Please fill ${c.label}`);
+      }
+    }
+
+    try {
+      const res = editingId
+        ? await editCustomerServices(editingId, formData)
+        : await createCustomerServices(formData);
+      if (res.success) {
+        toast.success(res.message || "Saved successfully");
+        resetForm();
+        fetchCustomers();
+      }
+    } catch {
+      toast.error("Something went wrong");
+    }
+  };
+
+  /* ---------------- Edit ---------------- */
+  const handleEdit = async (id) => {
+    try {
+      const res = await getCustomerServices(id);
+      if (res.success) {
+        setFormData(res.data);
+        setEditingId(id);
+        setOpen(true);
+      }
+    } catch {
+      toast.error("Failed to load customer");
+    }
+  };
+
+  /* ---------------- Delete ---------------- */
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this customer?"))
+      return;
+
+    try {
+      const res = await deleteCustomerServices(id);
+      if (res.success) {
+        toast.success(res.message);
+        fetchCustomers();
+      }
+    } catch {
+      toast.error("Delete failed");
+    }
+  };
+
+  /* ---------------- Helpers ---------------- */
+  const resetForm = () => {
+    setFormData(initalCustomerFormData);
+    setEditingId(null);
+    setOpen(false);
+  };
+
+  /* ---------------- UI ---------------- */
+  if (loading) return <Loading />;
+
+  return (
+    <div className="flex flex-col gap-2 md:gap-5 lg:gap-1">
+      {/* client List header  */}
+      <div className="md:flex md:justify-between md:items-center md:px-10 md:py-2">
+        <div className="text-2xl font-medium">Clients</div>
+
+        <div className="md:flex gap-5 lg:gap-10 hidden">
+          <div className="flex gap-2 items-center">
+            <p className="font-semibold">Showing</p>
+            <Select>
+              <SelectTrigger className="w-[90px] bg-white">
+                <SelectValue placeholder="Clients" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="30">30</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button className={"bg-white text-black hover:bg-gray-200"}>
+            <FunnelPlus /> Filter
+          </Button>
+
+          {/* <Button
+            onClick={() => setOpen(true)}
+            className={"text-white bg-orange-500 hover:bg-orange-600"}
+          >
+            <Plus size={30} /> Add New Client
+          </Button> */}
+        </div>
+      </div>
+
+      {/* client list  */}
+      <div className=" bg-white h-[78vh] rounded-2xl lg:h-[70vh] shadow-lg border ">
+        {/* heading  */}
+        <div className="grid grid-cols-6 gap-4 text-gray-500 border-b-2 py-3 font-semibold">
+          <p className="pl-5">Name</p>
+          <p>Company</p>
+          <p className="text-left">GSTIN</p>
+          <p className="text-center">Phone</p>
+          <p className="text-center">Sales Executive</p>
+          {/* <p className="text-center">Address</p> */}
+          <p className="text-center">Action</p>
+        </div>
+
+        {/* list  */}
+        <div>
+          {customers.map(
+            (
+              {
+                company,
+                name,
+                phone,
+                GSTIN,
+                Address,
+                salesExecutive,
+                _id,
+                SalesPersonName,
+              },
+              idx,
+            ) => (
+              <div
+                key={_id}
+                className={`grid grid-cols-6 gap-4  border-b py-3 ${idx % 2 === 0 && "bg-gray-50"}`}
+              >
+                <p className="pl-5">{name}</p>
+                <p>{company}</p>
+                <p className="">{GSTIN}</p>
+                <p className="text-center">{phone}</p>
+                <div className="text-center capitalize flex gap-2">
+                  {salesExecutive.map((item) => (
+                    <p
+                      key={item?._id}
+                      className="bg-orange-200 px-2 py-1 rounded-lg"
+                    >
+                      {item?.basicDetails?.name}
+                    </p>
+                  ))}
+                </div>
+               
+                <div className="flex gap-5 justify-center">
+                  <Link href={`/employee-dashboard/clients/client-assignment/${_id}`}>
+                    <Network />
+                  </Link>
+                  <Link
+                    href={`/employee-dashboard/clients/client-details/${_id}`}
+                  >
+                    <Eye />
+                  </Link>
+                  {/* <SquarePen onClick={() => handleEdit(_id)} /> */}
+                  {/* <Trash onClick={() => handleDelete(_id)} /> */}
+                </div>
+              </div>
+            ),
+          )}
+        </div>
+      </div>
+
+      {/* sheet for create the client  */}
+
+      <Sheet open={open} onOpenChange={resetForm}>
+        <SheetContent className="p-5 overflow-y-auto">
+          <p className="font-semibold text-center text-2xl pb-5">
+            {editingId ? "Edit Customer" : "Create Customer"}
+          </p>
+
+          <CommonForm
+            formData={formData}
+            setFormData={setFormData}
+            formControls={customerFormControls}
+            buttonText={editingId ? "Update" : "Add Client"}
+            onSubmit={handleSubmit}
+          />
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+};
+
+export default CustomerManager;

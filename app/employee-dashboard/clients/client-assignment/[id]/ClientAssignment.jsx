@@ -123,6 +123,8 @@ const ClientWork = ({ customerId }) => {
     }
     fetchClientWork();
   }, []);
+
+  
   return (
     <div className="flex gap-8">
       <div>
@@ -312,3 +314,4 @@ const ClientWork = ({ customerId }) => {
 };
 
 export default ClientWork;
+

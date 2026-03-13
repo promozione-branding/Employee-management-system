@@ -20,3 +20,10 @@ export async function getClientInoviceHistoryService(id) {
   );
   return data;
 }
+
+export async function getTeamUpdateAdminService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/customer/history/team-update/${id}`,
+  );
+  return data;
+}

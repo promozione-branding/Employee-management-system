@@ -19,16 +19,16 @@ const HistoryPage = ({ customerId }) => {
       icon: <Users />,
       href: `/dashboard/customer/history/client-history/${customerId}`,
     },
-    {
-      label: "Client Proposals",
-      icon: <TableProperties />,
-      href: `/dashboard/customer/history/client-proposal/${customerId}`,
-    },
-    {
-      label: "Client Invoice",
-      icon: <Album />,
-      href: `/dashboard/customer/history/client-invoice/${customerId}`,
-    },
+    // {
+    //   label: "Client Proposals",
+    //   icon: <TableProperties />,
+    //   href: `/dashboard/customer/history/client-proposal/${customerId}`,
+    // },
+    // {
+    //   label: "Client Invoice",
+    //   icon: <Album />,
+    //   href: `/dashboard/customer/history/client-invoice/${customerId}`,
+    // },
     {
       label: "Work Details",
       icon: <Activity />,
@@ -39,11 +39,11 @@ const HistoryPage = ({ customerId }) => {
       icon: <BanknoteArrowUp />,
       href: `/dashboard/customer/history/sales-history/${customerId}`,
     },
-    // {
-    //   label: "All History",
-    //   icon: <Volleyball />,
-    //   href: `/dashboard/customer/history/all-history/${customerId}`,
-    // },
+    {
+      label: "Team Update",
+      icon: <Volleyball />,
+      href: `/dashboard/customer/history/team-update/${customerId}`,
+    },
   ];
 
   return (

@@ -3,7 +3,12 @@
 import { useEmployeeStore } from "@/lib/store/EmployeeStore";
 import { useState, useEffect } from "react";
 
-export default function SEOChecklistForm({ onSubmit, template, completed }) {
+export default function SEOChecklistForm({
+  onSubmit,
+  template,
+  completed,
+  buttonDisabled,
+}) {
   const [checklist, setChecklist] = useState(template);
   const { employee } = useEmployeeStore();
 
@@ -117,9 +122,10 @@ export default function SEOChecklistForm({ onSubmit, template, completed }) {
 
       <button
         type="submit"
+        disabled={buttonDisabled}
         className="px-6 py-2 rounded-xl bg-black text-white text-sm my-5"
       >
-        Save Checklist
+        {buttonDisabled ? "Save Checklist..." : "Save Checklist"}
       </button>
     </form>
   );

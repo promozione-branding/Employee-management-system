@@ -26,6 +26,7 @@ import GridForm from "@/components/layout/GridForm";
 import { initialCheckListData } from "@/config/employee/initialData";
 
 const WorkDetails = ({ workDetailId }) => {
+  const [isBtnDisabled, setIsBtnDisabled] = useState(false);
   const [workDetailsData, setWorkDetailsData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -55,6 +56,7 @@ const WorkDetails = ({ workDetailId }) => {
   }
 
   async function handleSubmit(checklistData) {
+    setIsBtnDisabled(true);
     try {
       const filledData = checklistData.filter((item) => item?.completed);
       const res = await addCheckListService(workDetailId, {
@@ -69,10 +71,12 @@ const WorkDetails = ({ workDetailId }) => {
         toast.success(res.message || "Checklist updated successfully");
         setWorkDetailsData(res.data);
         fetchWorkDetails();
+        setIsBtnDisabled(false);
       }
     } catch (error) {
       console.log(error);
       toast.error(error.response.data?.message || "Error while add check list");
+      setIsBtnDisabled(false);
     }
   }
 
@@ -126,8 +130,7 @@ const WorkDetails = ({ workDetailId }) => {
         <div>
           <div>
             <h2 className="text-xl font-semibold">{department} Work Details</h2>
-            <p className="text-sm text-gray-500">
-            </p>
+            <p className="text-sm text-gray-500"></p>
           </div>
 
           {/* Checklist */}
@@ -206,6 +209,7 @@ const WorkDetails = ({ workDetailId }) => {
             onSubmit={handleSubmit}
             template={selectedTemplate}
             completed={checklist}
+            buttonDisabled={isBtnDisabled}
           />
         </div>
       )}

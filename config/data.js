@@ -612,3 +612,33 @@ export const projectDurationFormControl = [
     type: "date",
   },
 ];
+
+export const teamUpdateFormControl = [
+  {
+    label: "Title",
+    name: "title",
+    componentType: "input",
+    type: "text",
+  },
+  {
+    label: "Description",
+    name: "description",
+    componentType: "input",
+    type: "text",
+  },
+  {
+    label: "Link",
+    name: "link",
+    componentType: "input",
+    type: "text",
+  },
+  {
+    label: "Update Type",
+    name: "updateType",
+    componentType: "select",
+    options: [
+      { id: "call", label: "Call" },
+      { id: "general", label: "General" },
+    ],
+  },
+];

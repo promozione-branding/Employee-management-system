@@ -9,7 +9,15 @@ export async function GET(req, { params }) {
 
     const { id } = await params;
 
-    const clientWork = await Customer.findById(id).select("workDetails company").populate("workDetails");
+    const clientWork = await Customer.findById(id)
+      .select("workDetails company")
+      .populate({
+        path: "workDetails",
+        populate: {
+          path: "employeeId",
+          select: "basicDetails.name",
+        },
+      });
 
     if (!clientWork) {
       return NextResponse.json(
@@ -26,8 +34,8 @@ export async function GET(req, { params }) {
     return NextResponse.json(
       {
         success: true,
-        message:"client work details",
-        data:clientWork
+        message: "client work details",
+        data: clientWork,
       },
       {
         status: 200,

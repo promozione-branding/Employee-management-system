@@ -1,8 +1,9 @@
-import { connectDB } from "@/lib/db";
-import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
-import Employee from "@/models/employee/Employee";
-import { NextResponse } from "next/server";
-import Customer from "@/models/admin/Customer";
+// import { connectDB } from "@/lib/db";
+// import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
+// import Employee from "@/models/employee/Employee";
+// import { NextResponse } from "next/server";
+// import Customer from "@/models/admin/Customer";
+
 
 // export async function POST(req) {
 //   try {
@@ -32,25 +33,36 @@ import Customer from "@/models/admin/Customer";
 
 //     const employeeIds = Array.isArray(employeeId) ? employeeId : [employeeId];
 
-//     // 🔒 DUPLICATE CHECK
-//     const alreadyAssigned = await EmployeeWorkDetail.findOne({
+//     // 🔎 Check if work detail already exists for this client + department
+//     let workDetail = await EmployeeWorkDetail.findOne({
 //       clientId,
-//       employeeId: { $in: employeeIds },
-//     }).select("_id employeeId clientId");
+//       department,
+//     });
 
-//     if (alreadyAssigned) {
+//     // 🧠 CASE 1: WORK DETAIL ALREADY EXISTS → JUST ASSIGN EMPLOYEE
+//     if (workDetail) {
+//       await EmployeeWorkDetail.updateOne(
+//         { _id: workDetail._id },
+//         { $addToSet: { employeeId: { $each: employeeIds } } },
+//       );
+
+//       await Employee.updateMany(
+//         { _id: { $in: employeeIds } },
+//         { $addToSet: { workDetails: workDetail._id } },
+//       );
+
 //       return NextResponse.json(
 //         {
-//           success: false,
-//           message:
-//             "This client is already assigned to one of the selected employees",
+//           success: true,
+//           message: "Employee assigned to existing work detail",
+//           data: workDetail,
 //         },
-//         { status: 409 }, // Conflict
+//         { status: 200 },
 //       );
 //     }
 
-//     // ✅ Create work detail
-//     const workDetail = await EmployeeWorkDetail.create({
+//     // 🆕 CASE 2: CREATE NEW WORK DETAIL
+//     workDetail = await EmployeeWorkDetail.create({
 //       employeeId: employeeIds,
 //       clientId,
 //       department,
@@ -60,10 +72,9 @@ import Customer from "@/models/admin/Customer";
 //       startedAt,
 //     });
 
-//     // ✅ Sync to Employee
 //     await Employee.updateMany(
 //       { _id: { $in: employeeIds } },
-//       { $addToSet: { workDetails: workDetail._id } }, // safer than $push
+//       { $addToSet: { workDetails: workDetail._id } },
 //     );
 
 //     await Customer.findByIdAndUpdate(clientId, {
@@ -92,11 +103,26 @@ import Customer from "@/models/admin/Customer";
 // }
 
 
-
+import { connectDB } from "@/lib/db";
+import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
+import Employee from "@/models/employee/Employee";
+import Customer from "@/models/admin/Customer";
+import { NextResponse } from "next/server";
+import { createAuditLog } from "@/utils/createAuditLog";
+import { getAuthUser } from "@/lib/getAuthUser";
 
 export async function POST(req) {
   try {
     await connectDB();
+
+    const authUser = await getAuthUser(req);
+
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
     const body = await req.json();
 
@@ -116,20 +142,22 @@ export async function POST(req) {
           success: false,
           message: "employeeId, clientId and department are required",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     const employeeIds = Array.isArray(employeeId) ? employeeId : [employeeId];
 
-    // 🔎 Check if work detail already exists for this client + department
+    // 🔎 Check if work detail already exists
     let workDetail = await EmployeeWorkDetail.findOne({
       clientId,
       department,
     });
 
-    // 🧠 CASE 1: WORK DETAIL ALREADY EXISTS → JUST ASSIGN EMPLOYEE
+    // 🧠 CASE 1: UPDATE (Assign employee to existing work detail)
     if (workDetail) {
+      const oldData = workDetail.toObject();
+
       await EmployeeWorkDetail.updateOne(
         { _id: workDetail._id },
         { $addToSet: { employeeId: { $each: employeeIds } } }
@@ -140,11 +168,33 @@ export async function POST(req) {
         { $addToSet: { workDetails: workDetail._id } }
       );
 
+      const updatedWorkDetail = await EmployeeWorkDetail.findById(
+        workDetail._id
+      );
+
+      // 🧾 CREATE AUDIT HISTORY
+      const auditLog = await createAuditLog({
+        clientId,
+        entityType: "EmployeeWorkDetail",
+        entityId: workDetail._id,
+        action: "UPDATE",
+        oldData,
+        newData: updatedWorkDetail.toObject(),
+        userId: authUser._id,
+      });
+
+      // 🔗 Attach history to customer
+      if (auditLog) {
+        await Customer.findByIdAndUpdate(clientId, {
+          $push: { history: auditLog._id },
+        });
+      }
+
       return NextResponse.json(
         {
           success: true,
           message: "Employee assigned to existing work detail",
-          data: workDetail,
+          data: updatedWorkDetail,
         },
         { status: 200 }
       );
@@ -169,6 +219,23 @@ export async function POST(req) {
     await Customer.findByIdAndUpdate(clientId, {
       $addToSet: { workDetails: workDetail._id },
     });
+
+    // 🧾 CREATE AUDIT HISTORY
+    const auditLog = await createAuditLog({
+      clientId,
+      entityType: "EmployeeWorkDetail",
+      entityId: workDetail._id,
+      action: "CREATE",
+      oldData: null,
+      newData: workDetail.toObject(),
+      userId: authUser._id,
+    });
+
+    if (auditLog) {
+      await Customer.findByIdAndUpdate(clientId, {
+        $push: { history: auditLog._id },
+      });
+    }
 
     return NextResponse.json(
       {
