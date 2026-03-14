@@ -73,7 +73,7 @@ const EmployeeNavbar = () => {
     <div className="bg-white h-16 px-6 flex items-center justify-between border-b shadow-sm relative">
       <div className="flex items-center gap-4">
         <h2 className="text-xl font-semibold text-gray-800">
-          Employee Dashboard
+          Employe Dashboard
         </h2>
       </div>
 

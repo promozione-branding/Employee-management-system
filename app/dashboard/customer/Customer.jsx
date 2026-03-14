@@ -228,8 +228,8 @@ const Customer = ({ customerId }) => {
 
 
   return (
-    <div className="flex gap-5">
-      <div className="bg-white border border-gray-200 shadow-sm flex flex-col w-[30vw] rounded-xl overflow-hidden h-fit">
+    <div className="flex gap-5 flex-col lg:flex-row">
+      <div className="bg-white border border-gray-200 shadow-sm flex flex-col w-full lg:w-[30vw] rounded-xl overflow-hidden h-fit">
         <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-800">{name}</h2>
           <div className="flex items-center gap-2 text-gray-500 mt-1">
@@ -321,7 +321,7 @@ const Customer = ({ customerId }) => {
       </div>
 
       <div>
-        <div className="w-[30vw] border p-4 rounded-lg">
+        <div className="w-full lg:w-[30vw] border p-4 rounded-lg">
           <p className="font-semibold text-lg mb-4">Add Project</p>
           <form
             onSubmit={
@@ -425,7 +425,7 @@ const Customer = ({ customerId }) => {
         </div>
       </div>
 
-      <div className="w-[20vw] border p-4 rounded-lg">
+      <div className="w-full lg:w-[20vw] border p-4 rounded-lg">
         <p className="font-semibold text-xl mb-4">Service</p>
         <div className="flex flex-col gap-3 h-[400px] overflow-y-auto">
           {projectCycleData?.projectCycle?.projectDuration?.length > 0 ? (

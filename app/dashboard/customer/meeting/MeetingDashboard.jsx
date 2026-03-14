@@ -19,6 +19,7 @@ import {
 } from "@/service/meeting";
 import { SalesPeopleMeetingService } from "@/service/customer";
 
+
 const MeetingDashboard = ({ customerId, salesPersonId }) => {
   const [loading, setLoading] = useState(false);
   const [newMeeting, setNewMeeting] = useState(false);
@@ -393,7 +394,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
         console.log(error);
         setLoadingEmailList(true);
         toast.error(
-          error.response.date.message || "Error while fetching the sales person"
+          error.response.date.message ||
+            "Error while fetching the sales person",
         );
       }
     }
@@ -428,8 +430,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
         )}
       </div>
 
-      <div className="flex gap-10 ">
-        <div className="w-1/3">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="w-full">
           <h2 className="font-bold text-2xl text-center mb-5">Call Update</h2>
           <form
             onSubmit={newMeeting ? handleCallSubmit : updateCallSubmit}
@@ -507,7 +509,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
           </form>
         </div>
 
-        <div className="w-1/3">
+        <div className="w-full">
           <h2 className="font-bold text-2xl text-center mb-5">
             Meeting Update
           </h2>
@@ -598,7 +600,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
           </form>
         </div>
 
-        <div className="w-1/3">
+        <div className="w-full">
           <h2 className="font-bold text-2xl text-center mb-5">
             General Update
           </h2>

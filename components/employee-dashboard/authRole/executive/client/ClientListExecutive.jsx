@@ -10,17 +10,17 @@ import { useEmployeeStore } from "@/lib/store/EmployeeStore";
 
 const ClientListExecutive = () => {
   const [clients, setClients] = useState([]);
-  const [employeeDetails, setEmployeeDetails] = useState({});
   const [loading, setLoading] = useState(true);
   const { employee } = useEmployeeStore();
+
 
 
   useEffect(() => {
     async function getEmployeeClientList() {
       try {
-        if (employeeDetails?._id) {
+        if (employee?._id) {
           const res = await getEmployeeAssignedClientService(
-            employeeDetails?._id,
+            employee?._id,
           );
           if (res.success) {
             setLoading(false);
@@ -36,13 +36,9 @@ const ClientListExecutive = () => {
       }
     }
     getEmployeeClientList();
-  }, [employeeDetails]);
+  }, [employee?._id]);
 
-  useEffect(() => {
-    let user = sessionStorage.getItem("employeeData");
-    const data = JSON.parse(user);
-    setEmployeeDetails(data);
-  }, []);
+  
 
   if (loading) {
     return <Loading />;

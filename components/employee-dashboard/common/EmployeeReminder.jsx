@@ -33,6 +33,8 @@ const EmployeeReminder = ({ employeeId }) => {
     try {
       if (!description || !reminderAt) return;
 
+      console.log(employeeId, description, reminderAt);
+
       const res = await createReminderService({
         employeeId,
         description,
@@ -50,11 +52,6 @@ const EmployeeReminder = ({ employeeId }) => {
       toast.error(error.response.data.message || "error while create reminder");
     }
   };
-
-  //   const handleDelete = async (id) => {
-  //     await deleteReminderService(id);
-  //     fetchReminders();
-  //   };
 
   useEffect(() => {
     if (employeeId) fetchReminders();
@@ -112,14 +109,6 @@ const EmployeeReminder = ({ employeeId }) => {
                   </span>
                 )}
               </div>
-
-              {/* <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDelete(item._id)}
-              >
-                <Trash2 className="text-red-500" size={18} />
-              </Button> */}
             </li>
           ))}
         </ul>

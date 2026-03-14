@@ -118,16 +118,16 @@ const NewEmployee = () => {
             className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center hover:shadow-md transition-shadow"
           >
             <div>
-              <h3 className="font-semibold text-gray-800">{item.username}</h3>
+              <h3 className="font-semibold text-gray-800">{item.username?.split("@")[0]}</h3>
               <p className="text-sm text-gray-500">{item.email}</p>
             </div>
             <div className="flex items-center gap-3">
-              <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium capitalize">
+              <span className="p-2 rounded-full bg-blue-50 text-blue-600 text-xs font-medium capitalize">
                 <Dialog>
                   <DialogTrigger asChild>
                     <button
                       onClick={() => setUserId(item._id)}
-                      className="px-5 py-1 rounded-xl"
+                      className="rounded-xl"
                     >
                       <SmilePlus />
                     </button>

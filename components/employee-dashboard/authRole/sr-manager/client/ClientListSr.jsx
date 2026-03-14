@@ -229,9 +229,11 @@ const CustomerManager = () => {
                     </p>
                   ))}
                 </div>
-               
+
                 <div className="flex gap-5 justify-center">
-                  <Link href={`/employee-dashboard/clients/client-assignment/${_id}`}>
+                  <Link
+                    href={`/employee-dashboard/clients/client-assignment/${_id}`}
+                  >
                     <Network />
                   </Link>
                   <Link
@@ -239,8 +241,6 @@ const CustomerManager = () => {
                   >
                     <Eye />
                   </Link>
-                  {/* <SquarePen onClick={() => handleEdit(_id)} /> */}
-                  {/* <Trash onClick={() => handleDelete(_id)} /> */}
                 </div>
               </div>
             ),

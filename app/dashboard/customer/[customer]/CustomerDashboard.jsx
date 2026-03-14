@@ -41,7 +41,6 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
         </TabsContent>
         <TabsContent value="meetingHistory">
           <HistoryPage customerId={customerId} />
-          {/* <MeetingHistory customerId={customerId} /> */}
         </TabsContent>
         <TabsContent value="attachment">
           <Attachment />

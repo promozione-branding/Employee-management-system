@@ -146,8 +146,8 @@ const Employee = () => {
         <div className="flex w-full ">
           <Tabs defaultValue="employee" className="w-[90vw]">
             <TabsList>
-              <TabsTrigger value="employee">Employee</TabsTrigger>
-              <TabsTrigger value="user">New Employee</TabsTrigger>
+              <TabsTrigger value="employee">Employe</TabsTrigger>
+              <TabsTrigger value="user">New Employe</TabsTrigger>
               <TabsTrigger value="announcement">Announcement</TabsTrigger>
             </TabsList>
             <TabsContent value="employee" className={""}>
@@ -156,13 +156,13 @@ const Employee = () => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        EmployeeId
+                        Employe Id
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Name
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Designation
+                        Department
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Email
