@@ -106,7 +106,7 @@ const ClientDetailTab = ({ clientId }) => {
 
         <div className="bg-gray-50 p-4 rounded-lg">
           <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-indigo-500" /> Project Cycle
+            <Calendar className="w-5 h-5 text-indigo-500" /> Service duration
           </h3>
           {client.projectCycle?.projectDuration?.length > 0 ? (
             <div className="space-y-3">
