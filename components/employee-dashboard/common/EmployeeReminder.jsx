@@ -29,6 +29,16 @@ const EmployeeReminder = ({ employeeId }) => {
     }
   };
 
+const formatDate = (date) => {
+  if (!date) return "";
+
+  const d = new Date(date);
+
+  if (isNaN(d.getTime())) return "";
+
+  return d.toISOString().slice(0, 16);
+};
+
   const handleCreate = async () => {
     try {
       if (!description || !reminderAt) return;
@@ -73,7 +83,7 @@ const EmployeeReminder = ({ employeeId }) => {
         />
         <Input
           type="datetime-local"
-          value={reminderAt}
+          value={formatDate(reminderAt)}
           onChange={(e) => setReminderAt(e.target.value)}
         />
         <Button onClick={handleCreate}>Add</Button>

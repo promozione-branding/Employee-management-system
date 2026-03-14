@@ -27,6 +27,6 @@ const EmployeeReminderSchema = new mongoose.Schema(
   { timestamps: true },
 );
 const EmployeeReminder =
-  mongoose.model.EmployeeReminder ||
+  mongoose.models.EmployeeReminder ||
   mongoose.model("EmployeeReminder", EmployeeReminderSchema);
 export default EmployeeReminder;

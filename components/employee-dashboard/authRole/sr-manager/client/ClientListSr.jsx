@@ -9,45 +9,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FunnelPlus, Plus } from "lucide-react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import CommonForm from "@/components/layout/Form";
+import { FunnelPlus } from "lucide-react";
 import Loading from "@/components/layout/Loading";
-import { addCustomerFormControl } from "@/config/data";
-import { initalCustomerFormData } from "@/config/initialFormDate";
-import {
-  createCustomerServices,
-  editCustomerServices,
-  deleteCustomerServices,
-  getAllCustomerServices,
-  getCustomerServices,
-  getAllSalesService,
-} from "@/service/customer";
-import { Eye, Network, SquarePen, Trash } from "lucide-react";
+import { getAllCustomerServices } from "@/service/customer";
+import { Eye, Network } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useEmployeeStore } from "@/lib/store/EmployeeStore";
+import { getEmployeeAssignedClientService } from "@/service/employee-dashboard/employee";
 
 const CustomerManager = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState(initalCustomerFormData);
-  const [editingId, setEditingId] = useState(null);
-  const [fetchSales, setFetchSales] = useState([]);
+  const [assinedClientList, setAssinedClientList] = useState([]);
 
-  /* ---------------- Fetch ---------------- */
-  async function fetchSalesPerson() {
-    try {
-      const res = await getAllSalesService();
-      if (res.success) {
-        setFetchSales(res.data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
+  const { employee } = useEmployeeStore();
   /* ---------------- Fetch ---------------- */
   const fetchCustomers = async () => {
     try {
@@ -61,89 +38,34 @@ const CustomerManager = () => {
     }
   };
 
+  async function getEmployeeClientList() {
+    try {
+      if (employee?._id) {
+        const res = await getEmployeeAssignedClientService(employee?._id);
+
+        if (res.success) {
+          setAssinedClientList(
+            res?.data?.workDetails.map((item) => item?.clientId),
+          );
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message || "Error while getting the client list",
+      );
+    }
+  }
+
   useEffect(() => {
     fetchCustomers();
-    // fetchSalesPerson();
+    getEmployeeClientList();
   }, []);
 
-  /* ---------------- putting the into client list ---------------- */
-  const salesPerson = {
-    label: "salesExecutive",
-    name: "salesExecutive",
-    componentType: "select",
-    options: fetchSales.map(({ basicDetails, _id }) => ({
-      id: _id,
-      label: basicDetails?.name,
-    })),
-  };
 
-  const customerFormControls = [...addCustomerFormControl, salesPerson];
 
-  /* ---------------- Create / Edit ---------------- */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // customers.map((item)=> assinedClientList.map())
 
-    for (const c of customerFormControls) {
-      if (
-        !["tanNo", "notes", "website", "meetingDate"].includes(c.name) &&
-        !formData[c.name]
-      ) {
-        return toast.error(`Please fill ${c.label}`);
-      }
-    }
-
-    try {
-      const res = editingId
-        ? await editCustomerServices(editingId, formData)
-        : await createCustomerServices(formData);
-      if (res.success) {
-        toast.success(res.message || "Saved successfully");
-        resetForm();
-        fetchCustomers();
-      }
-    } catch {
-      toast.error("Something went wrong");
-    }
-  };
-
-  /* ---------------- Edit ---------------- */
-  const handleEdit = async (id) => {
-    try {
-      const res = await getCustomerServices(id);
-      if (res.success) {
-        setFormData(res.data);
-        setEditingId(id);
-        setOpen(true);
-      }
-    } catch {
-      toast.error("Failed to load customer");
-    }
-  };
-
-  /* ---------------- Delete ---------------- */
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this customer?"))
-      return;
-
-    try {
-      const res = await deleteCustomerServices(id);
-      if (res.success) {
-        toast.success(res.message);
-        fetchCustomers();
-      }
-    } catch {
-      toast.error("Delete failed");
-    }
-  };
-
-  /* ---------------- Helpers ---------------- */
-  const resetForm = () => {
-    setFormData(initalCustomerFormData);
-    setEditingId(null);
-    setOpen(false);
-  };
-
-  /* ---------------- UI ---------------- */
   if (loading) return <Loading />;
 
   return (
@@ -172,13 +94,6 @@ const CustomerManager = () => {
           <Button className={"bg-white text-black hover:bg-gray-200"}>
             <FunnelPlus /> Filter
           </Button>
-
-          {/* <Button
-            onClick={() => setOpen(true)}
-            className={"text-white bg-orange-500 hover:bg-orange-600"}
-          >
-            <Plus size={30} /> Add New Client
-          </Button> */}
         </div>
       </div>
 
@@ -247,24 +162,6 @@ const CustomerManager = () => {
           )}
         </div>
       </div>
-
-      {/* sheet for create the client  */}
-
-      <Sheet open={open} onOpenChange={resetForm}>
-        <SheetContent className="p-5 overflow-y-auto">
-          <p className="font-semibold text-center text-2xl pb-5">
-            {editingId ? "Edit Customer" : "Create Customer"}
-          </p>
-
-          <CommonForm
-            formData={formData}
-            setFormData={setFormData}
-            formControls={customerFormControls}
-            buttonText={editingId ? "Update" : "Add Client"}
-            onSubmit={handleSubmit}
-          />
-        </SheetContent>
-      </Sheet>
     </div>
   );
 };

@@ -59,7 +59,7 @@ export async function POST(req) {
         ],
       });
 
-      // 🔗 LINK TO EMPLOYEE
+      //  LINK TO EMPLOYEE
       employee.employeeReminderId = reminderDoc._id;
       await employee.save();
     }

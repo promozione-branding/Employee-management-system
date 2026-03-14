@@ -14,8 +14,8 @@ const Dashboard = () => {
     <div className="min-h-screen">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">Dashboard</h1>
-        <p className="text-slate-600">
+        <h1 className="text-xl md:text-4xl font-bold text-slate-900 mb-2">Dashboard</h1>
+        <p className="text-slate-600 text-sm">
           Welcome back! Here's your business performance overview.
         </p>
       </div>

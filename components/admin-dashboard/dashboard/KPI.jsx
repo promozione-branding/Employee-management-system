@@ -7,8 +7,6 @@ import {
   currentMonthRevenueService,
 } from "@/service/admin-dashboard/dashboard-api";
 import {
-  Activity,
-  ArrowDownRight,
   ArrowUpRight,
   FileText,
   IdCardLanyard,
@@ -77,13 +75,13 @@ export default function KPI() {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-2 md:p-6 border">
         <div className="flex items-center justify-between mb-4">
           <div className="bg-blue-50 p-3 rounded-lg">
-            <IndianRupee className="text-blue-600 w-6 h-6" />
+            <IndianRupee className="text-blue-600 md:w-6 md:h-6" />
           </div>
-          <div className="flex items-center gap-1 text-green-600">
+          <div className="items-center gap-1 text-green-600 hidden md:flex">
             <ArrowUpRight size={16} />
             <span className="text-sm font-semibold">+12.5%</span>
           </div>
@@ -96,12 +94,12 @@ export default function KPI() {
         </p>
       </div>
 
-      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
+      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-2 md:p-6 border">
         <div className="flex items-center justify-between mb-4">
           <div className="bg-green-50 p-3 rounded-lg">
-            <Users className="text-green-600 w-6 h-6" />
+            <Users className="text-green-600 md:w-6 md:h-6" />
           </div>
-          <div className="flex items-center gap-1 text-green-600">
+          <div className="items-center gap-1 text-green-600 hidden md:flex">
             <ArrowUpRight size={16} />
             <span className="text-sm font-semibold">+8.2%</span>
           </div>
@@ -112,12 +110,12 @@ export default function KPI() {
         <p className="text-2xl font-bold text-slate-900">{clientCount || 0}</p>
       </div>
 
-      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
+      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-2 md:p-6 border">
         <div className="flex items-center justify-between mb-4">
           <div className="bg-purple-50 p-3 rounded-lg">
-            <FileText className="text-purple-600 w-6 h-6" />
+            <FileText className="text-purple-600 md:w-6 md:h-6" />
           </div>
-          <div className="flex items-center gap-1 text-green-600">
+          <div className="items-center gap-1 text-green-600 hidden md:flex">
             <ArrowUpRight size={16} />
             <span className="text-sm font-semibold">+3.1%</span>
           </div>
@@ -129,12 +127,12 @@ export default function KPI() {
           ₹ {totalRevenue.toLocaleString("en-IN")}
         </p>
       </div>
-      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
+      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-2 md:p-6 border">
         <div className="flex items-center justify-between mb-4">
           <div className="bg-orange-50 p-3 rounded-lg">
-            <IdCardLanyard className="text-orange-600 w-6 h-6" />
+            <IdCardLanyard className="text-orange-600 md:w-6 md:h-6" />
           </div>
-          <div className="flex items-center gap-1 text-green-600">
+          <div className="items-center gap-1 text-green-600 hidden md:flex">
             <ArrowUpRight size={16} />
             <span className="text-sm font-semibold">-2.3%</span>
           </div>

@@ -124,8 +124,8 @@ const ClientWork = ({ customerId }) => {
     fetchClientWork();
   }, []);
   return (
-    <div className="flex gap-8">
-      <div>
+    <div className="flex flex-col lg:flex-row gap-8">
+      <div className="w-full lg:w-1/3">
         <div className=" flex flex-col gap-5">
           <div>
             <p className="text-lg font-medium mb-2">Domains of Work</p>
@@ -146,7 +146,7 @@ const ClientWork = ({ customerId }) => {
           </div>
           <div>
             {loadingEmployeeList ? (
-              <div className="w-[20vw] border-2 p-10 border-dashed rounded-xl flex items-center justify-center">
+              <div className="w-full border-2 p-10 border-dashed rounded-xl flex items-center justify-center">
                 <p className=" text-gray-400">Select one Domain</p>
               </div>
             ) : (
@@ -156,7 +156,11 @@ const ClientWork = ({ customerId }) => {
                     <button
                       onClick={() => handleSelectEmployee(employee?._id)}
                       key={employee?._id}
-                      className={`${selectedEmployee.includes(employee?._id) ? "bg-emerald-100 border-emerald-400" : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"} border p-4 rounded-lg shadow-sm bg-white w-[20vw]`}
+                      className={`${
+                        selectedEmployee.includes(employee?._id)
+                          ? "bg-emerald-100 border-emerald-400"
+                          : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
+                      } border p-4 rounded-lg shadow-sm bg-white w-full`}
                     >
                       <p className="font-semibold text-lg">
                         {employee?.basicDetails?.name}
@@ -176,19 +180,19 @@ const ClientWork = ({ customerId }) => {
 
         <Button
           disabled={buttonDisable}
-          className={"mt-5 w-[20vw]"}
+          className={"mt-5 w-full"}
           onClick={handleCreateWork}
         >
           Assign client
         </Button>
       </div>
 
-      <div>
+      <div className="w-full lg:w-2/3">
         {workDetailLoading ? (
           <Loading />
         ) : (
           <div className="">
-            <div className="w-[50vw]">
+            <div className="w-full">
               <h3 className="text-lg font-semibold mb-3">Work History</h3>
               <div className="flex flex-col gap-3">
                 {workDetailData?.workDetails?.map((work, index) => {
@@ -256,7 +260,7 @@ const ClientWork = ({ customerId }) => {
                               {work?.progressPercentage?.totalField} Tasks
                             </span>
                           </div>
-                          <div className="grid grid-cols-6 gap-2">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                             {work.checklist
                               ?.filter((t) => t.completed)
                               // .slice(0, 2)
@@ -272,7 +276,7 @@ const ClientWork = ({ customerId }) => {
                                 </div>
                               ))}
                             {completedTasks === 0 && (
-                              <p className="text-xs text-gray-400 italic">
+                              <p className="text-xs text-gray-400 italic col-span-full">
                                 No completed tasks yet
                               </p>
                             )}
@@ -281,7 +285,7 @@ const ClientWork = ({ customerId }) => {
 
                         {/* Footer */}
 
-                        <div className="flex gap-4">
+                        <div className="flex flex-wrap gap-4">
                           {work.employeeId?.map((item) => (
                             <div
                               key={item?._id}
