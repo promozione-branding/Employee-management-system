@@ -25,19 +25,28 @@ const SalesSidebar = () => {
   const router = useRouter();
   const navLinks = [
     {
+      title: "Dashboard",
       href: "/sales-dashboard",
       label: "Dashboard",
       icon: <LayoutDashboard size={24} />,
     },
     {
+      title: "Client",
       href: "/sales-dashboard/clients",
       label: "Client",
       icon: <UsersRound size={24} />,
     },
     {
+      title: "Activity",
       href: "/sales-dashboard/activity",
       label: "Activity",
       icon: <Activity size={24} />,
+    },
+    {
+      title: "Attendance",
+      href: "https://hrms.promozione.in/login",
+      label: "Attendance",
+      icon: <CalendarCheck size={24} />,
     },
     // {
     //   href: "/sales-dashboard/attendance",

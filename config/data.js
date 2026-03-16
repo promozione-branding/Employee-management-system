@@ -468,7 +468,7 @@ export const getEmployeeBasicDetailsFormControl = (designation = "") => [
     options: getSubDesignationOptions(designation),
   },
   {
-    label: "Auth Role",
+    label: "Designation",
     name: "authRole",
     componentType: "select",
     options: EMPLOYEE_AUTH_ROLE_OPTIONS,
@@ -524,19 +524,19 @@ export const editEmployeeBasicDetailsFormControl = (designation = "") => [
     placeholder: "Enter Your Name",
   },
   {
-    label: "Designation",
+    label: "Department",
     name: "designation",
     componentType: "select",
     options: EMPLOYEE_DESIGNATION_OPTIONS,
   },
   {
-    label: "Sub Designation",
+    label: "Sub Department",
     name: "subDesignation",
     componentType: "select",
     options: getSubDesignationOptions(designation),
   },
   {
-    label: "Auth Role",
+    label: "Designation",
     name: "authRole",
     componentType: "select",
     options: EMPLOYEE_AUTH_ROLE_OPTIONS,

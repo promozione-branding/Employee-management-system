@@ -100,7 +100,7 @@ const EditBasicDetail = ({ employeeId }) => {
       {/* here is the employee details  */}
       <div className="lg:w-1/2 bg-white p-1 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-1 text-gray-800">
-          Employee Details
+          Employe Details
         </h2>
         {employeeDetailLoading ? (
           <p>Loading...</p>
@@ -109,7 +109,14 @@ const EditBasicDetail = ({ employeeId }) => {
             {Object.entries(getEmployeeDetailsData).map(([key, value]) => (
               <div key={key} className="flex border-b py-1">
                 <p className="font-semibold text-gray-600 capitalize w-1/3">
-                  {key.replace(/([A-Z])/g, " $1")}:
+                  {key.replace(/([A-Z])/g, " $1") === "designation"
+                    ? "Department"
+                    : key.replace(/([A-Z])/g, " $1") === "sub Designation"
+                      ? "sub Department"
+                      : key.replace(/([A-Z])/g, " $1") === "auth Role"
+                        ? "Designation"
+                        : key.replace(/([A-Z])/g, " $1")}
+                  :
                 </p>
                 <p className="text-gray-800 w-2/3">{String(value)}</p>
               </div>
@@ -121,7 +128,7 @@ const EditBasicDetail = ({ employeeId }) => {
       {/* edit form  */}
       <div className="lg:w-1/2">
         <p className="text-2xl py-2 font-bold text-gray-600">
-          Edit Employee Details
+          Edit Employe Details
         </p>
         <GridForm
           formControls={employeeBasicDetailsFormControl}

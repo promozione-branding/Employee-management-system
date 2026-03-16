@@ -32,32 +32,38 @@ const EmployeeSidebar = ({ open, setOpen }) => {
 
   const navLinks = [
     {
+      title: "Dashboard",
       href: "/employee-dashboard",
       label: "Dashboard",
       icon: <LayoutDashboard size={24} />,
     },
     {
+      title: "Client List",
       href: "/employee-dashboard/clients",
       label: "Client",
       icon: <UsersRound size={24} />,
     },
-    // {
-    //   href: "/employee-dashboard/attendance",
-    //   label: "Attendance",
-    //   icon: <CalendarCheck size={24} />,
-    // },
+    {
+      title: "HRMS",
+      href: "https://hrms.promozione.in/login",
+      label: "Attendance",
+      icon: <CalendarCheck size={24} />,
+    },
 
     // {
+
     //   href: "/employee-dashboard/leaves",
     //   label: "Leaves",
     //   icon: <FileText size={24} />,
     // },
     // {
+
     //   href: "/employee-dashboard/projects",
     //   label: "Projects",
     //   icon: <Briefcase size={24} />,
     // },
     {
+      title: "",
       href: "/employee-dashboard/profile",
       label: "Profile",
       icon: <User size={24} />,
@@ -92,7 +98,7 @@ const EmployeeSidebar = ({ open, setOpen }) => {
               !open && "justify-center"
             }`}
           >
-            <Link href={link.href} className="flex items-center w-full">
+            <Link href={link.href} title={link?.title} className="flex items-center w-full">
               {link.icon}
               {open && <span className="ml-3">{link.label}</span>}
             </Link>
