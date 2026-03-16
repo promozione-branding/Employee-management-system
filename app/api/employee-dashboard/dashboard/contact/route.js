@@ -5,7 +5,11 @@ import { NextResponse } from "next/server";
 export async function GET(req) {
   try {
     await connectDB();
-    const contact = await Employee.find().select("basicDetails.name basicDetails.email basicDetails.designation basicDetails.profileImage basicDetails.phone");
+    const contact = await Employee.find({
+      "basicDetails.resignedEmployee": false,
+    }).select(
+      "basicDetails.name basicDetails.email basicDetails.designation basicDetails.profileImage basicDetails.phone",
+    );
 
     if (!contact) {
       return NextResponse.json(

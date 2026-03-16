@@ -69,3 +69,11 @@ export async function getTodayMeetingService() {
 
   return data;
 }
+
+export async function getAdminDetailService() {
+  const { data } = await axiosInstance.get(
+    "/api/admin-dashboard-api/get-admin-detail",
+  );
+
+  return data;
+}

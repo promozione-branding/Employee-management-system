@@ -10,6 +10,7 @@ export async function GET(req, { params }) {
       .populate({ path: "clientId", select: "name" })
       .sort({ createdAt: -1 })
       .limit(10);
+    const reversedTeamUpdate = [...teamUpdate].reverse();
 
     if (!teamUpdate) {
       return NextResponse.json(
@@ -25,7 +26,7 @@ export async function GET(req, { params }) {
       {
         success: true,
         message: "Success",
-        data: teamUpdate,
+        data: reversedTeamUpdate,
       },
       { status: 200 },
     );

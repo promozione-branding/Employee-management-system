@@ -6,8 +6,10 @@ export async function GET(req) {
   try {
     await connectDB();
 
-    const allEmployee = await Employee.find().select(
-      "-basicDetails.address -basicDetails.dob -basicDetails.gender -basicDetails.joiningDate -basicDetails.profileImage -user -workDetails -createdAt -updatedAt -__v -basicDetails.phone"
+    const allEmployee = await Employee.find({
+      "basicDetails.resignedEmployee": false,
+    }).select(
+      "-basicDetails.address -basicDetails.dob -basicDetails.gender -basicDetails.joiningDate -basicDetails.profileImage -user -workDetails -createdAt -updatedAt -__v -basicDetails.phone",
     );
     return NextResponse.json({
       success: true,
@@ -22,7 +24,7 @@ export async function GET(req) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

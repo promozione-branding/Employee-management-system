@@ -1,5 +1,5 @@
 "use client";
-import { IdCard, UserRoundPen, UserRoundPlus } from "lucide-react";
+import { IdCard, Trash2, UserRoundPen, UserRoundPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -29,6 +29,7 @@ import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NewEmployee from "./NewEmployee";
 import Announcement from "./annoucement/page";
+import { resignedEmployeeAdminService } from "@/service/admin-dashboard/employee/employee-basic-details";
 
 const Employee = () => {
   const [registerFormData, setRegisterFormData] = useState(
@@ -88,7 +89,6 @@ const Employee = () => {
   async function fetchEmployees() {
     try {
       const res = await getAllEmployee();
-      console.log(res);
       if (res.success) {
         setEmployeeList(res.data);
         setEmployeeLoading(false);
@@ -100,36 +100,18 @@ const Employee = () => {
     }
   }
 
-  async function handleEmployeeBasicDetailSubmit(e) {
-    e.preventDefault();
-
-    const profileData = {
-      user: employeeId,
-      employeeId: formData?.employeeId,
-      basicDetails: {
-        ...formData,
-      },
-    };
-
+  async function handleResignedEmployee(id) {
     try {
-      if (employeeId) {
-        const isEmployeeExists = await checkEmployeeExists(employeeId);
-        if (isEmployeeExists.employeeExist) {
-          toast.error("You already added employee details ");
-          router.push("/dashboard");
-          return;
-        }
-      }
-
-      const res = await createEmployeeProfile(profileData);
+      const res = await resignedEmployeeAdminService(id);
+      console.log(res,"res");
       if (res.success) {
-        setFormData(initialEmployeesBasicDetails);
-        router.push("/employee-dashboard");
+        toast.success("Employee deleted successfully");
+        fetchEmployees();
       }
     } catch (error) {
       console.log(error);
       toast.error(
-        error?.response?.data?.message || "error while create employee profile",
+        error?.response?.data?.message || "server error while resign employee",
       );
     }
   }
@@ -186,6 +168,13 @@ const Employee = () => {
                             {employee?.basicDetails?.email}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center gap-8">
+                            <button
+                              onClick={() =>
+                                handleResignedEmployee(employee._id)
+                              }
+                            >
+                              <Trash2 />
+                            </button>
                             <Link
                               href={`/dashboard/employee/employee-details/edit-basic-details/${employee._id}`}
                             >

@@ -37,6 +37,7 @@ const Proposal = ({ customerId }) => {
     paymentDuration: "",
     paymentAmount: "",
   });
+  const [isOtherDuration, setIsOtherDuration] = useState(false);
 
   const { Address, GSTIN, city, company, country, name, phone, tanNo, email } =
     clientDetails;
@@ -48,6 +49,9 @@ const Proposal = ({ customerId }) => {
   const [proposalServiceEditData, setProposalServiceEditData] = useState(
     initalServiceFormData,
   );
+
+  const reversePartPayment = [...listOfPayments].reverse();
+
 
   function calculationOfTotalAmount() {
     const totalAfterServiceDiscounts = selectedServices.reduce(
@@ -79,7 +83,7 @@ const Proposal = ({ customerId }) => {
     validTill: formData?.validTill,
     paymentMethod: formData?.paymentMethod,
     totalAmount: calculationOfTotalAmount(),
-    partlyPayment: listOfPayments,
+    partlyPayment: reversePartPayment,
   };
 
   async function fetchAllServices() {
@@ -237,7 +241,6 @@ const Proposal = ({ customerId }) => {
   const grandTotal = totalService + gstAmount;
   const tdsAmount = totalService * 0.02;
 
-
   useEffect(() => {
     customerDetails();
     fetchAllServices();
@@ -262,7 +265,8 @@ const Proposal = ({ customerId }) => {
       (acc, curr) => acc + Number(curr.paymentAmount),
       0,
     );
-    const remainingBalance = (tanNo ? grandTotal - tdsAmount : grandTotal) - totalPaid;
+    const remainingBalance =
+      (tanNo ? grandTotal - tdsAmount : grandTotal) - totalPaid;
 
     if (!partlyPaymentFormData.paymentDuration) {
       toast.error("Please select a payment duration");
@@ -285,6 +289,7 @@ const Proposal = ({ customerId }) => {
 
     setListOfPayments([partlyPaymentFormData, ...listOfPayments]);
     setPartlyPaymentFormData({ paymentDuration: "", paymentAmount: "" });
+    setIsOtherDuration(false);
   }
 
   function handleDeletePayment(index) {
@@ -485,13 +490,26 @@ const Proposal = ({ customerId }) => {
             <p className="font-bold text-xl ">Partial Payment</p>
             <select
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              value={partlyPaymentFormData?.paymentDuration}
-              onChange={(e) =>
-                setPartlyPaymentFormData((prev) => ({
-                  ...prev,
-                  paymentDuration: e.target.value,
-                }))
+              value={
+                isOtherDuration
+                  ? "Other"
+                  : partlyPaymentFormData?.paymentDuration
               }
+              onChange={(e) => {
+                if (e.target.value === "Other") {
+                  setIsOtherDuration(true);
+                  setPartlyPaymentFormData((prev) => ({
+                    ...prev,
+                    paymentDuration: "",
+                  }));
+                } else {
+                  setIsOtherDuration(false);
+                  setPartlyPaymentFormData((prev) => ({
+                    ...prev,
+                    paymentDuration: e.target.value,
+                  }));
+                }
+              }}
             >
               <option value="" disabled>
                 Select Payment Duration
@@ -503,7 +521,20 @@ const Proposal = ({ customerId }) => {
               <option value="After 60 Days">After 60 Days</option>
               <option value="After 90 Days">After 90 Days</option>
               <option value="After 120 Days">After 120 Days</option>
+              <option value="Other">Other</option>
             </select>
+            {isOtherDuration && (
+              <Input
+                placeholder="Enter Custom Duration"
+                value={partlyPaymentFormData.paymentDuration}
+                onChange={(e) =>
+                  setPartlyPaymentFormData((prev) => ({
+                    ...prev,
+                    paymentDuration: e.target.value,
+                  }))
+                }
+              />
+            )}
             <Input
               placeholder="Enter the Amount"
               type="number"
@@ -529,9 +560,9 @@ const Proposal = ({ customerId }) => {
           </form>
 
           <div className="mt-4">
-            {listOfPayments?.length > 0 ? (
+            {reversePartPayment?.length > 0 ? (
               <div className="flex flex-col gap-3">
-                {listOfPayments.map(
+                {reversePartPayment?.map(
                   ({ paymentAmount, paymentDuration }, idx) => (
                     <div
                       key={idx}

@@ -99,6 +99,14 @@ const EmployeeSchema = new mongoose.Schema(
         type: Date,
         default: Date.now,
       },
+      resignedDate: {
+        type: Date,
+        default: null,
+      },
+      resignedEmployee: {
+        type: Boolean,
+        default: false,
+      },
     },
 
     EmployeeCalendarId: {

@@ -6,7 +6,9 @@ export async function GET(req) {
   try {
     await connectDB();
 
-    const totalEmployee = await Employee.find().countDocuments();
+    const totalEmployee = await Employee.find({
+      "basicDetails.resignedEmployee": false,
+    }).countDocuments();
 
     return NextResponse.json(
       {

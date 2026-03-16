@@ -101,6 +101,8 @@ const ProposalPdfTemplate = ({ data }) => {
   // total Amount in words
   const totalAmountInWords = toWords.convert(totalAmount);
 
+
+
   const BankDetailsBlock = () => (
     <View wrap={false} minPresenceAhead={120} style={{ marginTop: 10 }}>
       <View style={styles.bankBox}>
@@ -302,16 +304,17 @@ const ProposalPdfTemplate = ({ data }) => {
         </View>
 
         {data?.partlyPayment?.length > 0 &&
-          data?.partlyPayment.map(({ _id, paymentAmount, paymentDuration }) => (
-            <View style={styles.totalBox} key={_id}>
-              <Text style={styles.totalLabel}></Text>
-              <Text style={styles.totalValue}>{paymentDuration}</Text>
+          data?.partlyPayment
+            .map(({ _id, paymentAmount, paymentDuration }) => (
+              <View style={styles.totalBox} key={_id}>
+                <Text style={styles.totalLabel}></Text>
+                <Text style={styles.totalValue}>{paymentDuration}</Text>
 
-              <Text style={styles.totalValue}>
-                {formatIndianCurrency(paymentAmount)}
-              </Text>
-            </View>
-          ))}
+                <Text style={styles.totalValue}>
+                  {formatIndianCurrency(paymentAmount)}
+                </Text>
+              </View>
+            ))}
 
         {/* terms */}
         <View style={styles.termsBox} wrap>

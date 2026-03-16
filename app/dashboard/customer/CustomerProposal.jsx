@@ -332,11 +332,7 @@ const CustomerProposal = ({ customerId }) => {
                 </Link>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <button
-                      // disabled={sendingInvoiceId === item?._id}
-                      // onClick={() => sendEmailHandler(item?._id)}
-                      className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
+                    <button className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed">
                       <Mail />
                     </button>
                   </DialogTrigger>
@@ -362,12 +358,12 @@ const CustomerProposal = ({ customerId }) => {
                   </DialogContent>
                 </Dialog>
 
-                <Link
+                {/* <Link
                   href={`/dashboard/proposal/edit-proposal/${item?._id}`}
                   className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
                 >
                   <Pencil />
-                </Link>
+                </Link> */}
                 <div
                   onClick={() => handleDeleteProposal(item?._id)}
                   className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
