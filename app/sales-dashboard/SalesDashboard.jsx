@@ -49,10 +49,7 @@ const SalesDashboard = () => {
         <EmployeeAnnouncements />
       </div>
 
-      {/* <div className="grid grid-cols-1 lg:grid-cols-2 mt-10 gap-5"> */}
-        {/* hidden  */}
-        {/* <RecentActivity employeeId={employee?._id} /> */}
-      {/* </div> */}
+
     </div>
   );
 };
