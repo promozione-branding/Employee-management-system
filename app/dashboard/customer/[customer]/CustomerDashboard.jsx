@@ -43,7 +43,7 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
           <HistoryPage customerId={customerId} />
         </TabsContent>
         <TabsContent value="attachment">
-          <Attachment />
+          <Attachment clientId={customerId}/>
         </TabsContent>
       </Tabs>
     </div>

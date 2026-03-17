@@ -64,7 +64,7 @@ const ExecutiveClientList = () => {
 
     for (const c of salesClientFC) {
       if (
-        !["tanNo", "notes", "website", "meetingDate"].includes(c.name) &&
+        !["tanNo", "notes", "website", "meetingDate","email"].includes(c.name) &&
         !formData[c.name]
       ) {
         return toast.error(`Please fill ${c.label}`);

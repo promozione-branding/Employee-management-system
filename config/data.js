@@ -642,3 +642,46 @@ export const teamUpdateFormControl = [
     ],
   },
 ];
+
+
+export const attachmentFormControl = [
+   {
+    label: "Asset Type",
+    name: "assetType",
+    componentType: "select",
+    options: [
+      { id: "image", label: "image" },
+      { id: "video", label: "video" },
+      { id: "pdf", label: "pdf" },
+      { id: "docs", label: "docs" },
+      { id: "other", label: "other" },
+    ],
+  },
+  {
+    label: "Title",
+    name: "title",
+    componentType: "input",
+    type: "text",
+  },
+  {
+    label: "Description",
+    name: "description",
+    componentType: "input",
+    type: "text",
+  },
+  {
+    label: "Visibility",
+    name: "visibility",
+    componentType: "select",
+    options: [
+      { id: "public", label: "Public" },
+      { id: "private", label: "Private" },
+    ],
+  },
+  {
+    label: "Reference Link",
+    name: "referenceLink",
+    componentType: "input",
+    type: "text",
+  },
+];

@@ -123,3 +123,12 @@ export const initialAnnouncementFormData = {
   startDate: "",
   endDate: "",
 };
+
+export const initialAttachmentFormData={
+  assetType:"",
+  title:"",
+  description:"",
+  visibility:"",
+  referenceLink:"",
+  file:""
+}

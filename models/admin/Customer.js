@@ -7,7 +7,7 @@ const CustomerSchema = new mongoose.Schema(
     tanNo: {
       type: String,
     },
-    email: { type: String, required: true },
+    email: { type: String },
     GSTIN: {
       type: String,
       required: true,

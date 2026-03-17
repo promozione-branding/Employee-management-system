@@ -348,7 +348,7 @@ const CustomerManager = () => {
 
     for (const c of customerFormControls) {
       if (
-        !["tanNo", "notes", "website", "meetingDate"].includes(c.name) &&
+        !["tanNo", "notes", "website", "meetingDate","email"].includes(c.name) &&
         !formData[c.name]
       ) {
         return toast.error(`Please fill ${c.label}`);

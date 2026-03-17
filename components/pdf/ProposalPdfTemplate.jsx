@@ -14,6 +14,8 @@ const ProposalPdfTemplate = ({ data }) => {
     return null;
   }
 
+
+
   const toWords = new ToWords({
     localeCode: "en-IN",
     converterOptions: {
@@ -164,7 +166,7 @@ const ProposalPdfTemplate = ({ data }) => {
   );
 
   return (
-    <Document style={{ marginTop: "0" }}>
+    <Document style={{ marginTop: "0" }} title={`PR-${data?.clientCompany}-${data?.proposalNo}`} fileName={`PR-${data?.clientCompany}-${data?.proposalNo}`}>
       {/* PAGE 1 */}
       <Page size="A4" style={styles.page} wrap>
         {/* watermark */}
@@ -263,13 +265,7 @@ const ProposalPdfTemplate = ({ data }) => {
           </View>
         )}
 
-        {/* <View style={styles.totalBox}>
-          <Text style={styles.totalLabel}>Deal Amount (Inc. GST)</Text> */}
-        {/* <Text style={styles.totalValue}>0000.00</Text> */}
-        {/* <Text style={styles.totalValue}>
-            {formatIndianCurrency(data.totalAmount)}
-          </Text>
-        </View> */}
+      
 
         <View style={styles.totalBox}>
           <Text style={styles.totalLabel}>GST @ 18%</Text>
