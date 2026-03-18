@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -11,12 +10,16 @@ import { Input } from "@/components/ui/input";
 import { Bell } from "lucide-react";
 import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
+import { getAllEmailService } from "@/service/team-update";
 
 const EmployeeReminder = ({ employeeId }) => {
   const [reminders, setReminders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [description, setDescription] = useState("");
   const [reminderAt, setReminderAt] = useState("");
+  const [emailList, setEmailList] = useState([]);
+  const [emailListLoading, setEmailListLoading] = useState(true);
+  const [selectEmail, setSelectEmail] = useState([]);
 
   /* ================= FETCH ================= */
   const fetchReminders = async () => {
@@ -45,12 +48,14 @@ const EmployeeReminder = ({ employeeId }) => {
         employeeId,
         description,
         reminderAt: localDate,
+        reminderFor: selectEmail.map((item) => item._id),
       });
 
       if (res?.success) {
         toast.success(res.message || "Reminder created");
         setDescription("");
         setReminderAt("");
+        setSelectEmail([]);
         fetchReminders();
       }
     } catch (error) {
@@ -61,9 +66,39 @@ const EmployeeReminder = ({ employeeId }) => {
     }
   };
 
+  async function fetchEmail() {
+    try {
+      setEmailListLoading(true);
+      const res = await getAllEmailService();
+      if (res.success) {
+        setEmailList(res.data || []);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.message);
+    } finally {
+      setEmailListLoading(false);
+    }
+  }
+
+  const handleSelectEmail = (email) => {
+    setSelectEmail((prevEmail) => {
+      const isSelected = prevEmail.some((s) => s?._id === email?._id);
+
+      if (isSelected) {
+        return prevEmail.filter((s) => s._id !== email?._id);
+      } else {
+        return [...prevEmail, email];
+      }
+    });
+  };
+
+  const reverseReminderArray= reminders.reverse()
+
   /* ================= EFFECT ================= */
   useEffect(() => {
     if (employeeId) fetchReminders();
+    fetchEmail();
   }, [employeeId]);
 
   return (
@@ -91,6 +126,22 @@ const EmployeeReminder = ({ employeeId }) => {
         <Button onClick={handleCreate}>Add</Button>
       </div>
 
+      <div className="flex flex-wrap gap-3">
+        {emailList?.map((item) => (
+          <button
+            key={item?._id}
+            onClick={() => handleSelectEmail(item)}
+            className={`p-1 border rounded-lg shadow-sm text-sm font-medium text-gray-700 duration-300 capitalize ${
+              selectEmail.some((s) => s?._id === item?._id)
+                ? "bg-blue-50 border-emerald-500 scale-105"
+                : "bg-white border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            @{item?.email?.split("@")?.[0]}
+          </button>
+        ))}
+      </div>
+
       {/* List */}
       {loading ? (
         <ul className="space-y-3 lg:h-[40vh] overflow-hidden">
@@ -104,7 +155,7 @@ const EmployeeReminder = ({ employeeId }) => {
       ) : reminders.length === 0 ? (
         <p className="text-sm text-slate-500">No reminders added</p>
       ) : (
-        <ul className="space-y-3 lg:h-[40vh] overflow-y-auto">
+        <ul className="space-y-3 lg:h-[20vh] overflow-y-auto">
           {reminders.map((item) => (
             <li
               key={item._id}
@@ -113,7 +164,6 @@ const EmployeeReminder = ({ employeeId }) => {
               <div>
                 <p className="font-medium">{item.description}</p>
 
-                {/* ✅ CORRECT DISPLAY */}
                 <p className="text-xs text-slate-500">
                   ⏰ {new Date(item.reminderAt).toLocaleString()}
                 </p>

@@ -14,8 +14,22 @@ export async function getClientAttachementServices(id) {
 }
 
 
+// export async function uploadAssetServices(formData) {
+//   const { data } = await axiosInstance.post(`/api/customer/attachment`,formData);
+//   return data;
+// }
+
+
 export async function uploadAssetServices(formData) {
-  const { data } = await axiosInstance.post(`/api/customer/attachment`,formData);
+  const { data } = await axiosInstance.post(
+    "/api/customer/attachment", // your R2 upload API
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
   return data;
 }
 
