@@ -3,7 +3,8 @@
 import ClientDetailTab from "@/components/employee-dashboard/tabs/ClientDetailTab";
 import TeamUpdateTab from "@/components/employee-dashboard/tabs/TeamUpdateTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import WorkProgressTab from "@/components/employee-dashboard/tabs/WorkProgressTab";
+// import WorkProgressTab from "@/components/employee-dashboard/tabs/WorkProgressTab";
+import AllHistory from "@/components/employee-dashboard/tabs/AllHistory";
 
 const ClientDetails = ({ clientId }) => {
   return (
@@ -21,7 +22,8 @@ const ClientDetails = ({ clientId }) => {
           <TeamUpdateTab clientId={clientId} />
         </TabsContent>
         <TabsContent value="history">
-         <WorkProgressTab customerId={clientId}/>
+         {/* <WorkProgressTab customerId={clientId}/> */}
+         <AllHistory customerId={clientId}/>
         </TabsContent>
       </Tabs>
     </div>

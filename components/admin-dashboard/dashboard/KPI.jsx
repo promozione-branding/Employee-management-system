@@ -13,6 +13,7 @@ import {
   IndianRupee,
   Users,
 } from "lucide-react";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 // KPI Cards Data
@@ -94,7 +95,10 @@ export default function KPI() {
         </p>
       </div>
 
-      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-2 md:p-6 border">
+      <Link
+        href={"/dashboard/customer"}
+        className="block bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-2 md:p-6 border"
+      >
         <div className="flex items-center justify-between mb-4">
           <div className="bg-green-50 p-3 rounded-lg">
             <Users className="text-green-600 md:w-6 md:h-6" />
@@ -108,7 +112,7 @@ export default function KPI() {
           Total Customers
         </h3>
         <p className="text-2xl font-bold text-slate-900">{clientCount || 0}</p>
-      </div>
+      </Link>
 
       <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-2 md:p-6 border">
         <div className="flex items-center justify-between mb-4">
@@ -127,7 +131,11 @@ export default function KPI() {
           ₹ {totalRevenue.toLocaleString("en-IN")}
         </p>
       </div>
-      <div className="bg-[#f3eaea] rounded-lg shadow-md hover:shadow-lg transition-shadow p-2 md:p-6 border">
+
+      <Link
+        href={"/dashboard/employee"}
+        className="bg-[#f3eaea] block rounded-lg shadow-md hover:shadow-lg transition-shadow p-2 md:p-6 border"
+      >
         <div className="flex items-center justify-between mb-4">
           <div className="bg-orange-50 p-3 rounded-lg">
             <IdCardLanyard className="text-orange-600 md:w-6 md:h-6" />
@@ -141,7 +149,7 @@ export default function KPI() {
           Total Employee
         </h3>
         <p className="text-2xl font-bold text-slate-900">{employeeCount}</p>
-      </div>
+      </Link>
     </div>
   );
 }
