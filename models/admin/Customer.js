@@ -7,7 +7,7 @@ const CustomerSchema = new mongoose.Schema(
     tanNo: {
       type: String,
     },
-    email: { type: String },
+    email: { type: String, lowercase: true, trim: true },
     GSTIN: {
       type: String,
       required: true,
@@ -21,6 +21,7 @@ const CustomerSchema = new mongoose.Schema(
     phone: {
       type: Number,
       required: true,
+      trim: true,
     },
     website: {
       type: String,
@@ -83,6 +84,31 @@ const CustomerSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+CustomerSchema.index(
+  {
+    name: "text",
+    company: "text",
+    email: "text",
+    GSTIN: "text",
+  },
+  {
+    weights: {
+      name: 5,
+      company: 4,
+      email: 3,
+      GSTIN: 2,
+    },
+  },
+);
+
+// ⚡ PERFORMANCE INDEXES
+CustomerSchema.index({ phone: 1 });
+CustomerSchema.index({ createdAt: -1 });
+CustomerSchema.index({ GSTIN: 1 });
+CustomerSchema.index({ salesExecutive: 1 });
+CustomerSchema.index({ city: 1 });
+
 
 export default mongoose.models.Customer ||
   mongoose.model("Customer", CustomerSchema);

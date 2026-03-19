@@ -25,9 +25,7 @@ const nextConfig = {
       },
     ],
   },
-  api: {
-    bodyParser: false,
-  },
+
 };
 
 export default nextConfig;

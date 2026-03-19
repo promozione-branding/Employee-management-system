@@ -47,12 +47,16 @@ const AttachmentSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Customer",
     },
+    cc_email: [
+      {
+        type: String,
+      },
+    ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Attachment =
-  mongoose.models.Attachment ||
-  mongoose.model("Attachment", AttachmentSchema);
+  mongoose.models.Attachment || mongoose.model("Attachment", AttachmentSchema);
 
 export default Attachment;
