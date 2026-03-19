@@ -44,11 +44,14 @@ const EmployeeReminder = ({ employeeId }) => {
 
       const localDate = new Date(reminderAt);
 
+
+  
+
       const res = await createReminderService({
         employeeId,
         description,
         reminderAt: localDate,
-        reminderFor: selectEmail.map((item) => item._id),
+        cc_email: selectEmail.map((item) => item?.email),
       });
 
       if (res?.success) {
@@ -92,8 +95,6 @@ const EmployeeReminder = ({ employeeId }) => {
       }
     });
   };
-
-  const reverseReminderArray= reminders.reverse()
 
   /* ================= EFFECT ================= */
   useEffect(() => {

@@ -21,6 +21,11 @@ const EmployeeReminderSchema = new mongoose.Schema(
           type: Boolean,
           default: false,
         },
+        cc_email: [
+          {
+            type: String,
+          },
+        ], 
       },
     ],
   },

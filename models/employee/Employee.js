@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { isValidSubDesignation } from "@/config/employeeDesignation";
+// import { isValidSubDesignation } from "@/config/employeeDesignation";
+import { isValidSubDesignation } from "../../config/employeeDesignation.js";
 
 const EmployeeSchema = new mongoose.Schema(
   {

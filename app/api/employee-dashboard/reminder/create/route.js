@@ -8,7 +8,7 @@ export async function POST(req) {
     await connectDB();
 
     const body = await req.json();
-    const { employeeId, description, reminderAt } = body;
+    const { employeeId, description, reminderAt, cc_email } = body;
 
     // 🔴 VALIDATION
     if (!employeeId || !description || !reminderAt) {
@@ -44,6 +44,7 @@ export async function POST(req) {
       reminderDoc.reminder.push({
         description,
         reminderAt,
+        cc_email,
       });
 
       await reminderDoc.save();
@@ -55,6 +56,7 @@ export async function POST(req) {
           {
             description,
             reminderAt,
+            cc_email,
           },
         ],
       });

@@ -1,3 +1,4 @@
+import SrAttachment from "@/components/sales-dashboard/auth-role/sr-manager/client/SrAttachment";
 import InvoiceList from "@/components/sales-dashboard/auth-role/sr-manager/invoice/InvoiceList";
 import LedgerDetails from "@/components/sales-dashboard/auth-role/sr-manager/ledger/LedgerDetails";
 import CreateProposal from "@/components/sales-dashboard/auth-role/sr-manager/proposal/createProposal";
@@ -33,7 +34,7 @@ const ClientDetails = ({ customerId }) => {
           <LedgerDetails customerId={customerId} />
         </TabsContent>
         <TabsContent value="attachment">
-        Attachment
+        <SrAttachment clientId={customerId}/>
         </TabsContent>
       </Tabs>
     </div>

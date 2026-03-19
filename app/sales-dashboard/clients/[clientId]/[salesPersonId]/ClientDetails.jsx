@@ -1,4 +1,5 @@
 import HistoryPage from "@/app/dashboard/customer/history/page";
+import ExecutiveAttachment from "@/components/sales-dashboard/auth-role/executive/client/ExecutiveAttachment";
 import CustomerTab from "@/components/sales-dashboard/client/CustomerTab";
 import HistoryTab from "@/components/sales-dashboard/client/HistoryTab";
 import ProposalTab from "@/components/sales-dashboard/client/ProposalTab";
@@ -14,9 +15,10 @@ const ClientDetails = ({ customerId, salesPersonId }) => {
           <TabsTrigger value="proposal">Proposal</TabsTrigger>
           <TabsTrigger value="meeting">Update</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
+          <TabsTrigger value="attachment">Attachment</TabsTrigger>
         </TabsList>
         <TabsContent value="Customer">
-          <CustomerTab customerId={customerId} salesPersonId={salesPersonId}/>
+          <CustomerTab customerId={customerId} salesPersonId={salesPersonId} />
         </TabsContent>
         <TabsContent value="proposal">
           <ProposalTab customerId={customerId} salesPersonId={salesPersonId} />
@@ -25,7 +27,10 @@ const ClientDetails = ({ customerId, salesPersonId }) => {
           <UpdateTab customerId={customerId} />
         </TabsContent>
         <TabsContent value="history">
-           <HistoryTab customerId={customerId} />
+          <HistoryTab customerId={customerId} />
+        </TabsContent>
+        <TabsContent value="attachment">
+          <ExecutiveAttachment clientId={customerId} />
         </TabsContent>
       </Tabs>
     </div>
