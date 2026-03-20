@@ -1,24 +1,32 @@
 "use client";
 
-import CommonForm from "@/components/layout/Form";
+import GridForm from "@/components/layout/GridForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { attachmentFormControl } from "@/config/data";
 import { initialAttachmentFormData } from "@/config/initialFormDate";
-import { createAttachmentServices, getClientAttachementServices, uploadAssetServices } from "@/service/customer/attachment";
+import {
+  createAttachmentServices,
+  getClientAttachementServices,
+  uploadAssetServices,
+} from "@/service/customer/attachment";
+import { getAllEmailService } from "@/service/team-update";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-
-const Attachment = ({clientId}) => {
+const Attachment = ({ clientId }) => {
   const [attachmentFormData, setAttachmentFormData] = useState(
-    initialAttachmentFormData
+    initialAttachmentFormData,
   );
   const [uploading, setUploading] = useState(false);
 
   const [attachmentList, setAttachmentList] = useState([]);
   const [attachmentLoading, setAttachmentLoading] = useState(true);
 
+  // cc Mail fetures
+  const [emailList, setEmailList] = useState([]);
+  const [emailListLoading, setEmailListLoading] = useState(true);
+  const [selectEmail, setSelectEmail] = useState([]);
 
   /* =========================
      FILE UPLOAD
@@ -61,14 +69,14 @@ const Attachment = ({clientId}) => {
     try {
       const payload = {
         ...attachmentFormData,
-        clientId
-
+        clientId,
+        cc_email: selectEmail,
       };
 
       const res = await createAttachmentServices(payload);
       if (res?.success) {
         toast.success(res.message);
-
+        setSelectEmail([]);
         setAttachmentFormData(initialAttachmentFormData);
         if (clientId) {
           setAttachmentLoading(true);
@@ -85,28 +93,6 @@ const Attachment = ({clientId}) => {
       setAttachmentLoading(false);
     }
   }
-
-  useEffect(()=>{
-    if(!clientId) return 
-
-    async function loadAttachments() {
-      try {
-        setAttachmentLoading(true)
-        const res = await getClientAttachementServices(clientId)
-        if(res?.success){
-          setAttachmentList(res.data || [])
-        }
-
-      } catch (error) {
-        console.log(error);
-        toast.error(error?.response?.data?.message || "Error while fetching attachment")
-      } finally {
-        setAttachmentLoading(false)
-      }
-    }
-
-    loadAttachments()
-  },[clientId])
 
   const formatDate = (date) => {
     if (!date) return "N/A";
@@ -127,6 +113,54 @@ const Attachment = ({clientId}) => {
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
+  async function fetchEmail() {
+    try {
+      setEmailListLoading(true);
+      const res = await getAllEmailService();
+      if (res.success) {
+        setEmailList(res.data || []);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.message);
+    } finally {
+      setEmailListLoading(false);
+    }
+  }
+
+  const handleSelectEmail = (item) => {
+    setSelectEmail((prevEmail) => {
+      if (prevEmail.includes(item?.email)) {
+        return prevEmail.filter((email) => email !== item?.email);
+      } else {
+        return [...prevEmail, item?.email];
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (!clientId) return;
+
+    async function loadAttachments() {
+      try {
+        setAttachmentLoading(true);
+        const res = await getClientAttachementServices(clientId);
+        if (res?.success) {
+          setAttachmentList(res.data || []);
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error(
+          error?.response?.data?.message || "Error while fetching attachment",
+        );
+      } finally {
+        setAttachmentLoading(false);
+      }
+    }
+    fetchEmail();
+    loadAttachments();
+  }, [clientId]);
+
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(320px,380px)_1fr]">
       <Card className="h-fit">
@@ -143,9 +177,7 @@ const Attachment = ({clientId}) => {
               onChange={onFileChange}
             />
 
-            {uploading && (
-              <p className="text-sm text-blue-500">Uploading...</p>
-            )}
+            {uploading && <p className="text-sm text-blue-500">Uploading...</p>}
 
             {attachmentFormData.file && (
               <p className="text-xs text-green-600 break-all">
@@ -154,13 +186,33 @@ const Attachment = ({clientId}) => {
             )}
           </div>
 
-          <CommonForm
+          <GridForm
             formControls={attachmentFormControl}
             formData={attachmentFormData}
             setFormData={setAttachmentFormData}
             onSubmit={handleSubmit}
             buttonText="Create Attachment"
           />
+
+          {emailListLoading ? (
+            "Loading"
+          ) : (
+            <div className="flex flex-wrap gap-3 mt-3">
+              {emailList?.map((item) => (
+                <button
+                  key={item?._id}
+                  onClick={() => handleSelectEmail(item)}
+                  className={`p-1 border rounded-lg shadow-sm text-sm font-medium text-gray-700 duration-300 capitalize ${
+                    selectEmail.includes(item?.email)
+                      ? "bg-blue-50 border-emerald-500 scale-105"
+                      : "bg-white border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  @{item?.email?.split("@")?.[0]}
+                </button>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -169,7 +221,8 @@ const Attachment = ({clientId}) => {
           <div>
             <h2 className="text-lg font-semibold">Attachments</h2>
             <p className="text-sm text-muted-foreground">
-              {attachmentList.length} item{attachmentList.length === 1 ? "" : "s"} found
+              {attachmentList.length} item
+              {attachmentList.length === 1 ? "" : "s"} found
             </p>
           </div>
         </div>
@@ -194,7 +247,8 @@ const Attachment = ({clientId}) => {
             <CardContent className="flex min-h-52 flex-col items-center justify-center gap-2 p-6 text-center">
               <p className="text-lg font-medium">No attachments yet</p>
               <p className="text-sm text-muted-foreground">
-                Uploaded files and shared links for this client will appear here.
+                Uploaded files and shared links for this client will appear
+                here.
               </p>
             </CardContent>
           </Card>
@@ -243,7 +297,6 @@ const Attachment = ({clientId}) => {
                     </div>
 
                     <div className="flex items-center justify-between gap-3">
-                     
                       {getAssetLink(item) && (
                         <a
                           href={getAssetLink(item)}

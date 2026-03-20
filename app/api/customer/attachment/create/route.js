@@ -77,6 +77,11 @@ export async function POST(req) {
             ? `<p><a href="${referenceLink}">View Attachment</a></p>`
             : ""
         }
+        ${
+          file
+            ? `<p><a href="${file}">View file</a></p>`
+            : ""
+        }
       `;
 
       try {

@@ -24,7 +24,6 @@ const ClientDetails = ({ clientId }) => {
           <TeamUpdateTab clientId={clientId} />
         </TabsContent>
         <TabsContent value="history">
-         {/* <WorkProgressTab customerId={clientId}/> */}
          <AllHistory customerId={clientId}/>
         </TabsContent>
         <TabsContent value="attachment">

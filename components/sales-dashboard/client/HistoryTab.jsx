@@ -7,6 +7,7 @@ import {
   BadgeIndianRupee,
   BanknoteArrowUp,
   NotebookTabs,
+  Paperclip,
   TableProperties,
   Users,
   Volleyball,
@@ -43,6 +44,11 @@ const HistoryTab = ({ customerId }) => {
       label: "Team Update",
       icon: <Volleyball />,
       href: `/sales-dashboard/clients/history/team-update/${customerId}`,
+    },
+     {
+      label: "Attachment",
+      icon: <Paperclip />,
+      href: `/sales-dashboard/clients/history/attachment-history/${customerId}`,
     },
   ];
 

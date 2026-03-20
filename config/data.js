@@ -162,6 +162,15 @@ export const addCustomerFormControl = [
     componentType: "input",
     type: "date",
   },
+  {
+    label: "Paid",
+    name: "isPaid",
+    componentType: "select",
+    options: [
+      { id: "Paid", label: "Paid" },
+      { id: "Unpaid", label: "Unpaid" },
+    ],
+  },
 
   {
     label: "Notes",
@@ -643,9 +652,8 @@ export const teamUpdateFormControl = [
   },
 ];
 
-
 export const attachmentFormControl = [
-   {
+  {
     label: "Asset Type",
     name: "assetType",
     componentType: "select",

@@ -11,6 +11,7 @@ export async function GET(req) {
     const q = searchParams.get("q");
     const company = searchParams.get("company");
     const email = searchParams.get("email");
+    const isPaidParam = searchParams.get("isPaid");
 
     const page = parseInt(searchParams.get("page")) || 1;
     const limit = parseInt(searchParams.get("limit")) || 10;
@@ -38,9 +39,22 @@ export async function GET(req) {
       filter.email = { $regex: email, $options: "i" };
     }
 
+    // 💰 isPaid FILTER
+    if (isPaidParam !== null) {
+      const isPaid =
+        isPaidParam === "true" ||
+        isPaidParam === "Paid" ||
+        isPaidParam === "paid";
+
+      filter.isPaid = isPaid;
+    }
+
     const customers = await Customer.find(filter)
-      .select("name company phone salesExecutive")
-      .populate({ path: "salesExecutive",select:"basicDetails.name" })
+      .select("name company phone salesExecutive isPaid")
+      .populate({
+        path: "salesExecutive",
+        select: "basicDetails.name",
+      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);

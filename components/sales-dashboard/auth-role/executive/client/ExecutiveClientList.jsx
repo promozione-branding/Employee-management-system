@@ -10,7 +10,7 @@ import {
   deleteCustomerServices,
   getCustomerServices,
 } from "@/service/customer";
-import { Eye, FilePlusCorner, SquarePen, Trash } from "lucide-react";
+import { Eye, FilePlusCorner, Search, SquarePen, Trash, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -21,6 +21,9 @@ import {
   getClientService,
 } from "@/service/sales-dashboard/client";
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { searchClientService } from "@/service/customer/search";
 
 const ExecutiveClientList = () => {
   const [customers, setCustomers] = useState([]);
@@ -29,6 +32,7 @@ const ExecutiveClientList = () => {
   const [formData, setFormData] = useState(initialClientData);
   const [editingId, setEditingId] = useState(null);
   const { employee, loading } = useSalesEmployeeStore();
+    const [searchInput, setSearchInput] = useState("");
 
   /* ---------------- Fetch ---------------- */
   const fetchCustomers = async () => {
@@ -64,7 +68,9 @@ const ExecutiveClientList = () => {
 
     for (const c of salesClientFC) {
       if (
-        !["tanNo", "notes", "website", "meetingDate","email"].includes(c.name) &&
+        !["tanNo", "notes", "website", "meetingDate", "email"].includes(
+          c.name,
+        ) &&
         !formData[c.name]
       ) {
         return toast.error(`Please fill ${c.label}`);
@@ -135,6 +141,20 @@ const ExecutiveClientList = () => {
     setOpen(false);
   };
 
+  /* ---------------- search ---------------- */
+  async function searchHandler(e) {
+    e.preventDefault();
+    try {
+      const res = await searchClientService(searchInput);
+      if (res.success) {
+        setCustomers(res?.data);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.message);
+    }
+  }
+
   /* ---------------- UI ---------------- */
   if (loading || clientLoading) {
     return (
@@ -193,6 +213,36 @@ const ExecutiveClientList = () => {
           />
         </SheetContent>
       </Sheet>
+
+      <div>
+        <div className="text-2xl">Client List</div>
+        <form onSubmit={searchHandler} className="flex gap-2 my-4">
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="Client search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              required
+              className="pr-8"
+            />
+            {searchInput && (
+              <X
+                size={15}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 hover:text-black"
+                onClick={() => {
+                  setSearchInput("");
+                  fetchCustomers();
+                }}
+              />
+            )}
+          </div>
+
+          <Button type="submit">
+            <Search />
+          </Button>
+        </form>
+      </div>
 
       {/* Table */}
       {!customers.length ? (

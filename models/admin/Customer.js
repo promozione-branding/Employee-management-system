@@ -81,6 +81,10 @@ const CustomerSchema = new mongoose.Schema(
         ref: "EmployeeWorkDetail",
       },
     ],
+    isPaid: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );
@@ -108,7 +112,6 @@ CustomerSchema.index({ createdAt: -1 });
 CustomerSchema.index({ GSTIN: 1 });
 CustomerSchema.index({ salesExecutive: 1 });
 CustomerSchema.index({ city: 1 });
-
 
 export default mongoose.models.Customer ||
   mongoose.model("Customer", CustomerSchema);

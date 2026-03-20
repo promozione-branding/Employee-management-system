@@ -7,6 +7,7 @@ import {
   BadgeIndianRupee,
   BanknoteArrowUp,
   NotebookTabs,
+  Paperclip,
   TableProperties,
   Users,
   Volleyball,
@@ -19,16 +20,7 @@ const AllHistory = ({ customerId }) => {
       icon: <Users />,
       href: `/employee-dashboard/clients/history/client-history/${customerId}`,
     },
-    // {
-    //   label: "Client Proposals",
-    //   icon: <TableProperties />,
-    //   href: `/dashboard/customer/history/client-proposal/${customerId}`,
-    // },
-    // {
-    //   label: "Client Invoice",
-    //   icon: <Album />,
-    //   href: `/dashboard/customer/history/client-invoice/${customerId}`,
-    // },
+   
     {
       label: "Work Details",
       icon: <Activity />,
@@ -38,7 +30,18 @@ const AllHistory = ({ customerId }) => {
       label: "Sales",
       icon: <BanknoteArrowUp />,
       href: `/employee-dashboard/clients/history/sales-history/${customerId}`,
-    }
+    },
+    {
+      label: "Attachment",
+      icon: <Paperclip />,
+      href: `/employee-dashboard/clients/history/attachment-history/${customerId}`,
+    },
+     {
+      label: "Team Update",
+      icon: <Volleyball />,
+      href: `/employee-dashboard/clients/history/team-update/${customerId}`,
+    },
+
   ];
 
   return (

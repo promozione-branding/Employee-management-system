@@ -117,6 +117,8 @@ const Customer = ({ customerId }) => {
     }
   }
 
+
+
   const fetchCurrentCustomer = async () => {
     try {
       const response = await getCustomerServices(customerId);

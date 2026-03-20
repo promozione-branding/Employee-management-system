@@ -44,9 +44,6 @@ const EmployeeReminder = ({ employeeId }) => {
 
       const localDate = new Date(reminderAt);
 
-
-  
-
       const res = await createReminderService({
         employeeId,
         description,

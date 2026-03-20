@@ -4,15 +4,16 @@ import Customer from "@/models/admin/Customer";
 
 export async function GET(req) {
   try {
-
     await connectDB();
 
     console.log("⏳ Syncing indexes...");
 
     // ✅ Sync indexes
-    const result = await Customer.syncIndexes();
+    const result = await Customer.updateMany(
+      { isPaid: { $exists: false } },
+      { $set: { isPaid: false } },
+    );
 
-    console.log("✅ Indexes synced:", result);
 
     return NextResponse.json({
       success: true,
@@ -28,8 +29,7 @@ export async function GET(req) {
         message: "Failed to sync indexes",
         error: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

@@ -9,3 +9,5 @@ export async function searchClientService(query) {
 
   return data;
 }
+
+

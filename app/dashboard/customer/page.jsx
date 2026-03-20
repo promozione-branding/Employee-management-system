@@ -37,6 +37,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Input } from "@/components/ui/input";
 import { searchClientService } from "@/service/customer/search";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const CustomerManager = () => {
   const [customers, setCustomers] = useState([]);
@@ -46,6 +47,10 @@ const CustomerManager = () => {
   const [editingId, setEditingId] = useState(null);
   const [fetchSales, setFetchSales] = useState([]);
   const [searchInput, setSearchInput] = useState("");
+
+  const [isPaid, setIsPaid] = useState(false);
+
+  const isPaidArray = customers?.filter((item) => item?.isPaid === true);
 
   /* ---------------- Fetch Sales ---------------- */
   async function fetchSalesPerson() {
@@ -89,9 +94,14 @@ const CustomerManager = () => {
 
     for (const c of customerFormControls) {
       if (
-        !["tanNo", "notes", "website", "meetingDate", "email"].includes(
-          c.name,
-        ) &&
+        ![
+          "tanNo",
+          "notes",
+          "website",
+          "meetingDate",
+          "email",
+          "isPaid",
+        ].includes(c.name) &&
         !formData[c.name]
       ) {
         return toast.error(`Please fill ${c.label}`);
@@ -99,9 +109,14 @@ const CustomerManager = () => {
     }
 
     try {
+      const payload = {
+        ...formData,
+        isPaid: formData.isPaid === "Paid",
+      };
+
       const res = editingId
-        ? await editCustomerServices(editingId, formData)
-        : await createCustomerServices(formData);
+        ? await editCustomerServices(editingId, payload)
+        : await createCustomerServices(payload);
 
       if (res.success) {
         toast.success(res.message || "Saved successfully");
@@ -118,11 +133,16 @@ const CustomerManager = () => {
     try {
       const res = await getCustomerServices(id);
       if (res.success) {
-        setFormData(res.data);
+        const customerData = res.data;
+        setFormData({
+          ...customerData,
+          isPaid: customerData.isPaid ? "Paid" : "Unpaid",
+        });
         setEditingId(id);
         setOpen(true);
       }
-    } catch {
+    } catch (error) {
+      console.log(error, "error while edit client");
       toast.error("Failed to load customer");
     }
   };
@@ -205,22 +225,10 @@ const CustomerManager = () => {
         </div>
 
         <div className="flex flex-wrap gap-3 ">
-          <div></div>
           <div className="flex gap-2 items-center">
-            <p className="font-medium hidden md:block">Showing</p>
+            <p className="font-medium hidden md:block">Paid</p>
 
-            <Select>
-              <SelectTrigger className="w-[80px] bg-white">
-                <SelectValue placeholder="10" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="30">30</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            <Checkbox checked={isPaid} onCheckedChange={setIsPaid} />
           </div>
 
           <Button variant="outline">
@@ -258,54 +266,115 @@ const CustomerManager = () => {
         </div>
 
         <div className="lg:h-[59vh] lg:overflow-x-auto">
-          {customers.map(
-            ({ company, name, phone, GSTIN, salesExecutive, _id }, idx) => (
-              <div
-                key={_id}
-                className={`grid grid-cols-6 md:grid-cols-5  px-4 py-3 items-center border-b ${
-                  idx % 2 === 0 ? "bg-gray-50" : ""
-                }`}
-              >
-                <p>{name}</p>
-                <p>{company}</p>
-                {/* <p className="md:hidden lg:block">{GSTIN}</p> */}
-                <p className="text-center">{phone}</p>
+          {isPaid
+            ? isPaidArray.map(
+                (
+                  { company, name, phone, GSTIN, salesExecutive, _id, isPaid },
+                  idx,
+                ) => (
+                  <div
+                    key={_id}
+                    className={`grid grid-cols-6 md:grid-cols-5  px-4 py-3 items-center border-b ${isPaid && "bg-green-100"} ${
+                      idx % 2 === 0 ? "bg-gray-50" : ""
+                    }`}
+                  >
+                    <p>{name}</p>
+                    <p>{company}</p>
+                    {/* <p className="md:hidden lg:block">{GSTIN}</p> */}
+                    <p className="text-center">{phone}</p>
 
-                <div className="flex flex-wrap gap-1 justify-center">
-                  {salesExecutive?.map((item) => (
-                    <span
-                      key={item._id}
-                      className="bg-orange-200 text-xs px-2 py-1 rounded"
-                    >
-                      {item?.basicDetails?.name}
-                    </span>
-                  ))}
-                </div>
+                    <div className="flex flex-wrap gap-1 justify-center">
+                      {salesExecutive?.map((item) => (
+                        <span
+                          key={item._id}
+                          className="bg-orange-200 text-xs px-2 py-1 rounded"
+                        >
+                          {item?.basicDetails?.name}
+                        </span>
+                      ))}
+                    </div>
 
-                <div className="flex justify-center gap-3 lg:gap-5">
-                  <Link href={`/dashboard/customer/work/${_id}`}>
-                    <Network
-                      size={18}
-                      className="cursor-pointer lg:h-6 lg:w-6"
-                    />
-                  </Link>
-                  <Link href={`/dashboard/customer/${_id}`}>
-                    <Eye size={18} className="cursor-pointer lg:h-6 lg:w-6" />
-                  </Link>
-                  <SquarePen
-                    size={18}
-                    onClick={() => handleEdit(_id)}
-                    className="cursor-pointer lg:h-6 lg:w-6"
-                  />
-                  <Trash
-                    size={18}
-                    onClick={() => handleDelete(_id)}
-                    className="cursor-pointer lg:h-6 lg:w-6"
-                  />
-                </div>
-              </div>
-            ),
-          )}
+                    <div className="flex justify-center gap-3 lg:gap-5">
+                      <Link href={`/dashboard/customer/work/${_id}`}>
+                        <Network
+                          size={18}
+                          className="cursor-pointer lg:h-6 lg:w-6"
+                        />
+                      </Link>
+                      <Link href={`/dashboard/customer/${_id}`}>
+                        <Eye
+                          size={18}
+                          className="cursor-pointer lg:h-6 lg:w-6"
+                        />
+                      </Link>
+                      <SquarePen
+                        size={18}
+                        onClick={() => handleEdit(_id)}
+                        className="cursor-pointer lg:h-6 lg:w-6"
+                      />
+                      <Trash
+                        size={18}
+                        onClick={() => handleDelete(_id)}
+                        className="cursor-pointer lg:h-6 lg:w-6"
+                      />
+                    </div>
+                  </div>
+                ),
+              )
+            : customers.map(
+                (
+                  { company, name, phone, GSTIN, salesExecutive, _id, isPaid },
+                  idx,
+                ) => (
+                  <div
+                    key={_id}
+                    className={`grid grid-cols-6 md:grid-cols-5  px-4 py-3 items-center border-b ${isPaid && "bg-green-100"} ${
+                      idx % 2 === 0 ? "bg-gray-50" : ""
+                    }`}
+                  >
+                    <p>{name}</p>
+                    <p>{company}</p>
+                    {/* <p className="md:hidden lg:block">{GSTIN}</p> */}
+                    <p className="text-center">{phone}</p>
+
+                    <div className="flex flex-wrap gap-1 justify-center">
+                      {salesExecutive?.map((item) => (
+                        <span
+                          key={item._id}
+                          className="bg-orange-200 text-xs px-2 py-1 rounded"
+                        >
+                          {item?.basicDetails?.name}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-center gap-3 lg:gap-5">
+                      <Link href={`/dashboard/customer/work/${_id}`}>
+                        <Network
+                          size={18}
+                          className="cursor-pointer lg:h-6 lg:w-6"
+                        />
+                      </Link>
+                      <Link href={`/dashboard/customer/${_id}`}>
+                        <Eye
+                          size={18}
+                          className="cursor-pointer lg:h-6 lg:w-6"
+                        />
+                      </Link>
+                      <SquarePen
+                        size={18}
+                        onClick={() => handleEdit(_id)}
+                        className="cursor-pointer lg:h-6 lg:w-6"
+                      />
+                      <Trash
+                        size={18}
+                        onClick={() => handleDelete(_id)}
+                        className="cursor-pointer lg:h-6 lg:w-6"
+                      />
+                    </div>
+                  </div>
+                ),
+              )}
         </div>
       </div>
 
