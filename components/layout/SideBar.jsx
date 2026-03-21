@@ -138,23 +138,23 @@ const SideBar = ({ children }) => {
 
           <div className="flex items-center gap-4 ml-auto">
             {/* Search */}
-            <div className="relative hidden md:block">
+            {/* <div className="relative hidden md:block">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <input
                 type="search"
                 placeholder="Search..."
                 className="pl-9 h-9 w-64 rounded-md border border-gray-200 bg-gray-50 px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950"
               />
-            </div>
+            </div> */}
 
             {/* Notification */}
-            <Button variant="ghost" size="icon" className="relative">
+            {/* <Button variant="ghost" size="icon" className="relative">
               <Bell size={20} />
               <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
-            </Button>
+            </Button> */}
 
             {/* User */}
-            <div className="flex items-center gap-2 border-l pl-4 ml-2">
+            <div className="flex items-center gap-2  pl-4 ml-2">
               <div
                 className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer"
                 onClick={() => setUserMenuOpen((prev) => !prev)}

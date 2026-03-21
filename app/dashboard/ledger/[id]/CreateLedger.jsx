@@ -302,7 +302,7 @@ const CreateLedgerPage = ({ customerId }) => {
       if (res.success) {
         setPaymentMethod("");
         setFormData({});
-        router.push("/dashboard/customer");
+        router.push(`/dashboard/customer/${customerId}`);
       }
     } catch (error) {
       console.log(error);
