@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FunnelPlus } from "lucide-react";
+import { FunnelPlus, Search, X } from "lucide-react";
 import Loading from "@/components/layout/Loading";
 import { getAllCustomerServices } from "@/service/customer";
 import { Eye, Network } from "lucide-react";
@@ -18,11 +18,14 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useEmployeeStore } from "@/lib/store/EmployeeStore";
 import { getEmployeeAssignedClientService } from "@/service/employee-dashboard/employee";
+import { searchClientService } from "@/service/customer/search";
+import { Input } from "@/components/ui/input";
 
 const CustomerManager = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [assinedClientList, setAssinedClientList] = useState([]);
+  const [searchInput, setSearchInput] = useState("");
 
   const { employee } = useEmployeeStore();
   /* ---------------- Fetch ---------------- */
@@ -62,9 +65,18 @@ const CustomerManager = () => {
     getEmployeeClientList();
   }, []);
 
-
-
-  // customers.map((item)=> assinedClientList.map())
+  async function searchHandler(e) {
+    e.preventDefault();
+    try {
+      const res = await searchClientService(searchInput);
+      if (res.success) {
+        setCustomers(res?.data);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.message);
+    }
+  }
 
   if (loading) return <Loading />;
 
@@ -73,28 +85,33 @@ const CustomerManager = () => {
       {/* client List header  */}
       <div className="md:flex md:justify-between md:items-center md:px-10 md:py-2">
         <div className="text-2xl font-medium">Clients</div>
-
-        <div className="md:flex gap-5 lg:gap-10 hidden">
-          <div className="flex gap-2 items-center">
-            <p className="font-semibold">Showing</p>
-            <Select>
-              <SelectTrigger className="w-[90px] bg-white">
-                <SelectValue placeholder="Clients" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="30">30</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+        <form onSubmit={searchHandler} className="flex gap-2">
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="Client search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              required
+              className="pr-8"
+            />
+            {searchInput && (
+              <X
+                size={15}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 hover:text-black"
+                onClick={() => {
+                  setSearchInput("");
+                  fetchCustomers();
+                }}
+              />
+            )}
           </div>
 
-          <Button className={"bg-white text-black hover:bg-gray-200"}>
-            <FunnelPlus /> Filter
+          <Button type="submit">
+            <Search />
           </Button>
-        </div>
+        </form>
+        
       </div>
 
       {/* client list  */}

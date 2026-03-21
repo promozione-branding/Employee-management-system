@@ -375,6 +375,7 @@ const Customer = ({ customerId }) => {
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Start Date</label>
               <input
+              className="border p-2 rounded-lg"
                 type="date"
                 value={projectFormData.startDate}
                 onChange={(e) =>

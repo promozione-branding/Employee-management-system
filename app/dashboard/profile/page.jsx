@@ -1,7 +1,9 @@
 "use client";
 
+import Profile from "./Profile";
+
 const page = () => {
-  return <div>page</div>;
+  return <Profile />
 };
 
 export default page;

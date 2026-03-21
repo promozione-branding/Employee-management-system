@@ -7,7 +7,7 @@ import {
 } from "@/service/employee-dashboard/reminder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Bell } from "lucide-react";
+import { AtSign, Bell } from "lucide-react";
 import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
 import { getAllEmailService } from "@/service/team-update";
@@ -20,6 +20,8 @@ const EmployeeReminder = ({ employeeId }) => {
   const [emailList, setEmailList] = useState([]);
   const [emailListLoading, setEmailListLoading] = useState(true);
   const [selectEmail, setSelectEmail] = useState([]);
+
+  const [ccMailShow, setCcMailShow] = useState(false);
 
   /* ================= FETCH ================= */
   const fetchReminders = async () => {
@@ -100,11 +102,19 @@ const EmployeeReminder = ({ employeeId }) => {
   }, [employeeId]);
 
   return (
-    <div className="bg-[#f3eaea] rounded-lg shadow-md p-6 lg:h-[68vh] lg:w-1/2">
+    <div className="bg-[#f3eaea] rounded-lg shadow-md p-6 h-[70vh] lg:h-[68vh] lg:w-1/2 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
-        <Bell className="text-blue-600" />
-        <h2 className="text-xl font-bold">Reminders</h2>
+      <div className="flex justify-between">
+        <div className="flex items-center gap-2 mb-4">
+          <Bell className="text-blue-600" />
+          <h2 className="text-xl font-bold">Reminders</h2>
+        </div>
+        <div
+          onClick={() => setCcMailShow((prev) => !prev)}
+          className={ccMailShow ? "text-orange-500" : "text-black"}
+        >
+          <AtSign />
+        </div>
       </div>
 
       {/* Create Reminder */}
@@ -124,21 +134,23 @@ const EmployeeReminder = ({ employeeId }) => {
         <Button onClick={handleCreate}>Add</Button>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        {emailList?.map((item) => (
-          <button
-            key={item?._id}
-            onClick={() => handleSelectEmail(item)}
-            className={`p-1 border rounded-lg shadow-sm text-sm font-medium text-gray-700 duration-300 capitalize ${
-              selectEmail.some((s) => s?._id === item?._id)
-                ? "bg-blue-50 border-emerald-500 scale-105"
-                : "bg-white border-gray-200 hover:border-gray-300"
-            }`}
-          >
-            @{item?.email?.split("@")?.[0]}
-          </button>
-        ))}
-      </div>
+      {ccMailShow && (
+        <div className="flex flex-wrap gap-3">
+          {emailList?.map((item) => (
+            <button
+              key={item?._id}
+              onClick={() => handleSelectEmail(item)}
+              className={`p-1 border rounded-lg shadow-sm text-sm font-medium text-gray-700 duration-300 capitalize ${
+                selectEmail.some((s) => s?._id === item?._id)
+                  ? "bg-blue-50 border-emerald-500 scale-105"
+                  : "bg-white border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              @{item?.email?.split("@")?.[0]}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* List */}
       {loading ? (
@@ -153,7 +165,9 @@ const EmployeeReminder = ({ employeeId }) => {
       ) : reminders.length === 0 ? (
         <p className="text-sm text-slate-500">No reminders added</p>
       ) : (
-        <ul className="space-y-3 lg:h-[20vh] overflow-y-auto">
+        <ul
+          className={`space-y-3 ${ccMailShow ? "lg:h-[20vh]" : "lg:h-[40vh] "} overflow-y-auto overflow-hidden duration-300 h-[30vh]`}
+        >
           {reminders.map((item) => (
             <li
               key={item._id}

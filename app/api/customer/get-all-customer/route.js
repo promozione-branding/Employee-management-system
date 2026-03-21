@@ -7,9 +7,13 @@ export async function GET(req) {
     await connectDB();
 
     const allCustomer = await Customer.find()
-      .select("name company phone GSTIN Address salesExecutive SalesPersonName isPaid")
+      .select(
+        "name company phone GSTIN Address salesExecutive SalesPersonName isPaid",
+      )
       .populate({ path: "salesExecutive", select: "basicDetails.name" })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(60);
+
     if (!allCustomer) {
       return Response.json({
         success: false,

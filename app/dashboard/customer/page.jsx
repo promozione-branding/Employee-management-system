@@ -2,14 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   FunnelPlus,
   Plus,
   Eye,
@@ -224,16 +216,24 @@ const CustomerManager = () => {
           </form>
         </div>
 
-        <div className="flex flex-wrap gap-3 ">
-          <div className="flex gap-2 items-center">
-            <p className="font-medium hidden md:block">Paid</p>
-
-            <Checkbox checked={isPaid} onCheckedChange={setIsPaid} />
+        <div className="flex flex-wrap gap-3 justify-between">
+          <div className="flex items-center gap-2 bg-white border border-gray-200 px-3 py-2 rounded-md shadow-sm hover:bg-gray-50 transition-colors">
+            <Checkbox
+              id="paid-filter"
+              checked={isPaid}
+              onCheckedChange={setIsPaid}
+            />
+            <label
+              htmlFor="paid-filter"
+              className="text-sm font-medium leading-none cursor-pointer select-none"
+            >
+              Paid
+            </label>
           </div>
 
-          <Button variant="outline">
+          {/* <Button variant="outline">
             <FunnelPlus size={18} /> Filter
-          </Button>
+          </Button> */}
 
           {/* for mobile  */}
           <Button
@@ -269,7 +269,7 @@ const CustomerManager = () => {
           {isPaid
             ? isPaidArray.map(
                 (
-                  { company, name, phone, GSTIN, salesExecutive, _id, isPaid },
+                  { company, name, phone, salesExecutive, _id, isPaid },
                   idx,
                 ) => (
                   <div
@@ -280,7 +280,6 @@ const CustomerManager = () => {
                   >
                     <p>{name}</p>
                     <p>{company}</p>
-                    {/* <p className="md:hidden lg:block">{GSTIN}</p> */}
                     <p className="text-center">{phone}</p>
 
                     <div className="flex flex-wrap gap-1 justify-center">
@@ -379,50 +378,97 @@ const CustomerManager = () => {
       </div>
 
       {/* MOBILE CARD VIEW */}
-      <div className="md:hidden flex flex-col gap-3">
-        {customers.map(
-          ({ company, name, phone, GSTIN, salesExecutive, _id }) => (
-            <div
-              key={_id}
-              className="bg-white rounded-xl shadow border p-4 flex flex-col gap-2"
-            >
-              <div className="flex justify-between items-center">
-                <p className="font-semibold">{name}</p>
-                <p className="text-sm text-gray-500">{company}</p>
-              </div>
+      {isPaid ? (
+        <div className="md:hidden flex flex-col gap-3">
+          {customers.map(
+            ({ company, name, phone, GSTIN, salesExecutive, _id }) => (
+              <div
+                key={_id}
+                className="bg-white rounded-xl shadow border p-4 flex flex-col gap-2"
+              >
+                <div className="flex justify-between items-center">
+                  <p className="font-semibold">{name}</p>
+                  <p className="text-sm text-gray-500">{company}</p>
+                </div>
 
-              <p className="text-sm ">GSTIN: {GSTIN}</p>
-              <p className="text-sm">Phone: {phone}</p>
+                <p className="text-sm ">GSTIN: {GSTIN}</p>
+                <p className="text-sm">Phone: {phone}</p>
 
-              <div className="flex flex-wrap gap-2">
-                {salesExecutive?.map((item) => (
-                  <span
-                    key={item._id}
-                    className="bg-orange-200 text-xs px-2 py-1 rounded"
-                  >
-                    {item?.basicDetails?.name}
-                  </span>
-                ))}
-              </div>
+                <div className="flex flex-wrap gap-2">
+                  {salesExecutive?.map((item) => (
+                    <span
+                      key={item._id}
+                      className="bg-orange-200 text-xs px-2 py-1 rounded"
+                    >
+                      {item?.basicDetails?.name}
+                    </span>
+                  ))}
+                </div>
 
-              <div className="flex justify-end gap-4 pt-2">
-                <Link href={`/dashboard/customer/work/${_id}`}>
-                  <Network size={18} />
-                </Link>
-                <Link href={`/dashboard/customer/${_id}`}>
-                  <Eye size={18} />
-                </Link>
-                <SquarePen size={18} onClick={() => handleEdit(_id)} />
-                <Trash
-                  size={18}
-                  className="text-red-500"
-                  onClick={() => handleDelete(_id)}
-                />
+                <div className="flex justify-end gap-4 pt-2">
+                  <Link href={`/dashboard/customer/work/${_id}`}>
+                    <Network size={18} />
+                  </Link>
+                  <Link href={`/dashboard/customer/${_id}`}>
+                    <Eye size={18} />
+                  </Link>
+                  <SquarePen size={18} onClick={() => handleEdit(_id)} />
+                  <Trash
+                    size={18}
+                    className="text-red-500"
+                    onClick={() => handleDelete(_id)}
+                  />
+                </div>
               </div>
-            </div>
-          ),
-        )}
-      </div>
+            ),
+          )}
+        </div>
+      ) : (
+        <div className="md:hidden flex flex-col gap-3">
+          {isPaidArray.map(
+            ({ company, name, phone, GSTIN, salesExecutive, _id }) => (
+              <div
+                key={_id}
+                className="bg-white rounded-xl shadow border p-4 flex flex-col gap-2"
+              >
+                <div className="flex justify-between items-center">
+                  <p className="font-semibold">{name}</p>
+                  <p className="text-sm text-gray-500">{company}</p>
+                </div>
+
+                <p className="text-sm ">GSTIN: {GSTIN}</p>
+                <p className="text-sm">Phone: {phone}</p>
+
+                <div className="flex flex-wrap gap-2">
+                  {salesExecutive?.map((item) => (
+                    <span
+                      key={item._id}
+                      className="bg-orange-200 text-xs px-2 py-1 rounded"
+                    >
+                      {item?.basicDetails?.name}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex justify-end gap-4 pt-2">
+                  <Link href={`/dashboard/customer/work/${_id}`}>
+                    <Network size={18} />
+                  </Link>
+                  <Link href={`/dashboard/customer/${_id}`}>
+                    <Eye size={18} />
+                  </Link>
+                  <SquarePen size={18} onClick={() => handleEdit(_id)} />
+                  <Trash
+                    size={18}
+                    className="text-red-500"
+                    onClick={() => handleDelete(_id)}
+                  />
+                </div>
+              </div>
+            ),
+          )}
+        </div>
+      )}
 
       {/* SHEET FORM */}
       <Sheet open={open} onOpenChange={resetForm}>

@@ -15,7 +15,7 @@ const EmployeeDashboard = () => {
 
   return (
     <div>
-      <div className="flex flex-col lg:flex-row gap-5">
+      <div className="flex flex-col lg:flex-row gap-5 mb-5 lg:mb-0">
         <EmployeeCalendar employeeId={employee?._id} />
         <EmployeeTodo employeeId={employee?._id} />
         <EmployeeClientsProgress employeeId={employee?._id} />

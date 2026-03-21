@@ -31,6 +31,9 @@ const EmployeeClientsProgress = ({ employeeId }) => {
     fetchEmployeeClient();
   }, [employeeId]);
 
+const employeeFilter = employeeClientData?.filter((client)=> client?.clientId !== null)
+
+
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 lg:h-[68vh] lg:w-1/3">
@@ -66,11 +69,11 @@ const EmployeeClientsProgress = ({ employeeId }) => {
   return (
     <div className="bg-[#f3eaea] rounded-lg shadow-md p-6 lg:h-[68vh] lg:w-1/3">
       <h2 className="text-xl font-bold mb-4 text-slate-800">Client Progress</h2>
-      {employeeClientData.length === 0 ? (
+      {employeeFilter.length === 0 ? (
         <p className="text-slate-500">No active clients found.</p>
       ) : (
         <div className="space-y-4 overflow-y-auto h-[50vh]">
-          {employeeClientData.map((item) => {
+          {employeeFilter.map((item) => {
             const { clientId, progressPercentage, status, _id } = item;
             const total = progressPercentage?.totalField || 0;
             const complete = progressPercentage?.completeField || 0;

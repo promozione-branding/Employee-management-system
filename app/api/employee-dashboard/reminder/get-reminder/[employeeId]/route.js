@@ -19,10 +19,10 @@ export async function GET(req, { params }) {
     // 🔍 Find reminder document
     const reminderDoc = await EmployeeReminder.findOne({
       employeeId,
-    }).populate({
-      path: "employeeId",
-      select: "basicDetails.name basicDetails.email",
-    });
+    })
+      .select("reminder")
+      .lean()
+      .limit(20);
 
     if (!reminderDoc) {
       return NextResponse.json(
@@ -32,6 +32,13 @@ export async function GET(req, { params }) {
           data: { reminder: [] },
         },
         { status: 200 },
+      );
+    }
+
+    // Sort reminders by newest reminderAt
+    if (reminderDoc.reminder && Array.isArray(reminderDoc.reminder)) {
+      reminderDoc.reminder.sort(
+        (a, b) => new Date(b.reminderAt) - new Date(a.reminderAt),
       );
     }
 

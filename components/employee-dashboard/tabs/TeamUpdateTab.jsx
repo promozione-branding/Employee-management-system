@@ -99,15 +99,14 @@ const TeamUpdateTab = ({ clientId }) => {
     }
   }
 
-
   useEffect(() => {
     fetchEmail();
     fetchTeamUpdate();
   }, []);
 
   return (
-    <div className="p-6 flex">
-      <div className="w-1/2 space-y-6 border-r pr-8">
+    <div className="p-6 flex flex-col lg:flex-row gap-6">
+      <div className="w-full lg:w-1/2 space-y-6 md:border-r md:pr-8 border-b md:border-b-0 pb-6 md:pb-0">
         <p className="text-2xl font-semibold text-center">Team Update</p>
         <CommonForm
           formControls={teamUpdateFormControl}
@@ -154,7 +153,7 @@ const TeamUpdateTab = ({ clientId }) => {
         </div>
       </div>
 
-      <div className="w-1/2 pl-8">
+      <div className="w-full lg:w-1/2 md:pl-8">
         <h2 className="text-2xl font-semibold text-center mb-6">
           Sent Updates
         </h2>
@@ -199,7 +198,7 @@ const TeamUpdateTab = ({ clientId }) => {
                           key={email}
                           className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full"
                         >
-                          {email}
+                          {email.split("@")?.[0]}
                         </span>
                       ))}
                     </div>
