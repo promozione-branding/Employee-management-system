@@ -130,7 +130,7 @@ const EmployeeCalendar = ({ employeeId }) => {
   return (
     <div >
       <div className="border rounded-lg">
-        <div className="bg-[#f3eaea] rounded-lg shadow-md md:p-6 h-[60vh] p-1 md:h-[70vh] lg:h-auto">
+        <div className="bg-[#f3eaea] rounded-lg shadow-md md:p-2 h-[80vh]  p-1 md:h-[78vh] lg:h-[68vh]">
           <div className="calendar-wrapper">
             <FullCalendar
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
