@@ -5,6 +5,8 @@ import { useAdminStore } from "@/lib/store/AdminStore";
 const Profile = () => {
   const { adminDetail } = useAdminStore();
 
+
+
   return (
     <div className="p-4 border rounded-lg">
       <h1 className="text-xl font-bold mb-4">Profile</h1>

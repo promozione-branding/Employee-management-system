@@ -27,7 +27,6 @@ function RecentActivity() {
     fetchRecentActivity();
   }, []);
 
-  console.log(activities);
 
   const activityIcons = {
     customer: <UserPlus className="w-5 h-5 text-blue-500" />,

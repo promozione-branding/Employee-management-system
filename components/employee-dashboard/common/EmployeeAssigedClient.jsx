@@ -30,6 +30,9 @@ const EmployeeAssigedClient = ({ employeeId }) => {
     }
   }
 
+  const clientFilter = clients?.filter((client)=> client?.clientId !== null);
+
+
   useEffect(() => {
     if (employeeId) {
       fetchClientList();
@@ -63,11 +66,11 @@ const EmployeeAssigedClient = ({ employeeId }) => {
       <h2 className="text-xl font-bold mb-4 text-slate-800">
         Assigned Clients
       </h2>
-      {clients.length === 0 ? (
+      {clientFilter.length === 0 ? (
         <p className="text-slate-500">No clients assigned.</p>
       ) : (
         <div className="space-y-4 overflow-y-auto h-[50vh]">
-          {clients.map((item) => (
+          {clientFilter.map((item) => (
             <Link
             href={`/employee-dashboard/clients/client-details/${item.clientId?._id}`}
               key={item._id}

@@ -77,3 +77,40 @@ export async function getAdminDetailService() {
 
   return data;
 }
+
+// reminder 
+
+export async function createAdminReminderService(formData) {
+  const { data } = await axiosInstance.post(
+    "/api/admin-dashboard-api/admin/reminder/create",
+    formData,
+  );
+
+  return data;
+}
+
+export async function getAdminReminderService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/admin-dashboard-api/admin/reminder/get/${id}`,
+  );
+
+  return data;
+}
+
+
+// calender 
+
+export async function createAdminCalenderService(formData) {
+  const { data } = await axiosInstance.post(
+    "/api/admin-dashboard-api/admin/calender/create",
+    formData,
+  );
+  return data;
+}
+
+export async function getAdminCalenderService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/admin-dashboard-api/admin/calender/get/${id}`,
+  );
+  return data;
+}

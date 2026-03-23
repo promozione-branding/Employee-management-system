@@ -36,7 +36,7 @@ const Employees = () => {
   }, []);
 
   return (
-    <div className="bg-[#f3eaea] rounded-lg shadow-md p-6 mb-8 border">
+    <div className="bg-[#f3eaea] rounded-lg shadow-md p-6 mb-8 border lg:w-auto md:h-[70vh] lg:h-auto lg:mb-0">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Team Members</h2>
@@ -63,7 +63,7 @@ const Employees = () => {
           ))}
         </div>
       ) : employees.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {employees.map((employee) => (
             <Link
               href={

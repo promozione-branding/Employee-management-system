@@ -19,7 +19,7 @@ import axiosInstance from "@/service/axiosInstance";
 import { useAdminStore } from "@/lib/store/AdminStore";
 
 const SideBar = ({ children }) => {
-  const [open, setOpen] = useState(true); // desktop collapse
+  const [open, setOpen] = useState(false); // desktop collapse
   const [mobileOpen, setMobileOpen] = useState(false); // mobile sidebar
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { adminDetail } = useAdminStore();

@@ -111,13 +111,12 @@ const CustomerManager = () => {
             <Search />
           </Button>
         </form>
-        
       </div>
 
       {/* client list  */}
-      <div className=" bg-white h-[78vh] rounded-2xl lg:h-[70vh] shadow-lg border ">
+      <div className=" bg-white h-[78vh] rounded-2xl lg:h-[70vh] shadow-lg border overflow-y-auto">
         {/* heading  */}
-        <div className="grid grid-cols-6 gap-4 text-gray-500 border-b-2 py-3 font-semibold">
+        <div className="hidden md:grid grid-cols-6 gap-4 text-gray-500 border-b-2 py-3 font-semibold sticky top-0 bg-white z-10">
           <p className="pl-5">Name</p>
           <p>Company</p>
           <p className="text-left">GSTIN</p>
@@ -128,7 +127,7 @@ const CustomerManager = () => {
         </div>
 
         {/* list  */}
-        <div>
+        <div className="">
           {customers.map(
             (
               {
@@ -145,34 +144,65 @@ const CustomerManager = () => {
             ) => (
               <div
                 key={_id}
-                className={`grid grid-cols-6 gap-4  border-b py-3 ${idx % 2 === 0 && "bg-gray-50"}`}
+                className={`grid grid-cols-1  md:grid-cols-6 gap-2 md:gap-4 border-b p-4 md:py-3 ${idx % 2 === 0 ? "bg-gray-50" : ""}`}
               >
-                <p className="pl-5">{name}</p>
-                <p>{company}</p>
-                <p className="">{GSTIN}</p>
-                <p className="text-center">{phone}</p>
-                <div className="text-center capitalize flex gap-2">
-                  {salesExecutive.map((item) => (
-                    <p
-                      key={item?._id}
-                      className="bg-orange-200 px-2 py-1 rounded-lg"
-                    >
-                      {item?.basicDetails?.name}
-                    </p>
-                  ))}
+                <div className="flex justify-between md:block">
+                  <span className="md:hidden font-medium text-gray-500">
+                    Name
+                  </span>
+                  <p className="md:pl-5 font-semibold md:font-normal">{name}</p>
+                </div>
+                <div className="flex justify-between md:block">
+                  <span className="md:hidden font-medium text-gray-500">
+                    Company
+                  </span>
+                  <p>{company}</p>
+                </div>
+                <div className="flex justify-between md:block">
+                  <span className="md:hidden font-medium text-gray-500">
+                    GSTIN
+                  </span>
+                  <p className="">{GSTIN}</p>
+                </div>
+                <div className="flex justify-between md:block">
+                  <span className="md:hidden font-medium text-gray-500">
+                    Phone
+                  </span>
+                  <p className="md:text-center">{phone}</p>
                 </div>
 
-                <div className="flex gap-5 justify-center">
-                  <Link
-                    href={`/employee-dashboard/clients/client-assignment/${_id}`}
-                  >
-                    <Network />
-                  </Link>
-                  <Link
-                    href={`/employee-dashboard/clients/client-details/${_id}`}
-                  >
-                    <Eye />
-                  </Link>
+                <div className="flex justify-between md:block items-center">
+                  <span className="md:hidden font-medium text-gray-500">
+                    Sales Executive
+                  </span>
+                  <div className="md:text-center capitalize flex gap-2 flex-wrap justify-end md:justify-center">
+                    {salesExecutive.map((item) => (
+                      <p
+                        key={item?._id}
+                        className="bg-orange-200 px-2 py-1 rounded-lg text-xs md:text-sm"
+                      >
+                        {item?.basicDetails?.name}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-between md:block items-center mt-2 md:mt-0">
+                  <span className="md:hidden font-medium text-gray-500">
+                    Action
+                  </span>
+                  <div className="flex gap-5 justify-end md:justify-center">
+                    <Link
+                      href={`/employee-dashboard/clients/client-assignment/${_id}`}
+                    >
+                      <Network />
+                    </Link>
+                    <Link
+                      href={`/employee-dashboard/clients/client-details/${_id}`}
+                    >
+                      <Eye />
+                    </Link>
+                  </div>
                 </div>
               </div>
             ),
