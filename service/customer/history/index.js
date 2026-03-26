@@ -27,3 +27,11 @@ export async function getTeamUpdateAdminService(id) {
   );
   return data;
 }
+
+
+export async function seoReportHistoryService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/customer/history/seo-report/${id}`,
+  );
+  return data;
+}

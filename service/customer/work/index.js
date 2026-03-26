@@ -23,3 +23,38 @@ export async function getClientWorkService(id) {
   );
   return data;
 }
+
+// create key word
+export async function createKeyService(formData) {
+  const { data } = await axiosInstance.post(
+    `/api/customer/work/seo-sheet/create-keyword`,
+    formData,
+  );
+  return data;
+}
+
+// update ranking key word
+export async function updateRankingService(formData) {
+  const { data } = await axiosInstance.post(
+    `/api/customer/work/seo-sheet/update-ranking`,
+    formData,
+  );
+  return data;
+}
+
+// update ranking key word
+export async function getSeoSheetService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/customer/work/seo-sheet/get-sheet/${id}`,
+  );
+  return data;
+}
+
+// edit ranking key word
+export async function editRankingService(formData) {
+  const { data } = await axiosInstance.put(
+    `/api/customer/work/seo-sheet/update-ranking/edit-ranking`,
+    formData,
+  );
+  return data;
+}

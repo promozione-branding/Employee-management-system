@@ -570,7 +570,6 @@ export const checkFormControl = [
   },
 ];
 
-
 export const announcementFormControls = [
   {
     name: "title",
@@ -613,3 +612,45 @@ export const announcementFormControls = [
   },
 ];
 
+export const createKeyWordFormControls = [
+  {
+    name: "keyword",
+    label: "Keyword",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter Keyword",
+  },
+  {
+    name: "type",
+    label: "Type",
+    componentType: "select",
+    options: [
+      { id: "primary", label: "Primary" },
+      { id: "secondary", label: "Secondary" },
+    ],
+  },
+];
+
+export const updateRankingFormControls = [
+  {
+    name: "position",
+    label: "Position",
+    componentType: "input",
+    type: "number",
+    placeholder: "Enter position of keyword",
+  },
+  {
+    name: "page",
+    label: "Page",
+    componentType: "input",
+    type: "number",
+    placeholder: "Enter where Page of keyword ranks",
+  },
+  {
+    name: "date",
+    label: "Date",
+    componentType: "input",
+    type: "date",
+    placeholder: "Enter where Page of keyword ranks",
+  },
+];

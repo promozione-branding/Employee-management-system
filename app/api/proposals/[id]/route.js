@@ -12,7 +12,7 @@ export async function GET(req, { params }) {
 
     const { id } = await params;
 
-    const proposal = await Proposal.findById(id);
+    const proposal = await Proposal.findById(id).select("-ledgerEntry -discount -discountPercentage");
 
     if (!proposal) {
       return Response.json(
@@ -101,83 +101,144 @@ export async function DELETE(req, { params }) {
   }
 }
 
+// old one
+
+// export async function PUT(req, { params }) {
+//   try {
+//     await connectDB();
+
+//     const { id } = await params;
+
+//     // 🔐 AUTH USER
+//     const authUser = await getAuthUser(req);
+//     if (!authUser) {
+//       return NextResponse.json(
+//         { success: false, message: "Unauthorized" },
+//         { status: 401 },
+//       );
+//     }
+
+//     const data = await req.json();
+
+//     // 🔎 FIND PROPOSAL
+//     const proposal = await Proposal.findById(id);
+//     if (!proposal) {
+//       return NextResponse.json(
+//         { success: false, message: "Proposal not found" },
+//         { status: 404 },
+//       );
+//     }
+
+//     const oldData = proposal.toObject();
+
+//     // 🟢 SNAPSHOT SERVICES AGAIN
+//     let proposalServices = proposal.services;
+
+//     if (data.services && data.services.length > 0) {
+//       const serviceDocs = await Service.find({
+//         _id: { $in: data.services },
+//       });
+
+//       proposalServices = serviceDocs.map((s) => ({
+//         serviceId: s._id,
+//         serviceTitle: s.serviceTitle,
+//         amount: s.amount,
+//         duration: s.duration,
+//         description: s.description,
+//         discountAmount: s.discountAmount || 0,
+//         discountPercentage: s.discountPercentage || 0,
+//         finalAmount:
+//           s.amount -
+//           (s.discountAmount || 0) -
+//           ((s.discountPercentage || 0) / 100) * s.amount,
+//       }));
+//     }
+
+//     // ✏️ UPDATE PROPOSAL
+//     const updatedProposal = await Proposal.findByIdAndUpdate(
+//       id,
+//       {
+//         ...data,
+//         services: proposalServices,
+//       },
+//       { new: true },
+//     );
+
+//     // 🧾 CREATE AUDIT HISTORY
+//     const audit = await createAuditLog({
+//       clientId: updatedProposal.clientId,
+//       entityType: "Proposal",
+//       entityId: updatedProposal._id,
+//       action: "UPDATE",
+//       oldData,
+//       newData: updatedProposal.toObject(),
+//       userId: authUser._id,
+//     });
+
+//     // 🔗 LINK HISTORY TO CUSTOMER
+//     if (audit?._id) {
+//       await Customer.findByIdAndUpdate(updatedProposal.clientId, {
+//         $push: { history: audit._id },
+//       });
+//     }
+
+//     return NextResponse.json(
+//       {
+//         success: true,
+//         message: "Proposal updated successfully",
+//         data: updatedProposal,
+//       },
+//       { status: 200 },
+//     );
+//   } catch (error) {
+//     console.error("UPDATE PROPOSAL API ERROR:", error);
+
+//     return NextResponse.json(
+//       {
+//         success: false,
+//         message: "Server Error",
+//         error: error.message,
+//       },
+//       { status: 500 },
+//     );
+//   }
+// }
+
 export async function PUT(req, { params }) {
   try {
     await connectDB();
 
     const { id } = await params;
+    const body = await req.json();
 
-    // 🔐 AUTH USER
-    const authUser = await getAuthUser(req);
-    if (!authUser) {
+    if (!id) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 },
+        { success: false, message: "Proposal ID is required" },
+        { status: 400 },
       );
     }
 
-    const data = await req.json();
+    // 🧠 Remove fields you don't want to update
+    delete body.proposalNo;
+    delete body.createdAt;
+    delete body.updatedAt;
 
-    // 🔎 FIND PROPOSAL
-    const proposal = await Proposal.findById(id);
-    if (!proposal) {
+    const updatedProposal = await Proposal.findByIdAndUpdate(
+      id,
+      {
+        $set: body,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (!updatedProposal) {
       return NextResponse.json(
         { success: false, message: "Proposal not found" },
         { status: 404 },
       );
-    }
-
-    const oldData = proposal.toObject();
-
-    // 🟢 SNAPSHOT SERVICES AGAIN
-    let proposalServices = proposal.services;
-
-    if (data.services && data.services.length > 0) {
-      const serviceDocs = await Service.find({
-        _id: { $in: data.services },
-      });
-
-      proposalServices = serviceDocs.map((s) => ({
-        serviceId: s._id,
-        serviceTitle: s.serviceTitle,
-        amount: s.amount,
-        duration: s.duration,
-        description: s.description,
-        discountAmount: s.discountAmount || 0,
-        discountPercentage: s.discountPercentage || 0,
-        finalAmount:
-          s.amount -
-          (s.discountAmount || 0) -
-          ((s.discountPercentage || 0) / 100) * s.amount,
-      }));
-    }
-
-    // ✏️ UPDATE PROPOSAL
-    const updatedProposal = await Proposal.findByIdAndUpdate(
-      id,
-      {
-        ...data,
-        services: proposalServices,
-      },
-      { new: true },
-    );
-
-    // 🧾 CREATE AUDIT HISTORY
-    const audit = await createAuditLog({
-      clientId: updatedProposal.clientId,
-      entityType: "Proposal",
-      entityId: updatedProposal._id,
-      action: "UPDATE",
-      oldData,
-      newData: updatedProposal.toObject(),
-      userId: authUser._id,
-    });
-
-    // 🔗 LINK HISTORY TO CUSTOMER
-    if (audit?._id) {
-      await Customer.findByIdAndUpdate(updatedProposal.clientId, {
-        $push: { history: audit._id },
-      });
     }
 
     return NextResponse.json(
@@ -189,13 +250,12 @@ export async function PUT(req, { params }) {
       { status: 200 },
     );
   } catch (error) {
-    console.error("UPDATE PROPOSAL API ERROR:", error);
+    console.error(error);
 
     return NextResponse.json(
       {
         success: false,
-        message: "Server Error",
-        error: error.message,
+        message: "Server error",
       },
       { status: 500 },
     );

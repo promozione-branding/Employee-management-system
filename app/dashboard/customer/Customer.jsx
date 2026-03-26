@@ -20,6 +20,7 @@ import {
   Trash,
   User,
 } from "lucide-react";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -116,8 +117,6 @@ const Customer = ({ customerId }) => {
       toast.error(error.message);
     }
   }
-
-
 
   const fetchCurrentCustomer = async () => {
     try {
@@ -225,19 +224,23 @@ const Customer = ({ customerId }) => {
     tanNo,
     email,
     SalesPersonName,
-    salesExecutive
+    salesExecutive,
   } = customerDetails;
-
 
   return (
     <div className="flex gap-5 flex-col lg:flex-row">
       <div className="bg-white border border-gray-200 shadow-sm flex flex-col w-full lg:w-[30vw] rounded-xl overflow-hidden h-fit">
-        <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-800">{name}</h2>
-          <div className="flex items-center gap-2 text-gray-500 mt-1">
-            <Building2 size={14} />
-            <p className="text-sm font-medium">{company}</p>
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">{name}</h2>
+            <div className="flex items-center gap-2 text-gray-500 mt-1">
+              <Building2 size={14} />
+              <p className="text-sm font-medium">{company}</p>
+            </div>
           </div>
+          <Link href={`/dashboard/employee/seo-sheet/${customerId}`} className="font-bold text-sm bg-orange-500 text-white px-4 py-2 rounded-lg">
+            Keywords
+          </Link>
         </div>
 
         <div className="p-6 space-y-5">
@@ -375,7 +378,7 @@ const Customer = ({ customerId }) => {
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Start Date</label>
               <input
-              className="border p-2 rounded-lg"
+                className="border p-2 rounded-lg"
                 type="date"
                 value={projectFormData.startDate}
                 onChange={(e) =>
@@ -475,4 +478,3 @@ const Customer = ({ customerId }) => {
 };
 
 export default Customer;
-

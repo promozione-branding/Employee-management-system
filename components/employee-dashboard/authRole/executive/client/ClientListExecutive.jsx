@@ -34,7 +34,7 @@ const ClientListExecutive = () => {
     getEmployeeClientList();
   }, [employee?._id]);
 
-  const clientList = clients?.filter((client)=> client?.clientId !== null)
+  const clientList = clients?.filter((client) => client?.clientId !== null);
   // console.log(clients,"clients");
 
   if (loading) {
@@ -125,6 +125,15 @@ const ClientListExecutive = () => {
                     >
                       Work
                     </Link>
+                    {employee?.basicDetails?.designation === "SEO" && (
+                      <Link
+                        title="Ranking"
+                        href={`/employee-dashboard/clients/seo-sheet/${client?.clientId?._id}`}
+                        className="border px-3 py-1.5 rounded-lg"
+                      >
+                        Ranking
+                      </Link>
+                    )}
                   </td>
                 </tr>
               ))

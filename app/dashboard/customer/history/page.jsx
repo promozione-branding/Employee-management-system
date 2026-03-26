@@ -19,13 +19,7 @@ const HistoryPage = ({ customerId }) => {
       label: "Client Profile",
       icon: <Users />,
       href: `/dashboard/customer/history/client-history/${customerId}`,
-    },
-    // {
-    //   label: "Client Proposals",
-    //   icon: <TableProperties />,
-    //   href: `/dashboard/customer/history/client-proposal/${customerId}`,
-    // },
-  
+    },  
     {
       label: "Work Details",
       icon: <Activity />,
@@ -45,6 +39,11 @@ const HistoryPage = ({ customerId }) => {
       label: "Attachment",
       icon: <Paperclip />,
       href: `/dashboard/customer/history/attachment-history/${customerId}`,
+    },
+    {
+      label: "SEO Report",
+      icon: <TableProperties />,
+      href: `/dashboard/customer/history/seo-report-history/${customerId}`,
     },
   ];
 

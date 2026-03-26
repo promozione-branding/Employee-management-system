@@ -39,7 +39,7 @@ const AdminReminder = () => {
       setReminders(res?.data?.reminder || []);
     } catch (err) {
       console.error(err);
-      toast.error(err?.response?.data?.message || "Failed to load reminders");
+      // toast.error(err?.response?.data?.message || "Failed to load reminders");
     } finally {
       setLoading(false);
     }

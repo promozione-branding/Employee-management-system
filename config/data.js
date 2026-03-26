@@ -11,7 +11,6 @@ export const addProposalFormControl = [
     componentType: "input",
     type: "date",
   },
-
   {
     label: "Valid Till",
     name: "validTill",
@@ -692,4 +691,51 @@ export const attachmentFormControl = [
     componentType: "input",
     type: "text",
   },
+];
+
+
+export const editProposalFormControl = [
+   {
+    label: "Customer Name",
+    name: "clientName",
+    componentType: "input",
+    type: "text",
+  },
+   {
+    label: "Customer Company",
+    name: "clientCompany",
+    componentType: "input",
+    type: "text",
+  },
+   {
+    label: "Customer Address",
+    name: "clientAddress",
+    componentType: "input",
+    type: "text",
+  },
+   {
+    label: "Date of Proposal",
+    name: "dateOfProposal",
+    componentType: "input",
+    type: "date",
+  },
+   {
+    label: "GSTIN",
+    name: "GSTIN",
+    componentType: "input",
+    type: "text",
+  },
+   {
+    label: "Tan No",
+    name: "tanNo",
+    componentType: "input",
+    type: "text",
+  },
+   {
+    label: "Valid Till",
+    name: "validTill",
+    componentType: "input",
+    type: "date",
+  },
+
 ];

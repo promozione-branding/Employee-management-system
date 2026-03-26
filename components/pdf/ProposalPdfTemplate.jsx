@@ -202,7 +202,7 @@ const ProposalPdfTemplate = ({ data }) => {
               <Text style={styles.colSN}>{index + 1}.</Text>
               <View style={styles.colDesc}>
                 <Text style={styles.serviceTitle}>{service.serviceTitle}</Text>
-                {service.description.split(",").map((item, idx) => (
+                {service?.description?.split(",").map((item, idx) => (
                   <Text key={idx} style={styles.serviceName}>
                     • {item}
                   </Text>

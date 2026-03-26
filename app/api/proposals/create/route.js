@@ -47,7 +47,7 @@ export async function POST(req) {
     // 🆕 CREATE PROPOSAL WITH SNAPSHOT DATA
     const proposal = await Proposal.create({
       ...data,
-      services: proposalServices, // 👈 IMPORTANT CHANGE
+      services: proposalServices, 
     });
 
     if (!proposal) {

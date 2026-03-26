@@ -31,6 +31,7 @@ const Proposal = ({ customerId }) => {
   const [selectedServices, setSelectedServices] = useState([]);
   const [clientDetails, setClientDetails] = useState({});
 
+
   // ----------------Partly Payment STATE ----------------
   const [listOfPayments, setListOfPayments] = useState([]);
   const [partlyPaymentFormData, setPartlyPaymentFormData] = useState({
@@ -51,7 +52,6 @@ const Proposal = ({ customerId }) => {
   );
 
   const reversePartPayment = [...listOfPayments].reverse();
-
 
   function calculationOfTotalAmount() {
     const totalAfterServiceDiscounts = selectedServices.reduce(
@@ -169,7 +169,7 @@ const Proposal = ({ customerId }) => {
       }
 
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Reset time to compare dates only
+      today.setHours(0, 0, 0, 0);
       const validTillDate = new Date(formData.validTill);
 
       if (validTillDate <= today) {

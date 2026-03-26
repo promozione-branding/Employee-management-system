@@ -125,11 +125,21 @@ export const initialAnnouncementFormData = {
   endDate: "",
 };
 
-export const initialAttachmentFormData={
-  assetType:"",
-  title:"",
-  description:"",
-  visibility:"",
-  referenceLink:"",
-  file:""
-}
+export const initialAttachmentFormData = {
+  assetType: "",
+  title: "",
+  description: "",
+  visibility: "",
+  referenceLink: "",
+  file: "",
+};
+
+export const initialEditProposal = {
+  clientName: "",
+  clientCompany: "",
+  clientAddress: "",
+  dateOfProposal: "",
+  GSTIN: "",
+  tanNo: "",
+  validTill: "",
+};
