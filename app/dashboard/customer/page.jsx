@@ -1,16 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  FunnelPlus,
-  Plus,
-  Eye,
-  Network,
-  SquarePen,
-  Trash,
-  Search,
-  X,
-} from "lucide-react";
+import { Plus, Eye, Network, SquarePen, Trash, Search, X } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import CommonForm from "@/components/layout/Form";
 import Loading from "@/components/layout/Loading";
@@ -115,8 +106,14 @@ const CustomerManager = () => {
         resetForm();
         fetchCustomers();
       }
-    } catch {
-      toast.error("Something went wrong");
+    } catch (error) {
+      if (error.response?.data?.errors?.length) {
+        error?.response?.data.errors?.forEach((err) =>
+          toast.error(err.message),
+        );
+      } else {
+        toast.error(error?.response?.data?.message || "Something went wrong");
+      }
     }
   };
 

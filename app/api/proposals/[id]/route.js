@@ -223,6 +223,7 @@ export async function PUT(req, { params }) {
     delete body.createdAt;
     delete body.updatedAt;
 
+
     const updatedProposal = await Proposal.findByIdAndUpdate(
       id,
       {

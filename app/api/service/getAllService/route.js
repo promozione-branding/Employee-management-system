@@ -5,7 +5,7 @@ export async function GET() {
   try {
     await connectDB();
 
-    const items = await Service.find().sort({ createdAt: -1 });
+    const items = await Service.find()
 
     return Response.json(
       {

@@ -1,273 +1,570 @@
-// "use client";
+"use client";
 
-// import CommonForm from "@/components/layout/Form";
-// import GridForm from "@/components/layout/GridForm";
-// import { editProposalFormControl, ServiceFormControl } from "@/config/data";
-// import { initalServiceFormData, initialEditProposal } from "@/config/initialFormDate";
-// import { getProposalByIdService } from "@/service/proposal";
-// import { useEffect, useState } from "react";
-// import toast from "react-hot-toast";
+import CommonForm from "@/components/layout/Form";
+import GridForm from "@/components/layout/GridForm";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { editProposalFormControl, ServiceFormControl } from "@/config/data";
+import {
+  initalServiceFormData,
+  initialEditProposal,
+} from "@/config/initialFormDate";
+import {
+  editProposalService,
+  getProposalByIdService,
+} from "@/service/proposal";
+import {
+  createServicesService,
+  deleteService,
+  editService,
+  fetchProposalServiceById,
+  getAllService,
+} from "@/service/service";
+import { Edit, Trash } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
-// const EditPropsal = ({ id }) => {
-//   const [proposalDetails, setProposalDetails] = useState({});
-//   const [proposalLoading, setProposalLoading] = useState(true);
+const EditPropsal = ({ id }) => {
+  // that is for show proposal
+  const [proposalDetails, setProposalDetails] = useState({});
+  const [proposalLoading, setProposalLoading] = useState(true);
 
-//   const [proposalFormData, setProposalFormData] = useState(initialEditProposal);
+  // this is the main formData State for edit proposal
+  const [proposalFormData, setProposalFormData] = useState(initialEditProposal);
 
-//   // ---------------- Editing state ----------------
-//     const [editProposalServiceId, setEditProposalServiceId] = useState(null);
+  // ---------------- Editing state ----------------
+  const [editProposalServiceId, setEditProposalServiceId] = useState(null);
 
-//      const [serviceFormData, setServiceFormData] = useState(initalServiceFormData);
+  // services handling
+  const [serviceFormData, setServiceFormData] = useState(initalServiceFormData);
+  const [proposalServiceEditData, setProposalServiceEditData] = useState(
+    initalServiceFormData,
+  );
 
-//   async function handleGetProposal() {
-//     try {
-//       const res = await getProposalByIdService(id);
-//       if (res.success) {
-//         setProposalDetails(res?.data);
-//         setProposalLoading(false);
-//       }
-//     } catch (error) {
-//       console.log(error);
-//       toast.error(
-//         error?.response?.data?.message || "error while fetching the proposal",
-//       );
-//     }
-//   }
+  const [servicesItem, setServicesItem] = useState([]);
+  const [selectedServices, setSelectedServices] = useState([]);
 
-//   async function handleEditProposal(e) {
-//     e.preventDefault();
-//     try {
-//     } catch (error) {
-//       console.log(error);
-//       toast.error(
-//         error?.response?.data?.message || "Error while editing proposal",
-//       );
-//     }
-//   }
+  const router = useRouter();
 
-//   useEffect(() => {
-//     if (!id) return;
-//     handleGetProposal();
-//   }, [id]);
+  function calculationOfTotalAmount() {
+    const totalAfterServiceDiscounts = selectedServices.reduce(
+      (total, service) => {
+        let servicePrice = service.amount;
+        if (service.discountAmount) {
+          servicePrice -= service.discountAmount;
+        } else if (service.discountPercentage) {
+          servicePrice -= (service.amount * service.discountPercentage) / 100;
+        }
 
-//   return (
-//     <div>
-//       <div className="flex gap-3">
-//         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-h-[400px] lg:w-1/2">
-//           {proposalLoading ? (
-//             <div className="animate-pulse space-y-6">
-//               <div className="flex justify-between items-center border-b pb-4">
-//                 <div className="h-8 bg-gray-200 rounded w-1/4" />
-//                 <div className="h-4 bg-gray-200 rounded w-32" />
-//               </div>
-//               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//                 <div className="h-32 bg-gray-100 rounded-lg" />
-//                 <div className="h-32 bg-gray-100 rounded-lg" />
-//               </div>
-//               <div className="h-48 bg-gray-50 rounded-lg border"></div>
-//               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-//                 <div className="h-20 bg-gray-100 rounded-lg" />
-//                 <div className="h-20 bg-gray-100 rounded-lg" />
-//                 <div className="h-20 bg-gray-100 rounded-lg" />
-//                 <div className="h-20 bg-gray-100 rounded-lg" />
-//               </div>
-//             </div>
-//           ) : (
-//             <div className="space-y-8 animate-in fade-in duration-500 ">
-//               <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-2">
-//                 <div>
-//                   <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
-//                     Proposal Number
-//                   </span>
-//                   <h2 className="text-2xl font-black text-gray-900 tracking-tight">
-//                     {proposalDetails?.proposalNo}
-//                   </h2>
-//                 </div>
-//                 <div className="text-sm font-medium text-gray-500 bg-gray-50 px-3 py-1 rounded-full border">
-//                   Date:{" "}
-//                   {proposalDetails?.dateOfProposal &&
-//                     new Date(
-//                       proposalDetails.dateOfProposal,
-//                     ).toLocaleDateString()}
-//                 </div>
-//               </div>
+        return total + servicePrice;
+      },
+      0,
+    );
+    return totalAfterServiceDiscounts;
+  }
 
-//               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-//                 <div className="space-y-3">
-//                   <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">
-//                     Client Details
-//                   </h3>
-//                   <div className="p-4 rounded-xl border border-gray-100 bg-gray-50/50">
-//                     <p className="font-extrabold text-lg text-gray-900">
-//                       {proposalDetails?.clientName}
-//                     </p>
-//                     <p className="text-gray-700 font-medium">
-//                       {proposalDetails?.clientCompany}
-//                     </p>
-//                     <p className="text-sm text-gray-500 mt-1 leading-relaxed">
-//                       {proposalDetails?.clientAddress}
-//                     </p>
-//                     {proposalDetails?.GSTIN && (
-//                       <div className="mt-3 flex items-center gap-2">
-//                         <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
-//                           GSTIN
-//                         </span>
-//                         <span className="text-sm font-mono text-gray-600">
-//                           {proposalDetails.GSTIN}
-//                         </span>
-//                       </div>
-//                     )}
-//                   </div>
-//                 </div>
+  async function handleGetProposal() {
+    try {
+      const res = await getProposalByIdService(id);
+      if (res.success) {
+        setProposalDetails(res?.data);
+        setProposalLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message || "error while fetching the proposal",
+      );
+    }
+  }
 
-//                 <div className="space-y-3">
-//                   <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">
-//                     Financial Summary
-//                   </h3>
-//                   <div className="p-4 rounded-xl border border-blue-100 bg-blue-50/30 space-y-3">
-//                     <div className="flex justify-between items-end">
-//                       <span className="text-sm text-gray-500">Grand Total</span>
-//                       <span className="font-black text-2xl text-blue-700">
-//                         ₹{proposalDetails?.totalAmount?.toLocaleString()}
-//                       </span>
-//                     </div>
-//                     <div className="h-px bg-blue-100/50" />
-//                     <div className="grid grid-cols-2 gap-4 text-sm">
-//                       <div>
-//                         <p className="text-gray-400 text-[10px] uppercase font-bold">
-//                           Payment Method
-//                         </p>
-//                         <p className="font-semibold text-gray-700 capitalize">
-//                           {proposalDetails?.paymentMethod}
-//                         </p>
-//                       </div>
-//                       <div>
-//                         <p className="text-gray-400 text-[10px] uppercase font-bold">
-//                           Valid Until
-//                         </p>
-//                         <p className="font-semibold text-orange-600">
-//                           {proposalDetails?.validTill &&
-//                             new Date(
-//                               proposalDetails.validTill,
-//                             ).toLocaleDateString()}
-//                         </p>
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
+  // that is the main for edit the proposal
+  async function mainHandleEditProposal(e) {
+    e.preventDefault();
 
-//               <div className="overflow-hidden border border-gray-100 rounded-xl">
-//                 <table className="min-w-full divide-y divide-gray-100">
-//                   <thead className="bg-gray-50/50">
-//                     <tr>
-//                       <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-//                         Service Item
-//                       </th>
-//                       <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-//                         Duration
-//                       </th>
-//                       <th className="px-6 py-4 text-right text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-//                         Amount
-//                       </th>
-//                     </tr>
-//                   </thead>
-//                   <tbody className="divide-y divide-gray-100">
-//                     {proposalDetails?.services?.map((service) => (
-//                       <tr
-//                         key={service._id}
-//                         className="hover:bg-gray-50/50 transition-colors"
-//                       >
-//                         <td className="px-6 py-2">
-//                           <p className="text-sm font-bold text-gray-900">
-//                             {service.serviceTitle}
-//                           </p>
-//                           <p className="text-xs text-gray-500 line-clamp-1">
-//                             {service.description}
-//                           </p>
-//                         </td>
-//                         <td className="px-6 py-2 text-sm text-gray-600 font-medium">
-//                           {service.duration}
-//                         </td>
-//                         <td className="px-6 py-2 text-right text-sm font-black text-gray-900">
-//                           ₹{service.finalAmount?.toLocaleString()}
-//                         </td>
-//                       </tr>
-//                     ))}
-//                   </tbody>
-//                 </table>
-//               </div>
+    if (selectedServices?.length === 0) {
+      toast.error("Add Service");
+      return;
+    }
 
-//               <div className="space-y-4">
-//                 <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">
-//                   Payment
-//                 </h3>
-//                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-//                   {proposalDetails?.partlyPayment?.map((payment, idx) => (
-//                     <div
-//                       key={payment._id}
-//                       className="relative p-4 bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden group"
-//                     >
-//                       <div className="absolute top-0 right-0 p-1 opacity-10 group-hover:opacity-20 transition-opacity"></div>
-//                       <p className="text-[10px] font-bold text-black uppercase mb-1">
-//                         {payment.paymentDuration}
-//                       </p>
-//                       <p className="text-lg font-black text-gray-900">
-//                         ₹{payment.paymentAmount?.toLocaleString()}
-//                       </p>
-//                     </div>
-//                   ))}
-//                 </div>
-//               </div>
-//             </div>
-//           )}
-//         </div>
-//         <div>
-//           <div>
-//             <CommonForm
-//               formControls={editProposalFormControl}
-//               formData={proposalFormData}
-//               setFormData={setProposalFormData}
-//             />
-//           </div>
-//           <div>
-//             <CommonForm
-//               formControls={ServiceFormControl}
-//               formData={
-//                 editProposalServiceId
-//                   ? proposalServiceEditData
-//                   : serviceFormData
-//               }
-//               setFormData={
-//                 editProposalServiceId
-//                   ? setProposalServiceEditData
-//                   : setServiceFormData
-//               }
-//               onSubmit={
-//                 editProposalServiceId
-//                   ? handleEditProposalService
-//                   : handleService
-//               }
-//               buttonText={
-//                 editProposalServiceId ? "Edit Service" : "Add Service"
-//               }
-//             />
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
+    const editProposalTemplate = {
+      ...proposalFormData,
+      totalAmount: calculationOfTotalAmount(),
+      services: selectedServices,
+      partlyPayment: reversePartPayment,
+    };
 
-// export default EditPropsal;
+    // only filled that
+    const filledValues = {};
+    for (const key in editProposalTemplate) {
+      const value = editProposalTemplate[key];
+      if (
+        Object.hasOwn(editProposalTemplate, key) &&
+        value &&
+        (!Array.isArray(value) || value.length > 0)
+      ) {
+        filledValues[key] = value;
+      }
+    }
 
+    try {
+      const res = await editProposalService(id, filledValues);
+      if (res?.success) {
+        toast.success("Proposal edit successfully");
+        router.push(`/dashboard/proposal/pdf-download/${id}`);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message || "Error while editing proposal",
+      );
+    }
+  }
 
-import React from 'react'
+  async function handleEditProposalService(e) {
+    e.preventDefault();
 
-const EditPropsal = () => {
+    try {
+      const res = await editService(
+        editProposalServiceId,
+        proposalServiceEditData,
+      );
+
+      if (res.success) {
+        toast.success("Service Updated successfully");
+        setProposalServiceEditData(initalServiceFormData);
+        fetchAllServices();
+        setEditProposalServiceId(null);
+      } else {
+        toast.error(res.message || "Failed to update service");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message || "Error updating services");
+    }
+  }
+
+  // add services
+  async function handleService(e) {
+    e.preventDefault();
+    try {
+      if (
+        !serviceFormData.serviceTitle ||
+        !serviceFormData.amount ||
+        !serviceFormData.duration
+      ) {
+        toast.error("please fill the service details");
+        return;
+      }
+
+      if (serviceFormData?.discountPercentage > 40) {
+        toast.error("Discount can't be more than 40%");
+      }
+
+      if (
+        serviceFormData.discountAmount &&
+        serviceFormData.discountPercentage
+      ) {
+        toast.error("Can't use both discount Amount and Percentage");
+        return;
+      }
+
+      if (serviceFormData.discountPercentage > 40) {
+        toast.error("Discount can't be more than 40 Percentage");
+        return;
+      }
+
+      if (serviceFormData.discountAmount > serviceFormData.amount) {
+        toast.error("Discount can't be more than service Amount");
+      }
+
+      const response = await createServicesService(serviceFormData);
+      if (response.success) {
+        toast.success(response.message);
+        setServiceFormData(initalServiceFormData);
+        fetchAllServices();
+      }
+    } catch (error) {
+      console.log(error);
+      toast.success(error.message);
+    }
+  }
+
+  async function fetchAllServices() {
+    try {
+      const response = await getAllService();
+      if (response.success) {
+        setServicesItem(response.data);
+        toast.success("All Services Fetched");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  }
+
+  const handleSelectService = (service) => {
+    setSelectedServices((prevSelected) => {
+      const isSelected = prevSelected.some((s) => s._id === service._id);
+      if (isSelected) {
+        return prevSelected.filter((s) => s._id !== service._id);
+      } else {
+        return [...prevSelected, service];
+      }
+    });
+  };
+
+  async function handleDeleteService(id) {
+    const confirm = window.confirm("Are you sure to delete the service");
+    if (confirm) {
+      const res = await deleteService(id);
+      if (res.success) {
+        fetchAllServices();
+      }
+    }
+  }
+
+  // ---------------- Editing function ----------------
+  async function getProposalServiceIdForEdit(id) {
+    setEditProposalServiceId(id);
+
+    const res = await fetchProposalServiceById(id);
+    if (res.success) {
+      setProposalServiceEditData(res?.data);
+    }
+  }
+
+  // ---------------- here is the logic for partical payment ----------------
+  // instance for proposal card Partial payment
+  const totalService = calculationOfTotalAmount();
+  const gstAmount = totalService * 0.18;
+  const grandTotal = totalService + gstAmount;
+  const tdsAmount = totalService * 0.02;
+
+  // ---------------- handle Partly payment form ----------------
+
+  // ----------------Partly Payment STATE ----------------
+  const [isOtherDuration, setIsOtherDuration] = useState(false);
+  const [listOfPayments, setListOfPayments] = useState([]);
+  const [partlyPaymentFormData, setPartlyPaymentFormData] = useState({
+    paymentDuration: "",
+    paymentAmount: "",
+  });
+
+  const reversePartPayment = [...listOfPayments].reverse();
+
+  async function handleParlyPaymentSubmit(e) {
+    e.preventDefault();
+    const currentAmount = Number(partlyPaymentFormData.paymentAmount);
+    const totalPaid = listOfPayments.reduce(
+      (acc, curr) => acc + Number(curr.paymentAmount),
+      0,
+    );
+    const remainingBalance =
+      (Boolean(proposalDetails.tanNo) ? grandTotal - tdsAmount : grandTotal) -
+      totalPaid;
+
+    if (!partlyPaymentFormData.paymentDuration) {
+      toast.error("Please select a payment duration");
+      return;
+    }
+
+    if (currentAmount <= 0) {
+      toast.error("Amount must be greater than 0");
+      return;
+    }
+
+    if (currentAmount > remainingBalance) {
+      toast.error(
+        `Amount cannot exceed remaining balance of ₹ ${remainingBalance.toLocaleString(
+          "en-IN",
+        )}`,
+      );
+      return;
+    }
+
+    setListOfPayments([partlyPaymentFormData, ...listOfPayments]);
+    setPartlyPaymentFormData({ paymentDuration: "", paymentAmount: "" });
+    setIsOtherDuration(false);
+  }
+
+  function handleDeletePayment(index) {
+    setListOfPayments((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  useEffect(() => {
+    if (!id) return;
+    handleGetProposal();
+  }, [id]);
+
+  useEffect(() => {
+    fetchAllServices();
+  }, []);
+
   return (
-    <div>EditPropsal</div>
-  )
-}
+    <div className="container mx-auto p-4 lg:p-0">
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="w-full lg:w-1/4 order-1 lg:lg:order-0">
+          <CommonForm
+            onSubmit={mainHandleEditProposal}
+            formControls={editProposalFormControl}
+            formData={proposalFormData}
+            setFormData={setProposalFormData}
+          />
+        </div>
 
-export default EditPropsal
+        {/* second div  */}
+        <div className="w-full lg:w-1/2 order-2 lg:lg:order-0">
+          <div className="">
+            <GridForm
+              formControls={ServiceFormControl}
+              formData={
+                editProposalServiceId
+                  ? proposalServiceEditData
+                  : serviceFormData
+              }
+              setFormData={
+                editProposalServiceId
+                  ? setProposalServiceEditData
+                  : setServiceFormData
+              }
+              onSubmit={
+                editProposalServiceId
+                  ? handleEditProposalService
+                  : handleService
+              }
+              buttonText={
+                editProposalServiceId ? "Edit Service" : "Add Service"
+              }
+            />
+          </div>
+
+          <div className=" my-5 h-[40vh] overflow-y-scroll">
+            {!servicesItem.length ? (
+              <div className="flex items-center justify-center bg-red-500 border-2 border-dashed border-gray-400 rounded-lg p-4 text-white hover:bg-red-500 transition-colors duration-200">
+                Add some service
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 py-3 ">
+                {servicesItem.map((item) => (
+                  <div key={item?._id} className="flex flex-col">
+                    <button
+                      onClick={() => handleSelectService(item)}
+                      className={`group block rounded-t-lg p-4 border shadow-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                        selectedServices.some((s) => s?._id === item?._id)
+                          ? "bg-blue-100 border-blue-400"
+                          : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="text-center">
+                        <p className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors py-2">
+                          {item?.serviceTitle}
+                        </p>
+                        {item?.description && (
+                          <p className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors border-t py-2">
+                            {item?.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {item?.discountPercentage ? (
+                        <p>Discount Percentage : {item?.discountPercentage}%</p>
+                      ) : (
+                        <p>
+                          Discount Amount : ₹{" "}
+                          {item?.discountAmount?.toLocaleString("en-IN")}
+                        </p>
+                      )}
+
+                      <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
+                        <span>{item?.duration}</span>
+                        <span className="font-bold text-gray-700">
+                          ₹ {item?.amount?.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    </button>
+
+                    <div className="flex justify-between px-4 py-3 border rounded-b-2xl ">
+                      <div
+                        onClick={() => getProposalServiceIdForEdit(item?._id)}
+                        className="bg-blue-300 p-2 rounded-full cursor-pointer"
+                      >
+                        <Edit />
+                      </div>
+                      <div
+                        onClick={() => handleDeleteService(item?._id)}
+                        className="bg-red-300 p-2 rounded-full cursor-pointer"
+                      >
+                        <Trash />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* third div  */}
+        <div className="w-full lg:w-1/4 order-3 lg:lg:order-0">
+          <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200 mb-4">
+            {totalService === 0 ? (
+              <div className="text-center">Add some service</div>
+            ) : (
+              <div>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
+                  Payment Summary
+                </h2>
+                <div className="space-y-0.5">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Subtotal</span>
+                    <span>₹ {totalService.toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>GST (18%)</span>
+                    <span>₹ {gstAmount.toLocaleString("en-IN")}</span>
+                  </div>
+
+                  {Boolean(proposalDetails.tanNo) && (
+                    <div className="flex justify-between text-gray-600">
+                      <span>TDS (2%)</span>
+                      <span>₹ {tdsAmount.toLocaleString("en-IN")}</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between font-bold text-lg text-gray-900 border-t pt-2 mt-2">
+                    <span>Total Amount</span>
+                    <span>
+                      {(Boolean(proposalDetails.tanNo)
+                        ? grandTotal - tdsAmount
+                        : grandTotal
+                      ).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <form
+            onSubmit={handleParlyPaymentSubmit}
+            className="flex flex-col gap-3 border-b pb-4"
+          >
+            <p className="font-bold text-xl ">Partial Payment</p>
+            <select
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              value={
+                isOtherDuration
+                  ? "Other"
+                  : partlyPaymentFormData?.paymentDuration
+              }
+              onChange={(e) => {
+                if (e.target.value === "Other") {
+                  setIsOtherDuration(true);
+                  setPartlyPaymentFormData((prev) => ({
+                    ...prev,
+                    paymentDuration: "",
+                  }));
+                } else {
+                  setIsOtherDuration(false);
+                  setPartlyPaymentFormData((prev) => ({
+                    ...prev,
+                    paymentDuration: e.target.value,
+                  }));
+                }
+              }}
+            >
+              <option value="" disabled>
+                Select Payment Duration
+              </option>
+              <option value="Advance Payment">Advance Payment</option>
+              <option value="After 15 Days">After 15 Days</option>
+              <option value="After 30 Days">After 30 Days</option>
+              <option value="After 45 Days">After 45 Days</option>
+              <option value="After 60 Days">After 60 Days</option>
+              <option value="After 90 Days">After 90 Days</option>
+              <option value="After 120 Days">After 120 Days</option>
+              <option value="Other">Other</option>
+            </select>
+            {isOtherDuration && (
+              <Input
+                placeholder="Enter Custom Duration"
+                value={partlyPaymentFormData.paymentDuration}
+                onChange={(e) =>
+                  setPartlyPaymentFormData((prev) => ({
+                    ...prev,
+                    paymentDuration: e.target.value,
+                  }))
+                }
+              />
+            )}
+            <Input
+              placeholder="Enter the Amount"
+              type="number"
+              value={partlyPaymentFormData?.paymentAmount}
+              onChange={(e) =>
+                setPartlyPaymentFormData((prev) => ({
+                  ...prev,
+                  paymentAmount: e.target.value,
+                }))
+              }
+            />
+            <p className="text-sm text-gray-500">
+              Balance: ₹{" "}
+              {(
+                (Boolean(proposalDetails.tanNo)
+                  ? grandTotal - tdsAmount
+                  : grandTotal) -
+                listOfPayments.reduce(
+                  (acc, curr) => acc + Number(curr.paymentAmount),
+                  0,
+                )
+              ).toLocaleString("en-IN")}
+            </p>
+            <Button type="submit">Add</Button>
+          </form>
+
+          <div className="mt-4">
+            {reversePartPayment?.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {reversePartPayment?.map(
+                  ({ paymentAmount, paymentDuration }, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200 shadow-sm"
+                    >
+                      <span className="text-sm font-medium text-gray-700">
+                        {paymentDuration}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className="font-semibold text-gray-900">
+                          ₹ {Number(paymentAmount).toLocaleString("en-IN")}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePayment(idx)}
+                          className="text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
+                <p className="text-sm text-gray-500">
+                  No partial payments added yet.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EditPropsal;
