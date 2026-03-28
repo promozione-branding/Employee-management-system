@@ -7,43 +7,36 @@ export async function POST(req) {
     const data = await req.formData();
     const file = data.get("file");
 
-    // ❌ No file
     if (!file) {
       return NextResponse.json(
-        { success: false, message: "File is required" },
+        { success: false, message: "File  required" },
         { status: 400 },
       );
     }
 
-    // ✅ File validation (optional but recommended)
-    const allowedTypes = ["image/", "video/", "application/pdf"];
-
+    // ✅ Validate type
+    const allowedTypes = ["image/"];
     const isValidType = allowedTypes.some((type) => file.type.startsWith(type));
 
     if (!isValidType) {
       return NextResponse.json(
-        { success: false, message: "Invalid file type" },
+        { success: false, message: "Only images allowed" },
         { status: 400 },
       );
     }
 
-    // ❗ File size limit (example: 20MB)
-    const MAX_SIZE = 20 * 1024 * 1024;
-
+    // ✅ Size limit (5MB for profile)
+    const MAX_SIZE = 5 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
-        { success: false, message: "File too large (max 20MB)" },
+        { success: false, message: "Max 5MB allowed" },
         { status: 400 },
       );
     }
 
-    // ✅ Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // ✅ Clean filename
-    const cleanName = file.name.replace(/\s+/g, "-").toLowerCase();
-
-    const fileName = `${Date.now()}-${cleanName}`;
+    const fileName = `profile/${Date.now()}-${file.name}`;
 
     // ✅ Upload to R2
     await r2.send(
@@ -55,7 +48,6 @@ export async function POST(req) {
       }),
     );
 
-    // ✅ Public URL
     const url = `${process.env.CLOUD_FLARE_R2_PUBLIC_URL}/${fileName}`;
 
     return NextResponse.json({
@@ -63,13 +55,10 @@ export async function POST(req) {
       url,
     });
   } catch (error) {
-    console.error("R2 UPLOAD ERROR:", error);
+    console.error("UPLOAD ERROR:", error);
 
     return NextResponse.json(
-      {
-        success: false,
-        message: "Upload failed",
-      },
+      { success: false, message: "Upload failed" },
       { status: 500 },
     );
   }
