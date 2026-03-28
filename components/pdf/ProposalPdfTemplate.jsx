@@ -14,8 +14,6 @@ const ProposalPdfTemplate = ({ data }) => {
     return null;
   }
 
-
-
   const toWords = new ToWords({
     localeCode: "en-IN",
     converterOptions: {
@@ -103,8 +101,6 @@ const ProposalPdfTemplate = ({ data }) => {
   // total Amount in words
   const totalAmountInWords = toWords.convert(totalAmount);
 
-
-
   const BankDetailsBlock = () => (
     <View wrap={false} minPresenceAhead={120} style={{ marginTop: 10 }}>
       <View style={styles.bankBox}>
@@ -166,7 +162,11 @@ const ProposalPdfTemplate = ({ data }) => {
   );
 
   return (
-    <Document style={{ marginTop: "0" }} title={`PR-${data?.clientCompany}-${data?.proposalNo}`} fileName={`PR-${data?.clientCompany}-${data?.proposalNo}`}>
+    <Document
+      style={{ marginTop: "0" }}
+      title={`PR-${data?.clientCompany}-${data?.proposalNo}`}
+      fileName={`PR-${data?.clientCompany}-${data?.proposalNo}`}
+    >
       {/* PAGE 1 */}
       <Page size="A4" style={styles.page} wrap>
         {/* watermark */}
@@ -265,8 +265,6 @@ const ProposalPdfTemplate = ({ data }) => {
           </View>
         )}
 
-      
-
         <View style={styles.totalBox}>
           <Text style={styles.totalLabel}>GST @ 18%</Text>
           <Text style={styles.totalValue}></Text>
@@ -300,17 +298,23 @@ const ProposalPdfTemplate = ({ data }) => {
         </View>
 
         {data?.partlyPayment?.length > 0 &&
-          data?.partlyPayment
-            .map(({ _id, paymentAmount, paymentDuration }) => (
-              <View style={styles.totalBox} key={_id}>
-                <Text style={styles.totalLabel}></Text>
-                <Text style={styles.totalValue}>{paymentDuration}</Text>
+          data?.partlyPayment.map(({ _id, paymentAmount, paymentDuration }) => (
+            <View style={styles.totalBox} key={_id}>
+              <Text style={styles.totalLabel}></Text>
+              <Text style={styles.totalValue}>{paymentDuration}</Text>
 
-                <Text style={styles.totalValue}>
-                  {formatIndianCurrency(paymentAmount)}
-                </Text>
-              </View>
-            ))}
+              <Text style={styles.totalValue}>
+                {formatIndianCurrency(paymentAmount)}
+              </Text>
+            </View>
+          ))}
+
+        {/* here is the notes  */}
+        {data?.notes && (
+          <View style={{ marginTop: "10px" }}>
+            <Text>Note: {data?.notes}</Text>
+          </View>
+        )}
 
         {/* terms */}
         <View style={styles.termsBox} wrap>

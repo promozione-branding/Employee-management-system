@@ -4,7 +4,7 @@ import EditPropsal from "./EditPropsal";
 const page = async ({ params }) => {
   const { id } = await params;
 
-  return <EditPropsal id={id}/>;
+  return <EditPropsal proposalId={id}/>;
 };
 
 export default page;

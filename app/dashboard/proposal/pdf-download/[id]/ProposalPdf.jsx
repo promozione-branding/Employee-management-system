@@ -24,6 +24,7 @@ const ProposalPdf = ({ id }) => {
     }
   }
 
+
   useEffect(() => {
     fetchingPdfData(id);
   }, []);

@@ -4,6 +4,7 @@ export const initialPerposelFormData = {
   discountPercentage: "",
   validTill: "",
   paymentMethod: "",
+  notes:""
 };
 
 export const initialservicesFormData = {

@@ -322,6 +322,13 @@ const ProposalPdfTemplate = ({ data }) => {
             </View>
           ))}
 
+        {/* here is the notes  */}
+        {data?.notes && (
+          <View style={{ marginTop: "10px" }}>
+            <Text>Note: {data?.notes}</Text>
+          </View>
+        )}
+
         {/* terms */}
         <View style={styles.termsBox} wrap>
           <Text>

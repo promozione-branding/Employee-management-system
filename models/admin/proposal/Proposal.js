@@ -66,6 +66,11 @@ const ProposalSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    notes: {
+      type: String,
+      default: "",
+      trim: true,
+    },
   },
   { timestamps: true },
 );

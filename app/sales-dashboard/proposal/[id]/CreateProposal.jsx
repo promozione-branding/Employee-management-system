@@ -84,6 +84,7 @@ const CreateProposal = ({ customerId }) => {
     totalAmount: calculationOfTotalAmount(),
     partlyPayment: listOfPayments,
     dateOfProposal: formData?.dateOfProposal,
+    notes: formData?.notes || "",
   };
 
   async function fetchAllServices() {

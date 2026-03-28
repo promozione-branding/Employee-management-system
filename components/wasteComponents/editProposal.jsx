@@ -1,56 +1,51 @@
 "use client";
+
 import CommonForm from "@/components/layout/Form";
+import GridForm from "@/components/layout/GridForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ServiceFormControl, addProposalFormControl } from "@/config/data";
+import { editProposalFormControl, ServiceFormControl } from "@/config/data";
 import {
   initalServiceFormData,
-  initialPerposelFormData,
+  initialEditProposal,
 } from "@/config/initialFormDate";
-import { getCustomerServices } from "@/service/customer";
-import { createProposelService } from "@/service/proposal";
+import {
+  editProposalService,
+  getProposalByIdService,
+} from "@/service/proposal";
 import {
   createServicesService,
-  fetchProposalServiceById,
-  editService,
-  getAllService,
   deleteService,
+  editService,
+  fetchProposalServiceById,
+  getAllService,
 } from "@/service/service";
 import { Edit, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const Proposal = ({ customerId }) => {
-  const navigate = useRouter();
+const EditPropsal = ({ id }) => {
+  // that is for show proposal
+  const [proposalDetails, setProposalDetails] = useState({});
+  const [proposalLoading, setProposalLoading] = useState(true);
 
-  // ---------------- STATE ----------------
-  const [formData, setFormData] = useState(initialPerposelFormData);
-  const [servicesItem, setServicesItem] = useState([]);
-  const [selectedServices, setSelectedServices] = useState([]);
-  const [clientDetails, setClientDetails] = useState({});
-
-  // ----------------Partly Payment STATE ----------------
-  const [listOfPayments, setListOfPayments] = useState([]);
-  const [partlyPaymentFormData, setPartlyPaymentFormData] = useState({
-    paymentDuration: "",
-    paymentAmount: "",
-  });
-  const [isOtherDuration, setIsOtherDuration] = useState(false);
-
-  const { Address, GSTIN, city, company, country, name, phone, tanNo, email } =
-    clientDetails;
-
-  const [serviceFormData, setServiceFormData] = useState(initalServiceFormData);
+  // this is the main formData State for edit proposal
+  const [proposalFormData, setProposalFormData] = useState(initialEditProposal);
 
   // ---------------- Editing state ----------------
   const [editProposalServiceId, setEditProposalServiceId] = useState(null);
+
+  // services handling
+  const [serviceFormData, setServiceFormData] = useState(initalServiceFormData);
   const [proposalServiceEditData, setProposalServiceEditData] = useState(
     initalServiceFormData,
   );
 
-  const reversePartPayment = [...listOfPayments].reverse();
+  const [servicesItem, setServicesItem] = useState([]);
+  const [selectedServices, setSelectedServices] = useState([]);
+
+  const router = useRouter();
 
   function calculationOfTotalAmount() {
     const totalAfterServiceDiscounts = selectedServices.reduce(
@@ -69,33 +64,84 @@ const Proposal = ({ customerId }) => {
     return totalAfterServiceDiscounts;
   }
 
-  const propsalAllItemForm = {
-    clientId: customerId,
-    clientName: name,
-    clientCompany: company,
-    clientAddress: `${Address} -${city} -${country}`,
-    GSTIN,
-    tanNo: tanNo,
-    services: selectedServices.map(({ _id }) => _id),
-    discount: formData?.discount || 0,
-    discountPercentage: formData?.discountPercentage || 0,
-    validTill: formData?.validTill,
-    paymentMethod: formData?.paymentMethod,
-    totalAmount: calculationOfTotalAmount(),
-    partlyPayment: reversePartPayment,
-    notes: formData?.notes || "",
-  };
-
-  async function fetchAllServices() {
+  async function handleGetProposal() {
     try {
-      const response = await getAllService();
-      if (response.success) {
-        setServicesItem(response.data);
-        toast.success("All Services Fetched");
+      const res = await getProposalByIdService(id);
+      if (res.success) {
+        setProposalDetails(res?.data);
+        setProposalLoading(false);
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message);
+      toast.error(
+        error?.response?.data?.message || "error while fetching the proposal",
+      );
+    }
+  }
+
+  // that is the main for edit the proposal
+  async function mainHandleEditProposal(e) {
+    e.preventDefault();
+
+    if (selectedServices?.length === 0) {
+      toast.error("Add Service");
+      return;
+    }
+
+    const editProposalTemplate = {
+      ...proposalFormData,
+      totalAmount: calculationOfTotalAmount(),
+      services: selectedServices,
+      partlyPayment: reversePartPayment,
+    };
+
+    // only filled that
+    const filledValues = {};
+    for (const key in editProposalTemplate) {
+      const value = editProposalTemplate[key];
+      if (
+        Object.hasOwn(editProposalTemplate, key) &&
+        value &&
+        (!Array.isArray(value) || value.length > 0)
+      ) {
+        filledValues[key] = value;
+      }
+    }
+
+    try {
+      const res = await editProposalService(id, filledValues);
+      if (res?.success) {
+        toast.success("Proposal edit successfully");
+        router.push(`/dashboard/proposal/pdf-download/${id}`);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message || "Error while editing proposal",
+      );
+    }
+  }
+
+  async function handleEditProposalService(e) {
+    e.preventDefault();
+
+    try {
+      const res = await editService(
+        editProposalServiceId,
+        proposalServiceEditData,
+      );
+
+      if (res.success) {
+        toast.success("Service Updated successfully");
+        setProposalServiceEditData(initalServiceFormData);
+        fetchAllServices();
+        setEditProposalServiceId(null);
+      } else {
+        toast.error(res.message || "Failed to update service");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message || "Error updating services");
     }
   }
 
@@ -145,61 +191,37 @@ const Proposal = ({ customerId }) => {
     }
   }
 
-  async function handleProposalSubmit(e) {
-    e.preventDefault();
-
+  async function fetchAllServices() {
     try {
-      if (formData?.discount > 0 && formData?.discountPercentage > 0) {
-        toast.error(
-          "Please use either a fixed discount or a percentage, not both.",
-        );
-        return;
-      }
-
-      if (!formData.paymentMethod || !formData.validTill) {
-        toast.error(
-          "Payment method and 'Valid Till' date are required to create the proposal.",
-        );
-        return;
-      }
-
-      if (propsalAllItemForm.services.length === 0) {
-        toast.error("Please add at least one service to the proposal.");
-        return;
-      }
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const validTillDate = new Date(formData.validTill);
-
-      if (validTillDate <= today) {
-        toast.error("'Valid Till' date must be a future date.");
-        return;
-      }
-
-      const response = await createProposelService(propsalAllItemForm);
-     
+      const response = await getAllService();
       if (response.success) {
-        toast.success("Proposal created successfully!");
-        setFormData(initialPerposelFormData);
-        setSelectedServices([]);
-        navigate.push(`/dashboard/proposal/pdf-download/${response.data._id}`);
+        setServicesItem(response.data);
+        toast.success("All Services Fetched");
       }
     } catch (error) {
       console.log(error);
       toast.error(error.message);
     }
   }
-  async function customerDetails() {
-    try {
-      const response = await getCustomerServices(customerId);
-      if (response.success) {
-        toast.success("customer details");
-        setClientDetails(response.data);
+
+  const handleSelectService = (service) => {
+    setSelectedServices((prevSelected) => {
+      const isSelected = prevSelected.some((s) => s._id === service._id);
+      if (isSelected) {
+        return prevSelected.filter((s) => s._id !== service._id);
+      } else {
+        return [...prevSelected, service];
       }
-    } catch (error) {
-      toast.error(error.message);
-      console.log(error.message);
+    });
+  };
+
+  async function handleDeleteService(id) {
+    const confirm = window.confirm("Are you sure to delete the service");
+    if (confirm) {
+      const res = await deleteService(id);
+      if (res.success) {
+        fetchAllServices();
+      }
     }
   }
 
@@ -213,52 +235,25 @@ const Proposal = ({ customerId }) => {
     }
   }
 
-  async function handleEditProposalService(e) {
-    e.preventDefault();
-
-    try {
-      const res = await editService(
-        editProposalServiceId,
-        proposalServiceEditData,
-      );
-
-      if (res.success) {
-        toast.success("Service Updated successfully");
-        setProposalServiceEditData(initalServiceFormData);
-        fetchAllServices();
-        setEditProposalServiceId(null);
-      } else {
-        toast.error(res.message || "Failed to update service");
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message || "Error updating services");
-    }
-  }
-
+  // ---------------- here is the logic for partical payment ----------------
   // instance for proposal card Partial payment
   const totalService = calculationOfTotalAmount();
   const gstAmount = totalService * 0.18;
   const grandTotal = totalService + gstAmount;
   const tdsAmount = totalService * 0.02;
 
-  useEffect(() => {
-    customerDetails();
-    fetchAllServices();
-  }, []);
-
-  const handleSelectService = (service) => {
-    setSelectedServices((prevSelected) => {
-      const isSelected = prevSelected.some((s) => s._id === service._id);
-      if (isSelected) {
-        return prevSelected.filter((s) => s._id !== service._id);
-      } else {
-        return [...prevSelected, service];
-      }
-    });
-  };
-
   // ---------------- handle Partly payment form ----------------
+
+  // ----------------Partly Payment STATE ----------------
+  const [isOtherDuration, setIsOtherDuration] = useState(false);
+  const [listOfPayments, setListOfPayments] = useState([]);
+  const [partlyPaymentFormData, setPartlyPaymentFormData] = useState({
+    paymentDuration: "",
+    paymentAmount: "",
+  });
+
+  const reversePartPayment = [...listOfPayments].reverse();
+
   async function handleParlyPaymentSubmit(e) {
     e.preventDefault();
     const currentAmount = Number(partlyPaymentFormData.paymentAmount);
@@ -267,7 +262,8 @@ const Proposal = ({ customerId }) => {
       0,
     );
     const remainingBalance =
-      (tanNo ? grandTotal - tdsAmount : grandTotal) - totalPaid;
+      (Boolean(proposalDetails.tanNo) ? grandTotal - tdsAmount : grandTotal) -
+      totalPaid;
 
     if (!partlyPaymentFormData.paymentDuration) {
       toast.error("Please select a payment duration");
@@ -297,101 +293,31 @@ const Proposal = ({ customerId }) => {
     setListOfPayments((prev) => prev.filter((_, i) => i !== index));
   }
 
-  async function handleDeleteService(id) {
-    const confirm = window.confirm("Are you sure to delete the service");
-    if (confirm) {
-      const res = await deleteService(id);
-      if (res.success) {
-        fetchAllServices();
-      }
-    }
-  }
+  useEffect(() => {
+    if (!id) return;
+    handleGetProposal();
+  }, [id]);
 
   useEffect(() => {
-    const serviceIds = selectedServices.map((s) => s._id);
-    setFormData((prev) => ({ ...prev, services: serviceIds }));
-  }, [selectedServices]);
+    fetchAllServices();
+  }, []);
 
   return (
-    <div className="w-full">
-      <h1 className="font-bold text-2xl text-center my-5">Create Proposals</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 px-10 mt-5">
-        <div>
+    <div className="container mx-auto p-4 lg:p-0">
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="w-full lg:w-1/4 order-1 lg:lg:order-0">
           <CommonForm
-            formControls={addProposalFormControl}
-            formData={formData}
-            setFormData={setFormData}
-            onSubmit={handleProposalSubmit}
-            buttonText={"Create Proposal"}
+            onSubmit={mainHandleEditProposal}
+            formControls={editProposalFormControl}
+            formData={proposalFormData}
+            setFormData={setProposalFormData}
           />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 py-3 ">
-            {!servicesItem.length ? (
-              <div className="flex items-center justify-center bg-red-500 border-2 border-dashed border-gray-400 rounded-lg p-4 text-white hover:bg-red-500 transition-colors duration-200">
-                Add some service
-              </div>
-            ) : (
-              servicesItem.map((item) => (
-                <div key={item?._id} className="flex flex-col">
-                  <button
-                    onClick={() => handleSelectService(item)}
-                    className={`group block rounded-t-lg p-4 border shadow-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                      selectedServices.some((s) => s?._id === item?._id)
-                        ? "bg-blue-100 border-blue-400"
-                        : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="text-center">
-                      <p className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors py-2">
-                        {item?.serviceTitle}
-                      </p>
-                      {item?.description && (
-                        <p className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors border-t py-2">
-                          {item?.description}
-                        </p>
-                      )}
-                    </div>
-
-                    {item?.discountPercentage ? (
-                      <p>Discount Percentage : {item?.discountPercentage}%</p>
-                    ) : (
-                      <p>
-                        Discount Amount : ₹{" "}
-                        {item?.discountAmount?.toLocaleString("en-IN")}
-                      </p>
-                    )}
-
-                    <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
-                      <span>{item?.duration}</span>
-                      <span className="font-bold text-gray-700">
-                        ₹ {item?.amount?.toLocaleString("en-IN")}
-                      </span>
-                    </div>
-                  </button>
-
-                  <div className="flex justify-between px-4 py-3 border rounded-b-2xl ">
-                    <div
-                      onClick={() => getProposalServiceIdForEdit(item?._id)}
-                      className="bg-blue-300 p-2 rounded-full cursor-pointer"
-                    >
-                      <Edit />
-                    </div>
-                    <div
-                      onClick={() => handleDeleteService(item?._id)}
-                      className="bg-red-300 p-2 rounded-full cursor-pointer"
-                    >
-                      <Trash />
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
         </div>
 
-        <div className="flex flex-col gap-5">
-          <div>
-            <CommonForm
+        {/* second div  */}
+        <div className="w-full lg:w-1/2 order-2 lg:lg:order-0">
+          <div className="">
+            <GridForm
               formControls={ServiceFormControl}
               formData={
                 editProposalServiceId
@@ -414,37 +340,74 @@ const Proposal = ({ customerId }) => {
             />
           </div>
 
-          <div className="border flex flex-col p-6 rounded-lg shadow-md bg-gray-50">
-            <h2 className="text-xl font-semibold mb-1 border-b pb-1 text-gray-700">
-              Client Details
-            </h2>
-            <div className="space-y-1 text-gray-600">
-              <p>
-                <strong>Company:</strong> {company}
-              </p>
-              <p>
-                <strong>Name:</strong> {name}
-              </p>
-              <p>
-                <strong>Phone:</strong> {phone}
-              </p>
-              <p>
-                <strong>TAN NO:</strong> {tanNo || "NA"}
-              </p>
-              <p>
-                <strong>Email:</strong> {email}
-              </p>
-              <p>
-                <strong>Address:</strong> {Address}, {city}, {country}
-              </p>
-              <p>
-                <strong>GSTIN:</strong> {GSTIN}
-              </p>
-            </div>
+          <div className=" my-5 h-[40vh] overflow-y-scroll">
+            {!servicesItem.length ? (
+              <div className="flex items-center justify-center bg-red-500 border-2 border-dashed border-gray-400 rounded-lg p-4 text-white hover:bg-red-500 transition-colors duration-200">
+                Add some service
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 py-3 ">
+                {servicesItem.map((item) => (
+                  <div key={item?._id} className="flex flex-col">
+                    <button
+                      onClick={() => handleSelectService(item)}
+                      className={`group block rounded-t-lg p-4 border shadow-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                        selectedServices.some((s) => s?._id === item?._id)
+                          ? "bg-blue-100 border-blue-400"
+                          : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="text-center">
+                        <p className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors py-2">
+                          {item?.serviceTitle}
+                        </p>
+                        {item?.description && (
+                          <p className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors border-t py-2">
+                            {item?.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {item?.discountPercentage ? (
+                        <p>Discount Percentage : {item?.discountPercentage}%</p>
+                      ) : (
+                        <p>
+                          Discount Amount : ₹{" "}
+                          {item?.discountAmount?.toLocaleString("en-IN")}
+                        </p>
+                      )}
+
+                      <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
+                        <span>{item?.duration}</span>
+                        <span className="font-bold text-gray-700">
+                          ₹ {item?.amount?.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    </button>
+
+                    <div className="flex justify-between px-4 py-3 border rounded-b-2xl ">
+                      <div
+                        onClick={() => getProposalServiceIdForEdit(item?._id)}
+                        className="bg-blue-300 p-2 rounded-full cursor-pointer"
+                      >
+                        <Edit />
+                      </div>
+                      <div
+                        onClick={() => handleDeleteService(item?._id)}
+                        className="bg-red-300 p-2 rounded-full cursor-pointer"
+                      >
+                        <Trash />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        <div>
+        {/* third div  */}
+        <div className="w-full lg:w-1/4 order-3 lg:lg:order-0">
           <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200 mb-4">
             {totalService === 0 ? (
               <div className="text-center">Add some service</div>
@@ -463,7 +426,7 @@ const Proposal = ({ customerId }) => {
                     <span>₹ {gstAmount.toLocaleString("en-IN")}</span>
                   </div>
 
-                  {tanNo && (
+                  {Boolean(proposalDetails.tanNo) && (
                     <div className="flex justify-between text-gray-600">
                       <span>TDS (2%)</span>
                       <span>₹ {tdsAmount.toLocaleString("en-IN")}</span>
@@ -473,7 +436,7 @@ const Proposal = ({ customerId }) => {
                   <div className="flex justify-between font-bold text-lg text-gray-900 border-t pt-2 mt-2">
                     <span>Total Amount</span>
                     <span>
-                      {(tanNo
+                      {(Boolean(proposalDetails.tanNo)
                         ? grandTotal - tdsAmount
                         : grandTotal
                       ).toLocaleString("en-IN")}
@@ -550,7 +513,9 @@ const Proposal = ({ customerId }) => {
             <p className="text-sm text-gray-500">
               Balance: ₹{" "}
               {(
-                (tanNo ? grandTotal - tdsAmount : grandTotal) -
+                (Boolean(proposalDetails.tanNo)
+                  ? grandTotal - tdsAmount
+                  : grandTotal) -
                 listOfPayments.reduce(
                   (acc, curr) => acc + Number(curr.paymentAmount),
                   0,
@@ -602,4 +567,4 @@ const Proposal = ({ customerId }) => {
   );
 };
 
-export default Proposal;
+export default EditPropsal;

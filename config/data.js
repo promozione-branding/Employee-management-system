@@ -28,6 +28,12 @@ export const addProposalFormControl = [
       { id: "cheque", label: "Cheque" },
     ],
   },
+   {
+    label: "Notes",
+    name: "notes",
+    componentType: "input",
+    type: "text",
+  },
 ];
 
 export const addInvoiceFormControl = [
