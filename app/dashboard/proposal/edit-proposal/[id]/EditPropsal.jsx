@@ -131,15 +131,36 @@ export default function ServiceEditor({ proposalId }) {
       toast.error("Partial payment amount exceeds the total amount");
       return;
     }
-  
+
+    // help to put only the filled items
+    const filterService = services?.filter(
+      (item) =>
+        item?.serviceTitle !== "" &&
+        item?.amount !== "" &&
+        item?.duration !== "" &&
+        item?.description !== "" &&
+        item?.discountAmount !== "" &&
+        item?.discountPercentage !== "",
+    );
+
+    const filterPartly = partlyPayment?.filter(
+      (item) => item?.paymentDuration !== "" && item?.paymentAmount !== "",
+    );
+
+    console.log(proposalId, {
+      services: filterService,
+      partlyPayment: filterPartly,
+      totalAmount: finalTotal,
+      notes: notesData || "",
+    });
+
     try {
       const res = await editProposalService(proposalId, {
-        services,
-        partlyPayment,
+        services: filterService,
+        partlyPayment: filterPartly,
         totalAmount: finalTotal,
         notes: notesData || "",
       });
-      console.log(res,"res");
       if (res.success) {
         toast.success("Proposal edit successfully");
         router.push(`/dashboard/proposal/pdf-download/${proposalId}`);
@@ -164,6 +185,7 @@ export default function ServiceEditor({ proposalId }) {
                 <Input
                   placeholder="Service Title"
                   value={service.serviceTitle}
+                  required
                   onChange={(e) =>
                     handleChange(index, "serviceTitle", e.target.value)
                   }
@@ -172,6 +194,7 @@ export default function ServiceEditor({ proposalId }) {
                 <Input
                   type="number"
                   placeholder="Amount"
+                  required
                   value={service.amount}
                   onChange={(e) =>
                     handleChange(index, "amount", e.target.value)
@@ -181,6 +204,7 @@ export default function ServiceEditor({ proposalId }) {
                 <Input
                   placeholder="Duration"
                   value={service.duration}
+                  required
                   onChange={(e) =>
                     handleChange(index, "duration", e.target.value)
                   }
@@ -214,6 +238,7 @@ export default function ServiceEditor({ proposalId }) {
                 <Textarea
                   className="md:col-span-2"
                   placeholder="Description"
+                  required
                   value={service.description}
                   onChange={(e) =>
                     handleChange(index, "description", e.target.value)

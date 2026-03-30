@@ -1,5 +1,10 @@
 "use client";
 
+// downloading pdf
+import { pdf } from "@react-pdf/renderer";
+import ProposalPdfTemplate from "@/components/pdf/ProposalPdfTemplate";
+import { pdfDownloadService } from "@/service/proposal";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -269,6 +274,45 @@ const CustomerProposal = ({ customerId }) => {
     }
   }
 
+ const downloadProposalPdf = async (proposalId) => {
+  try {
+    const toastId = toast.loading("Generating PDF...");
+
+    // ✅ Fetch proposal data
+    const res = await pdfDownloadService(proposalId);
+
+    if (!res?.success) {
+      throw new Error("Failed to fetch proposal data");
+    }
+
+    const pdfData = res.data;
+
+    // ✅ Generate PDF Blob
+    const blob = await pdf(
+      <ProposalPdfTemplate data={pdfData} />
+    ).toBlob();
+
+    // ✅ Create download link
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `proposal-${pdfData?.proposalNo}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+
+    // Cleanup
+    link.remove();
+    URL.revokeObjectURL(url);
+
+    toast.success("PDF downloaded!", { id: toastId });
+  } catch (error) {
+    console.error(error);
+    toast.error("Download failed");
+  }
+};
+
   useEffect(() => {
     fetchLedgerDetails();
     getAllCustomerPropsals();
@@ -328,8 +372,15 @@ const CustomerProposal = ({ customerId }) => {
                   href={`/dashboard/proposal/pdf-download/${item?._id}`}
                   className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
                 >
-                  <Download />
+                  <Eye />
                 </Link>
+
+                <div
+                  onClick={() => downloadProposalPdf(item?._id)}
+                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
+                >
+                  <Download />
+                </div>
                 <Dialog>
                   <DialogTrigger asChild>
                     <button className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed">
@@ -360,7 +411,9 @@ const CustomerProposal = ({ customerId }) => {
 
                 <Link
                   href={`/dashboard/proposal/edit-proposal/${item?._id}`}
-                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
+                  className={`bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full ${
+                    item?.ledgerEntry && "hidden"
+                  }`}
                 >
                   <Pencil />
                 </Link>

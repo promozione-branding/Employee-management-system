@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import axiosInstance from "@/service/axiosInstance";
 import { useAdminStore } from "@/lib/store/AdminStore";
@@ -37,6 +37,11 @@ const SideBar = ({ children }) => {
     }
   };
 
+
+  
+
+
+
   const navLinks = [
     {
       href: "/dashboard",
@@ -54,6 +59,8 @@ const SideBar = ({ children }) => {
       icon: <IdCardLanyard size={22} />,
     },
   ];
+
+
 
   return (
     <div className="flex min-h-screen">

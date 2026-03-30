@@ -1,4 +1,6 @@
 "use client";
+import CurrentMonthDealValue from "@/components/admin-dashboard/employee/employee-dashboard/CurrentMonthDealValue";
+import CurrentMonthRevenue from "@/components/admin-dashboard/employee/employee-dashboard/CurrentMonthRevenue";
 import { CalendarCheck, ListTodo, User, Users } from "lucide-react";
 import Link from "next/link";
 
@@ -53,6 +55,11 @@ const EmployeeDetailsDashboard = ({ employeeId }) => {
             </div>
           </Link>
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+       <CurrentMonthDealValue employeeId={employeeId}/>
+       <CurrentMonthRevenue employeeId={employeeId}/>
       </div>
     </div>
   );

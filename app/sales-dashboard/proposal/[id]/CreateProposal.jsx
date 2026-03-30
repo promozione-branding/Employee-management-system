@@ -184,6 +184,7 @@ const CreateProposal = ({ customerId }) => {
       };
 
       const response = await createProposalService(formDataTemplate);
+      console.log(response, "response");
       if (response.success) {
         toast.success("Proposal created successfully!");
         setFormData(initialPerposelFormData);
@@ -194,11 +195,7 @@ const CreateProposal = ({ customerId }) => {
       }
     } catch (error) {
       console.log(error);
-      if (error.response?.data?.errors?.length) {
-        error.response.data.errors.forEach((err) => toast.error(err.message));
-      } else {
-        toast.error(error.response?.data?.message || "Something went wrong");
-      }
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   }
 

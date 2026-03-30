@@ -112,8 +112,8 @@ const Proposal = ({ customerId }) => {
         return;
       }
 
-      if (serviceFormData?.discountPercentage > 40) {
-        toast.error("Discount can't be more than 40%");
+      if (serviceFormData?.discountPercentage > 70) {
+        toast.error("Discount can't be more than 70%");
       }
 
       if (
@@ -124,8 +124,8 @@ const Proposal = ({ customerId }) => {
         return;
       }
 
-      if (serviceFormData.discountPercentage > 40) {
-        toast.error("Discount can't be more than 40 Percentage");
+      if (serviceFormData.discountPercentage > 70) {
+        toast.error("Discount can't be more than 70 Percentage");
         return;
       }
 
