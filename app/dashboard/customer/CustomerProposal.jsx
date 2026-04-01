@@ -274,44 +274,42 @@ const CustomerProposal = ({ customerId }) => {
     }
   }
 
- const downloadProposalPdf = async (proposalId) => {
-  try {
-    const toastId = toast.loading("Generating PDF...");
+  const downloadProposalPdf = async (proposalId) => {
+    try {
+      const toastId = toast.loading("Generating PDF...");
 
-    // ✅ Fetch proposal data
-    const res = await pdfDownloadService(proposalId);
+      // ✅ Fetch proposal data
+      const res = await pdfDownloadService(proposalId);
 
-    if (!res?.success) {
-      throw new Error("Failed to fetch proposal data");
+      if (!res?.success) {
+        throw new Error("Failed to fetch proposal data");
+      }
+
+      const pdfData = res.data;
+
+      // ✅ Generate PDF Blob
+      const blob = await pdf(<ProposalPdfTemplate data={pdfData} />).toBlob();
+
+      // ✅ Create download link
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `proposal-${pdfData?.proposalNo}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      toast.success("PDF downloaded!", { id: toastId });
+    } catch (error) {
+      console.error(error);
+      toast.error("Download failed");
     }
-
-    const pdfData = res.data;
-
-    // ✅ Generate PDF Blob
-    const blob = await pdf(
-      <ProposalPdfTemplate data={pdfData} />
-    ).toBlob();
-
-    // ✅ Create download link
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `proposal-${pdfData?.proposalNo}.pdf`;
-
-    document.body.appendChild(link);
-    link.click();
-
-    // Cleanup
-    link.remove();
-    URL.revokeObjectURL(url);
-
-    toast.success("PDF downloaded!", { id: toastId });
-  } catch (error) {
-    console.error(error);
-    toast.error("Download failed");
-  }
-};
+  };
 
   useEffect(() => {
     fetchLedgerDetails();
@@ -420,7 +418,9 @@ const CustomerProposal = ({ customerId }) => {
 
                 <div
                   onClick={() => handleDeleteProposal(item?._id)}
-                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
+                  className={`bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full ${
+                    item?.ledgerEntry && "hidden"
+                  }`}
                 >
                   <Trash2 />
                 </div>

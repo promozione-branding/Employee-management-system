@@ -132,41 +132,44 @@ export default function ServiceEditor({ proposalId }) {
       return;
     }
 
-    // help to put only the filled items
-    const filterService = services?.filter(
-      (item) =>
-        item?.serviceTitle !== "" &&
-        item?.amount !== "" &&
-        item?.duration !== "" &&
-        item?.description !== "" &&
-        item?.discountAmount !== "" &&
-        item?.discountPercentage !== "",
-    );
+    // Validation: Ensure Service Title, Amount, and Duration are filled for all added services
+    for (const service of services) {
+      if (
+        !service.serviceTitle?.trim() ||
+        !service.amount ||
+        !service.duration?.trim()
+      ) {
+        toast.error("Service Title, Amount, and Duration are mandatory");
+        return;
+      }
+    }
 
-    const filterPartly = partlyPayment?.filter(
-      (item) => item?.paymentDuration !== "" && item?.paymentAmount !== "",
-    );
+    for (const payment of partlyPayment) {
+      if (!payment.paymentDuration?.trim() || !payment.paymentAmount) {
+        toast.error("Please add Service duration & Amount");
+      }
+    }
 
-    console.log(proposalId, {
-      services: filterService,
-      partlyPayment: filterPartly,
+    const payload = {
+      services,
+      partlyPayment,
       totalAmount: finalTotal,
-      notes: notesData || "",
-    });
+    };
+
+    if (notesData?.trim()) {
+      payload.notes = notesData;
+    }
 
     try {
-      const res = await editProposalService(proposalId, {
-        services: filterService,
-        partlyPayment: filterPartly,
-        totalAmount: finalTotal,
-        notes: notesData || "",
-      });
+      const res = await editProposalService(proposalId, payload);
       if (res.success) {
-        toast.success("Proposal edit successfully");
+        toast.success("Proposal edited successfully");
         router.push(`/dashboard/proposal/pdf-download/${proposalId}`);
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || "error while editing the");
+      toast.error(
+        error?.response?.data?.message || "Error while editing the proposal",
+      );
       console.log(error);
     }
   };
