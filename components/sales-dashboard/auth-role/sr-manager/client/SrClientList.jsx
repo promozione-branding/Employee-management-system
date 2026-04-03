@@ -1,15 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Plus,
-  Eye,
-  Network,
-  SquarePen,
-  Trash,
-  Search,
-  X,
-} from "lucide-react";
+import { Plus, Eye, Network, SquarePen, Trash, Search, X } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import CommonForm from "@/components/layout/Form";
 import Loading from "@/components/layout/Loading";
@@ -41,7 +33,10 @@ const SrClientList = () => {
 
   const [isPaid, setIsPaid] = useState(false);
 
-  const isPaidArray = customers?.filter((item) => item?.isPaid === true);
+
+  const filteredCustomers = isPaid
+    ? customers.filter((item) => item?.isPaid === true)
+    : customers;
 
   /* ---------------- Fetch Sales ---------------- */
   async function fetchSalesPerson() {
@@ -264,211 +259,104 @@ const SrClientList = () => {
         </div>
 
         <div className="lg:h-[59vh] lg:overflow-x-auto">
-          {isPaid
-            ? isPaidArray.map(
-                (
-                  { company, name, phone, salesExecutive, _id, isPaid },
-                  idx,
-                ) => (
-                  <div
-                    key={_id}
-                    className={`grid grid-cols-6 md:grid-cols-5  px-4 py-3 items-center border-b ${isPaid && "bg-green-100"} ${
-                      idx % 2 === 0 ? "bg-gray-50" : ""
-                    }`}
-                  >
-                    <p>{name}</p>
-                    <p>{company}</p>
-                    <p className="text-center">{phone}</p>
+          {filteredCustomers.map(
+            ({ company, name, phone, salesExecutive, _id, isPaid }, idx) => (
+              <div
+                key={_id}
+                className={`grid grid-cols-6 md:grid-cols-5  px-4 py-3 items-center border-b ${isPaid && "bg-green-100"} ${
+                  idx % 2 === 0 ? "bg-gray-50" : ""
+                }`}
+              >
+                <p>{name}</p>
+                <p>{company}</p>
+                <p className="text-center">{phone}</p>
 
-                    <div className="flex flex-wrap gap-1 justify-center">
-                      {salesExecutive?.map((item) => (
-                        <span
-                          key={item._id}
-                          className="bg-orange-200 text-xs px-2 py-1 rounded"
-                        >
-                          {item?.basicDetails?.name}
-                        </span>
-                      ))}
-                    </div>
+                <div className="flex flex-wrap gap-1 justify-center">
+                  {salesExecutive?.map((item) => (
+                    <span
+                      key={item._id}
+                      className="bg-orange-200 text-xs px-2 py-1 rounded"
+                    >
+                      {item?.basicDetails?.name}
+                    </span>
+                  ))}
+                </div>
 
-                    <div className="flex justify-center gap-3 lg:gap-5">
-                      <Link href={`/sales-dashboard/clients/client-assign/${_id}`}>
-                        <Network
-                          size={18}
-                          className="cursor-pointer lg:h-6 lg:w-6"
-                        />
-                      </Link>
+                <div className="flex justify-center gap-3 lg:gap-5">
+                  <Link href={`/sales-dashboard/clients/client-assign/${_id}`}>
+                    <Network
+                      size={18}
+                      className="cursor-pointer lg:h-6 lg:w-6"
+                    />
+                  </Link>
 
-                      <Link href={`/sales-dashboard/clients/${_id}`}>
-                        <Eye
-                          size={18}
-                          className="cursor-pointer lg:h-6 lg:w-6 "
-                        />
-                      </Link>
-                      
-                      <SquarePen
-                        size={18}
-                        onClick={() => handleEdit(_id)}
-                        className="cursor-pointer lg:h-6 lg:w-6"
-                      />
-                      <Trash
-                        size={18}
-                        onClick={() => handleDelete(_id)}
-                        className="cursor-pointer lg:h-6 lg:w-6"
-                      />
-                    </div>
-                  </div>
-                ),
-              )
-            : customers.map(
-                (
-                  { company, name, phone, salesExecutive, _id, isPaid },
-                  idx,
-                ) => (
-                  <div
-                    key={_id}
-                    className={`grid grid-cols-6 md:grid-cols-5  px-4 py-3 items-center border-b ${isPaid && "bg-green-100"} ${
-                      idx % 2 === 0 ? "bg-gray-50" : ""
-                    }`}
-                  >
-                    <p>{name}</p>
-                    <p>{company}</p>
-                    {/* <p className="md:hidden lg:block">{GSTIN}</p> */}
-                    <p className="text-center">{phone}</p>
+                  <Link href={`/sales-dashboard/clients/${_id}`}>
+                    <Eye size={18} className="cursor-pointer lg:h-6 lg:w-6 " />
+                  </Link>
 
-                    <div className="flex flex-wrap gap-1 justify-center">
-                      {salesExecutive?.map((item) => (
-                        <span
-                          key={item._id}
-                          className="bg-orange-200 text-xs px-2 py-1 rounded"
-                        >
-                          {item?.basicDetails?.name}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="flex justify-center gap-3 lg:gap-5">
-                      <Link href={`/sales-dashboard/clients/client-assign/${_id}`}>
-                        <Network
-                          size={18}
-                          className="cursor-pointer lg:h-6 lg:w-6"
-                        />
-                      </Link>
-                      <Link href={`/sales-dashboard/clients/${_id}`}>
-                        <Eye
-                          size={18}
-                          className="cursor-pointer lg:h-6 lg:w-6"
-                        />
-                      </Link>
-                      <SquarePen
-                        size={18}
-                        onClick={() => handleEdit(_id)}
-                        className="cursor-pointer lg:h-6 lg:w-6"
-                      />
-                      <Trash
-                        size={18}
-                        onClick={() => handleDelete(_id)}
-                        className="cursor-pointer lg:h-6 lg:w-6"
-                      />
-                    </div>
-                  </div>
-                ),
-              )}
+                  <SquarePen
+                    size={18}
+                    onClick={() => handleEdit(_id)}
+                    className="cursor-pointer lg:h-6 lg:w-6"
+                  />
+                  <Trash
+                    size={18}
+                    onClick={() => handleDelete(_id)}
+                    className="cursor-pointer lg:h-6 lg:w-6"
+                  />
+                </div>
+              </div>
+            ),
+          )}
         </div>
       </div>
 
       {/* MOBILE CARD VIEW */}
-      {isPaid ? (
-        <div className="md:hidden flex flex-col gap-3">
-          {customers.map(
-            ({ company, name, phone, GSTIN, salesExecutive, _id }) => (
-              <div
-                key={_id}
-                className="bg-white rounded-xl shadow border p-4 flex flex-col gap-2"
-              >
-                <div className="flex justify-between items-center">
-                  <p className="font-semibold">{name}</p>
-                  <p className="text-sm text-gray-500">{company}</p>
-                </div>
 
-                <p className="text-sm ">GSTIN: {GSTIN}</p>
-                <p className="text-sm">Phone: {phone}</p>
-
-                <div className="flex flex-wrap gap-2">
-                  {salesExecutive?.map((item) => (
-                    <span
-                      key={item._id}
-                      className="bg-orange-200 text-xs px-2 py-1 rounded"
-                    >
-                      {item?.basicDetails?.name}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex justify-end gap-4 pt-2">
-                  <Link href={`/dashboard/customer/work/${_id}`}>
-                    <Network size={18} />
-                  </Link>
-                  <Link href={`/dashboard/customer/${_id}`}>
-                    <Eye size={18} />
-                  </Link>
-                  <SquarePen size={18} onClick={() => handleEdit(_id)} />
-                  <Trash
-                    size={18}
-                    className="text-red-500"
-                    onClick={() => handleDelete(_id)}
-                  />
-                </div>
+      <div className="md:hidden flex flex-col gap-3">
+        {filteredCustomers.map(
+          ({ company, name, phone, GSTIN, salesExecutive, _id }) => (
+            <div
+              key={_id}
+              className="bg-white rounded-xl shadow border p-4 flex flex-col gap-2"
+            >
+              <div className="flex justify-between items-center">
+                <p className="font-semibold">{name}</p>
+                <p className="text-sm text-gray-500">{company}</p>
               </div>
-            ),
-          )}
-        </div>
-      ) : (
-        <div className="md:hidden flex flex-col gap-3">
-          {isPaidArray.map(
-            ({ company, name, phone, GSTIN, salesExecutive, _id }) => (
-              <div
-                key={_id}
-                className="bg-white rounded-xl shadow border p-4 flex flex-col gap-2"
-              >
-                <div className="flex justify-between items-center">
-                  <p className="font-semibold">{name}</p>
-                  <p className="text-sm text-gray-500">{company}</p>
-                </div>
 
-                <p className="text-sm ">GSTIN: {GSTIN}</p>
-                <p className="text-sm">Phone: {phone}</p>
+              <p className="text-sm ">GSTIN: {GSTIN}</p>
+              <p className="text-sm">Phone: {phone}</p>
 
-                <div className="flex flex-wrap gap-2">
-                  {salesExecutive?.map((item) => (
-                    <span
-                      key={item._id}
-                      className="bg-orange-200 text-xs px-2 py-1 rounded"
-                    >
-                      {item?.basicDetails?.name}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex justify-end gap-4 pt-2">
-                  <Link href={`/dashboard/customer/work/${_id}`}>
-                    <Network size={18} />
-                  </Link>
-                  <Link href={`/dashboard/customer/${_id}`}>
-                    <Eye size={18} />
-                  </Link>
-                  <SquarePen size={18} onClick={() => handleEdit(_id)} />
-                  <Trash
-                    size={18}
-                    className="text-red-500"
-                    onClick={() => handleDelete(_id)}
-                  />
-                </div>
+              <div className="flex flex-wrap gap-2">
+                {salesExecutive?.map((item) => (
+                  <span
+                    key={item._id}
+                    className="bg-orange-200 text-xs px-2 py-1 rounded"
+                  >
+                    {item?.basicDetails?.name}
+                  </span>
+                ))}
               </div>
-            ),
-          )}
-        </div>
-      )}
+
+              <div className="flex justify-end gap-4 pt-2">
+                <Link href={`/dashboard/customer/work/${_id}`}>
+                  <Network size={18} />
+                </Link>
+                <Link href={`/dashboard/customer/${_id}`}>
+                  <Eye size={18} />
+                </Link>
+                <SquarePen size={18} onClick={() => handleEdit(_id)} />
+                <Trash
+                  size={18}
+                  className="text-red-500"
+                  onClick={() => handleDelete(_id)}
+                />
+              </div>
+            </div>
+          ),
+        )}
+      </div>
 
       {/* SHEET FORM */}
       <Sheet open={open} onOpenChange={resetForm}>

@@ -7,61 +7,67 @@ A comprehensive employee management system built with modern JavaScript technolo
 
 ## ✨ Features
 
-- Interactive employee dashboards with performance and attendance charts  
-- Department-wise employee distribution and tenure insights  
-- Leave & attendance tracking with monthly reports  
-- Team skills assessment and salary distribution visualization  
-- Quick action buttons for adding employees, managing leave, and performance reviews  
-- Real-time team member status and contact information  
-- Secure authentication and role-based access (implied by dependencies)  
-- Integration with calendar, reminders, and notifications  
+- Interactive employee dashboards with performance and attendance charts
+- Department-wise employee distribution and tenure insights
+- Leave & attendance tracking with monthly reports
+- Team skills assessment and salary distribution visualization
+- Quick action buttons for adding employees, managing leave, and performance reviews
+- Real-time team member status and contact information
+- Secure authentication and role-based access (implied by dependencies)
+- Integration with calendar, reminders, and notifications
 
 ## 🚀 Installation
 
-1. **Clone the repository**  
+1. **Clone the repository**
+
 ```bash
 git clone https://github.com/Aalekh-coder/Employee-management-system.git
 cd Employee-management-system
 ```
 
 2. **Install dependencies**  
-Make sure you have Node.js installed (v16+ recommended). Then run:  
+   Make sure you have Node.js installed (v16+ recommended). Then run:
+
 ```bash
 npm install
 ```
 
 3. **Configure environment variables**  
-Create a `.env` file based on `.env.example` and fill in your credentials.
+   Create a `.env` file based on `.env.example` and fill in your credentials.
 
-4. **Run the development server**  
+4. **Run the development server**
+
 ```bash
 npm run dev
 ```
 
-5. **Build for production**  
+5. **Build for production**
+
 ```bash
 npm run build
 ```
 
-6. **Start production server**  
+6. **Start production server**
+
 ```bash
 npm start
 ```
 
 ## 💻 Usage
 
-- Access the app via your browser at `http://localhost:3000` by default.  
-- Use the dashboard to view employee performance trends, department stats, and attendance reports.  
-- Add new employees or manage existing ones using the quick action buttons.  
-- Navigate through tabs to analyze team skills, salary distribution, and leave reports.  
-- Monitor recent employee activities and stay updated with announcements.  
+- Access the app via your browser at `http://localhost:3000` by default.
+- Use the dashboard to view employee performance trends, department stats, and attendance reports.
+- Add new employees or manage existing ones using the quick action buttons.
+- Navigate through tabs to analyze team skills, salary distribution, and leave reports.
+- Monitor recent employee activities and stay updated with announcements.
 - Use the calendar and reminders integrated within the dashboard to plan and track tasks.
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please fork the repository, create a feature branch, and submit a pull request.  
 Ensure code follows existing style and includes proper error handling.  
-Run linting before commits:  
+Run linting before commits:
+
 ```bash
 npm run lint
 ```
@@ -101,6 +107,12 @@ NODE_ENV=development
 # - For email, ensure less secure app access is enabled or use app-specific passwords if required.
 ```
 
-
-
-
+<!-- <div className="flex gap-8">
+                <Link
+                  href={`/sales-dashboard/clients/${c._id}/${employee?._id}`}
+                >
+                  <Eye />
+                </Link>
+                <SquarePen onClick={() => handleEdit(c._id)} />
+                <Trash onClick={() => handleDelete(c._id)} />
+              </div> -->

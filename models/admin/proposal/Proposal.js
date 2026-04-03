@@ -79,23 +79,28 @@ ProposalSchema.pre("save", async function (next) {
   if (this.isNew) {
     const now = new Date();
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const datePrefix = `PR${year}${month}${day}`;
+
+    const prefix = `INQPI${year}`;
 
     const lastProposal = await this.constructor
       .findOne({
-        proposalNo: { $regex: `^${datePrefix}` },
+        proposalNo: { $regex: `^${prefix}` },
       })
       .sort({ proposalNo: -1 });
 
-    let nextProposalNumber = 1;
+    let nextNumber = 251;
+
     if (lastProposal && lastProposal.proposalNo) {
-      const lastNumber = parseInt(lastProposal.proposalNo.slice(-2), 10);
-      nextProposalNumber = lastNumber + 1;
+      const lastNumber = parseInt(
+        lastProposal.proposalNo.replace(prefix, ""),
+        10
+      );
+      nextNumber = lastNumber + 1;
     }
-    this.proposalNo = `${datePrefix}${String(nextProposalNumber).padStart(2, "0")}`;
+
+    this.proposalNo = `${prefix}${String(nextNumber).padStart(6, "0")}`;
   }
+
   next();
 });
 

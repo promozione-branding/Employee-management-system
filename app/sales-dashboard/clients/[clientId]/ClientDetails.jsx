@@ -3,6 +3,7 @@ import InvoiceList from "@/components/sales-dashboard/auth-role/sr-manager/invoi
 import LedgerDetails from "@/components/sales-dashboard/auth-role/sr-manager/ledger/LedgerDetails";
 import CreateProposal from "@/components/sales-dashboard/auth-role/sr-manager/proposal/createProposal";
 import CustomerTab from "@/components/sales-dashboard/client/CustomerTab";
+import HistoryTab from "@/components/sales-dashboard/client/HistoryTab";
 import UpdateTab from "@/components/sales-dashboard/client/UpdateTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -16,6 +17,7 @@ const ClientDetails = ({ customerId }) => {
           <TabsTrigger value="invoice">Invoice</TabsTrigger>
           <TabsTrigger value="ledger">Ledger</TabsTrigger>
           <TabsTrigger value="meeting">Update</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
           <TabsTrigger value="attachment">Attachment</TabsTrigger>
         </TabsList>
         <TabsContent value="Customer">
@@ -33,8 +35,11 @@ const ClientDetails = ({ customerId }) => {
         <TabsContent value="ledger">
           <LedgerDetails customerId={customerId} />
         </TabsContent>
+        <TabsContent value="history">
+          <HistoryTab customerId={customerId} />
+        </TabsContent>
         <TabsContent value="attachment">
-        <SrAttachment clientId={customerId}/>
+          <SrAttachment clientId={customerId} />
         </TabsContent>
       </Tabs>
     </div>

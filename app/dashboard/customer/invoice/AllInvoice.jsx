@@ -3,21 +3,22 @@ import {
   customerLedgerService,
   getAllinvoicesCustomer,
 } from "@/service/customer";
-import { sendInvoicePdfService } from "@/service/invoice";
+import { pdfDownloaderById, sendInvoicePdfService } from "@/service/invoice";
 import { createLedgerService, ledgerEntriesService } from "@/service/ledger";
+import { pdf } from "@react-pdf/renderer";
 import {
   BanknoteArrowUp,
   BookMarked,
   Download,
   Eye,
-  Mail,
-  Pencil,
+  Mail
 } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/layout/Loading";
+import InvoicePdfTemplate from "@/components/pdf/InvoicePdfTemplate";
 
 const AllInvoice = ({ customerId }) => {
   const [invoicesList, setInvoicesList] = useState([]);
@@ -44,7 +45,7 @@ const AllInvoice = ({ customerId }) => {
       console.log(error);
       toast.error(
         error?.response?.data?.message ||
-          "An error occurred while fetching customer invoices."
+          "An error occurred while fetching customer invoices.",
       );
     } finally {
       setLoading(false);
@@ -87,8 +88,6 @@ const AllInvoice = ({ customerId }) => {
     const gstAmount = totalAmount * 0.18;
     const tdsAmount = invoice?.tanNo ? totalAmount * 0.02 : 0;
 
-
-
     const currentBalance =
       currentLedger?.entries?.length > 0
         ? currentLedger.entries[currentLedger.entries.length - 1].balance
@@ -112,7 +111,6 @@ const AllInvoice = ({ customerId }) => {
       },
     };
 
-
     try {
       let res;
       if (currentLedger) {
@@ -121,7 +119,6 @@ const AllInvoice = ({ customerId }) => {
           proposalId: invoice._id,
         });
       }
-      console.log(res,"res");
       if (res.success) {
         toast.success("Ledger Entry created Successfully");
         router.push("/dashboard/customer");
@@ -134,14 +131,49 @@ const AllInvoice = ({ customerId }) => {
     }
   }
 
+  const downloadInvoicePdf = async (invoiceId) => {
+    try {
+      const toastId = toast.loading("Generating PDF...");
+
+      // ✅ Fetch proposal data
+      const res = await pdfDownloaderById(invoiceId);
+
+      if (!res?.success) {
+        throw new Error("Failed to fetch proposal data");
+      }
+
+      const pdfData = res.data;
+
+      // ✅ Generate PDF Blob
+      const blob = await pdf(<InvoicePdfTemplate data={pdfData} />).toBlob();
+
+      // ✅ Create download link
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${pdfData?.clientName}-Invoice.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      toast.success("PDF downloaded!", { id: toastId });
+    } catch (error) {
+      console.error(error);
+      toast.error("Download failed");
+    }
+  };
+
   useEffect(() => {
     fetchingInvoices();
   }, [customerId]);
 
   if (loading) {
-    return (
-      <Loading />
-    );
+    return <Loading />;
   }
 
   return (
@@ -224,21 +256,15 @@ const AllInvoice = ({ customerId }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center gap-4">
+                      <button onClick={() => downloadInvoicePdf(invoice._id)}>
+                        <Download />
+                      </button>
                       <Link
                         href={`/dashboard/invoice/pdf-download/${invoice._id}`}
                       >
-                        <Download />
-                      </Link>
-                      <Link
-                        href={`/dashboard/invoice/view-invoice/${invoice._id}`}
-                      >
                         <Eye />
                       </Link>
-                      {/* <Link
-                        href={`/dashboard/invoice/edit-invoice/${invoice?._id}`}
-                      >
-                        <Pencil />
-                      </Link> */}
+
                       <button
                         onClick={() => handleInvoiceSend(invoice?._id)}
                         disabled={sendingInvoiceId === invoice._id}

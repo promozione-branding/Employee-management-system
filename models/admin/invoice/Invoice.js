@@ -58,22 +58,26 @@ InvoiceSchema.pre("save", async function (next) {
   if (this.isNew) {
     const now = new Date();
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const datePrefix = `${year}${month}${day}`;
+
+    const prefix = `INQ${year}`;
 
     const lastInvoice = await this.constructor
       .findOne({
-        invoiceNo: { $regex: `^${datePrefix}` },
+        invoiceNo: { $regex: `^${prefix}` },
       })
       .sort({ invoiceNo: -1 });
 
-    let nextInvoiceNumber = 1;
+    let nextNumber = 551;
+
     if (lastInvoice && lastInvoice.invoiceNo) {
-      const lastNumber = parseInt(lastInvoice.invoiceNo.slice(-2), 10);
-      nextInvoiceNumber = lastNumber + 1;
+      const lastNumber = parseInt(
+        lastInvoice.invoiceNo.replace(prefix, ""),
+        10
+      );
+      nextNumber = lastNumber + 1;
     }
-    this.invoiceNo = `${datePrefix}${String(nextInvoiceNumber).padStart(2, "0")}`;
+
+    this.invoiceNo = `${prefix}${String(nextNumber).padStart(6, "0")}`;
   }
 
   next();

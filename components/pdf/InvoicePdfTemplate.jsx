@@ -52,13 +52,12 @@ const Invoice = ({ data }) => {
 
   const subtotal = services.reduce((sum, service) => sum + service.price, 0);
 
-  const tdsAmount = subtotal * 0.02;
-
-
-  const taxableAmount = subtotal ;
+  const taxableAmount = subtotal;
 
   const taxRate = 0.18;
   const taxAmount = taxableAmount * taxRate;
+
+
 
   const CgstAmount = taxableAmount * 0.09;
 
@@ -310,7 +309,7 @@ const Invoice = ({ data }) => {
                 { flex: 1, fontWeight: "bold", textAlign: "right" },
               ]}
             >
-              {formatIndianCurrency(totalAmount) || "000.00"}
+              {formatIndianCurrency(totalAmount + taxAmount) || "000.00"}
             </Text>
           </View>
         </View>
@@ -389,7 +388,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     objectFit: "cover",
-    borderRadius:20
+    borderRadius: 20,
   },
   title: {
     top: 20, // vertically center relative to logo

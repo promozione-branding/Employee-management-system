@@ -184,6 +184,7 @@ const ProposalPdfTemplate = ({ data }) => {
           <Text>Address: {data.clientAddress}</Text>
           <Text>GST No.: {data.GSTIN}</Text>
           <Text>Date: {proposalDate}</Text>
+          <Text>Proposal No. : {data?.proposalNo}</Text>
         </View>
 
         {/* table header */}
@@ -311,8 +312,19 @@ const ProposalPdfTemplate = ({ data }) => {
 
         {/* here is the notes  */}
         {data?.notes && (
-          <View style={{ marginTop: "10px" }}>
-            <Text>Note: {data?.notes}</Text>
+          <View style={styles.notesBox}>
+            {data?.notes?.split(",").map((item, idx) => (
+              <Text
+                key={idx}
+                style={
+                  idx === 0
+                    ? styles.noteText
+                    : { marginLeft: 23, fontSize: 8.5 }
+                }
+              >
+                {idx === 0 ? "Note: " : ""}• {item.trim()}
+              </Text>
+            ))}
           </View>
         )}
 
@@ -402,7 +414,6 @@ const ProposalPdfTemplate = ({ data }) => {
               <Text style={styles.deliverableContent}>
                 • 3 Banner for Hero Section
               </Text>
-              <Text style={styles.deliverableContent}>• Blog Building</Text>
               <Text style={styles.deliverableContent}>
                 • Custom UI & UX (No Templates)
               </Text>
@@ -437,7 +448,6 @@ const ProposalPdfTemplate = ({ data }) => {
               <Text style={styles.deliverableContent}>
                 • Website Enrichment in 72 hr
               </Text>
-              <Text style={styles.deliverableContent}>• Free Domain</Text>
               <Text style={styles.deliverableContent}>
                 • Trust Elite Certificate
               </Text>
@@ -1076,6 +1086,15 @@ const styles = StyleSheet.create({
     marginTop: 14,
     fontSize: 8,
     lineHeight: 1.5,
+  },
+
+  notesBox: {
+    // marginTop: 2,
+    paddingTop: 5,
+  },
+
+  noteText: {
+    fontSize: 8.5,
   },
 
   /* ---------------- PAGE 2 ---------------- */

@@ -1,6 +1,8 @@
 "use client";
 
+import ProposalPdfTemplate from "@/components/pdf/ProposalPdfTemplate";
 import { Button } from "@/components/ui/button";
+import { pdf } from "@react-pdf/renderer";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +19,7 @@ import {
 import { createLedgerService, ledgerEntriesService } from "@/service/ledger";
 import {
   deleteProposalService,
+  pdfDownloadService,
   proposalLedgerEntryValidation,
   sendProposalPdfEmailService,
 } from "@/service/proposal";
@@ -269,6 +272,43 @@ const CreateProposal = ({ customerId }) => {
     }
   }
 
+  const downloadProposalPdf = async (proposalId) => {
+    try {
+      const toastId = toast.loading("Generating PDF...");
+
+      // ✅ Fetch proposal data
+      const res = await pdfDownloadService(proposalId);
+
+      if (!res?.success) {
+        throw new Error("Failed to fetch proposal data");
+      }
+
+      const pdfData = res.data;
+
+      // ✅ Generate PDF Blob
+      const blob = await pdf(<ProposalPdfTemplate data={pdfData} />).toBlob();
+
+      // ✅ Create download link
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${pdfData?.clientName}-Proposal.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      toast.success("PDF downloaded!", { id: toastId });
+    } catch (error) {
+      console.error(error);
+      toast.error("Download failed");
+    }
+  };
+
   useEffect(() => {
     fetchLedgerDetails();
     getAllCustomerPropsals();
@@ -328,13 +368,17 @@ const CreateProposal = ({ customerId }) => {
                   href={`/sales-dashboard/proposal/pdf-download/${item?._id}`}
                   className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
                 >
-                  <Download />
+                  <Eye />
                 </Link>
+                <button
+                  onClick={() => downloadProposalPdf(item?._id)}
+                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
+                >
+                  <Download />
+                </button>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <button
-                      className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
+                    <button className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed">
                       <Mail />
                     </button>
                   </DialogTrigger>
@@ -360,18 +404,22 @@ const CreateProposal = ({ customerId }) => {
                   </DialogContent>
                 </Dialog>
 
-                <Link
-                  href={`/sales-dashboard/proposal/edit-proposal/${item?._id}`}
-                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
-                >
-                  <Pencil />
-                </Link>
-                <div
-                  onClick={() => handleDeleteProposal(item?._id)}
-                  className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
-                >
-                  <Trash2 />
-                </div>
+                {!item?.ledgerEntry && (
+                  <Link
+                    href={`/sales-dashboard/proposal/edit-proposal/${item?._id}`}
+                    className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
+                  >
+                    <Pencil />
+                  </Link>
+                )}
+                {!item?.ledgerEntry && (
+                  <div
+                    onClick={() => handleDeleteProposal(item?._id)}
+                    className="bg-gray-200 border-black h-10 w-10 flex items-center justify-center rounded-full"
+                  >
+                    <Trash2 />
+                  </div>
+                )}
 
                 <Dialog>
                   <DialogTrigger asChild>

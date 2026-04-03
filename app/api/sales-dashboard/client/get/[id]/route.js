@@ -9,8 +9,10 @@ export async function GET(req, { params }) {
     const { id } = await params;
 
     const allCustomer = await Customer.find({ salesExecutive: id })
-      .select("name company phone GSTIN Address")
+      .select("name company phone GSTIN Address isPaid")
       .sort({ createdAt: -1 });
+
+
     if (!allCustomer) {
       return NextResponse.json({
         success: false,

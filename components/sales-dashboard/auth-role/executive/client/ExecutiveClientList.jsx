@@ -10,7 +10,16 @@ import {
   deleteCustomerServices,
   getCustomerServices,
 } from "@/service/customer";
-import { Eye, FilePlusCorner, Search, SquarePen, Trash, X } from "lucide-react";
+import {
+  Eye,
+  FilePlusCorner,
+  Network,
+  Plus,
+  Search,
+  SquarePen,
+  Trash,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -20,6 +29,7 @@ import {
   createClientService,
   getClientService,
 } from "@/service/sales-dashboard/client";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +42,17 @@ const ExecutiveClientList = () => {
   const [formData, setFormData] = useState(initialClientData);
   const [editingId, setEditingId] = useState(null);
   const { employee, loading } = useSalesEmployeeStore();
-    const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+
+  const [isPaid, setIsPaid] = useState(false);
+
+
+
+  const filteredCustomers = isPaid
+    ? customers.filter((item) => item?.isPaid === true)
+    : customers;
+
+
 
   /* ---------------- Fetch ---------------- */
   const fetchCustomers = async () => {
@@ -158,21 +178,24 @@ const ExecutiveClientList = () => {
   /* ---------------- UI ---------------- */
   if (loading || clientLoading) {
     return (
-      <div className="w-full">
-        <div className="grid grid-cols-6 gap-6 bg-zinc-200 p-3 font-semibold rounded">
-          <div>Company</div>
-          <div>Name</div>
-          <div>Phone</div>
-          <div>GST</div>
-          <div>Address</div>
-          <div>Actions</div>
+      <div className="w-full space-y-4">
+        <div className="hidden md:grid grid-cols-6 gap-6 bg-gray-100 p-3 font-semibold rounded-t-xl">
+          <p>Company</p>
+          <p>Name</p>
+          <p>Phone</p>
+          <p>GST</p>
+          <p>Address</p>
+          <p>Actions</p>
         </div>
-        <div className="space-y-2 mt-2">
+        <div className="space-y-3">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="grid grid-cols-6 gap-3 p-3 border-b">
+            <div
+              key={i}
+              className="grid grid-cols-2 md:grid-cols-6 gap-4 p-4 md:p-3 border rounded-xl md:rounded-none md:border-0 md:border-b"
+            >
               <Skeleton className="h-4 w-[80%]" />
-              <Skeleton className="h-4 w-[60%]" />
-              <Skeleton className="h-4 w-[70%]" />
+              <Skeleton className="h-4 w-[60%] hidden md:block" />
+              <Skeleton className="h-4 w-[70%] hidden md:block" />
               <Skeleton className="h-4 w-[50%]" />
               <Skeleton className="h-4 w-[90%]" />
               <div className="flex gap-8">
@@ -188,14 +211,72 @@ const ExecutiveClientList = () => {
   }
 
   return (
-    <div>
-      {/* Floating Add Button */}
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-10 right-10 h-20 w-20 bg-blue-500 text-white rounded-full flex items-center justify-center"
-      >
-        <FilePlusCorner size={30} />
-      </button>
+    <div className="flex flex-col gap-4 p-1 md:p-3">
+      {/* header  */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex justify-between items-center gap-2">
+          <h1 className="text-lg  md:text-2xl font-semibold">Clients</h1>
+          <form onSubmit={searchHandler} className="flex gap-2">
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Client search"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                required
+                className="pr-8"
+              />
+              {searchInput && (
+                <X
+                  size={15}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 hover:text-black"
+                  onClick={() => {
+                    setSearchInput("");
+                    fetchCustomers();
+                  }}
+                />
+              )}
+            </div>
+
+            <Button type="submit">
+              <Search />
+            </Button>
+          </form>
+        </div>
+
+        <div className="flex flex-wrap gap-3 justify-between">
+          <div className="flex items-center gap-2 bg-white border border-gray-200 px-3 py-2 rounded-md shadow-sm hover:bg-gray-50 transition-colors">
+            <Checkbox
+              id="paid-filter"
+              checked={isPaid}
+              onCheckedChange={setIsPaid}
+            />
+            <label
+              htmlFor="paid-filter"
+              className="text-sm font-medium leading-none cursor-pointer select-none"
+            >
+              Paid
+            </label>
+          </div>
+
+          {/* for mobile  */}
+          <Button
+            variant="outline"
+            onClick={() => setOpen(true)}
+            className="bg-orange-500 hover:bg-orange-600 text-white lg:hidden"
+            title={"add Client"}
+          >
+            <Plus size={18} />
+          </Button>
+
+          <Button
+            onClick={() => setOpen(true)}
+            className="bg-orange-500 hover:bg-orange-600 text-white hidden lg:flex"
+          >
+            <Plus size={18} /> Add Client
+          </Button>
+        </div>
+      </div>
 
       {/* Sheet */}
       <Sheet open={open} onOpenChange={resetForm}>
@@ -214,76 +295,89 @@ const ExecutiveClientList = () => {
         </SheetContent>
       </Sheet>
 
-      <div>
-        <div className="text-2xl">Client List</div>
-        <form onSubmit={searchHandler} className="flex gap-2 my-4">
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Client search"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              required
-              className="pr-8"
-            />
-            {searchInput && (
-              <X
-                size={15}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 hover:text-black"
-                onClick={() => {
-                  setSearchInput("");
-                  fetchCustomers();
-                }}
-              />
-            )}
-          </div>
-
-          <Button type="submit">
-            <Search />
-          </Button>
-        </form>
-      </div>
-
-      {/* Table */}
-      {!customers.length ? (
-        <div className="mt-20 text-center text-gray-500">
-          No customers found
+      {/* DESKTOP TABLE */}
+      <div className="hidden md:block bg-white rounded-xl shadow border overflow-x-auto">
+        <div className="grid md:grid-cols-5 text-gray-500 border-b py-1 font-semibold px-4">
+          <p>Name</p>
+          <p>Company</p>
+          <p className="text-center">Phone</p>
+          <p className="text-center">GSTIN</p>
+          <p className="text-center">Action</p>
         </div>
-      ) : (
-        <div className="">
-          <div className="grid grid-cols-6 gap-6 bg-zinc-200 p-3 font-semibold rounded">
-            <div>Company</div>
-            <div>Name</div>
-            <div>Phone</div>
-            <div>GST</div>
-            <div>Address</div>
-            <div>Actions</div>
-          </div>
 
-          {customers.map((c) => (
-            <div
-              key={c._id}
-              className="grid grid-cols-6 gap-3 p-3 border-b hover:bg-white"
-            >
-              <div>{c.company}</div>
-              <div>{c.name}</div>
-              <div>{c.phone}</div>
-              <div>{c.GSTIN}</div>
-              <div>{c.Address?.slice(0, 20)}...</div>
+        <div className="lg:h-[59vh] lg:overflow-x-auto">
+          {filteredCustomers.map(
+            ({ company, name, phone, GSTIN, _id, isPaid }, idx) => (
+              <div
+                key={_id}
+                className={`grid grid-cols-6 md:grid-cols-5  px-4 py-3 items-center border-b ${isPaid && "bg-green-100"} ${
+                  idx % 2 === 0 ? "bg-gray-50" : ""
+                }`}
+              >
+                <p>{name}</p>
+                <p>{company}</p>
+                <p className="text-center">{phone}</p>
 
-              <div className="flex gap-8">
+                <div className="flex flex-wrap gap-1 justify-center">
+                  {GSTIN}
+                </div>
+
+               <div className="flex gap-8 justify-end">
                 <Link
-                  href={`/sales-dashboard/clients/${c._id}/${employee?._id}`}
+                  href={`/sales-dashboard/clients/${_id}/${employee?._id}`}
                 >
                   <Eye />
                 </Link>
-                <SquarePen onClick={() => handleEdit(c._id)} />
-                <Trash onClick={() => handleDelete(c._id)} />
+                <SquarePen onClick={() => handleEdit(_id)} />
+                <Trash onClick={() => handleDelete(_id)} />
+              </div>
+              </div>
+            ),
+          )}
+        </div>
+      </div>
+
+      {/* MOBILE CARD VIEW */}
+
+      <div className="md:hidden flex flex-col gap-3">
+        {filteredCustomers.map(
+          ({ company, name, phone, GSTIN, salesExecutive, _id }) => (
+            <div
+              key={_id}
+              className="bg-white rounded-xl shadow border p-4 flex flex-col gap-2"
+            >
+              <div className="flex justify-between items-center">
+                <p className="font-semibold">{name}</p>
+                <p className="text-sm text-gray-500">{company}</p>
+              </div>
+
+              <p className="text-sm ">GSTIN: {GSTIN}</p>
+              <p className="text-sm">Phone: {phone}</p>
+
+              <div className="flex flex-wrap gap-2">
+                {salesExecutive?.map((item) => (
+                  <span
+                    key={item._id}
+                    className="bg-orange-200 text-xs px-2 py-1 rounded"
+                  >
+                    {item?.basicDetails?.name}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex gap-8">
+                <Link
+                  href={`/sales-dashboard/clients/${_id}/${employee?._id}`}
+                >
+                  <Eye />
+                </Link>
+                <SquarePen onClick={() => handleEdit(_id)} />
+                <Trash onClick={() => handleDelete(_id)} />
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          ),
+        )}
+      </div>
     </div>
   );
 };

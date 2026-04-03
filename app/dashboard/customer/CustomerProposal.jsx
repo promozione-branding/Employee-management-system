@@ -295,7 +295,7 @@ const CustomerProposal = ({ customerId }) => {
 
       const link = document.createElement("a");
       link.href = url;
-      link.download = `proposal-${pdfData?.proposalNo}.pdf`;
+      link.download = `${pdfData?.clientName}-Proposal.pdf`;
 
       document.body.appendChild(link);
       link.click();

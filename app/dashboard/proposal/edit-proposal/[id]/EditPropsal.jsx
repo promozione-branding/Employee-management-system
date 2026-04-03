@@ -257,7 +257,7 @@ export default function ServiceEditor({ proposalId }) {
             <div>
               <div className="flex gap-2 items-center mb-2">
                 <label htmlFor="">Note:</label>
-                <Input
+                <Textarea
                   type="text"
                   placeholder="Notes"
                   value={notesData}
