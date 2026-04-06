@@ -51,7 +51,13 @@ const ClientProposal = ({ clientId }) => {
             return (
               <Link
                 key={item._id}
-                href={`/dashboard/proposal/pdf-download/${proposalId}`}
+                href={
+                  item.action === "CREATE"
+                    ? `/dashboard/proposal/pdf-download/${proposalId}`
+                    : item.action === "DELETE"
+                      ? `/dashboard/proposal/deleted-proposal/${item._id}`
+                      : `/dashboard/proposal/updated-proposal-history/${item._id}`
+                }
                 className="block"
               >
                 <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
@@ -77,7 +83,9 @@ const ClientProposal = ({ clientId }) => {
 
                   <div className="space-y-1 text-sm text-gray-600">
                     <p>
-                      <span className="font-medium text-gray-800">Changed By:</span>{" "}
+                      <span className="font-medium text-gray-800">
+                        Changed By:
+                      </span>{" "}
                       {item.changedBy?.username || "Unknown"}
                     </p>
                     <p className="break-all">

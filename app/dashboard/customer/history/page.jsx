@@ -8,6 +8,7 @@ import {
   BanknoteArrowUp,
   NotebookTabs,
   Paperclip,
+  SquareChartGantt,
   TableProperties,
   Users,
   Volleyball,
@@ -19,7 +20,7 @@ const HistoryPage = ({ customerId }) => {
       label: "Client Profile",
       icon: <Users />,
       href: `/dashboard/customer/history/client-history/${customerId}`,
-    },  
+    },
     {
       label: "Work Details",
       icon: <Activity />,
@@ -35,7 +36,7 @@ const HistoryPage = ({ customerId }) => {
       icon: <Volleyball />,
       href: `/dashboard/customer/history/team-update/${customerId}`,
     },
-      {
+    {
       label: "Attachment",
       icon: <Paperclip />,
       href: `/dashboard/customer/history/attachment-history/${customerId}`,
@@ -44,6 +45,16 @@ const HistoryPage = ({ customerId }) => {
       label: "SEO Report",
       icon: <TableProperties />,
       href: `/dashboard/customer/history/seo-report-history/${customerId}`,
+    },
+    {
+      label: "Proposal",
+      icon: <SquareChartGantt />,
+      href: `/dashboard/customer/history/client-proposal/${customerId}`,
+    },
+    {
+      label: "Invoice",
+      icon: <BanknoteArrowUp />,
+      href: `/dashboard/customer/history/client-invoice/${customerId}`,
     },
   ];
 

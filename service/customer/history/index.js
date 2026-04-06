@@ -35,3 +35,29 @@ export async function seoReportHistoryService(id) {
   );
   return data;
 }
+
+
+export async function getClientProposalCreatedHistory(id) {
+  const { data } = await axiosInstance.get(
+    `/api/customer/history/proposal/create/${id}`,
+  );
+  return data;
+}
+
+
+
+
+export async function getClientProposalDeletedHistory(id) {
+  const { data } = await axiosInstance.get(
+    `/api/customer/history/proposal/deleted-proposal/${id}`,
+  );
+  return data;
+}
+
+export async function getClientProposalUpdateHistory(id) {
+  const { data } = await axiosInstance.get(
+    `/api/customer/history/proposal/edit-proposal/${id}`,
+  );
+  return data;
+}
+
