@@ -442,7 +442,7 @@ const Customer = ({ customerId }) => {
         </div>
       </div>
 
-      <div className="w-full lg:w-[20vw] border p-4 rounded-lg">
+      <div className="w-full lg:w-[30vw] border p-4 rounded-lg">
         <p className="font-semibold text-xl mb-4">Service</p>
         <div className="flex flex-col gap-3 h-[400px] overflow-y-auto">
           {projectCycleData?.projectCycle?.projectDuration?.length > 0 ? (
