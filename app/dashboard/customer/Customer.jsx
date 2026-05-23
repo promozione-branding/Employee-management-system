@@ -31,6 +31,7 @@ const Customer = ({ customerId }) => {
   const [currentEditedId, setCurrentEditedId] = useState(null);
 
   const [projectFormData, setProjectFormData] = useState({
+    projectName: "",
     service: "",
     serviceName: "",
     startDate: "",
@@ -51,11 +52,11 @@ const Customer = ({ customerId }) => {
           projectCycleData?.projectCycle?.projectDuration?.map((item) =>
             item._id === currentEditedId
               ? {
-                  ...item,
-                  service: serviceValue,
-                  startDate: projectFormData?.startDate,
-                  endDate: projectFormData?.endDate,
-                }
+                ...item,
+                service: serviceValue,
+                startDate: projectFormData?.startDate,
+                endDate: projectFormData?.endDate,
+              }
               : item,
           );
 
@@ -79,6 +80,7 @@ const Customer = ({ customerId }) => {
         }
       } else {
         const formData = {
+          projectName: projectFormData?.projectName,
           clientId: customerId,
           service: serviceValue,
           "start-date": projectFormData["start-date"],
@@ -89,6 +91,7 @@ const Customer = ({ customerId }) => {
         if (res.success) {
           toast.success("Project details submitted");
           setProjectFormData({
+            projectName: "",
             service: "",
             serviceName: "",
             "start-date": "",
@@ -134,6 +137,7 @@ const Customer = ({ customerId }) => {
   // edit
   async function handleEditChange(data) {
     setProjectFormData({
+      projectName: data?.projectName,
       service: data.service,
       serviceName: data.service,
       "start-date": data.startDate
@@ -174,20 +178,19 @@ const Customer = ({ customerId }) => {
       const payload = {
         projectCycleId: projectCycleData?.projectCycle?._id,
         durationId: currentEditedId,
-        service:
-          projectFormData.service === "other"
-            ? projectFormData.serviceName
-            : projectFormData.service,
+        projectName: projectFormData?.projectName,
+        service: projectFormData.service === "other" ? projectFormData.serviceName : projectFormData.service,
         startDate: projectFormData.startDate,
         endDate: projectFormData.endDate,
       };
-
+      console.log(projectCycleData?.projectName)
       const res = await updateCustomerProjectPatchService(payload);
 
       if (res.success) {
         toast.success("Project updated successfully");
         setCurrentEditedId(null);
         setProjectFormData({
+          projectName: "",
           service: "",
           serviceName: "",
           startDate: "",
@@ -328,12 +331,20 @@ const Customer = ({ customerId }) => {
       <div>
         <div className="w-full lg:w-[30vw] border p-4 rounded-lg">
           <p className="font-semibold text-lg mb-4">Add Project</p>
-          <form
-            onSubmit={
-              currentEditedId ? handleProjectUpdate : handleProjectSubmit
-            }
+          <form onSubmit={currentEditedId ? handleProjectUpdate : handleProjectSubmit}
             className="flex flex-col gap-3"
           >
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Project</label>
+              <input
+                type="text"
+                value={projectFormData.projectName}
+                onChange={(e) => setProjectFormData({ ...projectFormData, projectName: e.target.value, })}
+                placeholder="Enter Project Name"
+                className="border p-2 rounded-md"
+              />
+            </div>
+
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Service</label>
               <select
@@ -438,6 +449,7 @@ const Customer = ({ customerId }) => {
             projectCycleData?.projectCycle?.projectDuration?.map(
               (item, idx) => (
                 <div key={idx} className="bg-gray-100 p-3 rounded-md border-b">
+                  <p className="font-semibold">{item?.projectName || "-"}</p>
                   <p className="font-semibold capitalize">{item?.service}</p>
                   <div className="text-sm mt-1">
                     <p>

@@ -126,11 +126,11 @@ const ProposalPdfTemplateServer = ({ data }) => {
           <Text style={styles.proposalTitle}>PROPOSAL</Text>
 
           <View style={styles.rightHeader}>
-            <Text style={styles.companyTitle}>Promozione Branding Pvt Ltd</Text>
-            <Text>Vardhman Plaza, Rohini, New Delhi</Text>
+            <Text style={styles.companyTitle}>Inquiry Bazaar Pvt Ltd</Text>
+            <Text>Best Business Park, NSp, Delhi</Text>
             <Text>Call us : 011 42603232</Text>
-            <Text>Email: info@promozionebranding.com</Text>
-            <Text>Website: www.promozionebranding.com</Text>
+            <Text>Email: info@inquirybazaar.com</Text>
+            <Text>Website: www.inquirybazaar.com</Text>
           </View>
         </View>
 
@@ -172,8 +172,8 @@ const ProposalPdfTemplateServer = ({ data }) => {
                   ? formatIndianCurrency(service.discountAmount)
                   : service.discountPercentage && service.amount
                     ? formatIndianCurrency(
-                        (service.amount * service.discountPercentage) / 100,
-                      )
+                      (service.amount * service.discountPercentage) / 100,
+                    )
                     : ""}
               </Text>
 
@@ -192,12 +192,12 @@ const ProposalPdfTemplateServer = ({ data }) => {
                 <Text style={styles.colAmt}>
                   {service?.discountAmount
                     ? formatIndianCurrency(
-                        service?.amount - service?.discountAmount,
-                      )
+                      service?.amount - service?.discountAmount,
+                    )
                     : formatIndianCurrency(
-                        service?.amount -
-                          (service.amount * service.discountPercentage) / 100,
-                      )}
+                      service?.amount -
+                      (service.amount * service.discountPercentage) / 100,
+                    )}
                 </Text>
               </View>
             </View>
@@ -278,7 +278,7 @@ const ProposalPdfTemplateServer = ({ data }) => {
         {/* terms */}
         <View style={styles.termsBox}>
           <Text>
-            • This is an application for Promozione Branding Private Limited
+            • This is an application for Inquiry Bazaar Private Limited
             services. An order confirmation may be done on phone/email before
             booking the order
           </Text>
@@ -291,7 +291,7 @@ const ProposalPdfTemplateServer = ({ data }) => {
           <Text>
             • All online content including text & pictures are to be provided by
             the client who should be the legal copyright owner of the same.
-            Promozione Branding shall not be liable for any claims/damages
+            Inquiry Bazaar shall not be liable for any claims/damages
             arising out of content posted on your catalog
           </Text>
 
@@ -306,7 +306,7 @@ const ProposalPdfTemplateServer = ({ data }) => {
 
           <Text>
             • Pursuant to the approval of this proposal, The Customer hereby
-            allows Promozione Branding Private Limited to make commercial calls
+            allows Inquiry Bazaar Private Limited to make commercial calls
             on its registered mobile number(s) and organization's contact
             number(s
           </Text>
@@ -343,11 +343,11 @@ const ProposalPdfTemplateServer = ({ data }) => {
           </View>
 
           <View style={styles.rightHeader2}>
-            <Text style={styles.companyTitle}>Promozione Branding Pvt Ltd</Text>
-            <Text>Vardhman Plaza, Rohini, New Delhi</Text>
+            <Text style={styles.companyTitle}>Inquiry Bazaar Pvt Ltd</Text>
+            <Text>Best Business Park, NSP, Delhi</Text>
             <Text>Call us : 011 42603232</Text>
-            <Text>Email: info@promozionebranding.com</Text>
-            <Text>Website: www.promozionebranding.com</Text>
+            <Text>Email: info@inquirybazaar.com</Text>
+            <Text>Website: www.inquirybazaar.com</Text>
           </View>
         </View>
 
@@ -355,10 +355,10 @@ const ProposalPdfTemplateServer = ({ data }) => {
         <View style={styles.bankBox}>
           <Text>Note</Text>
           <Text>
-            Cheque/Draft to be made in favor PROMOZIONE BRANDING PRIVATE LIMITED
+            Cheque/Draft to be made in favor INQUIRY BAZAAR PRIVATE LIMITED
           </Text>
           <Text>PAN No.: AAMCP6194C, CIN: U92112DL2024PTC432424</Text>
-          <Text>BANK ACCOUNT NO : 77770597710 BANK NAME : ICICI BANK</Text>
+          <Text>BANK ACCOUNT NO : 777705997170 BANK NAME : ICICI BANK</Text>
           <Text>IFSC CODE : ICIC0000254</Text>
         </View>
 
@@ -371,11 +371,11 @@ const ProposalPdfTemplateServer = ({ data }) => {
           }}
         >
           <Text style={{ marginTop: 8 }}>
-            Regd. Office: Vardhman Plaza, Sector 3, Rohini, Delhi – 110085,
+            Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi, 110034,
             India
           </Text>
           <Text>CIN: U92112DL2024PTC432424</Text>
-          <Text>011 42603232 • info@promozionebranding.com</Text>
+          <Text>011 42603232 • info@inquirybazaar.com</Text>
         </View>
 
         {/* SECTION TITLE */}
@@ -512,11 +512,11 @@ const ProposalPdfTemplateServer = ({ data }) => {
           </View>
 
           <View style={styles.rightHeader2}>
-            <Text style={styles.companyTitle}>Promozione Branding Pvt Ltd</Text>
-            <Text>Vardhman Plaza, Rohini, New Delhi</Text>
+            <Text style={styles.companyTitle}>Inquiry Bazaar Pvt Ltd</Text>
+            <Text>Best Business Park, NSP, Delhi</Text>
             <Text>Call us : 011 42603232</Text>
-            <Text>Email: info@promozionebranding.com</Text>
-            <Text>Website: www.promozionebranding.com</Text>
+            <Text>Email: info@inquirybazaar.com</Text>
+            <Text>Website: www.inquirybazaar.com</Text>
           </View>
         </View>
 
@@ -528,22 +528,22 @@ const ProposalPdfTemplateServer = ({ data }) => {
         {/* TERMS LIST */}
         <View style={styles.termsList}>
           <Text style={styles.termItem}>
-            1) Promozione Branding Private Limited excludes any warranty,
+            1) Inquiry Bazaar Private Limited excludes any warranty,
             express or implied, as to the quality, accuracy, timeliness,
             completeness, performance, fitness, for a particular purpose of any
-            of its contents, hosted on any of Promozione Branding Private
+            of its contents, hosted on any of Inquiry Bazaar Private
             Limited servers, unless otherwise specified in writing.
           </Text>
 
           <Text style={styles.termItem}>
-            2) Promozione Branding Private Limited will not be liable for any
+            2) Inquiry Bazaar Private Limited will not be liable for any
             damages (including, without limitation, damages for loss of business
             projects, or loss of profits) arising in contract, tort or otherwise
             from the use of or inability to use any site or any of its contents.
           </Text>
 
           <Text style={styles.termItem}>
-            3) You indemnify Promozione Branding Private Limited of all claims,
+            3) You indemnify Inquiry Bazaar Private Limited of all claims,
             conflicts or legal proceedings arising out of all information, data,
             text, software, music, sound, photographs, graphics, videos,
             messages or any other material ("content") posted on the website or
@@ -556,7 +556,7 @@ const ProposalPdfTemplateServer = ({ data }) => {
           </Text>
 
           <Text style={styles.termItem}>
-            5) Promozione Branding Private Limited reserves the right to add or
+            5) Inquiry Bazaar Private Limited reserves the right to add or
             change these terms & conditions as and when required without giving
             any notice. Changes will be deemed accepted if you continue to use
             the services.
@@ -564,7 +564,7 @@ const ProposalPdfTemplateServer = ({ data }) => {
 
           <Text style={styles.termItem}>
             6) Corporate Profile prepared by third-party agencies will be a
-            compilation of information of your organization. Promozione Branding
+            compilation of information of your organization. Inquiry Bazaar
             Private Limited will be authorized to use this information for
             promotional purposes.
           </Text>
@@ -574,13 +574,13 @@ const ProposalPdfTemplateServer = ({ data }) => {
           </Text>
 
           <Text style={styles.termItem}>
-            8) Promozione Branding Private Limited may have an option to convert
+            8) Inquiry Bazaar Private Limited may have an option to convert
             your service to an annual service plan. If unable to pay the
             outstanding amount, you may need to discontinue the service plan.
           </Text>
 
           <Text style={styles.termItem}>
-            9) Promozione Branding Private Limited reserves the right to
+            9) Inquiry Bazaar Private Limited reserves the right to
             add/modify/discontinue features offered with a service.
           </Text>
 
@@ -598,7 +598,7 @@ const ProposalPdfTemplateServer = ({ data }) => {
           <Text style={styles.termItem}>
             12) By accepting this document, you agree to these terms and to the
             Terms & Conditions of Use located at:
-            https://promozionebranding.com/terms/
+            https://www.inquirybazaar.com/terms-conditions
           </Text>
         </View>
       </Page>

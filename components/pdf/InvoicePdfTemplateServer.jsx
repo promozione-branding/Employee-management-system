@@ -326,7 +326,7 @@ const InvoicePdfTemplateServer = ({ data }) => {
           </Text>
 
           <Text style={{ marginLeft: 6 }}>
-            Promozione Branding Private Limited.
+            Inquiry Bazaar Private Limited.
           </Text>
 
           <Text>
@@ -344,7 +344,7 @@ const InvoicePdfTemplateServer = ({ data }) => {
 
           <View style={styles.companyDetails}>
             <Text style={{ fontWeight: "bold" }}>
-              Promozione Branding Pvt Ltd.
+              Inquiry Bazaar Pvt Ltd.
             </Text>
             <Text>
               356, Vardhman Grand Plaza, Sec 3, Rohini, New Delhi-110085, India.
@@ -803,7 +803,7 @@ const styles = StyleSheet.create({
 //           </Text>
 
 //           <Text style={{ marginLeft: 6 }}>
-//             Promozione Branding Private Limited.
+//             Inquiry Bazaar Private Limited.
 //           </Text>
 
 //           <Text>
@@ -821,7 +821,7 @@ const styles = StyleSheet.create({
 
 //           <View style={styles.companyDetails}>
 //             <Text style={{ fontWeight: "bold" }}>
-//               Promozione Branding Pvt Ltd.
+//               Inquiry Bazaar Pvt Ltd
 //             </Text>
 //             <Text>
 //               356, Vardhman Grand Plaza, Sec 3, Rohini, New Delhi-110085, India.

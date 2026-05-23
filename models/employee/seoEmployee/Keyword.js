@@ -1,3 +1,4 @@
+import { string } from "joi";
 import mongoose, { Schema } from "mongoose";
 
 const rankingSchema = new mongoose.Schema(
@@ -25,6 +26,11 @@ const keywordSchema = new mongoose.Schema(
   {
     keyword: {
       type: String,
+      required: true,
+      trim: true,
+    },
+    website: {
+      type: String, // ranking position (e.g. 1, 5, 10)
       required: true,
       trim: true,
     },

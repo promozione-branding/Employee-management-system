@@ -38,7 +38,7 @@ const SideBar = ({ children }) => {
   };
 
 
-  
+
 
 
 
@@ -80,7 +80,7 @@ const SideBar = ({ children }) => {
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          {open && <h1 className="text-xl font-bold">Promozione</h1>}
+          {open && <h1 className="text-xl font-bold">Inquiry Bazaar</h1>}
 
           <Button
             variant="ghost"

@@ -45,6 +45,14 @@ export async function customerLedgerService(id) {
   return data;
 }
 
+// delete ledger entry
+export async function deleteLedgerEntryService(ledgerId, entryId) {
+  const { data } = await axiosInstance.delete(
+    `/api/ledger/entry/${ledgerId}/${entryId}`,
+  );
+  return data;
+}
+
 // customer project cycle
 
 export async function createCustomerProjectCycleService(formData) {
@@ -124,9 +132,7 @@ export async function getAllHistory(id, page) {
 
 // all delete customer
 export async function getAllSalesService() {
-  const { data } = await axiosInstance.get(
-    "/api/customer/create/sales-person",
-  );
+  const { data } = await axiosInstance.get("/api/customer/create/sales-person");
 
   return data;
 }

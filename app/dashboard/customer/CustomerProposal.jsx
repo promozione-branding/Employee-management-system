@@ -173,7 +173,6 @@ const CustomerProposal = ({ customerId }) => {
 
       const res = await createLedgerService(formData);
       if (res.success) {
-        router.push("/dashboard/customer");
         toast.success("Ledger Entry created Successfully");
         await proposalLedgerEntryValidation(id, {
           ledgerEntry: true,

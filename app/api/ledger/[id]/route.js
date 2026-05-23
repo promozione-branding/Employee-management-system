@@ -52,46 +52,7 @@ export async function GET(req, {params}) {
   }
 }
 
-// export async function PUT(req, context) {
-//   try {
-//     await connectDB();
 
-//     const { id } = await context.params;
-//     const { entriesData, proposalId } = await req.json();
-
-//     const updatedLedger = await Ledger.findByIdAndUpdate(
-//       id,
-//       {
-//         $push: { entries: entriesData, proposalIds: proposalId },
-//       },
-//       { new: true }
-//     );
-
-//     if (!updatedLedger) {
-//       return NextResponse.json(
-//         {
-//           success: false,
-//           message: "Ledger not found",
-//         },
-//         {
-//           status: 404,
-//         }
-//       );
-//     }
-
-//     return NextResponse.json({
-//       success: true,
-//       message: "Entry added successfully",
-//       data: updatedLedger,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     return NextResponse.json({
-//       success: false,
-//       message: "Server error while adding entry",
-//     });
-//   }
-// }
 
 export async function PUT(req, { params }) {
   try {

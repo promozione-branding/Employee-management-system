@@ -8,11 +8,12 @@ import toast from "react-hot-toast";
 
 const SeoSheet = ({ clientId }) => {
   const [keywordFormData, setKeywordFormData] = useState({
+    website: "",
     keyword: "",
     type: "",
     clientId: clientId || "",
   });
-
+  console.log(keywordFormData)
   const [keywordList, setKeywordList] = useState([]);
   const [keyLoading, setKeyLoading] = useState(true);
 
@@ -24,6 +25,7 @@ const SeoSheet = ({ clientId }) => {
       console.log(res, "res");
       if (res.success) {
         setKeywordFormData({
+          website: "",
           keyword: "",
           type: "",
           clientId: clientId || "",
@@ -84,6 +86,9 @@ const SeoSheet = ({ clientId }) => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-2 font-medium text-gray-900 text-left">
+                    Website
+                  </th>
+                  <th className="px-4 py-2 font-medium text-gray-900 text-left">
                     Keyword
                   </th>
                   <th className="px-4 py-2 font-medium text-gray-900 text-left">
@@ -106,6 +111,9 @@ const SeoSheet = ({ clientId }) => {
                     item.rankings?.[item.rankings.length - 1];
                   return (
                     <tr key={item._id}>
+                      <td className="px-4 py-2 font-medium text-gray-700">
+                        {item?.website || "-"}
+                      </td>
                       <td className="px-4 py-2 font-medium text-gray-700">
                         {item.keyword}
                       </td>

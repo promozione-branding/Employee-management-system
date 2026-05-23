@@ -9,7 +9,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { customerLedgerService } from "@/service/customer";
+import {
+  customerLedgerService,
+  deleteLedgerEntryService,
+} from "@/service/customer";
+import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -17,6 +21,7 @@ import toast from "react-hot-toast";
 const LedgerDetails = ({ customerId }) => {
   const [loading, setLoading] = useState(true);
   const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
+
   const [data, setData] = useState({
     entries: [],
     openingBalance: 0,
@@ -26,29 +31,39 @@ const LedgerDetails = ({ customerId }) => {
 
   const { entries, openingBalance, _id } = data;
 
-  const isDisableManualBtn = entries.filter((item) =>
-    ["upi", "card", "net banking", "cheque"].includes(item?.voucher)
-  ).length
-    ? false
-    : true;
+  async function handleDeleteEntry(entryId) {
+    try {
+      const res = await deleteLedgerEntryService(_id, entryId);
+      console.log(res);
+
+      if (res.success) {
+        fetchLeaderDetail();
+        toast.success(res.message || "Ledger Entry");
+      }
+    } catch (error) {
+      toast.error(error.response.data.message || "Ledger delete entry error");
+      console.log(error);
+    }
+  }
+
+  async function fetchLeaderDetail() {
+    try {
+      if (customerId !== "") {
+        const res = await customerLedgerService(customerId);
+
+        if (res.success) {
+          setLoading(false);
+
+          setData(res?.data?.ledger || { entries: [], openingBalance: 0 });
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message || "Error while fetching the ledger");
+    }
+  }
 
   useEffect(() => {
-    async function fetchLeaderDetail() {
-      try {
-        if (customerId !== "") {
-          const res = await customerLedgerService(customerId);
-
-          if (res.success) {
-            setLoading(false);
-
-            setData(res?.data?.ledger || { entries: [], openingBalance: 0 });
-          }
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error(error.message || "Error while fetching the ledger");
-      }
-    }
     fetchLeaderDetail();
   }, [isManualEntryOpen]);
 
@@ -73,9 +88,7 @@ const LedgerDetails = ({ customerId }) => {
               >
                 <DialogTrigger asChild>
                   <button
-                    className={` ${
-                      isDisableManualBtn ? "hidden" : ""
-                    } bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm`}
+                    className={`bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm`}
                   >
                     Manual Entry
                   </button>
@@ -147,14 +160,23 @@ const LedgerDetails = ({ customerId }) => {
                     _id,
                     proposalId,
                   },
-                  idx
+                  idx,
                 ) => (
-                  <div key={_id} className="flex  border-b border-black">
+                  <div key={_id} className="flex  border-b border-black group">
                     <div className="w-[5vw] border-l-2 border-black pl-2 pt-2">
                       {idx + 1}.
                     </div>
-                    <div className="w-[10vw]  border-r-2 border-l-2 border-black p-3">
+                    <div className="w-[10vw]  border-r-2 border-l-2 border-black p-3 ">
                       {date?.split("T")?.[0]}
+
+                      <span className="hidden group-hover:flex gap-4 duration-300">
+                        <Pencil size={20} className={`text-blue-500  ${entries?.length - 1 !== idx && "hidden"}`} />
+                        <Trash2
+                          size={20}
+                          className={`text-red-500 ${entries?.length - 1 !== idx && "hidden"}`}
+                          onClick={() => handleDeleteEntry(_id)}
+                        />
+                      </span>
                     </div>
                     <div className="w-[35vw] text-left flex flex-col gap-3  border-r-2 border-black p-3">
                       {proposalId !== undefined ? (
@@ -181,7 +203,7 @@ const LedgerDetails = ({ customerId }) => {
                                 ₹ {price?.toLocaleString("en-IN")}
                               </div>
                             </div>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
@@ -198,7 +220,7 @@ const LedgerDetails = ({ customerId }) => {
                       {balance?.toLocaleString("en-IN")}
                     </div>
                   </div>
-                )
+                ),
               )}
             </div>
           </div>

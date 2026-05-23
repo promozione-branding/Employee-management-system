@@ -327,7 +327,7 @@ const Invoice = ({ data }) => {
           </Text>
 
           <Text style={{ marginLeft: 6 }}>
-            Promozione Branding Private Limited.
+            Inquiry Bazaar Private Limited.
           </Text>
 
           <Text>
@@ -345,7 +345,7 @@ const Invoice = ({ data }) => {
 
           <View style={styles.companyDetails}>
             <Text style={{ fontWeight: "bold" }}>
-              Promozione Branding Pvt Ltd.
+              Inquiry Bazaar Pvt Ltd.
             </Text>
             <Text>
               356, Vardhman Grand Plaza, Sec 3, Rohini, New Delhi-110085, India.

@@ -7,6 +7,10 @@ const ProjectCycleSchema = new mongoose.Schema({
   },
   projectDuration: [
     {
+      projectName: {
+        type: String,
+        required: true,
+      },
       service: {
         type: String,
         required: true,

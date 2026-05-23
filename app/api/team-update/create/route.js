@@ -16,7 +16,7 @@ function buildTeamUpdateEmail({ title, description, link }) {
             </p>`
           : ""
       }
-      <p>Promozione Branding Team</p>
+      <p>Inquiry Bazaar Team</p>
     </div>
   `;
 }

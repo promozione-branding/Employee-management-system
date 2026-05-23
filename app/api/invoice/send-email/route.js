@@ -51,9 +51,9 @@ export async function POST(req) {
     });
 
     await transporter.sendMail({
-      from: `"promozione branding proposal" <inquiry.promozione@gmail.com>`,
+      from: `"Inquiry Bazaar proposal" <inquiry.promozione@gmail.com>`,
       to: invoiceFromDb?.clientId?.email,
-      subject: `Your Invoice from Promozione Branding - #${invoiceFromDb?.invoiceNo}`,
+      subject: `Your Invoice from Inquiry Bazaar - #${invoiceFromDb?.invoiceNo}`,
       html: `
         <p>Dear ${invoiceFromDb?.clientName},</p>
         <p>Thank you for your business. Please find your invoice <strong>#${invoiceFromDb?.invoiceNo}</strong> attached for your records.</p>
@@ -61,7 +61,7 @@ export async function POST(req) {
         <p>We appreciate your prompt payment.</p>
         <br>
         <p>Best regards,</p>
-        <p><strong>The Promozione Branding Team</strong><br>
+        <p><strong>The Inquiry Bazaar Team</strong><br>
         <a href="https://promozionebranding.com">www.promozionebranding.com</a></p>
       `,
       attachments: [

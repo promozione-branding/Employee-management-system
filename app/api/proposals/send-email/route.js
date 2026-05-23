@@ -53,13 +53,13 @@ export async function POST(req) {
 
     // 4. Send email with attachment
     const mailOptions = {
-      from: `"promozione branding proposal" <inquiry.promozione@gmail.com>`,
+      from: `"Inquiry Bazaar proposal" <inquiry.promozione@gmail.com>`,
       to: proposal?.clientId?.email,
-      subject: `Your Proposal from Promozione Branding - #${proposal?.proposalNo}`,
+      subject: `Your Proposal from Inquiry Bazaar - #${proposal?.proposalNo}`,
       html: `
         <p>Dear ${proposal?.clientName} Sir,</p>
         <p>I hope this email finds you well.</p>
-        <p>I am writing to you to share with you the proposal for the marketing services that we discussed. At Promozione Branding Pvt Ltd, we take great pride in offering customized solutions that align with your business goals. We are excited about the opportunity to work together and help your brand achieve its marketing objectives.</p>
+        <p>I am writing to you to share with you the proposal for the marketing services that we discussed. At Inquiry Bazaar Pvt Ltd, we take great pride in offering customized solutions that align with your business goals. We are excited about the opportunity to work together and help your brand achieve its marketing objectives.</p>
         <p style="margin: 25px 0; text-align: center;">
           <a href="https://wa.me/919971700871?text=I%20accept%20proposal%20%23${proposal?.proposalNo}" style="background-color: #25D366; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 8px; font-size: 16px; font-weight: bold;">
             Accept Proposal
@@ -67,7 +67,7 @@ export async function POST(req) {
         </p>
         <p>Please find attached Performa Invoice for your reference</p>
         <p>Best regards,</p>
-        <p><strong>The Promozione Branding</strong><br>
+        <p><strong>The Inquiry Bazaar</strong><br>
         <a href="tel:01142603232">011 4260 3232</a></p>
       `,
       attachments: [

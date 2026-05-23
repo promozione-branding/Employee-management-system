@@ -29,23 +29,7 @@ const CreateLedgerPage = ({ customerId }) => {
   const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
   const [loadingForLedgerDetails, setLoadingForLedgerDetails] = useState(true);
 
-  async function fetchProposalInformation() {
-    try {
-      const res = await fetchingProposalsInfo(proposalId);
-      if (res.success) {
-        setLoadingForProposalInfo(false);
-        setProposalDetails(res.data);
-        fetchLedgerDetails(res?.data?.clientId);
-      }
-    } catch (error) {
-      console.log(error);
-      setLoadingForProposalInfo(true);
-      toast.error(
-        error.message || "error while fetching the proposal Information"
-      );
-    }
-  }
-
+ 
   async function fetchLedgerDetails(id) {
     try {
       const res = await customerLedgerService(id);
@@ -82,119 +66,6 @@ const CreateLedgerPage = ({ customerId }) => {
     setFormData((prev) => ({ ...prev, [id]: normalizedValue }));
   };
 
-  // for the proposal entry
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const submissionData = {
-      paymentMethod,
-      ...formData,
-    };
-    if (
-      submissionData?.paymentMethod === "cheque" &&
-      submissionData?.ifscCode &&
-      !IFSC_REGEX.test(submissionData.ifscCode)
-    ) {
-      toast.error("Invalid IFSC Code");
-      return;
-    }
-
-    const formDataLedger = {
-      customerId: proposalDetails?.clientId,
-      proposalIds: (prev) => [...prev, proposalDetails?._id],
-
-      entries: [
-        {
-          date: submissionData?.entryDate,
-          voucher: submissionData?.paymentMethod,
-          debit: 0,
-          credit: 0,
-          balance:
-            proposalDetails?.totalAmount +
-            proposalDetails?.totalAmount * 0.18 -
-            (proposalDetails?.tanNo ? proposalDetails?.totalAmount * 0.02 : 0),
-          particular: {
-            description: `Proposal #${proposalDetails?.proposalNo}`,
-            items: [
-              {
-                subDescription: "18% GST",
-                price: proposalDetails?.totalAmount * 0.18,
-              },
-              {
-                subDescription: "Service Amount",
-                price: proposalDetails?.totalAmount,
-              },
-              ...(proposalDetails?.tanNo
-                ? [
-                    {
-                      subDescription: "2% TDS",
-                      price: proposalDetails?.totalAmount * 0.02,
-                    },
-                  ]
-                : []),
-              {
-                subDescription: "Total Amount",
-                price:
-                  proposalDetails?.totalAmount +
-                  proposalDetails?.totalAmount * 0.18 -
-                  (proposalDetails?.tanNo
-                    ? proposalDetails?.totalAmount * 0.02
-                    : 0),
-              },
-            ],
-          },
-          chequeDetails:
-            submissionData?.paymentMethod === "cheque"
-              ? {
-                  chequeNumber: submissionData?.chequeNumber,
-                  accountNo: submissionData?.accountNo,
-                  chequeDate: submissionData?.chequeDate,
-                  chequeAmount: submissionData?.amount,
-                  bankName: submissionData?.bankName,
-                  branchName: submissionData?.branchName,
-                  ifscCode: submissionData?.ifscCode,
-                }
-              : {},
-          net_banking:
-            submissionData?.paymentMethod === "net-banking"
-              ? {
-                  transactionId: submissionData?.transactionId,
-                  transactionDate: submissionData?.transactionDate,
-                  transactionAmount: submissionData?.amount,
-                }
-              : {},
-          upi:
-            submissionData?.paymentMethod === "upi"
-              ? {
-                  upi_id: submissionData?.upiId,
-                  payerName: submissionData?.payerName,
-                  transactionId: submissionData?.upiTransactionId,
-                }
-              : {},
-          credit_debit_card:
-            submissionData?.paymentMethod === "card"
-              ? {
-                  card_type: submissionData?.cardType,
-                  cardLastNo: submissionData?.last4Digits,
-                  bankName: submissionData?.issuingBank,
-                  cardHolderName: submissionData?.cardholderName,
-                }
-              : {},
-        },
-      ],
-    };
-
-    try {
-      const res = await createLedgerService(formDataLedger);
-      if (res.success) {
-        toast.success("Ledger Entry create successfully");
-        router.push("/dashboard/customer");
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message || "Error while create ledger");
-    }
-  };
 
   // this is the main entry function
   async function handleEntrySubmit(e) {

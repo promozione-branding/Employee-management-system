@@ -8,8 +8,8 @@ export async function PATCH(req) {
     await connectDB();
 
     const body = await req.json();
-    const { projectCycleId, durationId, service, startDate, endDate } = body;
-
+    const { projectCycleId, durationId, service, startDate, endDate, projectName } = body;
+    console.log(projectName)
     // ---- validations ----
     if (!projectCycleId || !durationId) {
       return NextResponse.json(
@@ -36,6 +36,7 @@ export async function PATCH(req) {
     if (service) updateFields["projectDuration.$.service"] = service;
     if (startDate) updateFields["projectDuration.$.startDate"] = startDate;
     if (endDate) updateFields["projectDuration.$.endDate"] = endDate;
+    if (projectName) updateFields["projectDuration.$.projectName"] = projectName;
 
     if (Object.keys(updateFields).length === 0) {
       return NextResponse.json(
