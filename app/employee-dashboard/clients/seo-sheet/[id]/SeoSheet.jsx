@@ -104,6 +104,7 @@ const SeoSheet = ({ clientId }) => {
         <thead className="border-b bg-gray-100">
           <tr>
             <th className="border-r px-5">S.No</th>
+            <th className="border-r px-5">Website</th>
             <th className="border-r px-5">Keyword</th>
 
             {dates.map((date, i) => (
@@ -119,6 +120,7 @@ const SeoSheet = ({ clientId }) => {
             return (
               <tr key={kw._id} className="border px-5">
                 <td className="border-r px-2">{index + 1}</td>
+                <td className="border-r px-2">{kw?.website}</td>
 
                 <Dialog
                   open={updatekeywordId === kw._id}
@@ -157,9 +159,8 @@ const SeoSheet = ({ clientId }) => {
                   return (
                     <td
                       key={i}
-                      className={`px-2 text-center ${
-                        found ? "bg-red-100" : ""
-                      }`}
+                      className={`px-2 text-center ${found ? "bg-red-100" : ""
+                        }`}
                     >
                       {found ? (
                         <>
