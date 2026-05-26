@@ -15,7 +15,7 @@ import {
   getSeoSheetService,
   updateRankingService,
 } from "@/service/customer/work";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const SeoSheet = ({ clientId }) => {
@@ -37,7 +37,11 @@ const SeoSheet = ({ clientId }) => {
     const res = await getSeoSheetService(clientId);
 
     const sheet = res.data;
+    const newData = sheet.keywords.filter((i) => i.project?.employeeId?.some(
+      (id) => id.toString() === employee?._id?.toString()
+    ));
 
+    console.log(newData, sheet.keywords, employee)
     // 🧠 Extract all unique dates
     let allDates = [];
 
@@ -54,7 +58,7 @@ const SeoSheet = ({ clientId }) => {
     allDates.sort((a, b) => new Date(a) - new Date(b));
 
     setDates(allDates);
-    setData(sheet);
+    setData(newData);
   };
 
   async function updateRankingHandler(e) {
@@ -90,9 +94,25 @@ const SeoSheet = ({ clientId }) => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [employee]);
 
   if (!data) return <p>Loading...</p>;
+  // console.log(data)
+
+  const groupedData = data.reduce((acc, kw) => {
+    const projectId = kw.projectId;
+
+    if (!acc[projectId]) {
+      acc[projectId] = {
+        projectName: kw?.project?.projectName || "Unknown Project",
+        keywords: [],
+      };
+    }
+
+    acc[projectId].keywords.push(kw);
+
+    return acc;
+  }, {});
 
   return (
     <div style={{ overflowX: "auto" }}>
@@ -104,7 +124,7 @@ const SeoSheet = ({ clientId }) => {
         <thead className="border-b bg-gray-100">
           <tr>
             <th className="border-r px-5">S.No</th>
-            <th className="border-r px-5">Website</th>
+            {/* <th className="border-r px-5">Project</th> */}
             <th className="border-r px-5">Keyword</th>
 
             {dates.map((date, i) => (
@@ -116,66 +136,100 @@ const SeoSheet = ({ clientId }) => {
         </thead>
 
         <tbody>
-          {data.keywords.map((kw, index) => {
-            return (
-              <tr key={kw._id} className="border px-5">
-                <td className="border-r px-2">{index + 1}</td>
-                <td className="border-r px-2">{kw?.website}</td>
+          {Object.entries(groupedData).map(
+            ([projectId, projectData]) => (
+              <React.Fragment key={projectId}>
+                <tr className="bg-gray-100">
+                  <td colSpan={dates.length + 3}
+                    className="px-4 py-3 font-bold text-gray-800"
+                  >
+                    {projectData.projectName}
+                  </td>
+                </tr>
 
-                <Dialog
-                  open={updatekeywordId === kw._id}
-                  onOpenChange={(open) => !open && setUpdatekeywordId("")}
-                >
-                  <DialogTrigger asChild>
-                    <td
-                      onClick={() => setUpdatekeywordId(kw._id)}
-                      className={`border-r px-5 py-2 capitalize ${kw.type === "primary" ? "font-bold text-blue-600" : ""}`}
-                    >
-                      {kw.keyword}
-                    </td>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Update Ranking</DialogTitle>
-                      <DialogDescription>{kw.keyword}</DialogDescription>
-                    </DialogHeader>
-
-                    <div>
-                      <CommonForm
-                        formControls={updateRankingFormControls}
-                        formData={updateRankingFormData}
-                        setFormData={setUpdateRankingFormData}
-                        onSubmit={updateRankingHandler}
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-
-                {dates.map((date, i) => {
-                  const found = kw.rankings.find(
-                    (r) => new Date(r.date).toDateString() === date,
-                  );
-
+                {/* PROJECT KEYWORDS */}
+                {projectData.keywords.map((kw, index) => {
                   return (
-                    <td
-                      key={i}
-                      className={`px-2 text-center ${found ? "bg-red-100" : ""
-                        }`}
-                    >
-                      {found ? (
-                        <>
-                          {found.page} Page <br />
-                          {found.position} Position
-                        </>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
+                    <tr key={kw._id} className="border px-5">
+                      <td className="border-r px-2">
+                        {index + 1}
+                      </td>
+
+                      <Dialog
+                        open={updatekeywordId === kw._id}
+                        onOpenChange={(open) =>
+                          !open && setUpdatekeywordId("")
+                        }
+                      >
+                        <DialogTrigger asChild>
+                          <td
+                            onClick={() =>
+                              setUpdatekeywordId(kw._id)
+                            }
+                            className={`border-r px-5 py-2 capitalize cursor-pointer ${kw.type === "primary"
+                              ? "font-bold text-blue-600"
+                              : ""
+                              }`}
+                          >
+                            {kw.keyword}
+                          </td>
+                        </DialogTrigger>
+
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>
+                              Update Ranking
+                            </DialogTitle>
+
+                            <DialogDescription>
+                              {kw.keyword}
+                            </DialogDescription>
+                          </DialogHeader>
+
+                          <div>
+                            <CommonForm
+                              formControls={
+                                updateRankingFormControls
+                              }
+                              formData={updateRankingFormData}
+                              setFormData={
+                                setUpdateRankingFormData
+                              }
+                              onSubmit={updateRankingHandler}
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+
+                      {dates.map((date, i) => {
+                        const found = kw.rankings.find(
+                          (r) =>
+                            new Date(r.date).toDateString() ===
+                            date
+                        );
+
+                        return (
+                          <td
+                            key={i}
+                            className={`px-2 text-center ${found ? "bg-red-100" : ""
+                              }`}
+                          >
+                            {found ? (
+                              <>
+                                {found.page} Page <br />
+                                {found.position} Position
+                              </>
+                            ) : (
+                              "-"
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
                   );
                 })}
-              </tr>
-            );
-          })}
+              </React.Fragment>
+            ))}
         </tbody>
       </table>
     </div>

@@ -29,10 +29,10 @@ const keywordSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    website: {
-      type: String, // ranking position (e.g. 1, 5, 10)
+    projectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ProjectCycle",
       required: true,
-      trim: true,
     },
     type: {
       type: String,

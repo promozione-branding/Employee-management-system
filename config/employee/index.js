@@ -613,13 +613,13 @@ export const announcementFormControls = [
 ];
 
 export const createKeyWordFormControls = [
-  {
-    name: "website",
-    label: "Website",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Website",
-  },
+  // {
+  //   name: "website",
+  //   label: "Website",
+  //   componentType: "input",
+  //   type: "text",
+  //   placeholder: "Enter Website",
+  // },
   {
     name: "keyword",
     label: "Keyword",

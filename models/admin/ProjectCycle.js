@@ -7,6 +7,12 @@ const ProjectCycleSchema = new mongoose.Schema({
   },
   projectDuration: [
     {
+      employeeId: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Employee",
+        },
+      ],
       projectName: {
         type: String,
         required: true,

@@ -17,7 +17,16 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { CheckCircle2, Calendar, Users } from "lucide-react";
+import { CheckCircle2, Calendar, Users, User } from "lucide-react";
+import { getCustomerProjectCycleService } from "@/service/customer";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const ClientWork = ({ customerId }) => {
   const [selectedDomain, setSelectedDomain] = useState("");
@@ -26,9 +35,10 @@ const ClientWork = ({ customerId }) => {
   const [buttonDisable, setButtonDisable] = useState(false);
   const [workDetailLoading, setWorkDetailLoading] = useState(true);
   const [workDetailData, setWorkDetailData] = useState({});
-
   const [selectedEmployee, setSelectedEmployee] = useState([]);
-
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [projectCycleData, setProjectCycleData] = useState(null);
+  const [asignEmployee, setAsignEmployee] = useState(false);
   const router = useRouter();
 
   function handleSelectEmployee(employeeId) {
@@ -52,6 +62,7 @@ const ClientWork = ({ customerId }) => {
 
       const formData = {
         employeeId: selectedEmployee,
+        projectId: selectedProject,
         clientId: customerId,
         department: selectedDomain,
         startedAt: new Date().toISOString(),
@@ -93,6 +104,7 @@ const ClientWork = ({ customerId }) => {
         }
       } catch (error) {
         console.log(error);
+        setEmployeeList([]);
         toast.error(
           error?.response?.data?.message || "Error while fetching employee",
         );
@@ -117,17 +129,43 @@ const ClientWork = ({ customerId }) => {
         console.log(error);
         toast.error(
           error.response.data.message ||
-            "Error while fetching client work details",
+          "Error while fetching client work details",
         );
       }
     }
+
+    async function fetchCustomerProjectCycle() {
+      try {
+        const response = await getCustomerProjectCycleService(customerId);
+        if (response.success) {
+          setProjectCycleData(response.data);
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error(error.message);
+      }
+    }
+
+    fetchCustomerProjectCycle()
     fetchClientWork();
   }, []);
+
+  const handleClick = (e) => {
+    const domainMap = {
+      "seo": "SEO",
+      "web-dev": "WEB_DEVELOPER",
+      "social-media": "SOCIAL_MEDIA",
+      "ads": "ADS_MANAGER",
+    };
+
+    setSelectedDomain(domainMap[e] || "OTHER");
+  };
+
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="w-full lg:w-1/3">
         <div className=" flex flex-col gap-5">
-          <div>
+          {/* <div>
             <p className="text-lg font-medium mb-2">Domains of Work</p>
             <Select onValueChange={(value) => setSelectedDomain(value)}>
               <SelectTrigger>
@@ -156,11 +194,10 @@ const ClientWork = ({ customerId }) => {
                     <button
                       onClick={() => handleSelectEmployee(employee?._id)}
                       key={employee?._id}
-                      className={`${
-                        selectedEmployee.includes(employee?._id)
-                          ? "bg-emerald-100 border-emerald-400"
-                          : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
-                      } border p-4 rounded-lg shadow-sm bg-white w-full`}
+                      className={`${selectedEmployee.includes(employee?._id)
+                        ? "bg-emerald-100 border-emerald-400"
+                        : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
+                        } border p-4 rounded-lg shadow-sm bg-white w-full`}
                     >
                       <p className="font-semibold text-lg">
                         {employee?.basicDetails?.name}
@@ -175,16 +212,67 @@ const ClientWork = ({ customerId }) => {
                 )}
               </div>
             )}
+          </div> */}
+
+          <div>
+            <div className="flex flex-col gap-3">
+              {projectCycleData?.projectCycle?.projectDuration?.length > 0 ? (
+                projectCycleData?.projectCycle?.projectDuration?.map((project) =>
+                  <div key={project._id} className={`border p-4 rounded-lg shadow-sm bg-white w-full`}>
+                    <div className="flex justify-between">
+                      <p className="font-semibold text-lg">
+                        {project?.projectName}
+                      </p>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button onClick={() => { handleClick(project?.service); setSelectedProject(project._id) }} className="bg-gray-100 hover:bg-gray-200 border text-black p-2 rounded-md">
+                            <User size={18} />
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Asign Employee</DialogTitle>
+                          </DialogHeader>
+                          {employeeList.length > 0 ? (
+                            employeeList.map((employee) => (
+                              <button onClick={() => handleSelectEmployee(employee?._id)} key={employee?._id}
+                                className={`${selectedEmployee.includes(employee?._id)
+                                  ? "bg-emerald-100 border-emerald-400"
+                                  : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
+                                  } border p-4 rounded-lg shadow-sm bg-white w-full`}
+                              >
+                                <p className="font-semibold text-lg">
+                                  {employee?.basicDetails?.name}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  {employee?.employeeId}
+                                </p>
+                              </button>
+                            ))
+                          ) : (
+                            <p className="text-gray-500">No employees found</p>
+                          )}
+                          <Button disabled={buttonDisable} className={"mt-2 w-full"} onClick={handleCreateWork}>
+                            Assign client
+                          </Button>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      {project?.service}
+                    </p>
+                  </div>
+                ))
+                : (
+                  <p className="text-center text-gray-500 mt-10">
+                    No Project History Found
+                  </p>
+                )}
+            </div>
           </div>
         </div>
 
-        <Button
-          disabled={buttonDisable}
-          className={"mt-5 w-full"}
-          onClick={handleCreateWork}
-        >
-          Assign client
-        </Button>
+
       </div>
 
       <div className="w-full lg:w-2/3">
@@ -218,13 +306,12 @@ const ClientWork = ({ customerId }) => {
                           </div>
                         </div>
                         <span
-                          className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                            work.status === "COMPLETED"
-                              ? "bg-emerald-50 text-emerald-700"
-                              : work.status === "IN_PROGRESS"
-                                ? "bg-blue-50 text-blue-700"
-                                : "bg-gray-100 text-gray-700"
-                          }`}
+                          className={`text-xs px-2.5 py-1 rounded-full font-medium ${work.status === "COMPLETED"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : work.status === "IN_PROGRESS"
+                              ? "bg-blue-50 text-blue-700"
+                              : "bg-gray-100 text-gray-700"
+                            }`}
                         >
                           {work.status?.replace("_", " ")}
                         </span>
@@ -304,8 +391,8 @@ const ClientWork = ({ customerId }) => {
                 })}
                 {(!workDetailData?.workDetails ||
                   workDetailData.workDetails.length === 0) && (
-                  <p className="text-gray-500 text-sm">No work history found</p>
-                )}
+                    <p className="text-gray-500 text-sm">No work history found</p>
+                  )}
               </div>
             </div>
           </div>

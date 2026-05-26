@@ -72,6 +72,14 @@ export async function getCustomerProjectCycleService(id) {
   return data;
 }
 
+export async function getCustomerSeoProjectCycleService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/customer/project-cycle/get-client-seo-project/${id}`,
+  );
+
+  return data;
+}
+
 export async function updateCustomerProjectCycleService(id, formData) {
   const { data } = await axiosInstance.put(
     `/api/customer/project-cycle/get-client-project/${id}`,

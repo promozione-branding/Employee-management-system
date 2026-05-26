@@ -7,9 +7,9 @@ import SeoSheet from "@/models/employee/seoEmployee/SeoSheet";
 export async function POST(req) {
   try {
     await connectDB();
-    const { website, clientId, keyword, type } = await req.json();
-    console.log(website)
-    const newKeyword = await Keyword.create({ keyword, type, website });
+    const { projectId, clientId, keyword, type } = await req.json();
+    // console.log(website)
+    const newKeyword = await Keyword.create({ keyword, type, projectId });
 
     await SeoSheet.findOneAndUpdate(
       { clientId },

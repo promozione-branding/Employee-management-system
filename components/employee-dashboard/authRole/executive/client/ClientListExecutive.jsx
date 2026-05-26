@@ -35,7 +35,7 @@ const ClientListExecutive = () => {
   }, [employee?._id]);
 
   const clientList = clients?.filter((client) => client?.clientId !== null);
-  // console.log(clients,"clients");
+  console.log(clients,"clients");
 
   if (loading) {
     return <Loading />;

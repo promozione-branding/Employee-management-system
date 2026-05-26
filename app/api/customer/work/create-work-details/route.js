@@ -1,10 +1,11 @@
 import { connectDB } from "@/lib/db";
 import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
 import Employee from "@/models/employee/Employee";
-import Customer from "@/models/admin/Customer";
+import Customer from "@/models/admin/Customer";;
 import { NextResponse } from "next/server";
 import { createAuditLog } from "@/utils/createAuditLog";
 import { getAuthUser } from "@/lib/getAuthUser";
+import ProjectCycle from "@/models/admin/ProjectCycle";
 
 export async function POST(req) {
   try {
@@ -23,6 +24,7 @@ export async function POST(req) {
 
     const {
       employeeId,
+      projectId,
       clientId,
       department,
       checklist = [],
@@ -31,7 +33,7 @@ export async function POST(req) {
       startedAt,
     } = body;
 
-    if (!employeeId || !clientId || !department) {
+    if (!employeeId || !clientId || !department || !projectId) {
       return NextResponse.json(
         {
           success: false,
@@ -61,6 +63,19 @@ export async function POST(req) {
       await Employee.updateMany(
         { _id: { $in: employeeIds } },
         { $addToSet: { workDetails: workDetail._id } }
+      );
+
+      await ProjectCycle.updateOne(
+        {
+          "projectDuration._id": projectId,
+        },
+        {
+          $addToSet: {
+            "projectDuration.$.employeeId": {
+              $each: employeeIds,
+            },
+          },
+        }
       );
 
       const updatedWorkDetail = await EmployeeWorkDetail.findById(
@@ -99,6 +114,7 @@ export async function POST(req) {
     workDetail = await EmployeeWorkDetail.create({
       employeeId: employeeIds,
       clientId,
+      projectId,
       department,
       checklist,
       status,

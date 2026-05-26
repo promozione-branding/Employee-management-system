@@ -17,7 +17,6 @@ const SeoSheetSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const SeoSheet =
-  mongoose.models.SeoSheet || mongoose.model("SeoSheet", SeoSheetSchema);
+const SeoSheet = mongoose.models.SeoSheet || mongoose.model("SeoSheet", SeoSheetSchema);
 
 export default SeoSheet;

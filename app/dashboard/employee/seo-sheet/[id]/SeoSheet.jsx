@@ -1,31 +1,40 @@
 "use client";
 
 import CommonForm from "@/components/layout/Form";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createKeyWordFormControls } from "@/config/employee";
+import { getCustomerSeoProjectCycleService } from "@/service/customer";
 import { createKeyService, getSeoSheetService } from "@/service/customer/work";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 const SeoSheet = ({ clientId }) => {
   const [keywordFormData, setKeywordFormData] = useState({
-    website: "",
+    projectId: "",
     keyword: "",
     type: "",
     clientId: clientId || "",
   });
-  console.log(keywordFormData)
+  const [projectCycleData, setProjectCycleData] = useState(null);
   const [keywordList, setKeywordList] = useState([]);
   const [keyLoading, setKeyLoading] = useState(true);
 
+  // console.log(keywordList, "res");
   async function createKeywordHandle(e) {
     e.preventDefault();
 
     try {
       const res = await createKeyService(keywordFormData);
-      console.log(res, "res");
       if (res.success) {
         setKeywordFormData({
-          website: "",
+          projectId: "",
           keyword: "",
           type: "",
           clientId: clientId || "",
@@ -58,15 +67,70 @@ const SeoSheet = ({ clientId }) => {
     }
   }
 
+  async function fetchCustomerProjectCycle() {
+    try {
+      const response = await getCustomerSeoProjectCycleService(clientId);
+      if (response.success) {
+        setProjectCycleData(response.data);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  }
+
+  // console.log(keywordFormData)
+
   useEffect(() => {
     if (clientId) {
       fetchKeyHandler();
+      fetchCustomerProjectCycle()
     }
   }, [clientId]);
+
+  const groupedKeywords = keywordList.reduce((acc, keyword) => {
+    const projectId = keyword.projectId;
+
+    if (!acc[projectId]) {
+      acc[projectId] = {
+        projectName: keyword.project?.projectName || "Unknown Project",
+        keywords: [],
+      };
+    }
+
+    acc[projectId].keywords.push(keyword);
+
+    return acc;
+  }, {});
 
   return (
     <div>
       <div className="lg:w-1/3">
+        <div className="mb-2">
+          <div className="grid w-full gap-1.5">
+            <Label className="mb-1">Project</Label>
+          </div>
+
+          <Select
+            onValueChange={(value) => setKeywordFormData({
+              ...keywordFormData,
+              projectId: value,
+            })}
+            value={keywordFormData.projectId}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={"Select Project"} />
+            </SelectTrigger>
+            <SelectContent>
+              {projectCycleData?.map((optionItem) => (
+                <SelectItem key={optionItem._id} value={optionItem._id}>
+                  {optionItem.projectName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <CommonForm
           onSubmit={createKeywordHandle}
           formData={keywordFormData}
@@ -106,32 +170,51 @@ const SeoSheet = ({ clientId }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {keywordList.map((item) => {
-                  const latestRanking =
-                    item.rankings?.[item.rankings.length - 1];
-                  return (
-                    <tr key={item._id}>
-                      <td className="px-4 py-2 font-medium text-gray-700">
-                        {item?.website || "-"}
-                      </td>
-                      <td className="px-4 py-2 font-medium text-gray-700">
-                        {item.keyword}
-                      </td>
-                      <td className="px-4 py-2 text-gray-700 capitalize">
-                        {item.type}
-                      </td>
-                      <td className="px-4 py-2 text-center text-gray-700">
-                        {latestRanking?.position || "N/A"}
-                      </td>
-                      <td className="px-4 py-2 text-center text-gray-700">
-                        {latestRanking?.page || "N/A"}
-                      </td>
-                      <td className="px-4 py-2 text-right text-gray-700">
-                        {new Date(item.updatedAt).toLocaleDateString()}
+                {Object.entries(groupedKeywords).map(([projectId, projectData]) => (
+                  <React.Fragment key={projectId}>
+
+                    {/* PROJECT HEADER ROW */}
+                    <tr className="bg-gray-100">
+                      <td
+                        colSpan={6}
+                        className="px-4 py-3 font-bold text-gray-800"
+                      >
+                        {projectData.projectName}
                       </td>
                     </tr>
-                  );
-                })}
+
+                    {/* PROJECT KEYWORDS */}
+                    {projectData.keywords.map((item) => {
+                      const latestRanking =
+                        item.rankings?.[item.rankings.length - 1];
+
+                      return (
+                        <tr key={item._id}>
+                          <td></td>
+                          <td className="px-4 py-2 text-gray-700">
+                            {item.keyword}
+                          </td>
+
+                          <td className="px-4 py-2 text-gray-700 capitalize">
+                            {item.type}
+                          </td>
+
+                          <td className="px-4 py-2 text-center text-gray-700">
+                            {latestRanking?.position || "N/A"}
+                          </td>
+
+                          <td className="px-4 py-2 text-center text-gray-700">
+                            {latestRanking?.page || "N/A"}
+                          </td>
+
+                          <td className="px-4 py-2 text-right text-gray-700">
+                            {new Date(item.updatedAt).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </React.Fragment>
+                ))}
               </tbody>
             </table>
           </div>

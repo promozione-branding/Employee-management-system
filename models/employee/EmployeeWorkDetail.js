@@ -47,6 +47,13 @@ const EmployeeWorkDetailSchema = new mongoose.Schema(
       index: true,
     },
 
+    projectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ProjectCycle",
+      required: true,
+      index: true,
+    },
+
     department: {
       type: String,
       enum: [
