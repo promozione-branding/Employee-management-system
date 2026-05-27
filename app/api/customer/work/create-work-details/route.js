@@ -110,6 +110,19 @@ export async function POST(req) {
       );
     }
 
+    await ProjectCycle.updateOne(
+      {
+        "projectDuration._id": projectId,
+      },
+      {
+        $addToSet: {
+          "projectDuration.$.employeeId": {
+            $each: employeeIds,
+          },
+        },
+      }
+    );
+
     // 🆕 CASE 2: CREATE NEW WORK DETAIL
     workDetail = await EmployeeWorkDetail.create({
       employeeId: employeeIds,
