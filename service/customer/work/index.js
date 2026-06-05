@@ -58,3 +58,9 @@ export async function editRankingService(formData) {
   );
   return data;
 }
+
+export async function deleteKeywordService(id) {
+  const { data } = await axiosInstance.delete(`/api/customer/work/seo-sheet/delete-keyword/${id}`);
+
+  return data;
+}

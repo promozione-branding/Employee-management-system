@@ -2,13 +2,13 @@ import { connectDB } from "@/lib/db";
 import SeoSheet from "@/models/employee/seoEmployee/SeoSheet";
 import ProjectCycle from "@/models/admin/ProjectCycle";
 import { NextResponse } from "next/server";
-
+import Keyword from "@/models/employee/seoEmployee/Keyword";
 export async function GET(req, { params }) {
   try {
     await connectDB();
 
+    console.error("error");
     const { id } = await params;
-
     // Get seo sheet with keywords
     const getSeoSheet = await SeoSheet.findOne({ clientId: id, }).populate("keywords");
 

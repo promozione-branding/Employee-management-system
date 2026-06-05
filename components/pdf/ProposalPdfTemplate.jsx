@@ -170,7 +170,7 @@ const ProposalPdfTemplate = ({ data }) => {
       {/* PAGE 1 */}
       <Page size="A4" style={styles.page} wrap>
         {/* watermark */}
-        <Image src={"/blog/logo2.png"} style={styles.watermark} />
+        <Image src={"/pdf/logo.png"} style={styles.watermark} />
 
         {/* header */}
         <PdfHeader />
@@ -384,7 +384,7 @@ const ProposalPdfTemplate = ({ data }) => {
       {/* PAGE 2 */}
 
       <Page size="A4" style={styles.page}>
-        <Image src={"/blog/logo2.png"} style={styles.watermark} fixed />
+        <Image src={"/pdf/logo.png"} style={styles.watermark} fixed />
 
         {/* header */}
         <PdfHeader />

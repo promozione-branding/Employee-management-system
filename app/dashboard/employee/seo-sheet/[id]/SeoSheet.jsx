@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/select";
 import { createKeyWordFormControls } from "@/config/employee";
 import { getCustomerSeoProjectCycleService } from "@/service/customer";
-import { createKeyService, getSeoSheetService } from "@/service/customer/work";
+import { createKeyService, deleteKeywordService, getSeoSheetService } from "@/service/customer/work";
+import { Trash2 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -76,6 +77,26 @@ const SeoSheet = ({ clientId }) => {
     } catch (error) {
       console.log(error);
       toast.error(error.message);
+    }
+  }
+
+  async function handleDeleteKeyword(id) {
+    const confirmed = window.confirm("Are you sure you want to delete this keyword?");
+
+    if (!confirmed) return;
+    try {
+      const res = await deleteKeywordService(id);
+
+      if (res.success) {
+        toast.success(res.message);
+        fetchKeyHandler();
+      }
+    } catch (error) {
+      console.log(error);
+
+      toast.error(
+        error?.response?.data?.message || "Failed to delete keyword"
+      );
     }
   }
 
@@ -167,6 +188,9 @@ const SeoSheet = ({ clientId }) => {
                   <th className="px-4 py-2 font-medium text-gray-900 text-right">
                     Last Updated
                   </th>
+                  <th className="px-4 py-2 font-medium text-gray-900 text-right">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -176,7 +200,7 @@ const SeoSheet = ({ clientId }) => {
                     {/* PROJECT HEADER ROW */}
                     <tr className="bg-gray-100">
                       <td
-                        colSpan={6}
+                        colSpan={7}
                         className="px-4 py-3 font-bold text-gray-800"
                       >
                         {projectData.projectName}
@@ -209,6 +233,11 @@ const SeoSheet = ({ clientId }) => {
 
                           <td className="px-4 py-2 text-right text-gray-700">
                             {new Date(item.updatedAt).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-2 text-right text-gray-700">
+                            <button onClick={() => handleDeleteKeyword(item._id)} className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-md">
+                              <Trash2 size={18} />
+                            </button>
                           </td>
                         </tr>
                       );

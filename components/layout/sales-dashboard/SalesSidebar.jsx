@@ -44,7 +44,7 @@ const SalesSidebar = () => {
     },
     {
       title: "Attendance",
-      href: "https://hrms.promozione.in/login",
+      href: "https://hrms.inquirybazar.com/login",
       label: "Attendance",
       icon: <CalendarCheck size={24} />,
     },
@@ -88,9 +88,8 @@ const SalesSidebar = () => {
 
   return (
     <div
-      className={`bg-white border-r text-black p-4 flex flex-col transition-all h-screen duration-300 ease-in-out relative ${
-        open ? "w-64" : "w-14 md:w-20"
-      }`}
+      className={`bg-white border-r text-black p-4 flex flex-col transition-all h-screen duration-300 ease-in-out relative ${open ? "w-64" : "w-14 md:w-20"
+        }`}
     >
       <div className="flex items-center justify-between mb-6">
         {open && <h1 className="text-2xl font-bold truncate">Promizone</h1>}
@@ -110,9 +109,8 @@ const SalesSidebar = () => {
             key={link.href}
             asChild
             variant="ghost"
-            className={`justify-start gap-4 hover:bg-zinc-700 hover:text-white p-3 ${
-              !open && "justify-center"
-            }`}
+            className={`justify-start gap-4 hover:bg-zinc-700 hover:text-white p-3 ${!open && "justify-center"
+              }`}
           >
             <Link
               href={link.href}
@@ -128,9 +126,8 @@ const SalesSidebar = () => {
       <div className="mt-auto">
         <Button
           variant="ghost"
-          className={`justify-start gap-4 hover:bg-gray-500 hover:text-white w-full p-3 ${
-            !open && "justify-center"
-          }`}
+          className={`justify-start gap-4 hover:bg-gray-500 hover:text-white w-full p-3 ${!open && "justify-center"
+            }`}
           onClick={handleLogout}
         >
           <LogOut size={24} />
