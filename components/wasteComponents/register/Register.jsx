@@ -21,11 +21,11 @@ const Register = () => {
       return;
     }
 
-    if (formData?.email?.split("@")[1] !== "promozionebranding.com") {
-      toast.error("Only official company email is supported.");
-      setLoading(false);
-      return;
-    }
+    // if (formData?.email?.split("@")[1] !== "promozionebranding.com") {
+    //   toast.error("Only official company email is supported.");
+    //   setLoading(false);
+    //   return;
+    // }
 
     if (formData?.password?.length < 8) {
       toast.error("Password must be at least 8 characters long.");

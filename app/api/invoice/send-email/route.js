@@ -62,7 +62,7 @@ export async function POST(req) {
         <br>
         <p>Best regards,</p>
         <p><strong>The Inquiry Bazaar Team</strong><br>
-        <a href="https://promozionebranding.com">www.promozionebranding.com</a></p>
+        <a href="https://inquirybazaar.com/">www.inquirybazaar.com</a></p>
       `,
       attachments: [
         {

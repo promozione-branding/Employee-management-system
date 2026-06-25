@@ -56,10 +56,10 @@ const Employee = () => {
       return;
     }
 
-    if (registerFormData?.email?.split("@")[1] !== "promozionebranding.com") {
-      toast.error("Only official company email is supported.");
-      return;
-    }
+    // if (registerFormData?.email?.split("@")[1] !== "promozionebranding.com") {
+    //   toast.error("Only official company email is supported.");
+    //   return;
+    // }
 
     if (registerFormData?.password?.length < 8) {
       toast.error("Password must be at least 8 characters long.");
@@ -103,7 +103,7 @@ const Employee = () => {
   async function handleResignedEmployee(id) {
     try {
       const res = await resignedEmployeeAdminService(id);
-      console.log(res,"res");
+      console.log(res, "res");
       if (res.success) {
         toast.success("Employee deleted successfully");
         fetchEmployees();

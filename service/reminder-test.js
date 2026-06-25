@@ -50,7 +50,7 @@ function scheduleCheck() {
     console.log("📩 Time matched! Sending email now...");
 
     sendReminderEmail(
-      "aalekh@promozionebranding.com", 
+      "aalekh@promozionebranding.com",
       "Scheduled Reminder Test",
       emailHTML
     )

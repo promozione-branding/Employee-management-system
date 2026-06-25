@@ -23,11 +23,11 @@ export default function LoginPage() {
       return;
     }
 
-    if (form.email.split("@")[1] !== "promozionebranding.com") {
-      toast.error("Only official company email is supported.");
-      setLoading(false);
-      return;
-    }
+    // if (form.email.split("@")[1] !== "promozionebranding.com") {
+    //   toast.error("Only official company email is supported.");
+    //   setLoading(false);
+    //   return;
+    // }
 
     try {
       const res = await sendOtpService(form);
