@@ -2,77 +2,74 @@ import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
 import { NextResponse } from "next/server";
 
+function normalize(text = "") {
+  return String(text).toLowerCase().replace(/[\s.\-_]/g, "");
+}
+
 export async function GET(req) {
   try {
     await connectDB();
-
     const { searchParams } = new URL(req.url);
-
-    const q = searchParams.get("q");
-    const company = searchParams.get("company");
-    const email = searchParams.get("email");
-    const isPaidParam = searchParams.get("isPaid");
-
-    const page = parseInt(searchParams.get("page")) || 1;
-    const limit = parseInt(searchParams.get("limit")) || 10;
-
+    const q = searchParams.get("q") || "";
+    const isPaid = searchParams.get("isPaid");
+    const page = Number(searchParams.get("page")) || 1;
+    const limit = Number(searchParams.get("limit")) || 20;
     const skip = (page - 1) * limit;
+    const filter = {};
 
-    let filter = {};
-
-    // 🔍 GLOBAL SEARCH
-    if (q) {
-      filter.$or = [
-        { name: { $regex: q, $options: "i" } },
-        { company: { $regex: q, $options: "i" } },
-        { email: { $regex: q, $options: "i" } },
-        { GSTIN: { $regex: q, $options: "i" } },
-      ];
+    // Paid filter
+    if (isPaid === "true") {
+      filter.isPaid = true;
     }
 
-    // 🎯 SPECIFIC FILTERS
-    if (company) {
-      filter.company = { $regex: company, $options: "i" };
+    let customers = await Customer.find(filter)
+      .select(`name company phone Address GSTIN salesExecutive isPaid createdAt`)
+      .populate({ path: "salesExecutive", select: "basicDetails.name", }).lean();
+
+    // Elastic search
+    if (q.trim()) {
+      const search = normalize(q);
+      customers = customers.filter((customer) => {
+        const fields = [
+          customer?.name,
+          customer?.company,
+          customer?.phone,
+          customer?.GSTIN,
+          customer?.Address,
+        ];
+
+        return fields.some((field) =>
+          normalize(field).includes(search)
+        );
+      });
     }
 
-    if (email) {
-      filter.email = { $regex: email, $options: "i" };
-    }
-
-    // 💰 isPaid FILTER
-    if (isPaidParam !== null) {
-      const isPaid =
-        isPaidParam === "true" ||
-        isPaidParam === "Paid" ||
-        isPaidParam === "paid";
-
-      filter.isPaid = isPaid;
-    }
-
-    const customers = await Customer.find(filter)
-      .select("name company phone salesExecutive isPaid")
-      .populate({
-        path: "salesExecutive",
-        select: "basicDetails.name",
-      })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    const total = await Customer.countDocuments(filter);
+    // newest first
+    customers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const total = customers.length;
+    const paginated = customers.slice(skip, skip + limit);
 
     return NextResponse.json({
       success: true,
-      data: customers,
+      data: paginated,
       pagination: {
-        total,
         page,
         limit,
+        total,
         pages: Math.ceil(total / limit),
       },
     });
+
   } catch (error) {
-    console.error("Search Error:", error);
-    return NextResponse.json({ success: false }, { status: 500 });
+    console.log("Search API Error:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Search failed",
+        error: error.message,
+      },
+      { status: 500, }
+    );
   }
 }

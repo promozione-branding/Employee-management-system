@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const PUBLIC_ROUTES = ["/login", "/register", "/login-otp","/forgot-password"];
-
+const PUBLIC_ROUTES = ["/login", "/register", "/login-otp", "/forgot-password"];
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const ROLE_REDIRECT = {
   admin: "/dashboard",
   employee: "/employee-dashboard",
   sales: "/sales-dashboard",
+  manager: "/manager",
 };
 
 export async function middleware(req) {
@@ -63,20 +63,21 @@ export async function middleware(req) {
     }
 
     // Employee-only
-    if (
-      pathname.startsWith("/employee-dashboard") &&
-      role !== "employee"
-    ) {
+    if (pathname.startsWith("/employee-dashboard") && role !== "employee") {
       return NextResponse.redirect(
         new URL(ROLE_REDIRECT[role], req.url),
       );
     }
 
     // Sales-only
-    if (
-      pathname.startsWith("/sales-dashboard") &&
-      role !== "sales"
-    ) {
+    if (pathname.startsWith("/sales-dashboard") && role !== "sales") {
+      return NextResponse.redirect(
+        new URL(ROLE_REDIRECT[role], req.url),
+      );
+    }
+
+    // Manager-only
+    if (pathname.startsWith("/manager") && role !== "manager") {
       return NextResponse.redirect(
         new URL(ROLE_REDIRECT[role], req.url),
       );

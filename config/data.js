@@ -28,7 +28,7 @@ export const addProposalFormControl = [
       { id: "cheque", label: "Cheque" },
     ],
   },
-   {
+  {
     label: "Notes",
     name: "notes",
     componentType: "input",
@@ -447,9 +447,10 @@ export const employeeRegisterFormControl = [
     name: "role",
     componentType: "select",
     options: [
-      { id: "admin", label: "admin" },
+      { id: "admin", label: "Admin" },
       { id: "employee", label: "Employee" },
       { id: "sales", label: "Sales" },
+      { id: "manager", label: "Manager" },
     ],
   },
 ];
@@ -701,43 +702,43 @@ export const attachmentFormControl = [
 
 
 export const editProposalFormControl = [
-   {
+  {
     label: "Customer Name",
     name: "clientName",
     componentType: "input",
     type: "text",
   },
-   {
+  {
     label: "Customer Company",
     name: "clientCompany",
     componentType: "input",
     type: "text",
   },
-   {
+  {
     label: "Customer Address",
     name: "clientAddress",
     componentType: "input",
     type: "text",
   },
-   {
+  {
     label: "Date of Proposal",
     name: "dateOfProposal",
     componentType: "input",
     type: "date",
   },
-   {
+  {
     label: "GSTIN",
     name: "GSTIN",
     componentType: "input",
     type: "text",
   },
-   {
+  {
     label: "Tan No",
     name: "tanNo",
     componentType: "input",
     type: "text",
   },
-   {
+  {
     label: "Valid Till",
     name: "validTill",
     componentType: "input",

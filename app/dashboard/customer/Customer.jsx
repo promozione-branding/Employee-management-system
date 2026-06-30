@@ -83,10 +83,10 @@ const Customer = ({ customerId }) => {
           projectName: projectFormData?.projectName,
           clientId: customerId,
           service: serviceValue,
-          "start-date": projectFormData["start-date"],
-          "end-date": projectFormData["end-date"],
+          "start-date": projectFormData.startDate,
+          "end-date": projectFormData.endDate,
         };
-
+        // console.log(formData)
         const res = await createCustomerProjectCycleService(formData);
         if (res.success) {
           toast.success("Project details submitted");
@@ -94,8 +94,8 @@ const Customer = ({ customerId }) => {
             projectName: "",
             service: "",
             serviceName: "",
-            "start-date": "",
-            "end-date": "",
+            startDate: "",
+            endDate: "",
           });
           fetchCustomerProjectCycle();
         }
@@ -140,10 +140,10 @@ const Customer = ({ customerId }) => {
       projectName: data?.projectName,
       service: data.service,
       serviceName: data.service,
-      "start-date": data.startDate
+      startDate: data.startDate
         ? new Date(data.startDate).toISOString().split("T")[0]
         : "",
-      "end-date": data.endDate
+      endDate: data.endDate
         ? new Date(data.endDate).toISOString().split("T")[0]
         : "",
     });
@@ -229,6 +229,8 @@ const Customer = ({ customerId }) => {
     SalesPersonName,
     salesExecutive,
   } = customerDetails;
+
+  // console.log(projectFormData)
 
   return (
     <div className="flex gap-5 flex-col lg:flex-row">

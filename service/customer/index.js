@@ -1,9 +1,18 @@
 import axiosInstance from "../axiosInstance";
 
-export async function getAllCustomerServices() {
-  const { data } = await axiosInstance.get("/api/customer/get-all-customer");
+export async function getAllCustomerServices(page, limit, isPaid) {
+  const params = { page, limit, };
+  if (isPaid) {
+    params.isPaid = true;
+  }
+
+  const { data } = await axiosInstance.get("/api/customer/get-all-customer",
+    { params, }
+  );
+
   return data;
 }
+
 export async function createCustomerServices(formData) {
   const { data } = await axiosInstance.post("/api/customer/create", formData);
   return data;

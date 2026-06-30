@@ -1,47 +1,41 @@
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
-import Employee from "@/models/employee/Employee";
 
 export async function GET(req) {
   try {
     await connectDB();
 
-    const allCustomer = await Customer.find()
-      .select(
-        "name company phone GSTIN Address salesExecutive SalesPersonName isPaid",
-      )
-      .populate({ path: "salesExecutive", select: "basicDetails.name" })
-      .sort({ createdAt: -1 })
-      .limit(60);
+    const { searchParams } = new URL(req.url);
+    const page = Number(searchParams.get("page")) || 1;
+    const limit = Number(searchParams.get("limit")) || 20;
+    const isPaid = searchParams.get("isPaid");
+    const filter = {};
 
-    if (!allCustomer) {
-      return Response.json({
-        success: false,
-        message: "cant find customer",
-      });
+    if (isPaid !== null && isPaid !== undefined) {
+      filter.isPaid = isPaid === "true";
     }
 
-    return Response.json(
-      {
-        success: true,
-        message: "Get all Customer",
-        data: allCustomer,
-      },
-      {
-        status: 200,
-      },
-    );
+    const total = await Customer.countDocuments(filter);
+    const customers = await Customer.find(filter)
+      .select(`name company phone GSTIN salesExecutive isPaid `)
+      .populate({ path: "salesExecutive", select: "basicDetails.name", })
+      .sort({ createdAt: -1, }).skip((page - 1) * limit).limit(limit);
+
+    return Response.json({
+      success: true,
+      data: customers,
+      pagination: { totalPages: Math.ceil(total / limit), },
+    });
+
   } catch (error) {
-    console.error("get all api error");
+    console.log(error);
+
     return Response.json(
       {
         success: false,
-        message: "server error",
         error: error.message,
       },
-      {
-        status: 500,
-      },
+      { status: 500, }
     );
   }
 }
