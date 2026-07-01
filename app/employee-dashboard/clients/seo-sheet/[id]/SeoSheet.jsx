@@ -41,7 +41,7 @@ const SeoSheet = ({ clientId }) => {
       (id) => id.toString() === employee?._id?.toString()
     ));
 
-    console.log(newData, sheet.keywords, employee)
+    // console.log( sheet.keywords, employee)
     // 🧠 Extract all unique dates
     let allDates = [];
 

@@ -230,7 +230,7 @@ const Customer = ({ customerId }) => {
     salesExecutive,
   } = customerDetails;
 
-  console.log(projectFormData)
+  // console.log(projectFormData)
 
   return (
     <div className="flex gap-5 flex-col lg:flex-row">

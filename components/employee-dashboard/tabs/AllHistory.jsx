@@ -20,23 +20,23 @@ const AllHistory = ({ customerId }) => {
       icon: <Users />,
       href: `/employee-dashboard/clients/history/client-history/${customerId}`,
     },
-   
+
     {
       label: "Work Details",
       icon: <Activity />,
       href: `/employee-dashboard/clients/history/work-detail/${customerId}`,
     },
-    {
-      label: "Sales",
-      icon: <BanknoteArrowUp />,
-      href: `/employee-dashboard/clients/history/sales-history/${customerId}`,
-    },
+    // {
+    //   label: "Sales",
+    //   icon: <BanknoteArrowUp />,
+    //   href: `/employee-dashboard/clients/history/sales-history/${customerId}`,
+    // },
     {
       label: "Attachment",
       icon: <Paperclip />,
       href: `/employee-dashboard/clients/history/attachment-history/${customerId}`,
     },
-     {
+    {
       label: "Team Update",
       icon: <Volleyball />,
       href: `/employee-dashboard/clients/history/team-update/${customerId}`,

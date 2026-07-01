@@ -26,11 +26,11 @@ const HistoryPage = ({ customerId }) => {
       icon: <Activity />,
       href: `/manager/customer/history/work-detail/${customerId}`,
     },
-    {
-      label: "Sales",
-      icon: <BanknoteArrowUp />,
-      href: `/manager/customer/history/sales-history/${customerId}`,
-    },
+    // {
+    //   label: "Sales",
+    //   icon: <BanknoteArrowUp />,
+    //   href: `/manager/customer/history/sales-history/${customerId}`,
+    // },
     {
       label: "Team Update",
       icon: <Volleyball />,
