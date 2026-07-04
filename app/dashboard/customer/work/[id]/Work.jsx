@@ -122,6 +122,7 @@ const ClientWork = ({ customerId }) => {
           console.log(res, "res");
           if (res.success) {
             setWorkDetailLoading(false);
+            console.log(res.data)
             setWorkDetailData(res.data);
           }
         }

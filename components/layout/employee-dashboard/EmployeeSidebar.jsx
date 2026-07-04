@@ -45,7 +45,7 @@ const EmployeeSidebar = ({ open, setOpen }) => {
     },
     {
       title: "HRMS",
-      href: "https://hrms.inquirybazar.com/login",
+      href: "https://hrms.inquirybazar.com",
       label: "Attendance",
       icon: <CalendarCheck size={24} />,
     },

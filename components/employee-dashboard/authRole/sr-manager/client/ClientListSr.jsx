@@ -48,7 +48,7 @@ const CustomerManager = () => {
 
         if (res.success) {
           setAssinedClientList(
-            res?.data?.workDetails.map((item) => item?.clientId),
+            res?.data?.map((item) => item?.clientId),
           );
         }
       }

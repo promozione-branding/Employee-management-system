@@ -1,11 +1,11 @@
 import { connectDB } from "@/lib/db";
 import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
 import Employee from "@/models/employee/Employee";
-import Customer from "@/models/admin/Customer";;
+import Customer from "@/models/admin/Customer";
+import ProjectCycle from "@/models/admin/ProjectCycle";
 import { NextResponse } from "next/server";
 import { createAuditLog } from "@/utils/createAuditLog";
 import { getAuthUser } from "@/lib/getAuthUser";
-import ProjectCycle from "@/models/admin/ProjectCycle";
 
 export async function POST(req) {
   try {
@@ -15,7 +15,10 @@ export async function POST(req) {
 
     if (!authUser) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        {
+          success: false,
+          message: "Unauthorized",
+        },
         { status: 401 }
       );
     }
@@ -24,8 +27,8 @@ export async function POST(req) {
 
     const {
       employeeId,
-      projectId,
       clientId,
+      projectId,
       department,
       checklist = [],
       status = "IN_PROGRESS",
@@ -33,36 +36,60 @@ export async function POST(req) {
       startedAt,
     } = body;
 
-    if (!employeeId || !clientId || !department || !projectId) {
+    if (!employeeId || !clientId || !projectId || !department) {
       return NextResponse.json(
         {
           success: false,
-          message: "employeeId, clientId and department are required",
+          message:
+            "employeeId, clientId, projectId and department are required",
         },
         { status: 400 }
       );
     }
 
-    const employeeIds = Array.isArray(employeeId) ? employeeId : [employeeId];
+    const employeeIds = Array.isArray(employeeId)
+      ? employeeId
+      : [employeeId];
 
-    // 🔎 Check if work detail already exists
+    // ==========================================
+    // CHECK IF THIS PROJECT ALREADY EXISTS
+    // ==========================================
     let workDetail = await EmployeeWorkDetail.findOne({
       clientId,
+      projectId,
       department,
     });
 
-    // 🧠 CASE 1: UPDATE (Assign employee to existing work detail)
+    // ==========================================
+    // UPDATE EXISTING PROJECT
+    // ==========================================
     if (workDetail) {
       const oldData = workDetail.toObject();
 
       await EmployeeWorkDetail.updateOne(
-        { _id: workDetail._id },
-        { $addToSet: { employeeId: { $each: employeeIds } } }
+        {
+          _id: workDetail._id,
+        },
+        {
+          $addToSet: {
+            employeeId: {
+              $each: employeeIds,
+            },
+          },
+        }
       );
 
       await Employee.updateMany(
-        { _id: { $in: employeeIds } },
-        { $addToSet: { workDetails: workDetail._id } }
+        {
+          _id: {
+            $in: employeeIds,
+          },
+        },
+        {
+          $addToSet: {
+            workDetails: workDetail._id,
+          },
+        }
       );
 
       await ProjectCycle.updateOne(
@@ -82,7 +109,6 @@ export async function POST(req) {
         workDetail._id
       );
 
-      // 🧾 CREATE AUDIT HISTORY
       const auditLog = await createAuditLog({
         clientId,
         entityType: "EmployeeWorkDetail",
@@ -93,23 +119,29 @@ export async function POST(req) {
         userId: authUser._id,
       });
 
-      // 🔗 Attach history to customer
       if (auditLog) {
         await Customer.findByIdAndUpdate(clientId, {
-          $push: { history: auditLog._id },
+          $push: {
+            history: auditLog._id,
+          },
         });
       }
 
       return NextResponse.json(
         {
           success: true,
-          message: "Employee assigned to existing work detail",
+          message: "Employee assigned successfully.",
           data: updatedWorkDetail,
         },
-        { status: 200 }
+        {
+          status: 200,
+        }
       );
     }
 
+    // ==========================================
+    // UPDATE PROJECT CYCLE
+    // ==========================================
     await ProjectCycle.updateOne(
       {
         "projectDuration._id": projectId,
@@ -123,7 +155,9 @@ export async function POST(req) {
       }
     );
 
-    // 🆕 CASE 2: CREATE NEW WORK DETAIL
+    // ==========================================
+    // CREATE NEW PROJECT WORK DETAIL
+    // ==========================================
     workDetail = await EmployeeWorkDetail.create({
       employeeId: employeeIds,
       clientId,
@@ -135,16 +169,34 @@ export async function POST(req) {
       startedAt,
     });
 
+    // ==========================================
+    // UPDATE EMPLOYEE
+    // ==========================================
     await Employee.updateMany(
-      { _id: { $in: employeeIds } },
-      { $addToSet: { workDetails: workDetail._id } }
+      {
+        _id: {
+          $in: employeeIds,
+        },
+      },
+      {
+        $addToSet: {
+          workDetails: workDetail._id,
+        },
+      }
     );
 
+    // ==========================================
+    // UPDATE CUSTOMER
+    // ==========================================
     await Customer.findByIdAndUpdate(clientId, {
-      $addToSet: { workDetails: workDetail._id },
+      $addToSet: {
+        workDetails: workDetail._id,
+      },
     });
 
-    // 🧾 CREATE AUDIT HISTORY
+    // ==========================================
+    // AUDIT LOG
+    // ==========================================
     const auditLog = await createAuditLog({
       clientId,
       entityType: "EmployeeWorkDetail",
@@ -157,17 +209,21 @@ export async function POST(req) {
 
     if (auditLog) {
       await Customer.findByIdAndUpdate(clientId, {
-        $push: { history: auditLog._id },
+        $push: {
+          history: auditLog._id,
+        },
       });
     }
 
     return NextResponse.json(
       {
         success: true,
-        message: "Employee work detail created successfully",
+        message: "Project assigned successfully.",
         data: workDetail,
       },
-      { status: 201 }
+      {
+        status: 201,
+      }
     );
   } catch (error) {
     console.error("Create EmployeeWorkDetail Error:", error);
@@ -177,7 +233,9 @@ export async function POST(req) {
         success: false,
         message: "Internal Server Error",
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }

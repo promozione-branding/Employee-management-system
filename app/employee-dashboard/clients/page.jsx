@@ -8,7 +8,7 @@ import { useEmployeeStore } from "@/lib/store/EmployeeStore";
 const ClientsPage = () => {
   const { employee } = useEmployeeStore();
 
-  console.log(employee?.basicDetails?.designation === "SEO","employee");
+  // console.log(employee?.basicDetails?.designation === "SEO","employee");
 
   const srManager = employee?.basicDetails?.authRole === "SR_MANAGER";
 

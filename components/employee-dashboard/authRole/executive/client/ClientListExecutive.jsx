@@ -18,24 +18,24 @@ const ClientListExecutive = () => {
       try {
         if (employee?._id) {
           const res = await getEmployeeAssignedClientService(employee?._id);
+          console.log(res)
           if (res.success) {
             setLoading(false);
-            setClients(res.data?.workDetails);
+            setClients(res.data);
           }
         }
       } catch (error) {
         console.log(error);
         toast.error(
           error?.response?.data?.message ||
-            "Error while getting the client list",
+          "Error while getting the client list",
         );
       }
     }
     getEmployeeClientList();
   }, [employee?._id]);
 
-  const clientList = clients?.filter((client) => client?.clientId !== null);
-  console.log(clients,"clients");
+  const clientList = clients || [];
 
   if (loading) {
     return <Loading />;
@@ -86,23 +86,23 @@ const ClientListExecutive = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {clientList.length > 0 ? (
+            {clientList?.length > 0 ? (
               clientList.map((client) => (
                 <tr key={client?._id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {client?.clientId?.name}
+                    {client?.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {client?.clientId?.company}
+                    {client?.company}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <a
-                      href={client?.clientId?.website}
+                      href={client?.website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-indigo-600 hover:text-indigo-900"
                     >
-                      {client?.clientId?.website || "----"}
+                      {client?.website || "----"}
                     </a>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -112,7 +112,7 @@ const ClientListExecutive = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-6">
                     <Link
                       title="View"
-                      href={`/employee-dashboard/clients/client-details/${client?.clientId?._id}`}
+                      href={`/employee-dashboard/clients/client-details/${client?._id}`}
                       className="border px-3 py-1.5 rounded-lg"
                     >
                       View
@@ -128,7 +128,7 @@ const ClientListExecutive = () => {
                     {employee?.basicDetails?.designation === "SEO" && (
                       <Link
                         title="Ranking"
-                        href={`/employee-dashboard/clients/seo-sheet/${client?.clientId?._id}`}
+                        href={`/employee-dashboard/clients/seo-sheet/${client?._id}`}
                         className="border px-3 py-1.5 rounded-lg"
                       >
                         Ranking

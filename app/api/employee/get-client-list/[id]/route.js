@@ -10,31 +10,30 @@ export async function GET(req, { params }) {
     const { id } = await params;
 
     const employee = await Employee.findById(id)
-      .select("workDetails")
       .populate({
         path: "workDetails",
-        select: "-checklist -__v", 
         populate: {
           path: "clientId",
-          select: "name company website",
+          select: "name company website updatedAt",
         },
       });
 
-    if (!employee) {
-      return NextResponse.json(
-        { success: false, message: "Employee not found" },
-        { status: 404 },
-      );
-    }
+    const uniqueClients = [];
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Get all work details",
-        data: employee,
-      },
-      { status: 200 },
-    );
+    const map = new Map();
+
+    employee.workDetails.forEach((work) => {
+      const client = work.clientId;
+
+      if (!map.has(client._id.toString())) {
+        map.set(client._id.toString(), client);
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: [...map.values()],
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

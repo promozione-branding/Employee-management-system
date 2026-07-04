@@ -3,36 +3,48 @@
 import { useEmployeeStore } from "@/lib/store/EmployeeStore";
 import { useState, useEffect } from "react";
 
-export default function SEOChecklistForm({
-  onSubmit,
-  template,
-  completed,
-  buttonDisabled,
-}) {
-  const [checklist, setChecklist] = useState(template);
+export default function SEOChecklistForm({ onSubmit, template, completed, buttonDisabled, project }) {
+  // console.log(template, completed, project);
+  const [checklist, setChecklist] = useState([]);
   const { employee } = useEmployeeStore();
 
   useEffect(() => {
-    if (completed?.length) {
-      setChecklist((prev) =>
-        prev.map((item) => {
-          const isCompleted = completed.find((c) => c.key === item.key);
-          return isCompleted ? { ...item, ...isCompleted } : item;
-        }),
-      );
-    }
-  }, [completed]);
+    if (!template) return;
+
+    const mergedChecklist = template.map((item) => {
+      const saved = completed?.find((c) => c.key === item.key);
+
+      return saved
+        ? {
+          ...item,
+          ...saved,
+        }
+        : {
+          ...item,
+          completed: false,
+          completedAt: null,
+          remarks: "",
+          proofUrl: "",
+          completedBy: null,
+        };
+    });
+
+    // Add custom checklist items
+    const customItems = completed?.filter((saved) => !template.some((temp) => temp.key === saved.key)) || [];
+
+    setChecklist([...customItems, ...mergedChecklist]);
+  }, [template, completed, project?.workDetailId]);
 
   const toggleCompleted = (index) => {
     setChecklist((prev) =>
       prev.map((item, i) =>
         i === index
           ? {
-              ...item,
-              completed: !item.completed,
-              completedBy: employee?._id,
-              completedAt: !item.completed ? new Date().toISOString() : null,
-            }
+            ...item,
+            completed: !item.completed,
+            completedBy: employee?._id,
+            completedAt: !item.completed ? new Date().toISOString() : null,
+          }
           : item,
       ),
     );
@@ -55,7 +67,7 @@ export default function SEOChecklistForm({
 
   return (
     <form onSubmit={handleSubmit} className="">
-      <div className="text-sm text-gray-600">Progress: {progress}%</div>
+      <div className="text-sm text-gray-600 mb-2">Progress of {project?.project?.projectName}: {progress}%</div>
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div
           className="bg-black h-2 rounded-full transition-all"
@@ -64,16 +76,12 @@ export default function SEOChecklistForm({
       </div>
       <div className="grid grid-cols-4 gap-5 mt-5">
         {checklist.map((item, index) => {
-          const isSaved = completed?.some(
-            (c) => c.key === item.key && c.completed,
-          );
-
+          const isSaved = completed?.some((c) => c.key === item.key && c.completed,);
           return (
             <div
               key={item.key}
-              className={`border rounded-2xl p-4 space-y-3 shadow-sm ${
-                isSaved ? "border-emerald-500 bg-emerald-50" : ""
-              }`}
+              className={`border rounded-2xl p-4 space-y-3 shadow-sm ${isSaved ? "border-emerald-500 bg-emerald-50" : ""
+                }`}
             >
               <div className="flex items-center gap-3">
                 <input
@@ -84,9 +92,8 @@ export default function SEOChecklistForm({
                   disabled={isSaved}
                 />
                 <span
-                  className={`font-medium ${
-                    isSaved ? "line-through text-gray-500" : ""
-                  }`}
+                  className={`font-medium ${isSaved ? "line-through text-gray-500" : ""
+                    }`}
                 >
                   {item.label}
                 </span>
@@ -110,6 +117,11 @@ export default function SEOChecklistForm({
                 disabled={isSaved}
               />
 
+              {item.completedBy && (
+                <p className="text-xs text-gray-500">
+                  Completed by: {item.completedBy.basicDetails?.name}
+                </p>
+              )}
               {item.completedAt && (
                 <p className="text-xs text-gray-500">
                   Completed at: {new Date(item.completedAt).toLocaleString()}

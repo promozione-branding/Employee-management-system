@@ -1,8 +1,10 @@
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
+import ProjectCycle from "@/models/admin/ProjectCycle";
 import { NextResponse } from "next/server";
-import Employee from "@/models/employee/Employee";
-import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
+
+import "@/models/employee/Employee";
+import "@/models/employee/EmployeeWorkDetail";
 
 export async function GET(req, { params }) {
   try {
@@ -10,7 +12,7 @@ export async function GET(req, { params }) {
 
     const { id } = await params;
 
-    const customerWorkDetailsHistory = await Customer.findById(id)
+    const customer = await Customer.findById(id)
       .select("workDetails")
       .populate({
         path: "workDetails",
@@ -21,39 +23,68 @@ export async function GET(req, { params }) {
           },
           {
             path: "checklist.completedBy",
-            select: "basicDetails.name",
+            select: "basicDetails.name employeeId",
           },
         ],
       });
 
-    if (!customerWorkDetailsHistory) {
+    if (!customer) {
       return NextResponse.json(
         {
           success: false,
-          message: "there is no customer of this id",
+          message: "There is no customer with this id",
         },
-        { status: 404 },
+        { status: 404 }
       );
     }
+
+    const workDetails = await Promise.all(
+      customer.workDetails.map(async (work) => {
+        const cycle = await ProjectCycle.findOne(
+          {
+            clientId: id,
+            "projectDuration._id": work.projectId,
+          },
+          {
+            projectDuration: {
+              $elemMatch: {
+                _id: work.projectId,
+              },
+            },
+          }
+        );
+
+        const project = cycle?.projectDuration?.[0];
+
+        return {
+          ...work.toObject(),
+
+          project: project
+            ? {
+              _id: project._id,
+              projectName: project.projectName,
+              service: project.service,
+              startDate: project.startDate,
+              endDate: project.endDate,
+            }
+            : null,
+        };
+      })
+    );
 
     return NextResponse.json(
       {
         success: true,
         message: "Client work details history",
-        data: customerWorkDetailsHistory,
+        data: { workDetails: workDetails },
       },
-      {
-        status: 201,
-      },
+      { status: 200, }
     );
   } catch (error) {
     console.log(error);
     return NextResponse.json(
-      {
-        success: false,
-        message: "Server error",
-      },
-      { status: 500 },
+      { success: false, message: "Server error", },
+      { status: 500, }
     );
   }
 }
