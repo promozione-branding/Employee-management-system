@@ -311,7 +311,7 @@ const SrClientList = () => {
                 </div>
 
                 <div className="flex justify-center gap-3 lg:gap-5">
-                  <Link href={`/sales-dashboard/customer/work/${_id}`}>
+                  {/* <Link href={`/sales-dashboard/customer/work/${_id}`}>
                     <Network
                       size={18}
                       className="cursor-pointer lg:h-6 lg:w-6"
@@ -322,6 +322,16 @@ const SrClientList = () => {
                       size={18}
                       className="cursor-pointer lg:h-6 lg:w-6"
                     />
+                  </Link> */}
+                  <Link href={`/sales-dashboard/clients/client-assign/${_id}`}>
+                    <Network
+                      size={18}
+                      className="cursor-pointer lg:h-6 lg:w-6"
+                    />
+                  </Link>
+
+                  <Link href={`/sales-dashboard/clients/${_id}`}>
+                    <Eye size={18} className="cursor-pointer lg:h-6 lg:w-6 " />
                   </Link>
                   <SquarePen
                     size={18}
