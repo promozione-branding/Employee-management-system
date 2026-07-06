@@ -59,7 +59,7 @@ const SrClientList = () => {
   useEffect(() => {
     fetchData();
   }, [page, debouncedSearch, isPaid]);
-  
+
   async function fetchData() {
     try {
       setLoading(true);
@@ -311,13 +311,13 @@ const SrClientList = () => {
                 </div>
 
                 <div className="flex justify-center gap-3 lg:gap-5">
-                  <Link href={`/dashboard/customer/work/${_id}`}>
+                  <Link href={`/sales-dashboard/customer/work/${_id}`}>
                     <Network
                       size={18}
                       className="cursor-pointer lg:h-6 lg:w-6"
                     />
                   </Link>
-                  <Link href={`/dashboard/customer/${_id}`}>
+                  <Link href={`/sales-dashboard/customer/${_id}`}>
                     <Eye
                       size={18}
                       className="cursor-pointer lg:h-6 lg:w-6"
@@ -496,13 +496,13 @@ const SrClientList = () => {
                 <div className="flex justify-end gap-4 pt-2">
 
                   <Link
-                    href={`/dashboard/customer/work/${_id}`}
+                    href={`/sales-dashboard/customer/work/${_id}`}
                   >
                     <Network size={18} />
                   </Link>
 
                   <Link
-                    href={`/dashboard/customer/${_id}`}
+                    href={`/sales-dashboard/customer/${_id}`}
                   >
                     <Eye size={18} />
                   </Link>
