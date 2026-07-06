@@ -8,39 +8,62 @@ export async function GET(req, { params }) {
 
     const { id } = await params;
 
-    const allCustomer = await Customer.find({ salesExecutive: id })
-      .select("name company phone GSTIN Address isPaid")
-      .sort({ createdAt: -1 });
+    const { searchParams } = new URL(req.url);
 
+    const page = Number(searchParams.get("page")) || 1;
+    const limit = Number(searchParams.get("limit")) || 20;
+    const search = searchParams.get("search") || "";
+    const isPaid = searchParams.get("isPaid");
 
-    if (!allCustomer) {
-      return NextResponse.json({
-        success: false,
-        message: "cant find customer",
-      });
+    const filter = {
+      salesExecutive: id,
+    };
+
+    if (search.trim()) {
+      const or = [
+        { name: { $regex: search, $options: "i" } },
+        { company: { $regex: search, $options: "i" } },
+        { GSTIN: { $regex: search, $options: "i" } },
+      ];
+
+      // Only search phone if the input is numeric
+      if (!isNaN(search)) {
+        or.push({ phone: Number(search) });
+      }
+
+      filter.$or = or;
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Get all Customer by sales",
-        data: allCustomer,
+    if (isPaid !== null) {
+      filter.isPaid = isPaid === "true";
+    }
+
+    const total = await Customer.countDocuments(filter);
+
+    const customers = await Customer.find(filter)
+      .select("name company phone GSTIN Address isPaid")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    return NextResponse.json({
+      success: true,
+      data: customers,
+      pagination: {
+        page,
+        totalPages: Math.ceil(total / limit),
+        total,
       },
-      {
-        status: 200,
-      },
-    );
+    });
   } catch (error) {
-    console.error("get all api error");
     return NextResponse.json(
       {
         success: false,
-        message: "server error",
-        error: error.message,
+        message: error.message,
       },
       {
         status: 500,
-      },
+      }
     );
   }
 }
