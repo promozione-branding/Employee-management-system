@@ -12,11 +12,11 @@ const ClientListExecutive = () => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const { employee } = useEmployeeStore();
-
   useEffect(() => {
     async function getEmployeeClientList() {
       try {
         if (employee?._id) {
+          console.log(employee?._id)
           const res = await getEmployeeAssignedClientService(employee?._id);
           console.log(res)
           if (res.success) {
@@ -106,7 +106,7 @@ const ClientListExecutive = () => {
                     </a>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(client.updatedAt).toLocaleDateString()}
+                    {new Date(client?.updatedAt).toLocaleDateString()}
                   </td>
 
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-6">
@@ -120,7 +120,7 @@ const ClientListExecutive = () => {
 
                     <Link
                       title="Work"
-                      href={`/employee-dashboard/clients/work/${client._id}`}
+                      href={`/employee-dashboard/clients/work/${client?._id}`}
                       className="border px-3 py-1.5 rounded-lg"
                     >
                       Work
@@ -156,7 +156,7 @@ const ClientListExecutive = () => {
         {clientList.length > 0 ? (
           clientList.map((client) => (
             <div
-              key={client._id}
+              key={client?._id}
               className="bg-white rounded-xl shadow border p-4 flex flex-col gap-3"
             >
               <div className="flex justify-between items-start">
@@ -169,7 +169,7 @@ const ClientListExecutive = () => {
                   </p>
                 </div>
                 <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
-                  {new Date(client.updatedAt).toLocaleDateString()}
+                  {new Date(client?.updatedAt).toLocaleDateString()}
                 </span>
               </div>
 
@@ -192,7 +192,7 @@ const ClientListExecutive = () => {
                   View
                 </Link>
                 <Link
-                  href={`/employee-dashboard/clients/work/${client._id}`}
+                  href={`/employee-dashboard/clients/work/${client?._id}`}
                   className="flex-1 text-center bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800"
                 >
                   Work

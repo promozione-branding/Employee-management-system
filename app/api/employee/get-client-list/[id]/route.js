@@ -8,6 +8,7 @@ export async function GET(req, { params }) {
   try {
     await connectDB();
     const { id } = await params;
+    console.log(id, "lklkl")
 
     const employee = await Employee.findById(id)
       .populate({
@@ -24,9 +25,9 @@ export async function GET(req, { params }) {
 
     employee.workDetails.forEach((work) => {
       const client = work.clientId;
-
-      if (!map.has(client._id.toString())) {
-        map.set(client._id.toString(), client);
+      if (!client) return;
+      if (!map.has(client?._id.toString())) {
+        map.set(client?._id.toString(), client);
       }
     });
 
@@ -37,7 +38,7 @@ export async function GET(req, { params }) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { success: false, message: "Server error" },
+      { success: false, message: "Server error", error },
       { status: 500 },
     );
   }

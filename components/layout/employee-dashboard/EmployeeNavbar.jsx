@@ -7,7 +7,7 @@ import {
   LogOut,
   Settings,
   User,
- 
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
@@ -45,7 +45,7 @@ const EmployeeNavbar = () => {
       console.log(error);
       toast.error(
         error?.response?.data?.message ||
-          "error while fetching the announcement",
+        "error while fetching the announcement",
       );
     }
   }
@@ -103,7 +103,7 @@ const EmployeeNavbar = () => {
 
         <div className="flex items-center gap-2 border-l pl-4 ml-2">
           <div
-            className="h-8 w-8  flex items-center justify-center cursor-pointer"
+            className="h-10 w-10 rounded-full flex items-center justify-center cursor-pointer overflow-hidden"
             onClick={() => {
               setOpenNotification(false);
               setOpenEmployeeDetails((prev) => !prev);
@@ -113,7 +113,7 @@ const EmployeeNavbar = () => {
               width="1000"
               height="1000"
               alt="employeeImage"
-              className=" rounded-full"
+              className="h-full w-full object-cover"
               src={
                 employee?.basicDetails?.profileImage ||
                 "https://github.com/shadcn.png"
