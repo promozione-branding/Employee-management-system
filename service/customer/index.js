@@ -153,3 +153,11 @@ export async function getAllSalesService() {
 
   return data;
 }
+
+export const removeEmployee = async (projectCycleId, projectDurationId, employeeId) => {
+  const { data } = await axiosInstance.delete("/api/customer/project-cycle/remove-employee", {
+    data: { projectCycleId, projectDurationId, employeeId, },
+  });
+
+  return data;
+};

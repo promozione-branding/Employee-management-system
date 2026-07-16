@@ -21,6 +21,9 @@ const ProjectCycleSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
+      serviceType: {
+        type: String,
+      },
       startDate: { type: Date, default: Date.now, required: true },
       endDate: { type: Date },
     },

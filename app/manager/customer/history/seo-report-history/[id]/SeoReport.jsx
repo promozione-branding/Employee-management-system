@@ -1,12 +1,26 @@
 "use client";
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { seoReportHistoryService } from "@/service/customer/history";
+import { editRankingService } from "@/service/customer/work";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const SeoSheetAdmin = ({ clientId }) => {
   const [data, setData] = useState(null);
   const [dates, setDates] = useState([]);
+  const [form, setForm] = useState({
+    page: "",
+    position: "",
+  });
+
+  const [selected, setSelected] = useState({
+    keywordId: "",
+    rankingId: "",
+  });
 
   const fetchData = async () => {
     try {
@@ -55,7 +69,24 @@ const SeoSheetAdmin = ({ clientId }) => {
     return acc;
   }, {});
 
-  console.log(groupedData)
+  const handleUpdate = async () => {
+    try {
+      const payload = {
+        keywordId: selected.keywordId,
+        rankingId: selected.rankingId,
+        page: Number(form.page),
+        position: Number(form.position),
+      };
+
+      const res = await editRankingService(payload);
+      toast.success(res.message);
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  };
+
+  // console.log(groupedData)
 
   return (
     <div style={{ overflowX: "auto" }}>
@@ -137,51 +168,85 @@ const SeoSheetAdmin = ({ clientId }) => {
                         {index + 1}
                       </td>
 
-                      <td
-                        className={`border-r px-5 py-2 capitalize cursor-pointer ${kw.type === "primary"
-                          ? "font-bold text-blue-600"
-                          : ""
-                          }`}
-                      >
+                      <td className={`border-r px-5 py-2 capitalize cursor-pointer ${kw.type === "primary" ? "font-bold text-blue-600" : ""}`}>
                         {kw.keyword}
                       </td>
 
                       {dates.map((date, i) => {
-                        const found = kw.rankings.find(
-                          (r) =>
-                            new Date(r.date).toDateString() ===
-                            date
-                        );
+                        const found = kw.rankings.find((r) => new Date(r.date).toDateString() === date);
 
                         return (
-                          <td
-                            key={i}
-                            className={`px-3 py-3 text-center border-r transition-colors ${found ? "bg-red-50" : ""
-                              }`}
-                          >
-                            {found ? (
-                              <div className="flex flex-col items-center gap-2">
-                                {/* Page + Position */}
-                                <div className="flex items-center gap-2">
-                                  <span className="px-2 py-1 rounded-md bg-red-100 text-red-700 text-xs font-semibold">
-                                    Page {found.page}
-                                  </span>
+                          <td key={i} className={`px-3 py-3 text-center border-r transition-colors ${found ? "bg-red-50" : ""}`}>
+                            {found ? (<Dialog
+                              onOpenChange={(open) => {
+                                if (open) {
+                                  setSelected({ keywordId: kw._id, rankingId: found._id, });
+                                  setForm({ page: found.page, position: found.position, });
+                                }
+                              }}>
+                              <DialogTrigger>
+                                <div className="flex flex-col items-center gap-2">
+                                  {/* Page + Position */}
+                                  <div className="flex items-center gap-2">
+                                    <span className="px-2 py-1 rounded-md bg-red-100 text-red-700 text-xs font-semibold">
+                                      Page {found.page}
+                                    </span>
 
-                                  <span className="px-2 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-semibold">
-                                    Pos {found.position}
-                                  </span>
-                                </div>
-
-                                {/* Employee */}
-                                {found.employeeID?.basicDetails?.name && (
-                                  <div className="text-[11px] text-gray-500 flex items-center gap-1">
-                                    <span>👤</span>
-                                    <span className="font-medium">
-                                      {found.employeeID.basicDetails.name}
+                                    <span className="px-2 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-semibold">
+                                      Pos {found.position}
                                     </span>
                                   </div>
-                                )}
-                              </div>
+
+                                  {/* Employee */}
+                                  {found.employeeID?.basicDetails?.name && (
+                                    <div className="text-[11px] text-gray-500 flex items-center gap-1">
+                                      <span>👤</span>
+                                      <span className="font-medium">
+                                        {found.employeeID.basicDetails.name}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Update Postion</DialogTitle>
+                                </DialogHeader>
+                                <div className="flex flex-col gap-5 pt-5 border-t">
+                                  <div className="gap-3 flex flex-col">
+                                    <Label className="">
+                                      Page
+                                    </Label>
+                                    <Input
+                                      type="number"
+                                      value={form.page}
+                                      onChange={(e) => setForm((prev) => ({ ...prev, page: e.target.value, }))}
+                                    />
+                                  </div>
+                                  <div className="gap-3 flex flex-col">
+                                    <Label className="">
+                                      Postion
+                                    </Label>
+                                    <Input
+                                      type="number"
+                                      value={form.position}
+                                      onChange={(e) => setForm((prev) => ({ ...prev, position: e.target.value, }))}
+                                    />
+                                  </div>
+
+                                  <div className="flex gap-2 items-center justify-end">
+                                    <button onClick={handleUpdate}
+                                      className="bg-black text-white rounded px-3 py-2"
+                                    >
+                                      Update
+                                    </button>
+                                    {/* <button className="bg-gray-200 text-black rounded px-3 py-2">
+                                      Cancel
+                                    </button> */}
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
                             ) : (
                               <span className="text-gray-400">—</span>
                             )}

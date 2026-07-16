@@ -29,11 +29,11 @@ const Customer = ({ customerId }) => {
   const [projectCycleData, setProjectCycleData] = useState(null);
   const [loadingProjectCycle, setLoadingProjectCycle] = useState(false);
   const [currentEditedId, setCurrentEditedId] = useState(null);
-
   const [projectFormData, setProjectFormData] = useState({
     projectName: "",
     service: "",
     serviceName: "",
+    serviceType: "",
     startDate: "",
     endDate: "",
   });
@@ -54,17 +54,15 @@ const Customer = ({ customerId }) => {
               ? {
                 ...item,
                 service: serviceValue,
+                serviceType: projectFormData?.serviceType,
                 startDate: projectFormData?.startDate,
                 endDate: projectFormData?.endDate,
               }
               : item,
           );
 
-        const res = await updateCustomerProjectCycleService(
-          projectCycleData?.projectCycle?._id,
-          {
-            projectDuration: updatedProjectDuration,
-          },
+        const res = await updateCustomerProjectCycleService(projectCycleData?.projectCycle?._id,
+          { projectDuration: updatedProjectDuration, },
         );
 
         if (res.success) {
@@ -72,6 +70,7 @@ const Customer = ({ customerId }) => {
           setProjectFormData({
             service: "",
             serviceName: "",
+            serviceType: "",
             "start-date": "",
             "end-date": "",
           });
@@ -83,6 +82,7 @@ const Customer = ({ customerId }) => {
           projectName: projectFormData?.projectName,
           clientId: customerId,
           service: serviceValue,
+          serviceType: projectFormData?.serviceType,
           "start-date": projectFormData.startDate,
           "end-date": projectFormData.endDate,
         };
@@ -94,6 +94,7 @@ const Customer = ({ customerId }) => {
             projectName: "",
             service: "",
             serviceName: "",
+            serviceType: "",
             startDate: "",
             endDate: "",
           });
@@ -140,6 +141,7 @@ const Customer = ({ customerId }) => {
       projectName: data?.projectName,
       service: data.service,
       serviceName: data.service,
+      serviceType: data.serviceType || "",
       startDate: data.startDate
         ? new Date(data.startDate).toISOString().split("T")[0]
         : "",
@@ -180,10 +182,10 @@ const Customer = ({ customerId }) => {
         durationId: currentEditedId,
         projectName: projectFormData?.projectName,
         service: projectFormData.service === "other" ? projectFormData.serviceName : projectFormData.service,
+        serviceType: projectFormData?.serviceType,
         startDate: projectFormData.startDate,
         endDate: projectFormData.endDate,
       };
-      console.log(projectCycleData?.projectName)
       const res = await updateCustomerProjectPatchService(payload);
 
       if (res.success) {
@@ -193,6 +195,7 @@ const Customer = ({ customerId }) => {
           projectName: "",
           service: "",
           serviceName: "",
+          serviceType: "",
           startDate: "",
           endDate: "",
         });
@@ -370,6 +373,18 @@ const Customer = ({ customerId }) => {
               </select>
             </div>
 
+            {projectFormData.service === "web-dev" && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Service Type</label>
+                <select value={projectFormData?.serviceType} className="border p-2 rounded-md"
+                  onChange={(e) => setProjectFormData({ ...projectFormData, serviceType: e.target.value, })}>
+                  <option value="">Select Service Type</option>
+                  <option value={"B2b"}>B2B</option>
+                  <option value={"D2C"}>D2C</option>
+                </select>
+              </div>
+            )}
+
             {projectFormData.service === "other" && (
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium">Service Name</label>
@@ -452,7 +467,11 @@ const Customer = ({ customerId }) => {
               (item, idx) => (
                 <div key={idx} className="bg-gray-100 p-3 rounded-md border-b">
                   <p className="font-semibold">{item?.projectName || "-"}</p>
-                  <p className="font-semibold capitalize">{item?.service}</p>
+                  <div className="flex">
+                    <p className="font-semibold capitalize">{item?.service}</p>
+                    {item?.serviceType &&
+                      <p className="">&nbsp;- {item?.serviceType}</p>}
+                  </div>
                   <div className="text-sm mt-1">
                     <p>
                       Start Date:{" "}

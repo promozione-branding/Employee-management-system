@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import GridForm from "@/components/layout/GridForm";
-import { checkFormControl, paidAdsChecklistTemplate, seoChecklistTemplate, socialMediaChecklistTemplate, webDevelopmentChecklistTemplate } from "@/config/employee";
+import { b2bWebsiteChecklistTemplate, checkFormControl, d2cWebsiteChecklistTemplate, paidAdsChecklistTemplate, seoChecklistTemplate, socialMediaChecklistTemplate, webDevelopmentChecklistTemplate } from "@/config/employee";
 import { addCheckListService } from "@/service/employee-dashboard/work-details";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -135,7 +135,11 @@ const WorkDetail = ({ customerId }) => {
       break;
 
     case "WEB_DEVELOPER":
-      selectedTemplate = webDevelopmentChecklistTemplate;
+      selectedTemplate = selectedProject?.project?.serviceType === "B2b"
+        ? b2bWebsiteChecklistTemplate :
+        selectedProject?.project?.serviceType === "D2C" ?
+          d2cWebsiteChecklistTemplate
+          : webDevelopmentChecklistTemplate;
       break;
 
     case "SOCIAL_MEDIA":
@@ -146,7 +150,7 @@ const WorkDetail = ({ customerId }) => {
       selectedTemplate = paidAdsChecklistTemplate;
   }
 
-  const checklistMap = new Map(    (selectedProject?.checklist || []).map(item => [item.key, item])  );
+  const checklistMap = new Map((selectedProject?.checklist || []).map(item => [item.key, item]));
   const mergedChecklist = selectedTemplate.map(templateItem => {
     return checklistMap.get(templateItem.key) || templateItem;
   });
@@ -206,7 +210,7 @@ const WorkDetail = ({ customerId }) => {
           ) : (filteredProjects.map((work, id) => (
             <div onClick={() => setSelectedProject(work)} className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden py-2 px-4" key={id}>
               <h3 className="text-lg font-semibold text-gray-900">
-                {work.project.projectName}
+                {work.project.projectName} {work.project.serviceType && <span className="text-sm">- {work.project.serviceType}</span>}
               </h3>
               <p className="text-sm text-gray-500 mt-1">
                 Started: {new Date(work.startedAt).toLocaleString()}
@@ -275,7 +279,7 @@ const WorkDetail = ({ customerId }) => {
 
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {selectedProject.project.projectName}
+                  {selectedProject.project.projectName} {selectedProject.project.serviceType && <span className="text-sm">- {selectedProject.project.serviceType}</span>}
                 </h3>
 
                 <p className="text-sm text-gray-500 mt-1">

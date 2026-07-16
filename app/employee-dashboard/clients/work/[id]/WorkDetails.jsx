@@ -11,6 +11,8 @@ import {
   socialMediaChecklistTemplate,
   webDevelopmentChecklistTemplate,
   checkFormControl,
+  b2bWebsiteChecklistTemplate,
+  d2cWebsiteChecklistTemplate,
 } from "@/config/employee";
 import { addCheckListService } from "@/service/employee-dashboard/work-details";
 import { Plus } from "lucide-react";
@@ -60,7 +62,7 @@ const WorkDetails = ({ workDetailId }) => {
   }
 
   async function handleSubmit(checklistData) {
-    
+
     try {
       setIsBtnDisabled(true);
 
@@ -122,7 +124,11 @@ const WorkDetails = ({ workDetailId }) => {
       break;
 
     case "WEB_DEVELOPER":
-      selectedTemplate = webDevelopmentChecklistTemplate;
+      selectedTemplate = selectedProject?.project?.serviceType === "B2b"
+        ? b2bWebsiteChecklistTemplate :
+        selectedProject?.project?.serviceType === "D2C" ?
+          d2cWebsiteChecklistTemplate
+          : webDevelopmentChecklistTemplate;
       break;
 
     case "SOCIAL_MEDIA":
@@ -133,7 +139,7 @@ const WorkDetails = ({ workDetailId }) => {
       selectedTemplate = paidAdsChecklistTemplate;
   }
 
-  // console.log(projects, employee)
+  console.log(selectedProject?.project?.serviceType)
 
   return (
     <div className="flex flex-col gap-8">
@@ -233,6 +239,10 @@ ${selectedProject?.workDetailId === project.workDetailId
                 {project.project.endDate ? new Date(project.project.endDate).toLocaleDateString() : "Ongoing"}
               </p>
             </div>
+            {project?.project?.serviceType &&
+              <p className="text-sm font-medium">
+                {project?.project?.serviceType} - Website
+              </p>}
 
             <div className="mt-4">
               <p className="text-sm font-medium mb-2">

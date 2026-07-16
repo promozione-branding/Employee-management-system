@@ -7,7 +7,7 @@ export async function POST(req) {
   try {
     await connectDB();
     const body = await req.json();
-    const { clientId, service, serviceName, projectName } = body;
+    const { clientId, service, serviceName, projectName, serviceType } = body;
     const startDate = body.startDate || body["start-date"] || undefined;
     const endDate = body.endDate || body["end-date"] || undefined;
 
@@ -27,6 +27,7 @@ export async function POST(req) {
       service: finalService,
       startDate,
       endDate,
+      serviceType
     };
 
     if (projectCycle) {

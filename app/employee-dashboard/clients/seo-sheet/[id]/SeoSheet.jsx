@@ -9,21 +9,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { updateRankingFormControls } from "@/config/employee";
 import { useEmployeeStore } from "@/lib/store/EmployeeStore";
 import {
+  createKeyService,
   getSeoSheetService,
   updateRankingService,
 } from "@/service/customer/work";
+import { Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const SeoSheet = ({ clientId }) => {
   const [data, setData] = useState(null);
   const [dates, setDates] = useState([]);
-
+  const [keyword, setKeywords] = useState(null);
   const { employee } = useEmployeeStore();
-
   const [updatekeywordId, setUpdatekeywordId] = useState("");
   const [updateRankingFormData, setUpdateRankingFormData] = useState({
     keywordId: updatekeywordId,
@@ -97,7 +100,7 @@ const SeoSheet = ({ clientId }) => {
   }, [employee]);
 
   if (!data) return <p>Loading...</p>;
-  // console.log(data)
+  console.log(data)
 
   const groupedData = data.reduce((acc, kw) => {
     const projectId = kw.projectId;
@@ -113,6 +116,34 @@ const SeoSheet = ({ clientId }) => {
 
     return acc;
   }, {});
+
+  async function createKeywordHandle(projectId) {
+    // console.log({
+    //   projectId: projectId,
+    //   keyword: keyword,
+    //   type: "secondary",
+    //   clientId: clientId || "",
+    // })
+
+    try {
+      const res = await createKeyService({
+        projectId: projectId,
+        keyword: keyword,
+        type: "secondary",
+        clientId: clientId || "",
+      });
+      if (res.success) {
+        toast.success("Keyword create success");
+        setKeywords("")
+        fetchData();
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message || "error while creating the keyword",
+      );
+    }
+  }
 
   return (
     <div style={{ overflowX: "auto" }}>
@@ -143,7 +174,41 @@ const SeoSheet = ({ clientId }) => {
                   <td colSpan={dates.length + 3}
                     className="px-4 py-3 font-bold text-gray-800"
                   >
-                    {projectData.projectName}
+                    <div className="flex justify-between items-center">
+                      {projectData.projectName}
+
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button className="p-1 bg-blue-500 text-white rounded">
+                            <Plus size={18} />
+                          </button>
+                        </DialogTrigger>
+
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>
+                              Add Your Keyword
+                            </DialogTitle>
+                          </DialogHeader>
+
+                          <div className="gap-3 mt-4 flex flex-col">
+                            <Label className="">
+                              Keyword
+                            </Label>
+                            <Input
+                              type="text"
+                              onChange={(e) => setKeywords(e.target.value)}
+                            />
+                          </div>
+
+                          <div>
+                            <button className="bg-black text-white rounded p-2 w-full" onClick={() => createKeywordHandle(projectId)}>
+                              Add
+                            </button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </td>
                 </tr>
 

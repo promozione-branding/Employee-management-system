@@ -8,7 +8,7 @@ export async function PATCH(req) {
     await connectDB();
 
     const body = await req.json();
-    const { projectCycleId, durationId, service, startDate, endDate, projectName } = body;
+    const { projectCycleId, durationId, service, startDate, endDate, projectName, serviceType } = body;
     console.log(projectName)
     // ---- validations ----
     if (!projectCycleId || !durationId) {
@@ -37,6 +37,7 @@ export async function PATCH(req) {
     if (startDate) updateFields["projectDuration.$.startDate"] = startDate;
     if (endDate) updateFields["projectDuration.$.endDate"] = endDate;
     if (projectName) updateFields["projectDuration.$.projectName"] = projectName;
+    if (serviceType) updateFields["projectDuration.$.serviceType"] = serviceType;
 
     if (Object.keys(updateFields).length === 0) {
       return NextResponse.json(

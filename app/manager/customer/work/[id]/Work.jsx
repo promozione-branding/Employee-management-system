@@ -17,8 +17,8 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { CheckCircle2, Calendar, Users, User } from "lucide-react";
-import { getCustomerProjectCycleService } from "@/service/customer";
+import { CheckCircle2, Calendar, Users, User, X } from "lucide-react";
+import { getCustomerProjectCycleService, removeEmployee } from "@/service/customer";
 import {
   Dialog,
   DialogContent,
@@ -114,41 +114,42 @@ const ClientWork = ({ customerId }) => {
     fetchEmployeeByDomain();
   }, [selectedDomain]);
 
+  async function fetchClientWork() {
+    try {
+      if (customerId) {
+        const res = await getClientWorkService(customerId);
+        // console.log(res, "res");
+        if (res.success) {
+          setWorkDetailLoading(false);
+          console.log(res.data)
+          setWorkDetailData(res.data);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error.response.data.message ||
+        "Error while fetching client work details",
+      );
+    }
+  }
+
   useEffect(() => {
-    async function fetchClientWork() {
-      try {
-        if (customerId) {
-          const res = await getClientWorkService(customerId);
-          console.log(res, "res");
-          if (res.success) {
-            setWorkDetailLoading(false);
-            setWorkDetailData(res.data);
-          }
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error(
-          error.response.data.message ||
-          "Error while fetching client work details",
-        );
-      }
-    }
-
-    async function fetchCustomerProjectCycle() {
-      try {
-        const response = await getCustomerProjectCycleService(customerId);
-        if (response.success) {
-          setProjectCycleData(response.data);
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error(error.message);
-      }
-    }
-
     fetchCustomerProjectCycle()
     fetchClientWork();
   }, []);
+
+  async function fetchCustomerProjectCycle() {
+    try {
+      const response = await getCustomerProjectCycleService(customerId);
+      if (response.success) {
+        setProjectCycleData(response.data);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  }
 
   const handleClick = (e) => {
     const domainMap = {
@@ -160,6 +161,33 @@ const ClientWork = ({ customerId }) => {
 
     setSelectedDomain(domainMap[e] || "OTHER");
   };
+
+  const handleRemoveEmployee = async (projectDurationId, employeeId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to remove this employee from the project?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setButtonDisable(true);
+      const res = await removeEmployee(projectCycleData.projectCycle._id, projectDurationId, employeeId);
+      if (res.success) {
+        toast.success(res.message);
+        fetchCustomerProjectCycle();
+        fetchClientWork()
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error(
+        error?.response?.data?.message || "Something went wrong"
+      );
+    } finally {
+      setButtonDisable(false);
+    }
+  };
+
+  console.log(workDetailData?.workDetails)
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -258,9 +286,25 @@ const ClientWork = ({ customerId }) => {
                         </DialogContent>
                       </Dialog>
                     </div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm font-medium text-gray-600 flex">
                       {project?.service}
+                      {project?.serviceType && <p className="font-normal">&nbsp;- {project?.serviceType}</p>}
                     </p>
+                    {project.employeeId.length > 0 &&
+                      <div className="flex flex-wrap gap-4 mt-2">
+                        {project.employeeId?.map((item) => (
+                          <div key={item?._id} className="flex items-center gap-2 text-xs text-black p-2 border rounded-md">
+                            <Users className="w-4 h-4" />
+                            <span className="capitalize">
+                              {item?.basicDetails?.name}
+                            </span>
+                            <button onClick={() => handleRemoveEmployee(project._id, item._id)}
+                              className="hover:text-red-600 transition">
+                              <X size={18} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>}
                   </div>
                 ))
                 : (
@@ -271,8 +315,6 @@ const ClientWork = ({ customerId }) => {
             </div>
           </div>
         </div>
-
-
       </div>
 
       <div className="w-full lg:w-2/3">
@@ -284,8 +326,7 @@ const ClientWork = ({ customerId }) => {
               <h3 className="text-lg font-semibold mb-3">Work History</h3>
               <div className="flex flex-col gap-3">
                 {workDetailData?.workDetails?.map((work, index) => {
-                  const completedTasks =
-                    work.checklist?.filter((t) => t.completed).length || 0;
+                  const completedTasks = work.checklist?.filter((t) => t.completed).length || 0;
                   const totalTasks = work.checklist?.length || 0;
 
                   return (
@@ -348,20 +389,14 @@ const ClientWork = ({ customerId }) => {
                             </span>
                           </div>
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                            {work.checklist
-                              ?.filter((t) => t.completed)
-                              // .slice(0, 2)
-                              .map((item, i) => (
-                                <div key={i} className="flex items-start gap-2">
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
-                                  <span
-                                    className="text-xs text-gray-600 line-clamp-1"
-                                    title={item.label}
-                                  >
-                                    {item.label}
-                                  </span>
-                                </div>
-                              ))}
+                            {work.checklist?.filter((t) => t.completed).map((item, i) => (
+                              <div key={i} className="flex items-start gap-2">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                                <span className="text-xs text-gray-600 line-clamp-1" title={item.label}>
+                                  {item.label}
+                                </span>
+                              </div>
+                            ))}
                             {completedTasks === 0 && (
                               <p className="text-xs text-gray-400 italic col-span-full">
                                 No completed tasks yet
@@ -371,7 +406,6 @@ const ClientWork = ({ customerId }) => {
                         </div>
 
                         {/* Footer */}
-
                         <div className="flex flex-wrap gap-4">
                           {work.employeeId?.map((item) => (
                             <div

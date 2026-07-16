@@ -13,6 +13,10 @@ export async function GET(req, { params }) {
       .select("projectCycle")
       .populate({
         path: "projectCycle",
+        populate: {
+          path: "projectDuration.employeeId",
+          model: "Employee",
+        },
       });
 
     if (!customerProjects) {

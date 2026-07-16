@@ -69,6 +69,7 @@ export async function GET(req, { params }) {
           _id: project?._id,
           projectName: project?.projectName,
           service: project?.service,
+          serviceType: project?.serviceType,
           startDate: project?.startDate,
           endDate: project?.endDate,
         },
