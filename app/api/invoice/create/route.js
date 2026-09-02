@@ -108,6 +108,23 @@ export async function POST(req) {
       );
     }
 
+    // CHECK INVOICE NUMBER
+    if (data.invoiceNo) {
+      const existingInvoice = await Invoice.findOne({
+        invoiceNo: data.invoiceNo,
+      });
+
+      if (existingInvoice) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Invoice number ${data.invoiceNo} already exists.`,
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     // 2️⃣ FETCH SERVICES FROM MASTER COLLECTION
     const services = await InvoiceService.find({
       _id: { $in: data.services },

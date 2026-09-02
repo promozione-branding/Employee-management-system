@@ -42,6 +42,21 @@ export async function createInvoiceService(invoiceFormData) {
   }
 }
 
+export async function getNextInvoiceNumber() {
+  try {
+    const response = await fetch("/api/invoice/next-number");
+
+    const data = await response.json();
+
+    return data;
+  } catch (error) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+}
+
 export async function getInvoiceAllInvoice() {
   try {
     const { data } = await axiosInstance.get("/api/invoice/get-all-invoice");

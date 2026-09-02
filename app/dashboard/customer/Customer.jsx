@@ -265,9 +265,7 @@ const Customer = ({ customerId }) => {
             <div className="flex items-center gap-3 text-gray-600">
               <Globe size={16} className="text-gray-400" />
               <a
-                href={
-                  website?.startsWith("http") ? website : `https://${website}`
-                }
+                href={website?.startsWith("http") ? website : `https://${website}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm hover:text-blue-600 hover:underline truncate max-w-[200px]"

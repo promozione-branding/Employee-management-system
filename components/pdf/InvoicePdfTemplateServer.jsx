@@ -53,7 +53,7 @@ const InvoicePdfTemplateServer = ({ data }) => {
 
   const tdsAmount = subtotal * 0.02;
 
-  const taxableAmount = subtotal ;
+  const taxableAmount = subtotal;
 
   const taxRate = 0.18;
   const taxAmount = taxableAmount * taxRate;
@@ -347,7 +347,7 @@ const InvoicePdfTemplateServer = ({ data }) => {
               Inquiry Bazaar Pvt Ltd.
             </Text>
             <Text>
-              356, Vardhman Grand Plaza, Sec 3, Rohini, New Delhi-110085, India.
+              Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi, 110034,
             </Text>
             <Text>Ph no: +91 - 011 42603232</Text>
             <Text>
@@ -384,10 +384,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logo: {
-   width: 100,
+    width: 100,
     height: 100,
     objectFit: "cover",
-    borderRadius:20
+    borderRadius: 20
   },
   title: {
     top: 20, // vertically center relative to logo
@@ -824,7 +824,7 @@ const styles = StyleSheet.create({
 //               Inquiry Bazaar Pvt Ltd
 //             </Text>
 //             <Text>
-//               356, Vardhman Grand Plaza, Sec 3, Rohini, New Delhi-110085, India.
+//               Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi, 110034,
 //             </Text>
 //             <Text>Ph no: +91 - 011 42603232</Text>
 //             <Text>

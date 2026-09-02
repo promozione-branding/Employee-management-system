@@ -319,6 +319,13 @@ export const createInviceFormControls = [
     ],
   },
   {
+    label: "Invoice Number",
+    name: "invoiceNo",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter Invoice Number",
+  },
+  {
     label: "Date Of Invoice",
     name: "invoiceDate",
     componentType: "input",

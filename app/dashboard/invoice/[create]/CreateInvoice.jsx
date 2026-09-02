@@ -10,6 +10,7 @@ import {
   createInvoiceService,
   createInvoiceServiceService,
   getAllinvoiceServices,
+  getNextInvoiceNumber
 } from "@/service/invoice";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -28,6 +29,7 @@ const CreateInvoice = ({ id }) => {
   const [invoiceFormData, setInvoiceFormData] = useState({
     taxType: "",
     invoiceDate: "",
+    invoiceNo: "",
   });
 
   const [editInvoiceServiceId, setEditInvoiceServiceId] = useState(null);
@@ -40,7 +42,7 @@ const CreateInvoice = ({ id }) => {
   const [selectedServices, setSelectedServices] = useState([]);
 
   // 🆕 Loading states
-  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false); 
+  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
   const [isCreatingService, setIsCreatingService] = useState(false);
   const [isUpdatingService, setIsUpdatingService] = useState(false);
 
@@ -66,7 +68,7 @@ const CreateInvoice = ({ id }) => {
     //   ? taxAmount + totalServicePrice - tdsAmount
     //   : taxAmount + totalServicePrice;
 
-    const totalAmount =  taxAmount + totalServicePrice;
+    const totalAmount = taxAmount + totalServicePrice;
 
     return totalAmount;
   }
@@ -81,6 +83,7 @@ const CreateInvoice = ({ id }) => {
     services: selectedServices.map(({ _id }) => _id),
     taxType: invoiceFormData.taxType,
     invoiceDate: invoiceFormData.invoiceDate,
+    invoiceNo: invoiceFormData.invoiceNo,
     totalAmount: calculationOfTotalAmount(),
   };
 
@@ -125,6 +128,11 @@ const CreateInvoice = ({ id }) => {
       return;
     }
 
+    if (!invoiceFormData.invoiceNo) {
+      toast.error("Please enter an invoice number.");
+      return;
+    }
+
     setIsCreatingInvoice(true); // 🆕 Start loading
 
     const res = await createInvoiceService(invoiceFormDate);
@@ -134,7 +142,7 @@ const CreateInvoice = ({ id }) => {
     if (res.success) {
       toast.success("Invoice created successfully!");
       setSelectedServices([]);
-      setInvoiceFormData({ taxType: "", invoiceDate: "" });
+      setInvoiceFormData({ taxType: "", invoiceDate: "", invoiceNo: "", });
       router.push(`/dashboard/customer/${id}`);
     }
   }
@@ -210,10 +218,26 @@ const CreateInvoice = ({ id }) => {
     }
   }
 
+  async function getInvoiceNumber() {
+    try {
+      const res = await getNextInvoiceNumber();
+
+      if (res.success) {
+        setInvoiceFormData((prev) => ({
+          ...prev,
+          invoiceNo: res.invoiceNo,
+        }));
+      }
+    } catch (error) {
+      toast.error("Failed to get invoice number");
+    }
+  }
+
   // ---------------- USE EFFECT ----------------
   useEffect(() => {
     customerDetails();
     allInvoiceService();
+    getInvoiceNumber()
   }, []);
 
   return (
@@ -239,10 +263,9 @@ const CreateInvoice = ({ id }) => {
                 <button
                   onClick={() => handleSelectService(item)}
                   className={`group block rounded-t-lg p-4 border shadow-sm transition-all duration-300 ease-in-out 
-                    ${
-                      selectedServices.some((s) => s?._id === item?._id)
-                        ? "bg-blue-100 border-blue-400"
-                        : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
+                    ${selectedServices.some((s) => s?._id === item?._id)
+                      ? "bg-blue-100 border-blue-400"
+                      : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
                     }`}
                 >
                   <div className="text-center">

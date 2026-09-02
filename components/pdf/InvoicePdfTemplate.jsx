@@ -71,12 +71,12 @@ const Invoice = ({ data }) => {
 
         {/* logo and title */}
         <View style={styles.header}>
-          <Image src={"/blog/Logo-Company (2).png"} style={styles.logo} />
+          <Image src={"/pdf/logo.png"} style={styles.logo} />
           <Text style={styles.title}>TAX INVOICE</Text>
         </View>
 
         {/* watermark */}
-        <Image src={"/blog/logo2.png"} style={styles.watermark} />
+        <Image src={"/pdf/logo.png"} style={styles.watermark} />
 
         {/* invoice info */}
         <View style={styles.invoiceInfo}>
@@ -348,7 +348,7 @@ const Invoice = ({ data }) => {
               Inquiry Bazaar Pvt Ltd.
             </Text>
             <Text>
-              356, Vardhman Grand Plaza, Sec 3, Rohini, New Delhi-110085, India.
+              Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi, 110034,
             </Text>
             <Text>Ph no: +91 - 011 42603232</Text>
             <Text>

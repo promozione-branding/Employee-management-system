@@ -55,7 +55,7 @@ const InvoiceSchema = new mongoose.Schema(
 );
 
 InvoiceSchema.pre("save", async function (next) {
-  if (this.isNew) {
+  if (this.isNew && !this.invoiceNo) {
     const now = new Date();
     const year = now.getFullYear();
 
@@ -69,12 +69,15 @@ InvoiceSchema.pre("save", async function (next) {
 
     let nextNumber = 551;
 
-    if (lastInvoice && lastInvoice.invoiceNo) {
+    if (lastInvoice?.invoiceNo) {
       const lastNumber = parseInt(
         lastInvoice.invoiceNo.replace(prefix, ""),
         10
       );
-      nextNumber = lastNumber + 1;
+
+      if (!isNaN(lastNumber)) {
+        nextNumber = lastNumber + 1;
+      }
     }
 
     this.invoiceNo = `${prefix}${String(nextNumber).padStart(6, "0")}`;

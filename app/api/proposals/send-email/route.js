@@ -57,7 +57,7 @@ export async function POST(req) {
       to: proposal?.clientId?.email,
       subject: `Your Proposal from Inquiry Bazaar - #${proposal?.proposalNo}`,
       html: `
-        <p>Dear ${proposal?.clientName} Sir,</p>
+        <p>Dear ${proposal?.clientName},</p>
         <p>I hope this email finds you well.</p>
         <p>I am writing to you to share with you the proposal for the marketing services that we discussed. At Inquiry Bazaar Pvt Ltd, we take great pride in offering customized solutions that align with your business goals. We are excited about the opportunity to work together and help your brand achieve its marketing objectives.</p>
         <p style="margin: 25px 0; text-align: center;">
