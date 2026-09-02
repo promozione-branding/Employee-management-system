@@ -32,15 +32,22 @@ export async function createInvoiceService(invoiceFormData) {
       "/api/invoice/create",
       invoiceFormData
     );
-    if (data.success) {
-      toast.success(data.message || "Invoice created successfully");
-      return data;
-    }
+
+    return data;
   } catch (error) {
-    console.log(error);
-    toast.error(error.message || "error while creating the invoice");
+    console.log("CREATE INVOICE ERROR:", error);
+
+    return {
+      success: false,
+      status: error.response?.status,
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        "Error while creating the invoice",
+    };
   }
 }
+
 
 export async function getNextInvoiceNumber() {
   try {

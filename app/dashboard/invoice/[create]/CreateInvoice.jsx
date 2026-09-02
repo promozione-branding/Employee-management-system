@@ -133,17 +133,30 @@ const CreateInvoice = ({ id }) => {
       return;
     }
 
-    setIsCreatingInvoice(true); // 🆕 Start loading
+    setIsCreatingInvoice(true);
 
-    const res = await createInvoiceService(invoiceFormDate);
+    try {
+      const res = await createInvoiceService(invoiceFormDate);
 
-    setIsCreatingInvoice(false); // 🆕 End loading
+      if (res.success) {
+        toast.success("Invoice created successfully!");
 
-    if (res.success) {
-      toast.success("Invoice created successfully!");
-      setSelectedServices([]);
-      setInvoiceFormData({ taxType: "", invoiceDate: "", invoiceNo: "", });
-      router.push(`/dashboard/customer/${id}`);
+        setSelectedServices([]);
+
+        setInvoiceFormData({
+          taxType: "",
+          invoiceDate: "",
+          invoiceNo: "",
+        });
+
+        router.push(`/dashboard/customer/${id}`);
+      } else {
+        toast.error(res.message || "Failed to create invoice");
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to create invoice");
+    } finally {
+      setIsCreatingInvoice(false);
     }
   }
 

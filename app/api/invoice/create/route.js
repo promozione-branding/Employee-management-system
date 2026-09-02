@@ -87,17 +87,22 @@ export async function POST(req) {
     await connectDB();
 
     const authUser = await getAuthUser(req);
+
     if (!authUser) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        {
+          success: false,
+          message: "Unauthorized",
+        },
         { status: 401 }
       );
     }
 
     const data = await req.json();
 
-    // 1️⃣ FIND CUSTOMER
+    // 1. FIND CUSTOMER
     const findCustomer = await Customer.findById(data.clientId);
+
     if (!findCustomer) {
       return NextResponse.json(
         {
@@ -108,7 +113,7 @@ export async function POST(req) {
       );
     }
 
-    // CHECK INVOICE NUMBER
+    // 2. CHECK DUPLICATE INVOICE NUMBER
     if (data.invoiceNo) {
       const existingInvoice = await Invoice.findOne({
         invoiceNo: data.invoiceNo,
@@ -125,32 +130,32 @@ export async function POST(req) {
       }
     }
 
-    // 2️⃣ FETCH SERVICES FROM MASTER COLLECTION
+    // 3. FETCH SERVICES
     const services = await InvoiceService.find({
       _id: { $in: data.services },
     });
 
-    // 3️⃣ CREATE SNAPSHOT
+    // 4. CREATE SNAPSHOT
     const serviceSnapshot = services.map((service) => ({
       serviceName: service.serviceName,
       HSN: service.HSN,
       price: service.price,
     }));
 
-    // 4️⃣ CALCULATE TOTAL
+    // 5. CALCULATE TOTAL
     const totalAmount = serviceSnapshot.reduce(
-      (acc, s) => acc + s.price,
+      (acc, service) => acc + Number(service.price || 0),
       0
     );
 
-    // 5️⃣ CREATE INVOICE
+    // 6. CREATE INVOICE
     const invoice = await Invoice.create({
       ...data,
       services: serviceSnapshot,
       totalAmount,
     });
 
-    // 6️⃣ CREATE AUDIT HISTORY
+    // 7. CREATE AUDIT HISTORY
     const { _id } = await createAuditLog({
       clientId: invoice.clientId,
       entityType: "Invoice",
@@ -161,9 +166,10 @@ export async function POST(req) {
       userId: authUser._id,
     });
 
-    // 7️⃣ LINK TO CUSTOMER
+    // 8. LINK TO CUSTOMER
     findCustomer.invoices.push(invoice._id);
     findCustomer.history.push(_id);
+
     await findCustomer.save();
 
     return NextResponse.json(
@@ -176,6 +182,18 @@ export async function POST(req) {
     );
   } catch (error) {
     console.error("CREATE INVOICE API ERROR:", error);
+
+    // MongoDB duplicate key protection
+    if (error.code === 11000 && error.keyPattern?.invoiceNo) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invoice number already exists.",
+        },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
       {
         success: false,
