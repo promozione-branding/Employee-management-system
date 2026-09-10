@@ -24,20 +24,11 @@ import {
 
 const CreateInvoice = ({ id }) => {
   const router = useRouter();
-
   // ---------------- STATE ----------------
-  const [invoiceFormData, setInvoiceFormData] = useState({
-    taxType: "",
-    invoiceDate: "",
-    invoiceNo: "",
-  });
-
   const [editInvoiceServiceId, setEditInvoiceServiceId] = useState(null);
-
   const [clientDetails, setClientDetails] = useState({});
   const [serviceFormData, setServiceFormData] = useState(initialInvoiceServiceFormData);
   const [editData, setEditData] = useState(initialInvoiceServiceFormData);
-
   const [invoiceServiceItem, setInvoiceServiceItem] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
 
@@ -46,8 +37,25 @@ const CreateInvoice = ({ id }) => {
   const [isCreatingService, setIsCreatingService] = useState(false);
   const [isUpdatingService, setIsUpdatingService] = useState(false);
 
-  const { Address, GSTIN, city, company, country, name, phone, tanNo, email } =
-    clientDetails;
+  const { Address, GSTIN, city, company, country, name, phone, tanNo, email } = clientDetails;
+  console.log(GSTIN)
+
+  const [invoiceFormData, setInvoiceFormData] = useState({
+    taxType: "",
+    invoiceDate: "",
+    invoiceNo: "",
+  });
+
+  useEffect(() => {
+    if (!GSTIN) return;
+
+    const stateCode = String(GSTIN).substring(0, 2);
+
+    setInvoiceFormData((prev) => ({
+      ...prev,
+      taxType: stateCode === "07" ? "SGST/CGST" : "IGST",
+    }));
+  }, [GSTIN]);
 
   // ---------------- CALCULATION ----------------
   function calculationOfTotalAmount() {

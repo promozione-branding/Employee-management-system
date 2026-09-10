@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Document,
   Page,
@@ -12,14 +13,19 @@ import {
 Font.register({
   family: "LiberationSans",
   fonts: [
-    { src: "/font/LiberationSans-Regular.ttf" },
-    { src: "/font/LiberationSans-Bold.ttf", fontWeight: "bold" },
+    {
+      src: "/font/LiberationSans-Regular.ttf",
+    },
+    {
+      src: "/font/LiberationSans-Bold.ttf",
+      fontWeight: "bold",
+    },
   ],
 });
 
 const Invoice = ({ data }) => {
   if (!data) {
-    return null; // Return nothing if there's no data yet
+    return null;
   }
 
   const {
@@ -29,175 +35,294 @@ const Invoice = ({ data }) => {
     clientAddress,
     clientCompany,
     clientName,
-    services,
-    tanNo,
+    services = [],
     taxType,
     totalAmount,
   } = data;
 
+  // -----------------------------
+  // DATE FORMAT
+  // -----------------------------
   const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "short", day: "2-digit" };
+    if (!dateString) return "";
+
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    };
+
     return new Date(dateString)
       .toLocaleDateString("en-GB", options)
       .replace(/ /g, "-");
   };
 
+  // -----------------------------
+  // CURRENCY FORMAT
+  // -----------------------------
   const formatIndianCurrency = (num) => {
-    if (typeof num !== "number") return num;
-    return num.toLocaleString("en-IN", {
+    const number = Number(num || 0);
+
+    return number.toLocaleString("en-IN", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
   };
 
-  const subtotal = services.reduce((sum, service) => sum + service.price, 0);
+  // -----------------------------
+  // TAX CALCULATIONS
+  // -----------------------------
+  const subtotal = services.reduce(
+    (sum, service) => sum + Number(service?.price || 0),
+    0
+  );
 
   const taxableAmount = subtotal;
 
-  const taxRate = 0.18;
-  const taxAmount = taxableAmount * taxRate;
+  const cgstAmount = taxableAmount * 0.09;
+  const sgstAmount = taxableAmount * 0.09;
+  const igstAmount = taxableAmount * 0.18;
 
+  const taxAmount =
+    taxType === "IGST"
+      ? igstAmount
+      : cgstAmount + sgstAmount;
 
-
-  const CgstAmount = taxableAmount * 0.09;
+  // IMPORTANT:
+  // totalAmount coming from API is already tax-inclusive.
+  // Example:
+  // subtotal = 10000
+  // tax = 1800
+  // totalAmount = 11800
+  const finalTotalAmount = Number(totalAmount || 0);
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* original text */}
+        {/* =========================
+            ORIGINAL INVOICE
+        ========================== */}
         <View style={styles.originalInvoice}>
           <Text>(Original Invoice)</Text>
         </View>
 
-        {/* logo and title */}
+        {/* =========================
+            HEADER
+        ========================== */}
         <View style={styles.header}>
-          <Image src={"/pdf/logo.png"} style={styles.logo} />
+          <Image src="/pdf/logo.png" style={styles.logo} />
+
           <Text style={styles.title}>TAX INVOICE</Text>
         </View>
 
-        {/* watermark */}
-        <Image src={"/pdf/logo.png"} style={styles.watermark} />
+        {/* =========================
+            WATERMARK
+        ========================== */}
+        <Image src="/pdf/logo.png" style={styles.watermark} />
 
-        {/* invoice info */}
+        {/* =========================
+            INVOICE INFO
+        ========================== */}
         <View style={styles.invoiceInfo}>
-          <Text style={{ marginTop: "6px" }}>Invoice No.: {invoiceNo}</Text>
-          <Text style={{ marginBottom: "1px" }}>
+          <Text>
+            Invoice No.: {invoiceNo || "-"}
+          </Text>
+
+          <Text>
             Invoice Date: {formatDate(invoiceDate)}
           </Text>
         </View>
 
-        {/* customer details */}
+        {/* =========================
+            CUSTOMER DETAILS
+        ========================== */}
         <View style={styles.customerDetails}>
-          <Text style={styles.sectionTitle}>Customer Details</Text>
+          <Text style={styles.sectionTitle}>
+            Customer Details
+          </Text>
 
           <Text>
             <Text style={styles.bold}>Client Name: </Text>
-            {clientName || "error"}
+            {clientName || "-"}
           </Text>
 
           <Text>
             <Text style={styles.bold}>Company Name: </Text>
-            {clientCompany || "clientcompany"}
-          </Text>
-          <Text>
-            <Text style={styles.bold}>GST No.: </Text>
-            {GSTIN || "GSTIN"}
-          </Text>
-          <Text>
-            <Text style={[styles.bold, { textAlign: "justify" }]}>
-              Address:{" "}
-            </Text>
-            {clientAddress || "address"}
+            {clientCompany || "-"}
           </Text>
 
-          <Text style={{ textAlign: "justify" }}>
-            {/* {clientAddress.split("-")[1] || "address"} */}
+          <Text>
+            <Text style={styles.bold}>GST No.: </Text>
+            {GSTIN || "-"}
+          </Text>
+
+          <Text>
+            <Text style={styles.bold}>Address: </Text>
+            {clientAddress || "-"}
           </Text>
         </View>
 
-        {/* table */}
+        {/* =========================
+            TABLE
+        ========================== */}
         <View style={styles.table}>
-          {/* table header */}
+          {/* TABLE HEADER */}
           <View style={[styles.tableRow, styles.tableHeader]}>
-            <Text style={[styles.tableCell, { flex: 0.5, fontWeight: "bold" }]}>
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 0.5,
+                  fontWeight: "bold",
+                },
+              ]}
+            >
               S.No.
             </Text>
-            <Text style={[styles.tableCell, { flex: 3, fontWeight: "bold" }]}>
+
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 3,
+                  fontWeight: "bold",
+                },
+              ]}
+            >
               Description
             </Text>
-            <Text style={[styles.tableCell, { flex: 1, fontWeight: "bold" }]}>
+
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 1,
+                  fontWeight: "bold",
+                },
+              ]}
+            >
               HSN
             </Text>
-            <Text style={[styles.tableCell, { flex: 1, fontWeight: "bold" }]}>
+
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 1,
+                  fontWeight: "bold",
+                  textAlign: "right",
+                },
+              ]}
+            >
               Rate
             </Text>
-            <Text style={[styles.tableCell, { flex: 1, fontWeight: "bold" }]}>
+
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 1,
+                  fontWeight: "bold",
+                  textAlign: "right",
+                },
+              ]}
+            >
               Amount (Rs.)
             </Text>
           </View>
 
-          {/* table row example */}
-          {services.map(({ serviceName, HSN, price, _id }, idx) => {
-            return (
-              <View style={styles.tableRow} key={_id}>
-                <Text style={[styles.tableCell, { flex: 0.5 }]}>{idx + 1}</Text>
-                <Text
-                  style={[
-                    styles.tableCell,
-                    {
-                      flex: 3,
-                      fontFamily: "LiberationSans",
-                      fontWeight: "bold",
-                    },
-                  ]}
+          {/* =========================
+              SERVICE ROWS
+          ========================== */}
+          {services.map(
+            ({ serviceName, HSN, price, _id }, idx) => {
+              return (
+                <View
+                  style={styles.tableRow}
+                  key={_id || `${serviceName}-${idx}`}
                 >
-                  {serviceName || "service Name"}
-                </Text>
-                <Text
-                  style={[styles.tableCell, { flex: 1, textAlign: "right" }]}
-                >
-                  {HSN || "hsm code"}
-                </Text>
-                <Text
-                  style={[styles.tableCell, { flex: 1, textAlign: "right" }]}
-                ></Text>
-                <Text
-                  style={[styles.tableCell, { flex: 1, textAlign: "right" }]}
-                >
-                  {formatIndianCurrency(price) || "price"}
-                </Text>
-              </View>
-            );
-          })}
+                  {/* S.NO */}
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      {
+                        flex: 0.5,
+                      },
+                    ]}
+                  >
+                    {idx + 1}
+                  </Text>
 
-          {/* taxable amount */}
-          {/* {tanNo && (
-            <View style={styles.tableRow}>
-              <Text style={[styles.tableCell, { flex: 0.5 }]}></Text>
-              <Text
-                style={[
-                  styles.tableCell,
-                  { flex: 3, textAlign: "right", fontSize: 8 },
-                ]}
-              >
-                TDS Amount
-              </Text>
-              <Text style={[styles.tableCell, { flex: 1 }]}></Text>
-              <Text style={[styles.tableCell, { flex: 1 }]}></Text>
-              <Text
-                style={[
-                  styles.tableCell,
-                  { flex: 1, fontSize: 8, textAlign: "right" },
-                ]}
-              >
-                {formatIndianCurrency(tdsAmount)}
-              </Text>
-            </View>
-          )} */}
+                  {/* DESCRIPTION */}
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      {
+                        flex: 3,
+                        fontFamily: "LiberationSans",
+                        fontWeight: "bold",
+                      },
+                    ]}
+                  >
+                    {serviceName || "-"}
+                  </Text>
 
-          {/* cgst row */}
+                  {/* HSN */}
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      {
+                        flex: 1,
+                        textAlign: "right",
+                      },
+                    ]}
+                  >
+                    {HSN || "-"}
+                  </Text>
+
+                  {/* RATE */}
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      {
+                        flex: 1,
+                        textAlign: "right",
+                      },
+                    ]}
+                  >
+                    {formatIndianCurrency(price)}
+                  </Text>
+
+                  {/* AMOUNT */}
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      {
+                        flex: 1,
+                        textAlign: "right",
+                      },
+                    ]}
+                  >
+                    {formatIndianCurrency(price)}
+                  </Text>
+                </View>
+              );
+            }
+          )}
+
+          {/* =========================
+              TAXABLE AMOUNT
+          ========================== */}
           <View style={styles.tableRow}>
-            <Text style={[styles.tableCell, { flex: 0.5 }]}></Text>
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 0.5,
+                },
+              ]}
+            />
+
             <Text
               style={[
                 styles.tableCell,
@@ -205,152 +330,436 @@ const Invoice = ({ data }) => {
                   flex: 3,
                   textAlign: "right",
                   fontSize: 8,
+                },
+              ]}
+            >
+              Taxable Amount
+            </Text>
+
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 1,
+                },
+              ]}
+            />
+
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 1,
+                  fontSize: 8,
                   textAlign: "right",
                 },
               ]}
             >
+              -
+            </Text>
+
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 1,
+                  fontSize: 8,
+                  textAlign: "right",
+                },
+              ]}
+            >
+              {formatIndianCurrency(taxableAmount)}
+            </Text>
+          </View>
+
+          {/* =========================
               CGST
-            </Text>
-            <Text style={[styles.tableCell, { flex: 1 }]}></Text>
-            <Text
-              style={[
-                styles.tableCell,
-                { flex: 1, fontSize: 8, textAlign: "right" },
-              ]}
-            >
-              9%
-            </Text>
-            <Text
-              style={[
-                styles.tableCell,
-                { flex: 1, fontSize: 8, textAlign: "right" },
-              ]}
-            >
-              {formatIndianCurrency(CgstAmount) || "000.00"}
-            </Text>
-          </View>
+          ========================== */}
+          {taxType === "SGST/CGST" && (
+            <View style={styles.tableRow}>
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 0.5,
+                  },
+                ]}
+              />
 
-          {/* sgst row */}
-          <View style={styles.tableRow}>
-            <Text style={[styles.tableCell, { flex: 0.5 }]}></Text>
-            <Text
-              style={[
-                styles.tableCell,
-                { flex: 3, textAlign: "right", fontSize: 8 },
-              ]}
-            >
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 3,
+                    textAlign: "right",
+                    fontSize: 8,
+                  },
+                ]}
+              >
+                CGST
+              </Text>
+
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 1,
+                  },
+                ]}
+              />
+
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 1,
+                    fontSize: 8,
+                    textAlign: "right",
+                  },
+                ]}
+              >
+                9%
+              </Text>
+
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 1,
+                    fontSize: 8,
+                    textAlign: "right",
+                  },
+                ]}
+              >
+                {formatIndianCurrency(cgstAmount)}
+              </Text>
+            </View>
+          )}
+
+          {/* =========================
               SGST
-            </Text>
-            <Text style={[styles.tableCell, { flex: 1 }]}></Text>
-            <Text
-              style={[
-                styles.tableCell,
-                { flex: 1, fontSize: 8, textAlign: "right" },
-              ]}
-            >
-              9%
-            </Text>
-            <Text
-              style={[
-                styles.tableCell,
-                { flex: 1, fontSize: 8, textAlign: "right" },
-              ]}
-            >
-              {formatIndianCurrency(CgstAmount) || "000.00"}
-            </Text>
-          </View>
+          ========================== */}
+          {taxType === "SGST/CGST" && (
+            <View style={styles.tableRow}>
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 0.5,
+                  },
+                ]}
+              />
 
-          {/* total tax amount */}
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 3,
+                    textAlign: "right",
+                    fontSize: 8,
+                  },
+                ]}
+              >
+                SGST
+              </Text>
+
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 1,
+                  },
+                ]}
+              />
+
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 1,
+                    fontSize: 8,
+                    textAlign: "right",
+                  },
+                ]}
+              >
+                9%
+              </Text>
+
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 1,
+                    fontSize: 8,
+                    textAlign: "right",
+                  },
+                ]}
+              >
+                {formatIndianCurrency(sgstAmount)}
+              </Text>
+            </View>
+          )}
+
+          {/* =========================
+              IGST
+          ========================== */}
+          {taxType === "IGST" && (
+            <View style={styles.tableRow}>
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 0.5,
+                  },
+                ]}
+              />
+
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 3,
+                    textAlign: "right",
+                    fontSize: 8,
+                  },
+                ]}
+              >
+                IGST
+              </Text>
+
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 1,
+                  },
+                ]}
+              />
+
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 1,
+                    fontSize: 8,
+                    textAlign: "right",
+                  },
+                ]}
+              >
+                18%
+              </Text>
+
+              <Text
+                style={[
+                  styles.tableCell,
+                  {
+                    flex: 1,
+                    fontSize: 8,
+                    textAlign: "right",
+                  },
+                ]}
+              >
+                {formatIndianCurrency(igstAmount)}
+              </Text>
+            </View>
+          )}
+
+          {/* =========================
+              TOTAL TAX
+          ========================== */}
           <View style={styles.tableRow}>
-            <Text style={[styles.tableCell, { flex: 0.5 }]}></Text>
             <Text
               style={[
                 styles.tableCell,
-                { flex: 3, textAlign: "right", fontSize: 8 },
+                {
+                  flex: 0.5,
+                },
+              ]}
+            />
+
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 3,
+                  textAlign: "right",
+                  fontSize: 8,
+                },
               ]}
             >
               Total Tax Amount
             </Text>
-            <Text style={[styles.tableCell, { flex: 1 }]}></Text>
+
             <Text
               style={[
                 styles.tableCell,
-                { flex: 1, fontSize: 8, textAlign: "right" },
+                {
+                  flex: 1,
+                },
+              ]}
+            />
+
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 1,
+                  fontSize: 8,
+                  textAlign: "right",
+                },
               ]}
             >
               18%
             </Text>
+
             <Text
               style={[
                 styles.tableCell,
-                { flex: 1, fontSize: 8, textAlign: "right" },
+                {
+                  flex: 1,
+                  fontSize: 8,
+                  textAlign: "right",
+                },
               ]}
             >
-              {formatIndianCurrency(taxAmount) || "000.00"}
+              {formatIndianCurrency(taxAmount)}
             </Text>
           </View>
 
-          {/* total amount */}
+          {/* =========================
+              TOTAL AMOUNT
+          ========================== */}
           <View style={styles.tableRow}>
-            <Text style={[styles.tableCell, { flex: 0.5 }]}></Text>
             <Text
               style={[
                 styles.tableCell,
-                { textAlign: "right", fontWeight: "bold", flex: 3 },
+                {
+                  flex: 0.5,
+                },
+              ]}
+            />
+
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  textAlign: "right",
+                  fontWeight: "bold",
+                  flex: 3,
+                },
               ]}
             >
               Total Amount
             </Text>
-            <Text style={[styles.tableCell, { flex: 1 }]}></Text>
-            <Text style={[styles.tableCell, { flex: 1 }]}></Text>
+
             <Text
               style={[
                 styles.tableCell,
-                { flex: 1, fontWeight: "bold", textAlign: "right" },
+                {
+                  flex: 1,
+                },
+              ]}
+            />
+
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 1,
+                },
+              ]}
+            />
+
+            <Text
+              style={[
+                styles.tableCell,
+                {
+                  flex: 1,
+                  fontSize: 8,
+                  textAlign: "right",
+                  fontWeight: "bold",
+                },
               ]}
             >
-              {formatIndianCurrency(totalAmount + taxAmount) || "000.00"}
+              {formatIndianCurrency(finalTotalAmount)}
             </Text>
           </View>
         </View>
 
-        {/* note section */}
-        <View style={[styles.noteSection, { fontSize: 9 }]}>
-          <Text>Whether the tax is payable on reverse charge basis: No</Text>
+        {/* =========================
+            NOTE SECTION
+        ========================== */}
+        <View
+          style={[
+            styles.noteSection,
+            {
+              fontSize: 9,
+            },
+          ]}
+        >
+          <Text>
+            Whether the tax is payable on reverse charge basis: No
+          </Text>
 
-          <Text style={{ marginTop: 10, marginBottom: 5, fontWeight: "bold" }}>
+          <Text
+            style={{
+              marginTop: 10,
+              marginBottom: 5,
+              fontWeight: "bold",
+            }}
+          >
             NOTE:
           </Text>
+
           <Text>
             • Tenure of service and payment terms for this invoice would be
             governed as per the agreement between the Customer and
           </Text>
 
-          <Text style={{ marginLeft: 6 }}>
+          <Text
+            style={{
+              marginLeft: 6,
+            }}
+          >
             Inquiry Bazaar Private Limited.
           </Text>
 
           <Text>
-            • This invoice is valid, subject to realization of due payments, as
-            mentioned in details above.
-          </Text>
-          <Text>
-            • Any payment made is covered under "Advertising Contract" u/s 194C.
-            TDS, if applicable, shall be @ 2%.
-          </Text>
-          <Text>
-            • You are requested to validate this invoice along with GSTIN within
-            one month of Invoice date.
+            • This invoice is valid, subject to realization of due payments,
+            as mentioned in details above.
           </Text>
 
+          <Text>
+            • Any payment made is covered under "Advertising Contract" u/s
+            194C. TDS, if applicable, shall be @ 2%.
+          </Text>
+
+          <Text>
+            • You are requested to validate this invoice along with GSTIN
+            within one month of Invoice date.
+          </Text>
+
+          {/* =========================
+              COMPANY DETAILS
+          ========================== */}
           <View style={styles.companyDetails}>
-            <Text style={{ fontWeight: "bold" }}>
+            <Text
+              style={{
+                fontWeight: "bold",
+              }}
+            >
               Inquiry Bazaar Pvt Ltd.
             </Text>
+
             <Text>
-              Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi, 110034,
+              Regd. Office: 606 Best Business Park, Netaji Subhash Place,
+              Delhi, 110034,
             </Text>
-            <Text>Ph no: +91 - 011 42603232</Text>
+
+            <Text>
+              Ph no: +91 - 011 42603232
+            </Text>
+
             <Text>
               PAN No.: AAOCP9163C, GSTIN No.: 07AAOCP9163C1Z5, CIN:
               U63112DL2024PTC434224
@@ -364,19 +773,24 @@ const Invoice = ({ data }) => {
 
 export default Invoice;
 
+// ======================================
+// STYLES
+// ======================================
+
 const styles = StyleSheet.create({
   page: {
     fontFamily: "LiberationSans",
     padding: "0px 50px",
     fontSize: 10,
-    // fontFamily: "Helvetica",
   },
+
   originalInvoice: {
     marginTop: 20,
     textAlign: "right",
     fontSize: 9,
     color: "#000",
   },
+
   header: {
     flexDirection: "row",
     justifyContent: "flex-start",
@@ -384,18 +798,19 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
   },
+
   logo: {
     width: 100,
     height: 100,
     objectFit: "cover",
     borderRadius: 20,
   },
+
   title: {
-    top: 20, // vertically center relative to logo
+    top: 20,
     left: "50%",
     transform: "translateX(-150%)",
     fontSize: 12,
-
     fontWeight: "bold",
     color: "red",
   },
@@ -439,28 +854,33 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#000",
   },
+
   tableRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
     borderColor: "#000",
   },
+
   tableHeader: {
     backgroundColor: "#f0f0f0",
   },
+
   tableCell: {
     padding: 4,
     borderRightWidth: 1,
     borderColor: "#000",
   },
+
   noteSection: {
     marginTop: 24,
     lineHeight: 1.2,
     fontFamily: "LiberationSans",
   },
+
   companyDetails: {
     marginTop: 5,
     borderTopWidth: 1,
-    borderColor: "",
+    borderColor: "#000",
     paddingTop: 4,
   },
 });

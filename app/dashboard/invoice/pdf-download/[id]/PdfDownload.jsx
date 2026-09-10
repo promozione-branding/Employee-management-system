@@ -26,6 +26,8 @@ const PdfDownload = ({ id }) => {
     fetchingPdfInfo(id);
   }, []);
 
+  console.log(pdfData)
+
   return (
     <>
       {loading ? (
