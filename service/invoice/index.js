@@ -48,6 +48,28 @@ export async function createInvoiceService(invoiceFormData) {
   }
 }
 
+export async function editInvoiceById(id, invoiceData) {
+  try {
+    const { data } = await axiosInstance.put(
+      `/api/invoice/${id}`,
+      invoiceData
+    );
+
+    return data;
+  } catch (error) {
+    console.log("UPDATE INVOICE ERROR:", error);
+
+    return {
+      success: false,
+      status: error.response?.status,
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        "Error while updating invoice",
+    };
+  }
+}
+
 
 export async function getNextInvoiceNumber() {
   try {
@@ -104,4 +126,47 @@ export async function pdfDownloaderById(id) {
 export async function sendInvoicePdfService(id) {
   const { data } = await axiosInstance.post("/api/invoice/send-email", id);
   return data;
+}
+
+// GET SINGLE INVOICE
+export async function fetchInvoiceById(id) {
+  try {
+    const { data } = await axiosInstance.get(
+      `/api/invoice/${id}`
+    );
+
+    return data;
+  } catch (error) {
+    console.log("FETCH INVOICE ERROR:", error);
+
+    return {
+      success: false,
+      status: error.response?.status,
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        "Error while fetching invoice",
+    };
+  }
+}
+
+
+export async function deleteInvoiceById(id) {
+  try {
+    const { data } = await axiosInstance.delete(
+      `/api/invoice/${id}`
+    );
+
+    return data;
+  } catch (error) {
+    console.error("DELETE INVOICE SERVICE ERROR:", error);
+
+    return {
+      success: false,
+      message:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to delete invoice.",
+    };
+  }
 }

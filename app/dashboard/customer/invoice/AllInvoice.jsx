@@ -3,15 +3,19 @@ import {
   customerLedgerService,
   getAllinvoicesCustomer,
 } from "@/service/customer";
-import { pdfDownloaderById, sendInvoicePdfService } from "@/service/invoice";
+import { deleteInvoiceById, pdfDownloaderById, sendInvoicePdfService } from "@/service/invoice";
 import { createLedgerService, ledgerEntriesService } from "@/service/ledger";
 import { pdf } from "@react-pdf/renderer";
 import {
   BanknoteArrowUp,
   BookMarked,
   Download,
+  Edit,
+  Edit2,
   Eye,
-  Mail
+  Mail,
+  SquarePen,
+  Trash2
 } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -45,7 +49,7 @@ const AllInvoice = ({ customerId }) => {
       console.log(error);
       toast.error(
         error?.response?.data?.message ||
-          "An error occurred while fetching customer invoices.",
+        "An error occurred while fetching customer invoices.",
       );
     } finally {
       setLoading(false);
@@ -176,6 +180,49 @@ const AllInvoice = ({ customerId }) => {
     return <Loading />;
   }
 
+  async function handleDeleteInvoice(invoiceId) {
+    if (!invoiceId) {
+      toast.error("Invalid invoice ID.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this invoice?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await deleteInvoiceById(invoiceId);
+
+      if (response?.success) {
+        toast.success(
+          "Invoice deleted successfully."
+        );
+
+        // Refresh invoice list
+        await fetchingInvoices();
+      } else {
+        toast.error(
+          response?.message ||
+          "Failed to delete invoice."
+        );
+      }
+    } catch (error) {
+      console.error(
+        "DELETE INVOICE ERROR:",
+        error
+      );
+
+      toast.error(
+        error?.message ||
+        "Failed to delete invoice."
+      );
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-center font-bold text-3xl mb-8">All Invoices</h1>
@@ -256,6 +303,12 @@ const AllInvoice = ({ customerId }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center gap-4">
+                      <Link href={`/dashboard/invoice/edit-invoice/${invoice._id}`}>
+                        <SquarePen />
+                      </Link>
+                      <button onClick={() => handleDeleteInvoice(invoice._id)}>
+                        <Trash2 />
+                      </button>
                       <button onClick={() => downloadInvoicePdf(invoice._id)}>
                         <Download />
                       </button>
