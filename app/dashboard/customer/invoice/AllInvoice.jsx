@@ -147,7 +147,7 @@ const AllInvoice = ({ customerId }) => {
       }
 
       const pdfData = res.data;
-
+      console.log(pdfData)
       // ✅ Generate PDF Blob
       const blob = await pdf(<InvoicePdfTemplate data={pdfData} />).toBlob();
 
@@ -156,7 +156,7 @@ const AllInvoice = ({ customerId }) => {
 
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${pdfData?.clientName}-Invoice.pdf`;
+      link.download = `${pdfData?.clientCompany}-Invoice.pdf`;
 
       document.body.appendChild(link);
       link.click();
