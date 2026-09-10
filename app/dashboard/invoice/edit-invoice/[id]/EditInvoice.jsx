@@ -307,8 +307,8 @@ const EditInvoice = ({ id }) => {
       return;
     }
 
-    if (!/^\d{10}$/.test(String(invoiceFormData.invoiceNo))) {
-      toast.error("Invoice number should contain exactly 10 digits.");
+    if (String(invoiceFormData.invoiceNo).length > 13) {
+      toast.error("Invoice number cannot be more than 13 characters.");
       return;
     }
 

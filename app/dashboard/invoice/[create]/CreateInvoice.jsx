@@ -133,6 +133,10 @@ const CreateInvoice = ({ id }) => {
       return;
     }
 
+    if (String(invoiceFormData.invoiceNo).length > 13) {
+      toast.error("Invoice number cannot be more than 13 characters.");
+      return;
+    }
     setIsCreatingInvoice(true);
 
     try {
