@@ -1105,11 +1105,11 @@ const styles = StyleSheet.create({
   },
 
   logoSmall: {
-    width: 80,
+    width: 150,
     height: 80,
     borderRadius: 20,
-    marginBottom: 10,
-    marginTop: 10,
+    marginBottom: 0,
+    marginTop: 0,
     objectFit: "cover",
   },
 

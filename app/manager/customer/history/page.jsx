@@ -8,6 +8,7 @@ import {
   BanknoteArrowUp,
   NotebookTabs,
   Paperclip,
+  PhoneCall,
   SquareChartGantt,
   TableProperties,
   Users,
@@ -35,6 +36,11 @@ const HistoryPage = ({ customerId }) => {
       label: "Team Update",
       icon: <Volleyball />,
       href: `/manager/customer/history/team-update/${customerId}`,
+    },
+    {
+      label: "My Updates",
+      icon: <PhoneCall />,
+      href: `/manager/customer/history/my-update/${customerId}`,
     },
     {
       label: "Attachment",

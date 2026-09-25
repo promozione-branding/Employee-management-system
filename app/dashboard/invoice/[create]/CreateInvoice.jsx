@@ -38,7 +38,7 @@ const CreateInvoice = ({ id }) => {
   const [isUpdatingService, setIsUpdatingService] = useState(false);
 
   const { Address, GSTIN, city, company, country, name, phone, tanNo, email } = clientDetails;
-  console.log(GSTIN)
+
 
   const [invoiceFormData, setInvoiceFormData] = useState({
     taxType: "",
@@ -59,26 +59,20 @@ const CreateInvoice = ({ id }) => {
 
   // ---------------- CALCULATION ----------------
   function calculationOfTotalAmount() {
-    const totalServicePrice = selectedServices.reduce(
-      (total, service) => total + Number(service.price || 0),
+    const taxableAmount = selectedServices.reduce(
+      (total, service) => total + Number(service?.price || 0),
       0
     );
 
-    // let tdsAmount = 0;
+    if (invoiceFormData.taxType === "IGST") {
+      return taxableAmount + taxableAmount * 0.18;
+    }
 
-    // if (tanNo?.length !== 0) {
-    //   tdsAmount = totalServicePrice * 0.02;
-    // }
+    if (invoiceFormData.taxType === "SGST/CGST") {
+      return taxableAmount + taxableAmount * 0.09 + taxableAmount * 0.09;
+    }
 
-    const taxAmount = totalServicePrice * 0.18;
-
-    // const totalAmount = tanNo?.length
-    //   ? taxAmount + totalServicePrice - tdsAmount
-    //   : taxAmount + totalServicePrice;
-
-    const totalAmount = taxAmount + totalServicePrice;
-
-    return totalAmount;
+    return taxableAmount;
   }
 
   const invoiceFormDate = {
@@ -264,7 +258,7 @@ const CreateInvoice = ({ id }) => {
     allInvoiceService();
     getInvoiceNumber()
   }, []);
-
+  console.log(invoiceFormDate)
   return (
     <div>
       <p className="font-bold text-2xl text-center">Create Invoice</p>

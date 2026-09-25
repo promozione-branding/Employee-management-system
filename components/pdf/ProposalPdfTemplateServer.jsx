@@ -1432,7 +1432,7 @@ const ProposalPdfTemplate = ({ data }) => {
     <View style={styles.headerWrapper} fixed>
       <View style={styles.headerContainer}>
         <View style={styles.leftHeader2}>
-          <Image style={styles.logoSmall} src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765862267/Logo-Company_2_xnnz7x.png"} />
+          <Image style={styles.logoSmall} src={"https://pub-118976a6ce724cc9a72e1646c03e3665.r2.dev/logo.png"} />
         </View>
 
         <View style={styles.rightHeader2}>
@@ -1474,7 +1474,7 @@ const ProposalPdfTemplate = ({ data }) => {
       {/* PAGE 1 */}
       <Page size="A4" style={styles.page} wrap>
         {/* watermark */}
-        <Image src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765437572/logo2_wznumr.png"} style={styles.watermark} />
+        <Image src={"https://pub-118976a6ce724cc9a72e1646c03e3665.r2.dev/logo.png"} style={styles.watermark} />
 
         {/* header */}
         <PdfHeader />
@@ -1688,7 +1688,7 @@ const ProposalPdfTemplate = ({ data }) => {
       {/* PAGE 2 */}
 
       <Page size="A4" style={styles.page}>
-        <Image src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765437572/logo2_wznumr.png"} style={styles.watermark} fixed />
+        <Image src={"https://pub-118976a6ce724cc9a72e1646c03e3665.r2.dev/logo.png"} style={styles.watermark} fixed />
 
         {/* header */}
         <PdfHeader />
@@ -2409,11 +2409,11 @@ const styles = StyleSheet.create({
   },
 
   logoSmall: {
-    width: 80,
+    width: 150,
     height: 80,
     borderRadius: 20,
-    marginBottom: 10,
-    marginTop: 10,
+    marginBottom: 0,
+    marginTop: 0,
     objectFit: "cover",
   },
 
