@@ -1,3 +1,5 @@
+// app/(auth)/login-otp/page.jsx
+
 "use client";
 
 import { useState } from "react";

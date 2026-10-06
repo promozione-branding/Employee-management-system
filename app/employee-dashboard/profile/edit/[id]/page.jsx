@@ -1,3 +1,5 @@
+// app/employee-dashboard/profile/edit/[id]/page.jsx
+
 import ProfileEdit from "./ProfileEdit";
 
 const page = async ({ params }) => {

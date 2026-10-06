@@ -1,3 +1,5 @@
+// components/pdf/InvoicePdfTemplateServer.jsx
+
 import {
   Document,
   Page,

@@ -1,3 +1,5 @@
+// components/subComponents/customer/Customer.jsx
+
 "use client";
 import Loading from "@/components/layout/Loading";
 import { getCustomerServices } from "@/service/customer";

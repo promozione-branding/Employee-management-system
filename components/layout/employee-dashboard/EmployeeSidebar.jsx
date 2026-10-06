@@ -1,3 +1,5 @@
+// components/layout/employee-dashboard/EmployeeSidebar.jsx
+
 "use client";
 import { Button } from "@/components/ui/button";
 import {

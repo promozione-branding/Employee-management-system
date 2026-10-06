@@ -1,3 +1,5 @@
+// app/api/employee-dashboard/reminder/get-reminder/[employeeId]/route.js
+
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import EmployeeReminder from "@/models/employee/EmployeeReminder";

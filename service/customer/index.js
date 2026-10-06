@@ -1,3 +1,5 @@
+// service/customer/index.js
+
 import axiosInstance from "../axiosInstance";
 
 export async function getAllCustomerServices(page, limit, isPaid) {

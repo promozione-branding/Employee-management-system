@@ -1,3 +1,5 @@
+// app/api/invoice/[id]/route.js
+
 import { connectDB } from "@/lib/db";
 import { getAuthUser } from "@/lib/getAuthUser";
 import Customer from "@/models/admin/Customer";

@@ -1,3 +1,5 @@
+// app/(auth)/forgot-password/page.jsx
+
 "use client";
 
 import React, { useState } from "react";

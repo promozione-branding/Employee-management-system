@@ -1,3 +1,5 @@
+// app/api/customer/work/seo-sheet/update-ranking/edit-ranking/route.js
+
 import { connectDB } from "@/lib/db";
 import Keyword from "@/models/employee/seoEmployee/Keyword";
 import { NextResponse } from "next/server";

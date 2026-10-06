@@ -1,3 +1,5 @@
+// components/admin-dashboard/dashboard/RecentActivity.jsx
+
 "use client";
 
 import { recentActivityService } from "@/service/admin-dashboard/dashboard-api";

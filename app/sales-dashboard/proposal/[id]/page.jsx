@@ -1,3 +1,5 @@
+// app/sales-dashboard/proposal/[id]/page.jsx
+
 import CreateProposal from "./CreateProposal";
 
 const page = async ({ params }) => {

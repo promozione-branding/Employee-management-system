@@ -1,3 +1,5 @@
+// app/api/employee/work/[id]/route.js
+
 import { connectDB } from "@/lib/db";
 import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
 import { NextResponse } from "next/server";

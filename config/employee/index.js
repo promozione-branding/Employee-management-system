@@ -1,3 +1,5 @@
+// config/employee/index.js
+
 export const seoChecklistTemplate = [
   {
     key: "keyword_research",

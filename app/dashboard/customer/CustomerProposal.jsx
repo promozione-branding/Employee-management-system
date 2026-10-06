@@ -1,3 +1,5 @@
+// app/dashboard/customer/CustomerProposal.jsx
+
 "use client";
 
 // downloading pdf

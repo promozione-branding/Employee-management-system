@@ -1,3 +1,5 @@
+// components/sections/proposal/Proposal.jsx
+
 import React from 'react'
 
 const ProposalViewer = ({data}) => {

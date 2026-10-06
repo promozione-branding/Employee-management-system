@@ -1,3 +1,5 @@
+// components/wasteComponents/sales-dashboard/clients/[id]/page.jsx
+
 import React from "react";
 import ClientDetails from "./ClientDetails";
 

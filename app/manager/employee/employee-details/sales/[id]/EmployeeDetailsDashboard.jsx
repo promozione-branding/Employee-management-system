@@ -1,3 +1,5 @@
+// app/manager/employee/employee-details/sales/[id]/EmployeeDetailsDashboard.jsx
+
 "use client";
 import CurrentMonthDealValue from "@/components/admin-dashboard/employee/employee-dashboard/CurrentMonthDealValue";
 import CurrentMonthRevenue from "@/components/admin-dashboard/employee/employee-dashboard/CurrentMonthRevenue";

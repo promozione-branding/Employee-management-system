@@ -1,3 +1,5 @@
+// app/dashboard/customer/history/seo-report-history/[id]/page.jsx
+
 import React from "react";
 import SeoReport from "./SeoReport";
 

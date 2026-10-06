@@ -1,3 +1,5 @@
+// service/admin-dashboard/admin-basic/index.js
+
 import axiosInstance from "@/service/axiosInstance";
 
 export async function createAdminBasicDetailService(formData) {

@@ -1,3 +1,5 @@
+// components/employee-dashboard/tabs/WorkProgressTab.jsx
+
 "use client";
 
 import Loading from "@/components/layout/Loading";

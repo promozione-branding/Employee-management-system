@@ -1,3 +1,5 @@
+// app/manager/customer/history/seo-report-history/[id]/SeoReport.jsx
+
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";

@@ -1,3 +1,5 @@
+// app/api/user/get-all-user/route.js
+
 import { connectDB } from "@/lib/db";
 import User from "@/models/admin/User";
 import { NextResponse } from "next/server";

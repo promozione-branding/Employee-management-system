@@ -1,3 +1,5 @@
+// app/employee-dashboard/clients/work/[id]/page.jsx
+
 import React from "react";
 import WorkDetails from "./WorkDetails";
 

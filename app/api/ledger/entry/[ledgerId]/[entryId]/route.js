@@ -1,3 +1,5 @@
+// app/api/ledger/entry/[ledgerId]/[entryId]/route.js
+
 import { connectDB } from "@/lib/db";
 import Ledger from "@/models/admin/Ledger";
 import { NextResponse } from "next/server";

@@ -1,3 +1,5 @@
+// service/sales-dashboard/activity/index.js
+
 import axiosInstance from "@/service/axiosInstance";
 
 export async function callUpdatesService(id) {

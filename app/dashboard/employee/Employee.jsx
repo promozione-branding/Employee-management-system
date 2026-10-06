@@ -1,3 +1,5 @@
+// app/dashboard/employee/Employee.jsx
+
 "use client";
 import { IdCard, Trash2, UserRoundPen, UserRoundPlus } from "lucide-react";
 import { useEffect, useState } from "react";

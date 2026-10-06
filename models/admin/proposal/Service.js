@@ -1,3 +1,5 @@
+// models/admin/proposal/Service.js
+
 import mongoose from "mongoose";
 
 const ServiceSchema = new mongoose.Schema({

@@ -1,3 +1,5 @@
+// app/manager/customer/history/all-history/[id]/page.jsx
+
 import AllHistory from "./AllHistory";
 
 const page = async ({ params }) => {

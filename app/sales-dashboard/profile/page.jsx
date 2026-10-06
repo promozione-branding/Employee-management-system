@@ -1,3 +1,5 @@
+// app/sales-dashboard/profile/page.jsx
+
 import React from 'react'
 import Profile from './Profile'
 

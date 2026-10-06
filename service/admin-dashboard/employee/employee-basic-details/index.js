@@ -1,3 +1,5 @@
+// service/admin-dashboard/employee/employee-basic-details/index.js
+
 import axiosInstance from "@/service/axiosInstance";
 
 export async function editEmployeeBasicDetailsAdminService(id, formData) {

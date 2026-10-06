@@ -1,3 +1,5 @@
+// app/sales-dashboard/clients/ledger/[id]/page.jsx
+
 import CreateLedgerPage from "./CreateLedger";
 
 const page = async ({ params }) => {

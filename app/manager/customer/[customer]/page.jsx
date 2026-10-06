@@ -1,3 +1,5 @@
+// app/manager/customer/[customer]/page.jsx
+
 import { cookies } from "next/headers";
 import { decodeJwt } from "jose";
 import CustomerDetails from "./CustomerDetails";

@@ -1,3 +1,5 @@
+// app/dashboard/customer/ledger/LedgerDetails.jsx
+
 "use client";
 import Loading from "@/components/layout/Loading";
 import AddEntriesForm from "@/components/subComponents/ledger/AddEntries";

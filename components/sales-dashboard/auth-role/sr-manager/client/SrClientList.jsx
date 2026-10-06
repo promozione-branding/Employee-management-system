@@ -1,3 +1,5 @@
+// components/sales-dashboard/auth-role/sr-manager/client/SrClientList.jsx
+
 "use client";
 
 import { Button } from "@/components/ui/button";

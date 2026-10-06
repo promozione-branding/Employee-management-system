@@ -1,3 +1,5 @@
+// app/employee-dashboard/clients/seo-sheet/[id]/page.jsx
+
 import SeoSheet from "./SeoSheet";
 
 const page = async ({ params }) => {

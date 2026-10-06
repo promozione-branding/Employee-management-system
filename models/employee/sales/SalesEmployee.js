@@ -1,3 +1,5 @@
+// models/employee/sales/SalesEmployee.js
+
 import mongoose from "mongoose";
 
 const SalesEmployeeSchema = new mongoose.Schema(

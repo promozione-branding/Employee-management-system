@@ -1,3 +1,5 @@
+// app/manager/employee/employee-details/client/[id]/page.jsx
+
 import React from "react";
 import Client from "./Client";
 

@@ -1,3 +1,5 @@
+// app/dashboard/proposal/deleted-proposal/[id]/DeleteProposal.jsx
+
 "use client";
 import { getClientProposalDeletedHistory } from "@/service/customer/history";
 import React, { useEffect, useState } from "react";

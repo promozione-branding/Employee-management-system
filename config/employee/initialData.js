@@ -1,3 +1,5 @@
+// config/employee/initialData.js
+
 export const initialProfileData = {
   name: "",
   phone: "",

@@ -1,3 +1,5 @@
+// app/manager/employee/page.jsx
+
 import Employee from './Employee'
 
 const page = () => {

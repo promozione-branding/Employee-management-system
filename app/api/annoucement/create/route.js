@@ -1,3 +1,5 @@
+// app/api/annoucement/create/route.js
+
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Announcement from "@/models/admin/Announcement";

@@ -1,3 +1,5 @@
+// app/dashboard/proposal/deleted-proposal/[id]/page.jsx
+
 import React from "react";
 import DeleteProposal from "./DeleteProposal";
 

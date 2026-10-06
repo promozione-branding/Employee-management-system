@@ -1,3 +1,5 @@
+// service/customer/search/index.js
+
 import axiosInstance from "@/service/axiosInstance";
 
 export async function searchClientService(query, page = 1, isPaid) {

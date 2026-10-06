@@ -1,3 +1,5 @@
+// app/api/employee/edit-basic-details/[id]/route.js
+
 import { connectDB } from "@/lib/db";
 import Employee from "@/models/employee/Employee";
 import { getAuthUser } from "@/lib/getAuthUser";

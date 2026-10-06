@@ -1,3 +1,5 @@
+// app/api/customer/project-cycle/update-duration/route.js
+
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";

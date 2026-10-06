@@ -1,3 +1,5 @@
+// app/api/invoice/next-number/route.js
+
 import { connectDB } from "@/lib/db";
 import Invoice from "@/models/admin/invoice/Invoice";
 import { NextResponse } from "next/server";

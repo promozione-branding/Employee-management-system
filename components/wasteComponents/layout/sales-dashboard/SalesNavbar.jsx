@@ -1,3 +1,5 @@
+// components/wasteComponents/layout/sales-dashboard/SalesNavbar.jsx
+
 "use client";
 
 import React, { useState } from "react";

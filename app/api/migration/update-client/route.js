@@ -1,3 +1,5 @@
+// app/api/migration/update-client/route.js
+
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";

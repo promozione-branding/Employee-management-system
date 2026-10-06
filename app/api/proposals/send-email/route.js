@@ -1,3 +1,5 @@
+// app/api/proposals/send-email/route.js
+
 import Proposal from "@/models/admin/proposal/Proposal";
 import Customer from "@/models/admin/Customer";
 import nodemailer from "nodemailer";

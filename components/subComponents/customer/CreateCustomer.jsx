@@ -1,3 +1,5 @@
+// components/subComponents/customer/CreateCustomer.jsx
+
 "use client";
 
 import CommonForm from "@/components/layout/Form";

@@ -1,3 +1,5 @@
+// models/admin/adminDetails/AdminBasicDetail.js
+
 import mongoose from "mongoose";
 
 const AdminBasicDetailSchema = new mongoose.Schema(

@@ -1,3 +1,5 @@
+// components/wasteComponents/sales-dashboard/page.jsx
+
 "use client";
 
 import EmployeeCalendar from "@/components/employee-dashboard/common/EmployeeCalendar";

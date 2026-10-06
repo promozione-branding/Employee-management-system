@@ -1,3 +1,5 @@
+// app/api/customer/invoice/[id]/route.js
+
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
 import Invoice from "@/models/admin/invoice/Invoice";

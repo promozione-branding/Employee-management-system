@@ -1,3 +1,5 @@
+// app/sales-dashboard/proposal/edit-proposal/[id]/page.jsx
+
 import React from "react";
 import EditPropsal from "./EditPropsal";
 

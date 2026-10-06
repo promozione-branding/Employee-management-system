@@ -1,3 +1,5 @@
+// app/dashboard/invoice/page.jsx
+
 import React from "react";
 import AllInvoices from "./AllInvoices";
 

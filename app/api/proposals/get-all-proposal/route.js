@@ -1,3 +1,5 @@
+// app/api/proposals/get-all-proposal/route.js
+
 import { connectDB } from "@/lib/db";
 import Proposal from "@/models/admin/proposal/Proposal";
 

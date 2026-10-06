@@ -1,3 +1,5 @@
+// components/sales-dashboard/auth-role/sr-manager/proposal/createProposal.jsx
+
 "use client";
 
 import ProposalPdfTemplate from "@/components/pdf/ProposalPdfTemplate";

@@ -1,3 +1,5 @@
+// components/layout/Loading.jsx
+
 "use client";
 
 const Loading = () => {

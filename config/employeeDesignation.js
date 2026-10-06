@@ -1,3 +1,5 @@
+// config/employeeDesignation.js
+
 export const EMPLOYEE_DESIGNATION_OPTIONS = [
   { id: "SEO", label: "SEO" },
   { id: "ADS_MANAGER", label: "Ads Manager" },

@@ -1,3 +1,5 @@
+// app/sales-dashboard/clients/[clientId]/ClientDetails.jsx
+
 import SrAttachment from "@/components/sales-dashboard/auth-role/sr-manager/client/SrAttachment";
 import InvoiceList from "@/components/sales-dashboard/auth-role/sr-manager/invoice/InvoiceList";
 import LedgerDetails from "@/components/sales-dashboard/auth-role/sr-manager/ledger/LedgerDetails";

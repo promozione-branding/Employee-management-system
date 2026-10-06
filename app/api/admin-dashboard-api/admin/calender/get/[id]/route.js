@@ -1,3 +1,5 @@
+// app/api/admin-dashboard-api/admin/calender/get/[id]/route.js
+
 import { connectDB } from "@/lib/db";
 import AdminCalendar from "@/models/admin/adminDetails/AdminCalender";
 import { NextResponse } from "next/server";

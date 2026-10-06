@@ -1,3 +1,5 @@
+// app/api/customer/work/get-client-project/[clientId]/[employeeId]/route.js
+
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";

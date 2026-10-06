@@ -1,3 +1,5 @@
+// config/sales/data.js
+
 export const salesClientFC = [
   {
     label: "Client Name",

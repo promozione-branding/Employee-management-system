@@ -1,3 +1,5 @@
+// components/wasteComponents/editProposal.jsx
+
 "use client";
 
 import CommonForm from "@/components/layout/Form";

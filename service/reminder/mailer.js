@@ -1,3 +1,5 @@
+// service/reminder/mailer.js
+
 import nodemailer from "nodemailer";
 
 let transporter;

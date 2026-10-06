@@ -1,3 +1,5 @@
+// app/api/sales-dashboard/activity/customer/[id]/route.js
+
 import Customer from "@/models/admin/Customer";
 import { NextResponse } from "next/server";
 

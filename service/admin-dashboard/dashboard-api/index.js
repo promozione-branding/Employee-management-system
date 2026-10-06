@@ -1,3 +1,5 @@
+// service/admin-dashboard/dashboard-api/index.js
+
 import axiosInstance from "@/service/axiosInstance";
 
 export async function myClientService() {

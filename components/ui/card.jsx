@@ -1,3 +1,5 @@
+// components/ui/card.jsx
+
 import * as React from "react";
 
 const Card = React.forwardRef(({ className, ...props }, ref) => (

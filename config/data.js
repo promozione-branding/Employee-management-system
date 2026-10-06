@@ -1,3 +1,5 @@
+// config/data.js
+
 import {
   EMPLOYEE_AUTH_ROLE_OPTIONS,
   EMPLOYEE_DESIGNATION_OPTIONS,

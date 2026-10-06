@@ -1,3 +1,5 @@
+// app/sales-dashboard/proposal/[id]/CreateProposal.jsx
+
 "use client";
 import CommonForm from "@/components/layout/Form";
 import Loading from "@/components/layout/Loading";

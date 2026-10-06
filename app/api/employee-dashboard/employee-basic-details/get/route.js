@@ -1,3 +1,5 @@
+// app/api/employee-dashboard/employee-basic-details/get/route.js
+
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { connectDB } from "@/lib/db";

@@ -1,3 +1,5 @@
+// app/api/team-update/get-all-email/route.js
+
 import { connectDB } from "@/lib/db";
 import User from "@/models/admin/User";
 import { NextResponse } from "next/server";

@@ -1,3 +1,5 @@
+// app/(auth)/register/Register.jsx
+
 "use client";
 
 import CommonForm from "@/components/layout/Form";

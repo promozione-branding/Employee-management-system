@@ -1,3 +1,5 @@
+// app/dashboard/employee/employee-details/edit-basic-details/[id]/page.jsx
+
 import EditBasicDetail from "./EditBasicDetail";
 
 const page = async ({ params }) => {

@@ -1,3 +1,5 @@
+// models/admin/adminDetails/AdminCalender.js
+
 import mongoose from "mongoose";
 
 const AdminCalendarSchema = new mongoose.Schema(

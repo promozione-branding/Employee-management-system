@@ -1,3 +1,5 @@
+// app/manager/customer/work/[id]/Work.jsx
+
 "use client";
 
 import Loading from "@/components/layout/Loading";

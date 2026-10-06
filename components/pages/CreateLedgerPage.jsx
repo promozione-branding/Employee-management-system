@@ -1,3 +1,5 @@
+// components/pages/CreateLedgerPage.jsx
+
 "use client";
 
 import CommonForm from "@/components/layout/Form";

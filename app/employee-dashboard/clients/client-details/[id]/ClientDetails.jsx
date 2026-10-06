@@ -1,3 +1,5 @@
+// app/employee-dashboard/clients/client-details/[id]/ClientDetails.jsx
+
 "use client";
 
 import ClientDetailTab from "@/components/employee-dashboard/tabs/ClientDetailTab";

@@ -1,3 +1,5 @@
+// app/dashboard/employee/seo-sheet/[id]/page.jsx
+
 import React from "react";
 import SeoSheet from "./SeoSheet";
 

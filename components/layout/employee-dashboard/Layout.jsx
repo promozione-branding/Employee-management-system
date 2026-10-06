@@ -1,3 +1,5 @@
+// components/layout/employee-dashboard/Layout.jsx
+
 "use client";
 
 import EmployeeSidebar from "./EmployeeSidebar";

@@ -1,3 +1,5 @@
+// components/pdf/InvoicePdfTemplate.jsx
+
 "use client";
 
 import {

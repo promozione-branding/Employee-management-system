@@ -1,3 +1,5 @@
+// app/sales-dashboard/clients/client-assign/[id]/page.jsx
+
 import ClientAssign from "./ClientAssign";
 
 const page = async ({ params }) => {

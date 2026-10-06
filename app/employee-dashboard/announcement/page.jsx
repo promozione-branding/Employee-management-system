@@ -1,3 +1,5 @@
+// app/employee-dashboard/announcement/page.jsx
+
 "use client";
 
 import Loading from "@/components/layout/Loading";

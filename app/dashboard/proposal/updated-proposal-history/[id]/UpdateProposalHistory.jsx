@@ -1,3 +1,5 @@
+// app/dashboard/proposal/updated-proposal-history/[id]/UpdateProposalHistory.jsx
+
 // "use client";
 
 // import { getClientProposalUpdateHistory } from "@/service/customer/history";

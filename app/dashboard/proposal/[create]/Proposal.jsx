@@ -1,3 +1,5 @@
+// app/dashboard/proposal/[create]/Proposal.jsx
+
 "use client";
 import CommonForm from "@/components/layout/Form";
 import { Button } from "@/components/ui/button";

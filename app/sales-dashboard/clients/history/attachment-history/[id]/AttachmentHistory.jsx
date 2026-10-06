@@ -1,3 +1,5 @@
+// app/sales-dashboard/clients/history/attachment-history/[id]/AttachmentHistory.jsx
+
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";

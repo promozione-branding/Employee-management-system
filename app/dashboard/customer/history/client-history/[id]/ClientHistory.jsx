@@ -1,3 +1,5 @@
+// app/dashboard/customer/history/client-history/[id]/ClientHistory.jsx
+
 "use client";
 
 import Loading from "@/components/layout/Loading";

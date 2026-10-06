@@ -1,3 +1,5 @@
+// app/dashboard/invoice/view-invoice/[id]/ViewInvoice.jsx
+
 "use client";
 import Loading from "@/components/layout/Loading";
 import { getInvoiceById } from "@/service/invoice"; // Assuming this path is correct for your actual API call

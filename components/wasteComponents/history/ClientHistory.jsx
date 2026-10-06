@@ -1,3 +1,5 @@
+// components/wasteComponents/history/ClientHistory.jsx
+
 "use client";
 
 import Loading from "@/components/layout/Loading";

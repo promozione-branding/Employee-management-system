@@ -1,3 +1,5 @@
+// app/dashboard/customer/[customer]/CustomerDashboard.jsx
+
 import CustomerProposal from "../CustomerProposal";
 import AllInvoice from "../invoice/AllInvoice";
 import Customer from "../Customer";

@@ -1,3 +1,5 @@
+// app/api/employee-dashboard/employee-basic-details/upload-image/route.js
+
 import cloudinary from "@/lib/cloudinary";
 import { NextResponse } from "next/server";
 

@@ -1,3 +1,5 @@
+// components/wasteComponents/sales-dashboard/clients/page.jsx
+
 "use client";
 
 

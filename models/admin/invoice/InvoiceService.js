@@ -1,3 +1,5 @@
+// models/admin/invoice/InvoiceService.js
+
 import mongoose, { Schema } from "mongoose";
 
 const invoiceServiceSchema = new Schema(

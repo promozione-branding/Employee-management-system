@@ -1,3 +1,5 @@
+// app/api/service/[id]/route.js
+
 import { connectDB } from "@/lib/db";
 import Service from "@/models/admin/proposal/Service";
 

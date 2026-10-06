@@ -1,3 +1,5 @@
+// service/employee-dashboard/common/get-user-details/index.js
+
 import axiosInstance from "@/service/axiosInstance";
 
 export async function getUserDetails() {

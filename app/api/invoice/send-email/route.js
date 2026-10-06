@@ -1,3 +1,5 @@
+// app/api/invoice/send-email/route.js
+
 import InvoicePdfTemplateServer from "@/components/pdf/InvoicePdfTemplateServer";
 import { connectDB } from "@/lib/db";
 import Invoice from "@/models/admin/invoice/Invoice";

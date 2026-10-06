@@ -1,3 +1,5 @@
+// app/api/user/reset-password/route.js
+
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import User from "@/models/admin/User";

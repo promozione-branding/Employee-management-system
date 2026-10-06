@@ -1,3 +1,5 @@
+// app/manager/customer/history/my-update/[id]/page.jsx
+
 import MyUpdate from "./MyUpdate";
 
 const page = async ({ params }) => {

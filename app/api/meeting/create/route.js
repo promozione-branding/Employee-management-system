@@ -1,3 +1,5 @@
+// app/api/meeting/create/route.js
+
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
 import Meeting from "@/models/admin/meeting/Meeting";

@@ -1,3 +1,5 @@
+// app/employee-dashboard/clients/work/[id]/WorkDetails.jsx
+
 "use client";
 
 import Loading from "@/components/layout/Loading";

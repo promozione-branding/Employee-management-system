@@ -1,3 +1,5 @@
+// app/api/customer/work/seo-sheet/delete-keyword/[id]/route.js
+
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Keyword from "@/models/employee/seoEmployee/Keyword";

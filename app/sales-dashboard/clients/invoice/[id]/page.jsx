@@ -1,3 +1,5 @@
+// app/sales-dashboard/clients/invoice/[id]/page.jsx
+
 import CreateInvoice from "./CreateInvoice";
 
 const page = async ({ params }) => {

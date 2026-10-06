@@ -1,3 +1,5 @@
+// app/api/user/create-user/route.js
+
 import { NextResponse } from "next/server";
 import User from "@/models/admin/User";
 import mongoose from "mongoose";

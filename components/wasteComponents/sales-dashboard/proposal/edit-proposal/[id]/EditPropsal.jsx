@@ -1,3 +1,5 @@
+// components/wasteComponents/sales-dashboard/proposal/edit-proposal/[id]/EditPropsal.jsx
+
 "use client";
 
 import Loading from "@/components/layout/Loading";

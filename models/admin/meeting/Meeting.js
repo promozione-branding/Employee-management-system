@@ -1,3 +1,5 @@
+// models/admin/meeting/Meeting.js
+
 import mongoose from "mongoose";
 
 const MeetingSchema = new mongoose.Schema(

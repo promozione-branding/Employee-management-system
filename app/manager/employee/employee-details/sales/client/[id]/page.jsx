@@ -1,3 +1,5 @@
+// app/manager/employee/employee-details/sales/client/[id]/page.jsx
+
 import React from "react";
 import AssignedClient from "./AssignedClient";
 

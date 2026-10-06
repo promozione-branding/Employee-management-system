@@ -1,3 +1,5 @@
+// app/dashboard/invoice/edit-invoice/[id]/page.jsx
+
 import React from "react";
 import EditInvoice from "./EditInvoice";
 

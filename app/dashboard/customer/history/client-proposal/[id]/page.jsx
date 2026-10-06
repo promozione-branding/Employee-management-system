@@ -1,3 +1,5 @@
+// app/dashboard/customer/history/client-proposal/[id]/page.jsx
+
 import ClientProposal from "./ClientProposal";
 
 const page = async ({ params }) => {

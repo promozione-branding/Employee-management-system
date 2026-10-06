@@ -1,3 +1,5 @@
+// app/api/customer/create/sales-person/route.js
+
 import { NextResponse } from "next/server";
 import Employee from "@/models/employee/Employee";
 import { connectDB } from "@/lib/db";

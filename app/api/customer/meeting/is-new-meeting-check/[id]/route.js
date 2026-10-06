@@ -1,3 +1,5 @@
+// app/api/customer/meeting/is-new-meeting-check/[id]/route.js
+
 import "@/models/admin/User";
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";

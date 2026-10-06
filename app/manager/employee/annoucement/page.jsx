@@ -1,3 +1,5 @@
+// app/manager/employee/annoucement/page.jsx
+
 "use client";
 
 import CommonForm from "@/components/layout/Form";

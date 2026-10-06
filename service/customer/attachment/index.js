@@ -1,3 +1,5 @@
+// service/customer/attachment/index.js
+
 import axiosInstance from "@/service/axiosInstance";
 
 export async function createAttachmentServices(payload) {

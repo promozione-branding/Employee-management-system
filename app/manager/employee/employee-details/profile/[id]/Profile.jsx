@@ -1,3 +1,5 @@
+// app/manager/employee/employee-details/profile/[id]/Profile.jsx
+
 "use client";
 import Loading from "@/components/layout/Loading";
 import { Briefcase, Calendar, Mail, MapPin, Phone, User } from "lucide-react";

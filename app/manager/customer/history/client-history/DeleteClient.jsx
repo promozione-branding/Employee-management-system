@@ -1,3 +1,5 @@
+// app/manager/customer/history/client-history/DeleteClient.jsx
+
 "use client";
 
 import Loading from "@/components/layout/Loading";

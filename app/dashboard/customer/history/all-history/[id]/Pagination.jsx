@@ -1,3 +1,5 @@
+// app/dashboard/customer/history/all-history/[id]/Pagination.jsx
+
 "use client";
 
 import { MoveLeft, MoveRight } from "lucide-react";

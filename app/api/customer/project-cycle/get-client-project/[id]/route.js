@@ -1,3 +1,5 @@
+// app/api/customer/project-cycle/get-client-project/[id]/route.js
+
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
 import { NextResponse } from "next/server";

@@ -1,3 +1,5 @@
+// app/api/admin-dashboard-api/admin/admin-basic/create/route.js
+
 import { connectDB } from "@/lib/db";
 import AdminBasicDetail from "@/models/admin/adminDetails/AdminBasicDetail";
 import { NextResponse } from "next/server";

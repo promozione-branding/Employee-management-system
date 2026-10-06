@@ -1,3 +1,5 @@
+// service/auth/index.js
+
 import axiosInstance from "../axiosInstance";
 
 export async function registerService(formData) {

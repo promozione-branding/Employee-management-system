@@ -1,3 +1,5 @@
+// components/admin-dashboard/tabs/Attachment.jsx
+
 "use client";
 
 import GridForm from "@/components/layout/GridForm";

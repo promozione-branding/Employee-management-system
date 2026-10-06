@@ -1,3 +1,5 @@
+// app/api/customer/history/customer/deleted-customer/route.js
+
 import { connectDB } from "@/lib/db";
 import AuditHistory from "@/models/admin/AuditHistory";
 import User from "@/models/admin/User";

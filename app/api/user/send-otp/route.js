@@ -1,3 +1,5 @@
+// app/api/user/send-otp/route.js
+
 import { connectDB } from "@/lib/db";
 import User from "@/models/admin/User";
 import { sendLoginOTP } from "@/service/auth/otp/mailer";

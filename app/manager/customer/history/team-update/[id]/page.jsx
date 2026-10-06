@@ -1,3 +1,5 @@
+// app/manager/customer/history/team-update/[id]/page.jsx
+
 import TeamUpdate from "./TeamUpdate";
 
 const page = async ({ params }) => {

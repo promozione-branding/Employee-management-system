@@ -1,3 +1,5 @@
+// app/api/employee-dashboard/employee-work-details/add-check-list/[id]/route.js
+
 import { connectDB } from "@/lib/db";
 import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
 import { NextResponse } from "next/server";

@@ -1,3 +1,5 @@
+// app/dashboard/employee/employee-details/profile/[id]/page.jsx
+
 import React from "react";
 import Profile from "./Profile";
 

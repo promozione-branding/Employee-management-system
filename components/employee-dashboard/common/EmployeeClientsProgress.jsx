@@ -1,3 +1,5 @@
+// components/employee-dashboard/common/EmployeeClientsProgress.jsx
+
 "use client";
 
 import Skeleton from "react-loading-skeleton";

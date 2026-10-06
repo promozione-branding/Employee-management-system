@@ -1,3 +1,5 @@
+// components/sales-dashboard/auth-role/sr-manager/client/SrAttachment.jsx
+
 "use client";
 
 import GridForm from "@/components/layout/GridForm";

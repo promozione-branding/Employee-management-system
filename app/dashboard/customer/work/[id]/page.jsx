@@ -1,3 +1,5 @@
+// app/dashboard/customer/work/[id]/page.jsx
+
 import React from "react";
 import ClientWork from "./Work";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

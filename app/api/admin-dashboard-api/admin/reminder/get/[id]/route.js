@@ -1,3 +1,5 @@
+// app/api/admin-dashboard-api/admin/reminder/get/[id]/route.js
+
 import { connectDB } from "@/lib/db";
 import AdminReminder from "@/models/admin/adminDetails/AdminReminder";
 import { NextResponse } from "next/server";

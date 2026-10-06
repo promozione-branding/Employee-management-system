@@ -1,3 +1,5 @@
+// components/sales-dashboard/activity/ProposalTab.jsx
+
 "use client";
 
 import { proposalService } from "@/service/sales-dashboard/activity";

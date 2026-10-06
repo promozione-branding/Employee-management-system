@@ -1,3 +1,5 @@
+// components/wasteComponents/register/page.jsx
+
 import React from 'react'
 import Register from './Register'
 

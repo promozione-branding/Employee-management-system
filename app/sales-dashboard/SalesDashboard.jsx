@@ -1,3 +1,5 @@
+// app/sales-dashboard/SalesDashboard.jsx
+
 "use client";
 
 import EmployeeCalendar from "@/components/employee-dashboard/common/EmployeeCalendar";

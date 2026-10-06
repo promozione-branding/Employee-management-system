@@ -1,3 +1,5 @@
+// app/dashboard/customer/work/[id]/SalesWork.jsx
+
 "use client";
 
 import {

@@ -1,3 +1,5 @@
+// app/dashboard/invoice/AllInvoices.jsx
+
 "use client";
 import { getAllinvoicesCustomer } from "@/service/customer";
 import { getInvoiceAllInvoice } from "@/service/invoice";

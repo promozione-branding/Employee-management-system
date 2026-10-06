@@ -1,3 +1,5 @@
+// app/api/user/forgot-password/route.js
+
 import { NextResponse } from "next/server";
 import User from "@/models/admin/User";
 import {connectDB} from "@/lib/db";

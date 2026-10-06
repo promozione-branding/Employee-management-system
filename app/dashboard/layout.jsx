@@ -1,3 +1,5 @@
+// app/dashboard/layout.jsx
+
 "use client"
 
 import SideBar from "@/components/layout/SideBar";

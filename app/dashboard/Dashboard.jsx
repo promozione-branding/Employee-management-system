@@ -1,3 +1,5 @@
+// app/dashboard/Dashboard.jsx
+
 "use client";
 
 import { MyClient } from "@/components/admin-dashboard/dashboard/MyClient";

@@ -1,3 +1,5 @@
+// config/sales/initialFormData.js
+
 export const initialClientData = {
   name: "",
   company: "",

@@ -1,3 +1,5 @@
+// app/dashboard/proposal/[create]/page.jsx
+
 import React from "react";
 import Proposal from "./Proposal";
 

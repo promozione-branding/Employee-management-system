@@ -1,3 +1,5 @@
+// components/sales-dashboard/activity/UpdateTab.jsx
+
 "use client";
 
 import { callUpdatesService } from "@/service/sales-dashboard/activity";

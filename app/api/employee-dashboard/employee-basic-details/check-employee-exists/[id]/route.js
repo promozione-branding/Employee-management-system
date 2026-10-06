@@ -1,3 +1,5 @@
+// app/api/employee-dashboard/employee-basic-details/check-employee-exists/[id]/route.js
+
 import { connectDB } from "@/lib/db";
 import Employee from "@/models/employee/Employee";
 import { NextResponse } from "next/server";

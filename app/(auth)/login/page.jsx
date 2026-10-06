@@ -1,3 +1,5 @@
+// app/(auth)/login/page.jsx
+
 import React from 'react'
 import Login from './Login'
 

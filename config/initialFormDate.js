@@ -1,3 +1,5 @@
+// config/initialFormDate.js
+
 export const initialPerposelFormData = {
   dateOfProposal: "",
   discount: "",

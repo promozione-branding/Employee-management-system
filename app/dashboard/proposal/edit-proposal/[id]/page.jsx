@@ -1,3 +1,5 @@
+// app/dashboard/proposal/edit-proposal/[id]/page.jsx
+
 import EditProposal from "./EditPropsal";
 
 const page = async ({ params }) => {

@@ -1,3 +1,5 @@
+// app/sales-dashboard/activity/Activity.jsx
+
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

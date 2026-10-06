@@ -1,3 +1,5 @@
+// app/api/sales-dashboard/client/create/route.js
+
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
 import { validateClient } from "@/lib/validation/sales/client";

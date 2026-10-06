@@ -1,3 +1,5 @@
+// config/employee/staticData.js
+
   export const eventColors = [
     "#ef4444",
     "#3b82f6",

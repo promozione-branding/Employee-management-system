@@ -1,3 +1,5 @@
+// app/api/customer/attachment/[id]/route.js
+
 import { connectDB } from "@/lib/db";
 import Attachment from "@/models/admin/Attachments";
 import { NextResponse } from "next/server";

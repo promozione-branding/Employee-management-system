@@ -1,3 +1,5 @@
+// models/employee/Employee.js
+
 import mongoose from "mongoose";
 import { isValidSubDesignation } from "../../config/employeeDesignation.js";
 

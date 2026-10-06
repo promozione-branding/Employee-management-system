@@ -1,3 +1,5 @@
+// app/employee-dashboard/layout.jsx
+
 "use client";
 
 import Layout from "@/components/layout/employee-dashboard/Layout";

@@ -1,3 +1,5 @@
+// components/layout/sales-dashboard/Layout.jsx
+
 "use client";
 
 import { useState } from "react";

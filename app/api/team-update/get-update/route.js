@@ -1,3 +1,5 @@
+// app/api/team-update/get-update/route.js
+
 import { connectDB } from "@/lib/db";
 import TeamUpdate from "@/models/employee/TeamUpdate";
 import { NextResponse } from "next/server";

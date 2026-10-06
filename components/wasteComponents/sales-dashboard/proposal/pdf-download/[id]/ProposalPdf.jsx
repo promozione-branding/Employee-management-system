@@ -1,3 +1,5 @@
+// components/wasteComponents/sales-dashboard/proposal/pdf-download/[id]/ProposalPdf.jsx
+
 "use client";
 import Loading from "@/components/layout/Loading";
 import ProposalPdfTemplate from "@/components/pdf/ProposalPdfTemplate";

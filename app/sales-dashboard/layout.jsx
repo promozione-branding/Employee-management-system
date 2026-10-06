@@ -1,3 +1,5 @@
+// app/sales-dashboard/layout.jsx
+
 "use client";
 
 import { useEffect, useState } from "react";

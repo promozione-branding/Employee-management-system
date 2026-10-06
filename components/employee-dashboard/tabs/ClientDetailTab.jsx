@@ -1,3 +1,5 @@
+// components/employee-dashboard/tabs/ClientDetailTab.jsx
+
 "use client";
 
 import React, { useEffect, useState } from "react";

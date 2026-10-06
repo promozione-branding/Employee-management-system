@@ -1,3 +1,5 @@
+// app/dashboard/customer/[customer]/page.jsx
+
 import CustomerDashboard from "./CustomerDashboard";
 import { cookies } from "next/headers";
 import { decodeJwt } from "jose";

@@ -1,3 +1,5 @@
+// service/annoucement-reminder/mailer.js
+
 import nodemailer from "nodemailer";
 
 export async function sendAnnouncementEmail({

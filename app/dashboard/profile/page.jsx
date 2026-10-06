@@ -1,3 +1,5 @@
+// app/dashboard/profile/page.jsx
+
 "use client";
 
 import Profile from "./Profile";

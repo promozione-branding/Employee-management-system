@@ -1,3 +1,5 @@
+// service/sales-dashboard/proposal/index.js
+
 import axiosInstance from "@/service/axiosInstance";
 
 export async function createProposalService(formData) {

@@ -1,3 +1,5 @@
+// components/wasteComponents/sales-dashboard/clients/[id]/ClientDetails.jsx
+
 import CustomerTab from "@/components/sales-dashboard/client/CustomerTab";
 import ProposalTab from "@/components/sales-dashboard/client/ProposalTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

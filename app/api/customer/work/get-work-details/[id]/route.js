@@ -1,3 +1,5 @@
+// app/api/customer/work/get-work-details/[id]/route.js
+
 import EmployeeWorkDetail from "@/models/employee/EmployeeWorkDetail";
 import { NextResponse } from "next/server";
 

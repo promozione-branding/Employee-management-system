@@ -1,3 +1,5 @@
+// service/customer/proposal/index.js
+
 import axiosInstance from "@/service/axiosInstance";
 
 export async function getProposalDetail(id) {

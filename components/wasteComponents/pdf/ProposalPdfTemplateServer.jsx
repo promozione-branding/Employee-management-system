@@ -1,3 +1,5 @@
+// components/wasteComponents/pdf/ProposalPdfTemplateServer.jsx
+
 import {
   Document,
   Page,

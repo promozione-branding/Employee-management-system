@@ -1,3 +1,5 @@
+// app/manager/customer/history/all-history/[id]/AllHistory.jsx
+
 "use client";
 
 import Loading from "@/components/layout/Loading";

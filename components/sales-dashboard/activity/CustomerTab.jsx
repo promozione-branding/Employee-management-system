@@ -1,3 +1,5 @@
+// components/sales-dashboard/activity/CustomerTab.jsx
+
 "use client";
 
 import { clientListService } from "@/service/sales-dashboard/activity";

@@ -1,3 +1,5 @@
+// app/sales-dashboard/clients/[clientId]/[salesPersonId]/ClientDetails.jsx
+
 import HistoryPage from "@/app/dashboard/customer/history/page";
 import ExecutiveAttachment from "@/components/sales-dashboard/auth-role/executive/client/ExecutiveAttachment";
 import CustomerTab from "@/components/sales-dashboard/client/CustomerTab";

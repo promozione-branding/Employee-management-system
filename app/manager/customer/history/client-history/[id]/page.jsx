@@ -1,3 +1,5 @@
+// app/manager/customer/history/client-history/[id]/page.jsx
+
 import DeleteClient from "../DeleteClient";
 import ClientHistory from "./ClientHistory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

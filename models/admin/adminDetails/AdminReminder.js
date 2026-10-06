@@ -1,3 +1,5 @@
+// models/admin/adminDetails/AdminReminder.js
+
 import mongoose, { Schema } from "mongoose";
 
 const AdminReminderSchema = new mongoose.Schema(

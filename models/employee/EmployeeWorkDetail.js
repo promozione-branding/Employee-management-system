@@ -1,3 +1,5 @@
+// models/employee/EmployeeWorkDetail.js
+
 import mongoose from "mongoose";
 
 const ChecklistItemSchema = new mongoose.Schema(

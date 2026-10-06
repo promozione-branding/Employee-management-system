@@ -1,3 +1,5 @@
+// app/dashboard/proposal/edit-proposal/[id]/EditPropsal.jsx
+
 "use client";
 
 import { useEffect, useState } from "react";

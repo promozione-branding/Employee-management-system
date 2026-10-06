@@ -1,3 +1,5 @@
+// components/layout/manager/Sidebar.jsx
+
 "use client";
 
 import { Button } from "@/components/ui/button";

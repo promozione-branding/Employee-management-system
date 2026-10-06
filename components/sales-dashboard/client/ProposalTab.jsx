@@ -1,3 +1,5 @@
+// components/sales-dashboard/client/ProposalTab.jsx
+
 "use client";
 
 import Loading from "@/components/layout/Loading";

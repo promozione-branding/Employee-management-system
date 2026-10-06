@@ -1,3 +1,5 @@
+// app/employee-dashboard/clients/history/team-update/[id]/TeamUpdate.jsx
+
 "use client";
 
 import { getTeamUpdateAdminService } from "@/service/customer/history";

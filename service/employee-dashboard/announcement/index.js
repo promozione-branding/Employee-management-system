@@ -1,3 +1,5 @@
+// service/employee-dashboard/announcement/index.js
+
 import axiosInstance from "@/service/axiosInstance";
 
 export async function acceptAnnouncementService(id) {

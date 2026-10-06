@@ -1,3 +1,5 @@
+// app/manager/customer/Customer.jsx
+
 "use client";
 import Loading from "@/components/layout/Loading";
 import { projectDurationFormControl } from "@/config/data";

@@ -1,3 +1,5 @@
+// app/api/admin-dashboard-api/admin/reminder/create/route.js
+
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import AdminReminder from "@/models/admin/adminDetails/AdminReminder";

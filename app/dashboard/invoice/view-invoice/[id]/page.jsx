@@ -1,3 +1,5 @@
+// app/dashboard/invoice/view-invoice/[id]/page.jsx
+
 import ViewInvoice from "./ViewInvoice";
 
 const page = async({params}) => {

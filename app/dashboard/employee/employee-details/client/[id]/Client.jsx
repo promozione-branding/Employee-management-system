@@ -1,3 +1,5 @@
+// app/dashboard/employee/employee-details/client/[id]/Client.jsx
+
 "use client";
 
 import { assignedClientService } from "@/service/admin-dashboard/employee/work";

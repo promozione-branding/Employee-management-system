@@ -1,3 +1,5 @@
+// app/dashboard/proposal/all-proposal/page.jsx
+
 import React from 'react'
 import AllProposal from './AllProposal'
 

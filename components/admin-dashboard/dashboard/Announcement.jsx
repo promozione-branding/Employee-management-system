@@ -1,3 +1,5 @@
+// components/admin-dashboard/dashboard/Announcement.jsx
+
 "use client";
 
 import { getAnnouncementService } from "@/service/admin-dashboard/dashboard-api";

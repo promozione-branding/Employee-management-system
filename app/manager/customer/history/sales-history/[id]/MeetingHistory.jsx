@@ -1,3 +1,5 @@
+// app/manager/customer/history/sales-history/[id]/MeetingHistory.jsx
+
 "use client";
 
 import Loading from "@/components/layout/Loading";

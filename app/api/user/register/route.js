@@ -1,3 +1,5 @@
+// app/api/user/register/route.js
+
 import User from "@/models/admin/User";
 import { connectDB } from "@/lib/db";
 import bcrypt from "bcryptjs";

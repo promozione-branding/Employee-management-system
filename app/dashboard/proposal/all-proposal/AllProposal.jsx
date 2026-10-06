@@ -1,3 +1,5 @@
+// app/dashboard/proposal/all-proposal/AllProposal.jsx
+
 "use client";
 
 import Loading from "@/components/layout/Loading";

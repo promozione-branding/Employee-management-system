@@ -1,3 +1,5 @@
+// app/api/sales-dashboard/proposal/get/[salesPersonId]/[clientId]/route.js
+
 import { connectDB } from "@/lib/db";
 import Proposal from "@/models/admin/proposal/Proposal";
 import { NextResponse } from "next/server";

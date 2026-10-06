@@ -1,3 +1,5 @@
+// components/pdf/ProposalPdfTemplate.jsx
+
 "use client";
 import {
   Document,

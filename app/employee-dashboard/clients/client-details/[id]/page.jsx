@@ -1,3 +1,5 @@
+// app/employee-dashboard/clients/client-details/[id]/page.jsx
+
 import ClientDetails from "./ClientDetails";
 
 const page = async ({ params }) => {

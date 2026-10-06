@@ -1,3 +1,5 @@
+// app/api/sales-dashboard/activity/updates/[id]/route.js
+
 import { connectDB } from "@/lib/db";
 import Meeting from "@/models/admin/meeting/Meeting";
 import mongoose from "mongoose";

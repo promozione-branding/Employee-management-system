@@ -1,3 +1,5 @@
+// app/manager/layout.jsx
+
 "use client"
 
 import SideBar from "@/components/layout/manager/Sidebar";

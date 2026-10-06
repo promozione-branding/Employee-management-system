@@ -1,3 +1,5 @@
+// app/dashboard/invoice/pdf-download/[id]/PdfDownload.jsx
+
 "use client";
 import Loading from "@/components/layout/Loading";
 import InvoicePdfTemplate from "@/components/pdf/InvoicePdfTemplate";

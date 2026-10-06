@@ -1,3 +1,5 @@
+// components/sales-dashboard/auth-role/sr-manager/ledger/LedgerDetails.jsx
+
 "use client";
 import Loading from "@/components/layout/Loading";
 import AddEntriesForm from "@/components/subComponents/ledger/AddEntries";

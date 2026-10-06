@@ -1,3 +1,5 @@
+// components/admin-dashboard/employee/sales-work/SalesProposalTab.jsx
+
 "use client";
 
 import { getSalesWorkProposalService } from "@/service/admin-dashboard/employee/sales-work";

@@ -1,3 +1,5 @@
+// app/dashboard/proposal/ledger/[id]/page.jsx
+
 "use client";
 import React, { useState } from "react";
 

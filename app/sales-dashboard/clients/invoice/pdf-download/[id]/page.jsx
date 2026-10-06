@@ -1,3 +1,5 @@
+// app/sales-dashboard/clients/invoice/pdf-download/[id]/page.jsx
+
 import React from 'react'
 import PdfDownload from './PdfDownload'
 

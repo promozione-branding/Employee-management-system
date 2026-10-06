@@ -1,3 +1,5 @@
+// components/wasteComponents/sales-dashboard/proposal/pdf-download/[id]/page.jsx
+
 import ProposalPdf from './ProposalPdf'
 
 const page = async({params}) => {

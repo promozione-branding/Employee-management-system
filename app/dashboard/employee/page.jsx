@@ -1,3 +1,5 @@
+// app/dashboard/employee/page.jsx
+
 import Employee from './Employee'
 
 const page = () => {

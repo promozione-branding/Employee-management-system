@@ -1,3 +1,5 @@
+// app/sales-dashboard/page.jsx
+
 import React from "react";
 import SalesDashboard from "./SalesDashboard";
 

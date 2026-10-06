@@ -1,3 +1,5 @@
+// app/dashboard/employee/employee-details/sales/client/[id]/AssignedClient.jsx
+
 "use client";
 
 import { getClientService } from "@/service/sales-dashboard/client";

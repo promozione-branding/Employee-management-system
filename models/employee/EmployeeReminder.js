@@ -1,3 +1,5 @@
+// models/employee/EmployeeReminder.js
+
 import mongoose from "mongoose";
 
 const EmployeeReminderSchema = new mongoose.Schema(

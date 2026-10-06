@@ -1,3 +1,5 @@
+// app/manager/customer/history/client-invoice/[id]/page.jsx
+
 import ClientInvoice from "./ClientInvoice";
 
 const page = async ({ params }) => {

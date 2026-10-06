@@ -1,3 +1,5 @@
+// app/api/sales-dashboard/dashboard-api/recent-activity/[id]/route.js
+
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";

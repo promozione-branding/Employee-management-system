@@ -1,3 +1,5 @@
+// app/dashboard/employee/employee-details/sales/sales-task/[id]/SalesTask.jsx
+
 "use client";
 import SalesCustomerTab from "@/components/admin-dashboard/employee/sales-work/SalesCustomerTab";
 import SalesProposalTab from "@/components/admin-dashboard/employee/sales-work/SalesProposalTab";

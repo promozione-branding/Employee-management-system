@@ -1,3 +1,5 @@
+// models/admin/AuditHistory.js
+
 import mongoose from "mongoose";
 
 const AuditHistorySchema = new mongoose.Schema(

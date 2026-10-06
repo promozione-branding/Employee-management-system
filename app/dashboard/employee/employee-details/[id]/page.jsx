@@ -1,3 +1,5 @@
+// app/dashboard/employee/employee-details/[id]/page.jsx
+
 import React from "react";
 import EmployeeDetailsDashboard from "./EmployeeDetailsDashboard";
 

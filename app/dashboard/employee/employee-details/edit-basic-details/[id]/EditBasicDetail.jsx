@@ -1,3 +1,5 @@
+// app/dashboard/employee/employee-details/edit-basic-details/[id]/EditBasicDetail.jsx
+
 "use client";
 
 import GridForm from "@/components/layout/GridForm";

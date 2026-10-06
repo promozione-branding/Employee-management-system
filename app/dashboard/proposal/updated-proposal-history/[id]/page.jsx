@@ -1,3 +1,5 @@
+// app/dashboard/proposal/updated-proposal-history/[id]/page.jsx
+
 import React from "react";
 import UpdateProposalHistory from "./UpdateProposalHistory";
 

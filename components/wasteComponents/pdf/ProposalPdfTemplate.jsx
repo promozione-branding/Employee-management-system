@@ -1,3 +1,5 @@
+// components/wasteComponents/pdf/ProposalPdfTemplate.jsx
+
 "use client";
 import {
   Document,

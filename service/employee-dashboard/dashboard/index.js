@@ -1,3 +1,5 @@
+// service/employee-dashboard/dashboard/index.js
+
 import axiosInstance from "@/service/axiosInstance";
 
 export async function employeeClientService(id) {
