@@ -86,7 +86,7 @@ const SalesNavbar = () => {
             <p className="text-xs text-gray-500 truncate">
               {Array.isArray(employee?.basicDetails?.email)
                 ? employee?.basicDetails?.email[0]
-                : employee?.basicDetails?.email || "aalekh@promozione.com"}
+                : employee?.basicDetails?.email || "Testmode.com"}
             </p>
           </div>
 
