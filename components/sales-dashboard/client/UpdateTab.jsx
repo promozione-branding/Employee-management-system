@@ -1,6 +1,9 @@
 // components/sales-dashboard/client/UpdateTab.jsx
 
 "use client";
+import { getCallHistoryService } from "@/service/calling";
+import CallPanel from "./CallPanel";
+import CallHistory from "./CallHistory";
 import { Label } from "@/components/ui/label";
 import React, { useEffect, useState } from "react";
 import {
@@ -31,8 +34,8 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
   const [selectEmail, setSelectEmail] = useState([]);
 
   const { employee } = useSalesEmployeeStore();
-  
- const [callForm, setCallForm] = useState({
+
+  const [callForm, setCallForm] = useState({
     status: "",
     note: "",
     reminderTime: "",
@@ -57,6 +60,27 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     meetingTime: "",
     meetingDate: "",
   });
+
+  // ------------------------------------------------------------
+  // Call history (real API)
+  // ------------------------------------------------------------
+  const [callHistory, setCallHistory] = useState([]);
+  const [callHistoryLoading, setCallHistoryLoading] = useState(false);
+
+  const fetchCallHistory = async () => {
+    if (!customerId) return;
+    try {
+      setCallHistoryLoading(true);
+      const res = await getCallHistoryService(customerId, "all");
+      if (res?.success) {
+        setCallHistory(res.data || []);
+      }
+    } catch (err) {
+      console.log("fetchCallHistory error:", err);
+    } finally {
+      setCallHistoryLoading(false);
+    }
+  };
 
   // -------------------for Call update --------------------
   const handleCallSubmit = async (e) => {
@@ -391,8 +415,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     CheckNewMeet();
   }, [customerId]);
 
-
-
   useEffect(() => {
     async function salesPeopleMail() {
       try {
@@ -411,6 +433,14 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       }
     }
     salesPeopleMail();
+  }, [customerId]);
+
+  // ------------------------------------------------------------
+  // Fetch call history for this client
+  // ------------------------------------------------------------
+  useEffect(() => {
+    fetchCallHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerId]);
 
   return (
@@ -438,6 +468,29 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
               );
             })}
           </div>
+        )}
+      </div>
+
+      {/* --- Call panel (wired) --- */}
+      <CallPanel
+        customerId={customerId}
+        customerName="Customer"
+        customerPhone="—"
+        virtualNumber={process.env.NEXT_PUBLIC_MYOP_VIRTUAL_NUMBER || "—"}
+        onCallStarted={() => {
+          // refresh history a moment later
+          setTimeout(fetchCallHistory, 2000);
+        }}
+      />
+
+      {/* --- Call history (wired) --- */}
+      <div className="mb-5">
+        {callHistoryLoading ? (
+          <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-6 text-center text-sm text-gray-500">
+            Loading call history…
+          </div>
+        ) : (
+          <CallHistory calls={callHistory} />
         )}
       </div>
 

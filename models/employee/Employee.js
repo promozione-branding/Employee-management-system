@@ -129,6 +129,19 @@ const EmployeeSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "SalesEmployee",
     },
+
+    // ------------------------------------------------------------
+    // MyOperator Calling integration
+    // ------------------------------------------------------------
+    myoperatorUserId: {
+      type: String,
+      default: "",
+      index: true,
+    },
+    myoperatorName: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true },
 );
