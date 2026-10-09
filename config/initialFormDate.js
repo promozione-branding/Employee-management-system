@@ -105,6 +105,8 @@ export const initialEmployeesBasicDetails = {
   dob: "",
   gender: "",
   joiningDate: "",
+  myoperatorUserId: "",
+  myoperatorName: "",
 };
 
 export const initialEmployeesBasicDetailsEdit = {
@@ -118,6 +120,8 @@ export const initialEmployeesBasicDetailsEdit = {
   dob: "",
   gender: "",
   joiningDate: "",
+  myoperatorUserId: "",
+  myoperatorName: "",
 };
 
 export const initialAnnouncementFormData = {

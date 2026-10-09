@@ -1,4 +1,5 @@
 // config/data.js
+//
 
 import {
   EMPLOYEE_AUTH_ROLE_OPTIONS,
@@ -537,6 +538,23 @@ export const getEmployeeBasicDetailsFormControl = (designation = "") => [
     componentType: "input",
     type: "date",
   },
+  // ------------------------------------------------------------
+  // MyOperator Calling
+  // ------------------------------------------------------------
+  {
+    label: "MyOperator User ID",
+    name: "myoperatorUserId",
+    componentType: "input",
+    type: "text",
+    placeholder: "Paste UUID from MyOperator panel → Users",
+  },
+  {
+    label: "MyOperator Name",
+    name: "myoperatorName",
+    componentType: "input",
+    type: "text",
+    placeholder: "Agent name in MyOperator (for reference)",
+  },
 ];
 
 export const editEmployeeBasicDetailsFormControl = (designation = "") => [
@@ -604,6 +622,23 @@ export const editEmployeeBasicDetailsFormControl = (designation = "") => [
     name: "joiningDate",
     componentType: "input",
     type: "date",
+  },
+  // ------------------------------------------------------------
+  // MyOperator Calling
+  // ------------------------------------------------------------
+  {
+    label: "MyOperator User ID",
+    name: "myoperatorUserId",
+    componentType: "input",
+    type: "text",
+    placeholder: "Paste UUID from MyOperator panel → Users",
+  },
+  {
+    label: "MyOperator Name",
+    name: "myoperatorName",
+    componentType: "input",
+    type: "text",
+    placeholder: "Agent name in MyOperator (for reference)",
   },
 ];
 

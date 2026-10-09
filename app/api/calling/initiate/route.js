@@ -3,22 +3,19 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { initiateOutboundCall, normalizePhone } from "@/lib/myoperator";
-
-import dbConnect from "@/lib/dbConnect";                 // 🔧 ADAPT ME
-import { getServerSession } from "next-auth";            // 🔧 ADAPT ME (or your auth)
+import { connectDB } from "@/lib/db";
+import { getAuthUser } from "@/lib/getAuthUser";
 import CallLog from "@/models/employee/sales/CallLog";
 import Customer from "@/models/admin/Customer";
 import Employee from "@/models/employee/Employee";
 
 export async function POST(req) {
   try {
-    await dbConnect();
+    await connectDB();
 
     // --- auth ---
-    const session = await getServerSession(); // 🔧 ADAPT ME
-    const erpUserId =
-      session?.user?._id || session?.user?.id || req.headers.get("x-user-id");
-    if (!erpUserId) {
+    const user = await getAuthUser(req);
+    if (!user?._id) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 },
@@ -37,7 +34,7 @@ export async function POST(req) {
     // --- load ---
     const [customer, agent] = await Promise.all([
       Customer.findById(customerId).lean(),
-      Employee.findById(erpUserId).lean(),
+      Employee.findOne({ user: user._id }).lean(), // Employee refs User
     ]);
 
     if (!customer) {
@@ -48,13 +45,13 @@ export async function POST(req) {
     }
     if (!agent) {
       return NextResponse.json(
-        { success: false, message: "Agent (Employee) not found" },
+        { success: false, message: "Employee record not found for this user" },
         { status: 404 },
       );
     }
 
     // --- myoperator user mapping ---
-    const myopUserId = agent.myoperatorUserId;
+    const myopUserId = agent?.basicDetails?.myoperatorUserId;
     if (!myopUserId) {
       return NextResponse.json(
         {

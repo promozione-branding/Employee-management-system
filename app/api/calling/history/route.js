@@ -1,29 +1,46 @@
 // app/api/calling/history/route.js
 
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/dbConnect";                 // 🔧 ADAPT ME
-import { getServerSession } from "next-auth";            // 🔧 ADAPT ME
+import { connectDB } from "@/lib/db";
+import { getAuthUser } from "@/lib/getAuthUser";
 import CallLog from "@/models/employee/sales/CallLog";
+import Employee from "@/models/employee/Employee";
 
 export async function GET(req) {
   try {
-    await dbConnect();
+    await connectDB();
 
-    const session = await getServerSession(); // 🔧 ADAPT ME
-    const erpUserId =
-      session?.user?._id || session?.user?.id;
-    if (!erpUserId) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    const user = await getAuthUser(req);
+    if (!user?._id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
+      );
     }
 
     const { searchParams } = new URL(req.url);
     const customerId = searchParams.get("customerId");
-    const scope = searchParams.get("scope") || "self"; // "self" | "all"
-    const limit = Math.min(parseInt(searchParams.get("limit") || "50", 10), 200);
+    const scope = searchParams.get("scope") || "self";
+    const limit = Math.min(
+      parseInt(searchParams.get("limit") || "50", 10),
+      200,
+    );
 
     const query = {};
     if (customerId) query.customerId = customerId;
-    if (scope === "self") query.agentErpUserId = erpUserId;
+
+    // For "self" scope, filter by the Employee._id of the logged-in user
+    if (scope === "self") {
+      const emp = await Employee.findOne({ user: user._id })
+        .select("_id")
+        .lean();
+      if (emp?._id) {
+        query.agentErpUserId = emp._id;
+      } else {
+        // employee not found, return empty
+        return NextResponse.json({ success: true, data: [] });
+      }
+    }
 
     const calls = await CallLog.find(query)
       .sort({ startedAt: -1 })

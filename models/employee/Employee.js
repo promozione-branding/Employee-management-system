@@ -109,6 +109,20 @@ const EmployeeSchema = new mongoose.Schema(
         type: Boolean,
         default: false,
       },
+
+      // ------------------------------------------------------------
+      // MyOperator Calling integration
+      // ------------------------------------------------------------
+      myoperatorUserId: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      myoperatorName: {
+        type: String,
+        default: "",
+        trim: true,
+      },
     },
 
     EmployeeCalendarId: {
@@ -128,19 +142,6 @@ const EmployeeSchema = new mongoose.Schema(
     salesDetails: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "SalesEmployee",
-    },
-
-    // ------------------------------------------------------------
-    // MyOperator Calling integration
-    // ------------------------------------------------------------
-    myoperatorUserId: {
-      type: String,
-      default: "",
-      index: true,
-    },
-    myoperatorName: {
-      type: String,
-      default: "",
     },
   },
   { timestamps: true },

@@ -8,9 +8,9 @@ const CallLogSchema = new mongoose.Schema(
     // MYOPERATOR IDENTIFIERS
     // ============================================================
     // MyOperator's unique call id (echoed in webhooks + Search Logs)
+    // Note: index is declared once below via CallLogSchema.index(...)
     myoperatorCallId: {
       type: String,
-      index: true,
       sparse: true,
     },
 
@@ -143,7 +143,7 @@ CallLogSchema.index({ status: 1, startedAt: -1 });
 CallLogSchema.index({ fromNumber: 1, startedAt: -1 });
 CallLogSchema.index({ toNumber: 1, startedAt: -1 });
 
-// 6) Webhook dedupe — fast lookup by MyOperator's id
+// 6) Webhook dedupe — fast lookup by MyOperator's id (also serves as unique identifier)
 CallLogSchema.index({ myoperatorCallId: 1 }, { sparse: true });
 
 // 7) Company-scoped queries (if you ever go multi-tenant)
