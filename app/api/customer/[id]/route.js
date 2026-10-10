@@ -5,12 +5,26 @@ import Customer from "@/models/admin/Customer";
 import { createAuditLog } from "@/utils/createAuditLog";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";   // ✅ add this
 
 export async function GET(req, {params}) {
   try {
     await connectDB();
 
     const { id } = await params;
+
+    // ✅ ID validation guard
+    if (!id || id === "undefined" || !mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid customer ID",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
     const customer = await Customer.findById(id).populate({path:"salesExecutive",select:"basicDetails.name"});
 
