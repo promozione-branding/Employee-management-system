@@ -2,7 +2,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { PhoneIncoming, PhoneOutgoing, Play, PhoneMissed } from "lucide-react";
+import {
+  PhoneIncoming,
+  PhoneOutgoing,
+  PhoneMissed,
+  ChevronDown,
+} from "lucide-react";
 
 function formatDuration(sec = 0) {
   sec = Number(sec) || 0;
@@ -26,7 +31,6 @@ function formatDate(d) {
   }
 }
 
-// Map a Mongo CallLog doc -> UI row shape
 function mapLog(log) {
   const statusMap = {
     completed: log.connected ? "Answered" : "Missed",
@@ -47,111 +51,124 @@ function mapLog(log) {
     agent: log.agentName || log.agentEmail || "—",
     from: log.fromNumber,
     to: log.toNumber,
-    recordingUrl: log.recordingUrl || "",
     note: log.note || log.disposition || "",
   };
 }
 
 const CallHistory = ({ calls = [] }) => {
+  // panel open/close
+  const [open, setOpen] = useState(true);
+  // which row is expanded
   const [expanded, setExpanded] = useState(null);
 
   const rows = (calls || []).map(mapLog);
 
-  if (!rows.length) {
-    return (
-      <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-6 text-center text-sm text-gray-500">
-        No call history for this client yet.
-      </div>
-    );
-  }
-
   return (
     <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100">
+      {/* ✅ Header with arrow */}
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-100 text-left hover:bg-gray-50 transition"
+      >
         <h3 className="font-semibold text-gray-800">Call History</h3>
-      </div>
+        <ChevronDown
+          className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
+            open ? "rotate-180" : ""
+          }`}
+        />
+      </button>
 
-      <ul className="divide-y divide-gray-100">
-        {rows.map((call) => {
-          const isInbound = call.direction === "inbound";
-          const isMissed =
-            call.status === "Missed" || call.status === "Failed";
-          const Icon = isMissed
-            ? PhoneMissed
-            : isInbound
-              ? PhoneIncoming
-              : PhoneOutgoing;
+      {/* ✅ Collapsible body */}
+      {open && (
+        <div>
+          {!rows.length ? (
+            <div className="p-6 text-center text-sm text-gray-500">
+              No call history for this client yet.
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {rows.map((call) => {
+                const isInbound = call.direction === "inbound";
+                const isMissed =
+                  call.status === "Missed" || call.status === "Failed";
+                const Icon = isMissed
+                  ? PhoneMissed
+                  : isInbound
+                    ? PhoneIncoming
+                    : PhoneOutgoing;
 
-          return (
-            <li key={call.id} className="px-4 py-3">
-              <button
-                type="button"
-                onClick={() =>
-                  setExpanded((prev) => (prev === call.id ? null : call.id))
-                }
-                className="w-full flex items-center gap-3 text-left"
-              >
-                <span
-                  className={`h-9 w-9 rounded-full flex items-center justify-center ${
-                    isMissed
-                      ? "bg-red-50 text-red-500"
-                      : isInbound
-                        ? "bg-emerald-50 text-emerald-600"
-                        : "bg-blue-50 text-blue-600"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-
-                <span className="flex-1 min-w-0">
-                  <span className="block text-sm font-medium text-gray-800">
-                    {isInbound ? "Inbound" : "Outbound"} ·{" "}
-                    <span
-                      className={
-                        isMissed ? "text-red-500" : "text-emerald-600"
+                return (
+                  <li key={call.id} className="px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpanded((prev) =>
+                          prev === call.id ? null : call.id
+                        )
                       }
+                      className="w-full flex items-center gap-3 text-left"
                     >
-                      {call.status}
-                    </span>
-                  </span>
-                  <span className="block text-xs text-gray-500 truncate">
-                    {call.at} · {call.duration} · {call.agent}
-                  </span>
-                </span>
+                      <span
+                        className={`h-9 w-9 rounded-full flex items-center justify-center ${
+                          isMissed
+                            ? "bg-red-50 text-red-500"
+                            : isInbound
+                              ? "bg-emerald-50 text-emerald-600"
+                              : "bg-blue-50 text-blue-600"
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </span>
 
-                {call.recordingUrl && (
-                  <a
-                    href={call.recordingUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
-                  >
-                    <Play className="h-3.5 w-3.5" />
-                    Play
-                  </a>
-                )}
-              </button>
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-sm font-medium text-gray-800">
+                          {isInbound ? "Inbound" : "Outbound"} ·{" "}
+                          <span
+                            className={
+                              isMissed ? "text-red-500" : "text-emerald-600"
+                            }
+                          >
+                            {call.status}
+                          </span>
+                        </span>
+                        <span className="block text-xs text-gray-500 truncate">
+                          {call.at} · {call.duration} · {call.agent}
+                        </span>
+                      </span>
 
-              {expanded === call.id && (
-                <div className="mt-2 ml-12 text-xs text-gray-600 space-y-1">
-                  <p>
-                    <span className="text-gray-400">From:</span> {call.from}
-                  </p>
-                  <p>
-                    <span className="text-gray-400">To:</span> {call.to}
-                  </p>
-                  {call.note && (
-                    <p>
-                      <span className="text-gray-400">Note:</span> {call.note}
-                    </p>
-                  )}
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+                      {/* per-row chevron */}
+                      <ChevronDown
+                        className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                          expanded === call.id ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {expanded === call.id && (
+                      <div className="mt-2 ml-12 text-xs text-gray-600 space-y-1">
+                        <p>
+                          <span className="text-gray-400">From:</span>{" "}
+                          {call.from}
+                        </p>
+                        <p>
+                          <span className="text-gray-400">To:</span> {call.to}
+                        </p>
+                        {call.note && (
+                          <p>
+                            <span className="text-gray-400">Note:</span>{" "}
+                            {call.note}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 };
