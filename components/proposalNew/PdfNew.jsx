@@ -25,7 +25,6 @@ const CSS_RESET = `
 * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-family: Arial, sans-serif; }
 
-/* ================= PRINT ONLY ================= */
 @page { size: A4; margin: 0; }
 
 .pdf-header-fixed,
@@ -38,7 +37,7 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
     width: 210mm !important;
     min-height: 297mm !important;
     margin: 0 auto !important;
-    padding: 12mm !important;
+    padding: 12mm 12mm 24mm 12mm !important;
     border: 0 !important;
     box-shadow: none !important;
     page-break-after: always;
@@ -46,6 +45,7 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
     overflow: visible;
   }
   .pdf-screen-page:last-child { page-break-after: auto; }
+
   .pdf-header-inline,
   .pdf-footer-inline { display: none !important; }
 
@@ -63,6 +63,7 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
     border-bottom: 1px solid #e5e7eb;
     z-index: 10;
   }
+
   .pdf-footer-fixed {
     display: flex;
     position: fixed;
@@ -79,6 +80,16 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
     color: #6b7280;
     z-index: 10;
   }
+
+  .pdf-footer-fixed .left,
+  .pdf-footer-fixed .right {
+    flex: 1;
+  }
+  .pdf-footer-fixed .center {
+    text-align: center;
+    flex: 0 0 auto;
+  }
+
   .pdf-watermark-fixed {
     display: flex;
     position: fixed;
@@ -93,19 +104,23 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
     height: auto;
     opacity: 0.10;
   }
+
   .pdf-body { padding-top: 26mm !important; padding-bottom: 14mm !important; }
 }
 
-/* ================= SCREEN ================= */
+/* SCREEN */
 .pdf-screen-page {
   width: 210mm;
   min-height: 297mm;
   padding: 12mm;
+  padding-bottom: 24mm;
   background: #fff;
   margin: 0 auto 12px auto;
   position: relative;
   border: 1px solid #e5e7eb;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
 }
 .pdf-screen-page .pdf-header-inline {
   display: flex;
@@ -129,14 +144,32 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
   color: #111827;
   font-size: 12px;
 }
+.pdf-screen-page .pdf-body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
 .pdf-screen-page .pdf-footer-inline {
+  position: absolute;
+  bottom: 8mm;
+  left: 12mm;
+  right: 12mm;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 10px;
   color: #6b7280;
   padding-top: 8px;
   border-top: 1px solid #e5e7eb;
-  margin-top: 20px;
+}
+.pdf-screen-page .pdf-footer-inline .left,
+.pdf-screen-page .pdf-footer-inline .right {
+  flex: 1;
+}
+.pdf-screen-page .pdf-footer-inline .right { text-align: right; }
+.pdf-screen-page .pdf-footer-inline .center {
+  flex: 0 0 auto;
+  text-align: center;
 }
 .pdf-screen-page .pdf-watermark-inline {
   position: absolute;
@@ -151,9 +184,8 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
   height: auto;
   opacity: 0.10;
 }
-.pdf-screen-page .pdf-body { position: relative; z-index: 1; }
 
-/* ================= TYPOGRAPHY ================= */
+/* TYPOGRAPHY */
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 6px 6px; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 12px; vertical-align: top; }
 th { background: #f3f4f6; font-weight: 600; }
@@ -162,8 +194,10 @@ h3 { font-size: 14px; margin: 18px 0 6px 0; }
 ul { list-style: disc; padding-left: 18px; margin: 0; }
 li { font-size: 12px; margin-bottom: 2px; line-height: 1.45; }
 
-/* TOTALS table */
+/* Totals table: no borders on label rows */
 table tr td[style*="border: 0"] { border: 0 !important; }
+
+a { color: #111827; text-decoration: none; }
 `;
 
 const HeaderContent = () => (
@@ -187,10 +221,44 @@ const HeaderContent = () => (
         </b>
       </div>
       <div>{COMPANY_DETAILS.address}</div>
-      <div>Call us : {COMPANY_DETAILS.phone}</div>
-      <div>Email: {COMPANY_DETAILS.email}</div>
-      <div>Website: {COMPANY_DETAILS.website}</div>
+      <div>
+        Call us :{" "}
+        <a href={`tel:${COMPANY_DETAILS.phone.replace(/\s+/g, "")}`}>
+          {COMPANY_DETAILS.phone}
+        </a>
+      </div>
+      <div>
+        Email:{" "}
+        <a href={`mailto:${COMPANY_DETAILS.email}`}>
+          {COMPANY_DETAILS.email}
+        </a>
+      </div>
+      <div>
+        Website:{" "}
+        <a
+          href={COMPANY_DETAILS.website}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {COMPANY_DETAILS.website}
+        </a>
+      </div>
     </div>
+  </>
+);
+
+const FooterContent = ({ pageNumber, totalPages }) => (
+  <>
+    <span className="left">
+      <a href={`mailto:${FOOTER_LEFT}`}>{FOOTER_LEFT}</a>
+    </span>
+    <span className="center">
+      Page {pageNumber} of {totalPages}
+    </span>
+    <span className="right">
+      <a href={`tel:01142603232`}>011 - 42603232</a>,{" "}
+      <a href={`tel:+919971700871`}>+91 99717 00871</a>
+    </span>
   </>
 );
 
@@ -221,7 +289,7 @@ export const downloadProposalPdf = (proposal) => {
   }, 500);
 };
 
-const ScreenPage = ({ children }) => (
+const ScreenPage = ({ children, pageNumber, totalPages }) => (
   <div className="pdf-screen-page">
     <div className="pdf-watermark-inline">
       <img src={PDF_LOGO_PATH} alt="" />
@@ -231,10 +299,9 @@ const ScreenPage = ({ children }) => (
         <HeaderContent />
       </div>
       {children}
-      <div className="pdf-footer-inline">
-        <span>{FOOTER_LEFT}</span>
-        <span>{FOOTER_RIGHT}</span>
-      </div>
+    </div>
+    <div className="pdf-footer-inline">
+      <FooterContent pageNumber={pageNumber} totalPages={totalPages} />
     </div>
   </div>
 );
@@ -268,23 +335,34 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
     (c) => PROPOSAL_CATALOG[c]
   );
 
+  const hasDeliverables = usedCategories.some((catKey) => {
+    const cat = PROPOSAL_CATALOG[catKey];
+    return checklist.some((c) =>
+      cat.checklist?.some((s) => s.title === c.section)
+    );
+  });
+
+  const totalPages = 1 + (hasDeliverables ? 1 : 0) + 1;
+
+  let pageCounter = 1;
+
   return (
     <div ref={ref} id="proposal-print-root">
       <style>{CSS_RESET}</style>
 
-      {/* Print-only fixed header/footer/watermark */}
+      {/* Print-only fixed header / footer / watermark */}
       <div className="pdf-header-fixed">
         <HeaderContent />
       </div>
       <div className="pdf-footer-fixed">
-        <span>{FOOTER_LEFT}</span>
-        <span>{FOOTER_RIGHT}</span>
+        <FooterContent pageNumber="" totalPages="" />
       </div>
       <div className="pdf-watermark-fixed">
         <img src={PDF_LOGO_PATH} alt="" />
       </div>
 
-      <ScreenPage>
+      {/* PAGE 1 */}
+      <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
         <h1>Proposal</h1>
 
         <div style={{ fontSize: "12px", marginBottom: "14px" }}>
@@ -424,24 +502,41 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </ul>
         </div>
 
-        <div style={{ marginTop: "12px", fontSize: "11px", lineHeight: 1.5 }}>
-          <div>{BANK_DETAILS.payee}</div>
+        <div style={{ marginTop: "12px", fontSize: "11px", lineHeight: 1.6 }}>
           <div>
-            PAN No.: {BANK_DETAILS.pan}, CIN: {BANK_DETAILS.cin}
+            <b>Cheque/Draft to be made in favor:</b>{" "}
+            <b>Inquiry Bazaar PRIVATE LIMITED</b>
           </div>
           <div>
-            BANK ACCOUNT NO : {BANK_DETAILS.account} &nbsp; BANK NAME :{" "}
-            {BANK_DETAILS.bank}
+            <b>PAN No.:</b> {BANK_DETAILS.pan} &nbsp;&nbsp;
+            <b>CIN:</b> {BANK_DETAILS.cin}
           </div>
-          <div>IFSC CODE : {BANK_DETAILS.ifsc}</div>
-          <div style={{ marginTop: "4px" }}>{BANK_DETAILS.regdOffice}</div>
-          <div>CIN: {BANK_DETAILS.cin}</div>
-          <div>011 42603232 • customercare@inquirybazaar.com</div>
+          <div>
+            <b>BANK ACCOUNT NO :</b> {BANK_DETAILS.account} &nbsp;&nbsp;
+            <b>BANK NAME :</b> {BANK_DETAILS.bank}
+          </div>
+          <div>
+            <b>IFSC CODE :</b> {BANK_DETAILS.ifsc}
+          </div>
+          <div style={{ marginTop: "4px" }}>
+            <b>Regd. Office:</b> 606 Best Business Park, Netaji Subhash Place,
+            Delhi, 110034
+          </div>
+          <div>
+            <b>CIN:</b> {BANK_DETAILS.cin}
+          </div>
+          <div>
+            <a href="tel:01142603232">011 42603232</a> •{" "}
+            <a href="mailto:customercare@inquirybazaar.com">
+              customercare@inquirybazaar.com
+            </a>
+          </div>
         </div>
       </ScreenPage>
 
-      {usedCategories.length > 0 && (
-        <ScreenPage>
+      {/* PAGE 2 — Deliverables (only if any) */}
+      {hasDeliverables && (
+        <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
           <h1 style={{ textAlign: "center" }}>
             Service Offerings and Deliverables
           </h1>
@@ -491,7 +586,8 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         </ScreenPage>
       )}
 
-      <ScreenPage>
+      {/* LAST PAGE — T&C */}
+      <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
         <h1 style={{ textAlign: "center" }}>Terms &amp; Conditions</h1>
         <ol style={{ paddingLeft: "18px", margin: 0 }}>
           {TERMS_AND_CONDITIONS.map((t, i) => (

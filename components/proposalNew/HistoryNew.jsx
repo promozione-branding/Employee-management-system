@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { FileText, Eye, Trash2, Pencil, Download } from "lucide-react";
 import toast from "react-hot-toast";
 import PreviewNew from "./PreviewNew";
+import { downloadProposalPdf } from "./PdfNew";
 import {
   listProposalNewService,
   getProposalNewByIdService,
@@ -65,6 +66,23 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
       }
     } catch (err) {
       toast.error("Failed to delete");
+    }
+  };
+
+  const handleDownload = async (id) => {
+    try {
+      const res = await getProposalNewByIdService(id);
+      if (!res.success || !res.data) {
+        toast.error("Failed to load proposal");
+        return;
+      }
+      setPreview(res.data);
+      // Wait for the preview DOM to render, then trigger the popup print
+      setTimeout(() => {
+        downloadProposalPdf(res.data);
+      }, 350);
+    } catch (err) {
+      toast.error("Failed to download");
     }
   };
 
@@ -132,7 +150,7 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
               </button>
               <button
                 type="button"
-                onClick={() => handleView(p._id).then(() => setTimeout(() => window.print?.(), 0))}
+                onClick={() => handleDownload(p._id)}
                 className="text-emerald-600 hover:text-emerald-800"
                 title="Download PDF"
               >
