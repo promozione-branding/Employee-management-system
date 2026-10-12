@@ -56,6 +56,7 @@ export async function POST(req) {
       items = [],
       discountType = "amount",
       discountInput = 0,
+      tdsApplicable = false,
       partialPayments = [],
       deliveryPeriod = "weekly",
       deliveredMetrics = [],
@@ -76,8 +77,21 @@ export async function POST(req) {
         { status: 400 }
       );
 
+    if (Number(discountInput) < 0)
+      return NextResponse.json(
+        { success: false, message: "Discount cannot be negative" },
+        { status: 400 }
+      );
+
+    for (const p of partialPayments) {
+      if (Number(p.paymentAmount) < 0)
+        return NextResponse.json(
+          { success: false, message: "Partial payment cannot be negative" },
+          { status: 400 }
+        );
+    }
+
     const subtotal = items.reduce((s, it) => s + Number(it.amount || 0), 0);
-    const gstAmount = Number((subtotal * 0.18).toFixed(2));
 
     let discountAmount = 0;
     if (discountType === "percentage") {
@@ -88,16 +102,20 @@ export async function POST(req) {
       discountAmount = Number(discountInput || 0);
     }
 
-    if (discountAmount > subtotal + gstAmount) {
+    if (discountAmount > subtotal) {
       return NextResponse.json(
-        { success: false, message: "Discount cannot exceed total" },
+        { success: false, message: "Discount cannot exceed subtotal" },
         { status: 400 }
       );
     }
 
-    const grandTotal = Number(
-      (subtotal + gstAmount - discountAmount).toFixed(2)
-    );
+    const baseAfterDiscount = subtotal - discountAmount;
+    const tdsAmount = tdsApplicable
+      ? Number((baseAfterDiscount * 0.02).toFixed(2))
+      : 0;
+    const taxableBase = Number((baseAfterDiscount - tdsAmount).toFixed(2));
+    const gstAmount = Number((taxableBase * 0.18).toFixed(2));
+    const grandTotal = Number((taxableBase + gstAmount).toFixed(2));
 
     const totalPartial = partialPayments.reduce(
       (s, p) => s + Number(p.paymentAmount || 0),
@@ -121,6 +139,9 @@ export async function POST(req) {
       subtotal,
       gstRate: 0.18,
       gstAmount,
+      tdsApplicable,
+      tdsRate: 0.02,
+      tdsAmount,
       discountType,
       discountInput: Number(discountInput || 0),
       discountAmount,

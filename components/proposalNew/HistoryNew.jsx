@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { FileText, Eye, Trash2, Pencil } from "lucide-react";
+import { FileText, Eye, Trash2, Pencil, Download } from "lucide-react";
 import toast from "react-hot-toast";
 import PreviewNew from "./PreviewNew";
 import {
@@ -129,6 +129,14 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
                 title="Edit"
               >
                 <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleView(p._id).then(() => setTimeout(() => window.print?.(), 0))}
+                className="text-emerald-600 hover:text-emerald-800"
+                title="Download PDF"
+              >
+                <Download className="h-4 w-4" />
               </button>
               <button
                 type="button"

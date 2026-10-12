@@ -17,13 +17,9 @@ const SelectorNew = ({ selectedItems = [], onChange }) => {
         it.duration === durKey
     );
 
-  const addItem = (category, pkg, durationKey, amountOverride) => {
-    const durationLabel =
-      category.durations?.find((d) => d.key === durationKey)?.label ||
-      durationKey;
+  const addItem = (category, pkg, durationKey, durationLabel, amountOverride) => {
     const amount = amountOverride ?? pkg?.prices?.[durationKey] ?? 0;
     if (amount <= 0) return;
-
     if (isSelected(category.key, pkg.key, durationKey)) return;
 
     onChange([
@@ -138,31 +134,26 @@ const SelectorNew = ({ selectedItems = [], onChange }) => {
 };
 
 const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
-  const saved = selectedItems.find(
-    (it) => it.category === category.key && it.packageKey === pkg.key
-  );
-  const initialDuration = saved?.duration || category.durations[0]?.key;
+  const [durationKey, setDurationKey] = useState(category.durations[0]?.key);
+  const [customDuration, setCustomDuration] = useState("");
+  const [customAmount, setCustomAmount] = useState("");
+  const [useCustomDuration, setUseCustomDuration] = useState(false);
 
-  const [durationKey, setDurationKey] = useState(initialDuration);
-  const [customAmount, setCustomAmount] = useState(
-    pkg.custom && saved ? String(saved.amount) : ""
-  );
+  const effectiveDurationKey = useCustomDuration
+    ? `custom::${customDuration.trim() || "N/A"}`
+    : durationKey;
 
-  useEffect(() => {
-    const match = selectedItems.find(
-      (it) => it.category === category.key && it.packageKey === pkg.key
-    );
-    if (match) {
-      setDurationKey(match.duration);
-      if (pkg.custom) setCustomAmount(String(match.amount));
-    }
-  }, [selectedItems, category.key, pkg.key, pkg.custom]);
+  const effectiveDurationLabel = useCustomDuration
+    ? customDuration.trim() || "Custom"
+    : category.durations.find((d) => d.key === durationKey)?.label || durationKey;
 
   const price = pkg.custom
     ? Number(customAmount || 0)
+    : useCustomDuration
+    ? 0
     : pkg.prices?.[durationKey] || 0;
 
-  const selected = isSelected(category.key, pkg.key, durationKey);
+  const selected = isSelected(category.key, pkg.key, effectiveDurationKey);
 
   return (
     <div
@@ -181,28 +172,64 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
         )}
       </div>
 
-      {category.durations.length > 1 && !pkg.custom && (
-        <div className="flex gap-1 flex-wrap">
-          {category.durations.map((d) => (
+      {!pkg.custom && (
+        <>
+          <div className="flex gap-1 flex-wrap">
+            {category.durations.map((d) => (
+              <button
+                key={d.key}
+                type="button"
+                onClick={() => {
+                  setDurationKey(d.key);
+                  setUseCustomDuration(false);
+                }}
+                className={`text-xs px-2 py-1 rounded-md border ${
+                  !useCustomDuration && durationKey === d.key
+                    ? "bg-gray-900 text-white border-gray-900"
+                    : "bg-white text-gray-600 border-gray-200"
+                }`}
+              >
+                {d.label}
+              </button>
+            ))}
             <button
-              key={d.key}
               type="button"
-              onClick={() => setDurationKey(d.key)}
+              onClick={() => setUseCustomDuration(true)}
               className={`text-xs px-2 py-1 rounded-md border ${
-                durationKey === d.key
+                useCustomDuration
                   ? "bg-gray-900 text-white border-gray-900"
                   : "bg-white text-gray-600 border-gray-200"
               }`}
             >
-              {d.label}
+              Custom
             </button>
-          ))}
-        </div>
+          </div>
+
+          {useCustomDuration && (
+            <input
+              type="text"
+              value={customDuration}
+              onChange={(e) => setCustomDuration(e.target.value)}
+              placeholder="e.g. 4 Months"
+              className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+            />
+          )}
+        </>
       )}
 
       {pkg.custom ? (
         <input
           type="number"
+          min="0"
+          value={customAmount}
+          onChange={(e) => setCustomAmount(e.target.value)}
+          placeholder="Enter amount"
+          className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+        />
+      ) : useCustomDuration ? (
+        <input
+          type="number"
+          min="0"
           value={customAmount}
           onChange={(e) => setCustomAmount(e.target.value)}
           placeholder="Enter amount"
@@ -214,9 +241,15 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
 
       <button
         type="button"
-        disabled={selected || price <= 0}
+        disabled={selected || price <= 0 || (useCustomDuration && !customDuration.trim())}
         onClick={() =>
-          onAdd(category, pkg, durationKey, pkg.custom ? price : undefined)
+          onAdd(
+            category,
+            pkg,
+            effectiveDurationKey,
+            effectiveDurationLabel,
+            price
+          )
         }
         className={`mt-1 text-xs font-medium rounded-md py-1.5 transition ${
           selected

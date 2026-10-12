@@ -17,7 +17,7 @@ const ProposalItemSchema = new mongoose.Schema(
 const PartialPaymentSchema = new mongoose.Schema(
   {
     paymentDuration: { type: String, required: true },
-    paymentAmount: { type: Number, required: true },
+    paymentAmount: { type: Number, required: true, min: 0 },
   },
   { _id: false }
 );
@@ -25,8 +25,7 @@ const PartialPaymentSchema = new mongoose.Schema(
 const DeliveredMetricSchema = new mongoose.Schema(
   {
     label: { type: String, required: true },
-    count: { type: Number, default: 0 },
-    total: { type: Number, default: 0 },
+    count: { type: Number, default: 0, min: 0 },
   },
   { _id: false }
 );
@@ -63,6 +62,9 @@ const ProposalNewSchema = new mongoose.Schema(
     subtotal: { type: Number, default: 0 },
     gstRate: { type: Number, default: 0.18 },
     gstAmount: { type: Number, default: 0 },
+    tdsApplicable: { type: Boolean, default: false },
+    tdsRate: { type: Number, default: 0.02 },
+    tdsAmount: { type: Number, default: 0 },
     discountType: {
       type: String,
       enum: ["amount", "percentage"],

@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { Trash, X } from "lucide-react";
 import SelectorNew from "./SelectorNew";
 import ChecklistNew from "./ChecklistNew";
-import SummaryNew from "./SummaryNew";
+import SummaryNew, { computeTotals } from "./SummaryNew";
 import HistoryNew from "./HistoryNew";
 import { createProposalNewService } from "@/service/proposalNew";
 
@@ -33,6 +33,7 @@ const emptyForm = {
   items: [],
   discountType: "amount",
   discountInput: 0,
+  tdsApplicable: false,
   notes: "",
   validTill: "",
   paymentMethod: "",
@@ -46,6 +47,8 @@ const ProposalTabNew = ({ customerId }) => {
   const [form, setForm] = useState(emptyForm);
   const [paymentForm, setPaymentForm] = useState({
     paymentDuration: "",
+    customDurationText: "",
+    customDate: "",
     paymentAmount: "",
   });
   const [saving, setSaving] = useState(false);
@@ -58,6 +61,7 @@ const ProposalTabNew = ({ customerId }) => {
     items,
     discountType,
     discountInput,
+    tdsApplicable,
     notes,
     validTill,
     paymentMethod,
@@ -67,40 +71,71 @@ const ProposalTabNew = ({ customerId }) => {
     checklist,
   } = form;
 
-  const subtotal = items.reduce((s, it) => s + Number(it.amount || 0), 0);
-  const gstAmount = Number((subtotal * 0.18).toFixed(2));
-  const discountAmount =
-    discountType === "percentage"
-      ? Number(((subtotal * Number(discountInput || 0)) / 100).toFixed(2))
-      : Number(discountInput || 0);
-  const grandTotal = Number((subtotal + gstAmount - discountAmount).toFixed(2));
+  const { grandTotal } = computeTotals({
+    items,
+    discountType,
+    discountInput,
+    tdsApplicable,
+  });
+
   const totalPaid = partialPayments.reduce(
     (s, p) => s + Number(p.paymentAmount || 0),
     0
   );
   const balance = grandTotal - totalPaid;
 
+  const isCustomDur = paymentForm.paymentDuration === "__custom_text__";
+  const isCustomDate = paymentForm.paymentDuration === "__custom_date__";
+
+  const usedDurations = partialPayments.map((p) => p.paymentDuration);
+
+  const resolveDuration = () => {
+    if (isCustomDur) {
+      const txt = paymentForm.customDurationText.trim();
+      if (!txt) return "";
+      return txt.toLowerCase().startsWith("after") ? txt : `After ${txt}`;
+    }
+    if (isCustomDate) {
+      if (!paymentForm.customDate) return "";
+      const d = new Date(paymentForm.customDate);
+      return `On ${d.toLocaleDateString("en-IN")}`;
+    }
+    return paymentForm.paymentDuration;
+  };
+
   const resetForm = () => {
     setForm(emptyForm);
-    setPaymentForm({ paymentDuration: "", paymentAmount: "" });
+    setPaymentForm({
+      paymentDuration: "",
+      customDurationText: "",
+      customDate: "",
+      paymentAmount: "",
+    });
     setEditingProposal(null);
   };
 
   const handleAddPayment = (e) => {
     e.preventDefault();
+    const resolved = resolveDuration();
+    if (!resolved) return toast.error("Select or enter a duration");
+    if (usedDurations.includes(resolved))
+      return toast.error("This duration is already added");
     const amt = Number(paymentForm.paymentAmount);
-    if (!paymentForm.paymentDuration)
-      return toast.error("Select payment duration");
-    if (amt <= 0) return toast.error("Amount must be > 0");
+    if (amt <= 0) return toast.error("Amount must be greater than 0");
     if (amt > balance)
       return toast.error(
         `Amount cannot exceed balance ₹ ${balance.toLocaleString("en-IN")}`
       );
     setField("partialPayments", [
-      { paymentDuration: paymentForm.paymentDuration, paymentAmount: amt },
       ...partialPayments,
+      { paymentDuration: resolved, paymentAmount: amt },
     ]);
-    setPaymentForm({ paymentDuration: "", paymentAmount: "" });
+    setPaymentForm({
+      paymentDuration: "",
+      customDurationText: "",
+      customDate: "",
+      paymentAmount: "",
+    });
   };
 
   const handleRemovePayment = (idx) => {
@@ -118,18 +153,16 @@ const ProposalTabNew = ({ customerId }) => {
         deliveredMetrics.filter((m) => m.label !== label)
       );
     } else {
-      setField("deliveredMetrics", [
-        ...deliveredMetrics,
-        { label, count: 0, total: 0 },
-      ]);
+      setField("deliveredMetrics", [...deliveredMetrics, { label, count: 0 }]);
     }
   };
 
-  const updateMetric = (label, field, value) => {
+  const updateMetric = (label, value) => {
+    const n = Math.max(0, Number(value) || 0);
     setField(
       "deliveredMetrics",
       deliveredMetrics.map((m) =>
-        m.label === label ? { ...m, [field]: Number(value) || 0 } : m
+        m.label === label ? { ...m, count: n } : m
       )
     );
   };
@@ -140,6 +173,7 @@ const ProposalTabNew = ({ customerId }) => {
       items: proposal.items || [],
       discountType: proposal.discountType || "amount",
       discountInput: proposal.discountInput || 0,
+      tdsApplicable: !!proposal.tdsApplicable,
       notes: proposal.notes || "",
       validTill: proposal.validTill
         ? new Date(proposal.validTill).toISOString().slice(0, 10)
@@ -147,7 +181,10 @@ const ProposalTabNew = ({ customerId }) => {
       paymentMethod: proposal.paymentMethod || "",
       partialPayments: proposal.partialPayments || [],
       deliveryPeriod: proposal.deliveryPeriod || "weekly",
-      deliveredMetrics: proposal.deliveredMetrics || [],
+      deliveredMetrics: (proposal.deliveredMetrics || []).map((m) => ({
+        label: m.label,
+        count: m.count || 0,
+      })),
       checklist: proposal.checklist || [],
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -159,6 +196,14 @@ const ProposalTabNew = ({ customerId }) => {
     if (!paymentMethod) return toast.error("Select payment method");
     if (discountType === "percentage" && Number(discountInput) > 100)
       return toast.error("Percentage cannot exceed 100");
+    if (Number(discountInput) < 0)
+      return toast.error("Discount cannot be negative");
+    if (grandTotal > 0 && Math.abs(totalPaid - grandTotal) > 0.01)
+      return toast.error(
+        `Partial payments must total ₹${grandTotal.toLocaleString(
+          "en-IN"
+        )}. Remaining: ₹${balance.toLocaleString("en-IN")}`
+      );
 
     try {
       setSaving(true);
@@ -167,6 +212,7 @@ const ProposalTabNew = ({ customerId }) => {
         items,
         discountType,
         discountInput: Number(discountInput || 0),
+        tdsApplicable,
         partialPayments,
         deliveryPeriod,
         deliveredMetrics,
@@ -184,7 +230,7 @@ const ProposalTabNew = ({ customerId }) => {
       }
     } catch (err) {
       console.log(err);
-      toast.error("Failed to create proposal");
+      toast.error(err?.response?.data?.message || "Failed to create proposal");
     } finally {
       setSaving(false);
     }
@@ -266,20 +312,10 @@ const ProposalTabNew = ({ customerId }) => {
                     <span className="text-sm font-medium w-24">{m.label}</span>
                     <Input
                       type="number"
+                      min="0"
                       placeholder="Delivered"
                       value={m.count}
-                      onChange={(e) =>
-                        updateMetric(m.label, "count", e.target.value)
-                      }
-                    />
-                    <span className="text-sm text-gray-500">of</span>
-                    <Input
-                      type="number"
-                      placeholder="Total"
-                      value={m.total}
-                      onChange={(e) =>
-                        updateMetric(m.label, "total", e.target.value)
-                      }
+                      onChange={(e) => updateMetric(m.label, e.target.value)}
                     />
                   </div>
                 ))}
@@ -299,20 +335,54 @@ const ProposalTabNew = ({ customerId }) => {
                   setPaymentForm((p) => ({
                     ...p,
                     paymentDuration: e.target.value,
+                    customDurationText: "",
+                    customDate: "",
                   }))
                 }
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 <option value="">Select Payment Duration</option>
-                {DURATION_OPTIONS.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
+                {DURATION_OPTIONS.filter((d) => !usedDurations.includes(d)).map(
+                  (d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  )
+                )}
+                <option value="__custom_text__">Custom (enter days)</option>
+                <option value="__custom_date__">Custom Date</option>
               </select>
+
+              {isCustomDur && (
+                <Input
+                  type="text"
+                  placeholder="e.g. 23 Days"
+                  value={paymentForm.customDurationText}
+                  onChange={(e) =>
+                    setPaymentForm((p) => ({
+                      ...p,
+                      customDurationText: e.target.value,
+                    }))
+                  }
+                />
+              )}
+
+              {isCustomDate && (
+                <Input
+                  type="date"
+                  value={paymentForm.customDate}
+                  onChange={(e) =>
+                    setPaymentForm((p) => ({
+                      ...p,
+                      customDate: e.target.value,
+                    }))
+                  }
+                />
+              )}
 
               <Input
                 type="number"
+                min="0"
                 placeholder="Enter amount"
                 value={paymentForm.paymentAmount}
                 onChange={(e) =>
@@ -327,7 +397,9 @@ const ProposalTabNew = ({ customerId }) => {
                 Balance: ₹ {balance.toLocaleString("en-IN")}
               </p>
 
-              <Button type="submit">Add</Button>
+              <Button type="submit" disabled={balance <= 0}>
+                Add
+              </Button>
             </form>
 
             <div className="mt-4">
@@ -372,6 +444,7 @@ const ProposalTabNew = ({ customerId }) => {
             items={items}
             discountType={discountType}
             discountInput={discountInput}
+            tdsApplicable={tdsApplicable}
           />
 
           <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm flex flex-col gap-3">
@@ -412,11 +485,22 @@ const ProposalTabNew = ({ customerId }) => {
                 </select>
                 <Input
                   type="number"
+                  min="0"
                   value={discountInput}
                   onChange={(e) => setField("discountInput", e.target.value)}
                 />
               </div>
             </div>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={tdsApplicable}
+                onChange={(e) => setField("tdsApplicable", e.target.checked)}
+                className="h-4 w-4 accent-emerald-600"
+              />
+              <span className="text-sm text-gray-700">Apply TDS (2%)</span>
+            </label>
 
             <div>
               <Label>Notes</Label>
@@ -426,22 +510,24 @@ const ProposalTabNew = ({ customerId }) => {
                 rows={3}
               />
             </div>
-
-            <Button onClick={handleSubmit} disabled={saving}>
-              {saving
-                ? "Saving…"
-                : isEditing
-                ? "Save as New Version"
-                : "Create Proposal"}
-            </Button>
-
-            {isEditing && (
-              <Button variant="outline" onClick={resetForm}>
-                Cancel
-              </Button>
-            )}
           </div>
         </div>
+      </div>
+
+      <div className="flex items-center justify-center gap-3 mt-2">
+        <Button
+          onClick={handleSubmit}
+          disabled={saving}
+          size="lg"
+          className="min-w-[240px]"
+        >
+          {saving ? "Saving…" : "Save Proposal"}
+        </Button>
+        {isEditing && (
+          <Button variant="outline" onClick={resetForm}>
+            Cancel
+          </Button>
+        )}
       </div>
 
       <div className="mt-4">

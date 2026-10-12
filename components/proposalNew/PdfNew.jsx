@@ -1,8 +1,45 @@
 "use client";
 import React, { forwardRef } from "react";
+import { computeTotals } from "./SummaryNew";
 
 const fmt = (n) => `₹ ${Number(n || 0).toLocaleString("en-IN")}`;
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("en-IN") : "—");
+
+export const downloadProposalPdf = (proposal) => {
+  const node = document.getElementById("proposal-print-root");
+  if (!node) return;
+
+  const html = node.outerHTML;
+  const win = window.open("", "_blank", "width=900,height=650");
+  if (!win) return;
+
+  win.document.open();
+  win.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>${proposal?.proposalNumber || "Proposal"}</title>
+        <style>
+          * { box-sizing: border-box; }
+          body { font-family: Arial, sans-serif; padding: 20px; margin: 0; color: #111827; }
+          #proposal-print-root { width: 100%; max-width: 794px; margin: 0 auto; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 13px; }
+          ul { list-style: none; padding: 0; margin: 0; }
+          li { margin-bottom: 3px; font-size: 13px; break-inside: avoid; }
+          @media print { body { padding: 0; } }
+        </style>
+      </head>
+      <body>${html}</body>
+    </html>
+  `);
+  win.document.close();
+  setTimeout(() => {
+    win.focus();
+    win.print();
+  }, 250);
+};
 
 const PdfNew = forwardRef(({ proposal }, ref) => {
   if (!proposal) return null;
@@ -13,12 +50,18 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
   const deliveredMetrics = proposal.deliveredMetrics || [];
   const checklist = proposal.checklist || [];
 
-  const subtotal =
-    proposal.subtotal ?? items.reduce((s, it) => s + Number(it.amount || 0), 0);
-  const gstAmount = proposal.gstAmount ?? subtotal * 0.18;
-  const discountAmount = proposal.discountAmount ?? 0;
-  const grandTotal =
-    proposal.grandTotal ?? subtotal + gstAmount - discountAmount;
+  const {
+    subtotal,
+    discountAmount,
+    tdsAmount,
+    gstAmount,
+    grandTotal,
+  } = computeTotals({
+    items,
+    discountType: proposal.discountType,
+    discountInput: proposal.discountInput,
+    tdsApplicable: proposal.tdsApplicable,
+  });
 
   const totalPaid = partialPayments.reduce(
     (s, p) => s + Number(p.paymentAmount || 0),
@@ -89,7 +132,9 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           {client.GSTIN && (
             <p style={{ margin: "2px 0 0" }}>GSTIN: {client.GSTIN}</p>
           )}
-          {client.tanNo && <p style={{ margin: "2px 0 0" }}>TAN: {client.tanNo}</p>}
+          {client.tanNo && (
+            <p style={{ margin: "2px 0 0" }}>TAN: {client.tanNo}</p>
+          )}
         </div>
       )}
 
@@ -134,16 +179,14 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         }}
       >
         <div
-          style={{ display: "flex", justifyContent: "space-between", padding: "2px 0" }}
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            padding: "2px 0",
+          }}
         >
           <span>Subtotal</span>
           <span>{fmt(subtotal)}</span>
-        </div>
-        <div
-          style={{ display: "flex", justifyContent: "space-between", padding: "2px 0" }}
-        >
-          <span>GST (18%)</span>
-          <span>{fmt(gstAmount)}</span>
         </div>
         {discountAmount > 0 && (
           <div
@@ -163,6 +206,28 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
             <span>- {fmt(discountAmount)}</span>
           </div>
         )}
+        {tdsAmount > 0 && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "2px 0",
+            }}
+          >
+            <span>TDS (2%)</span>
+            <span>- {fmt(tdsAmount)}</span>
+          </div>
+        )}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            padding: "2px 0",
+          }}
+        >
+          <span>GST (18%)</span>
+          <span>{fmt(gstAmount)}</span>
+        </div>
         <div
           style={{
             display: "flex",
@@ -255,9 +320,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
               {deliveredMetrics.map((m, i) => (
                 <tr key={i} style={{ borderBottom: "1px solid #f3f4f6" }}>
                   <td style={td}>{m.label}</td>
-                  <td style={tdR}>
-                    {m.count} of {m.total}
-                  </td>
+                  <td style={tdR}>{m.count}</td>
                 </tr>
               ))}
             </tbody>
@@ -272,41 +335,54 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           >
             Payment Schedule
           </h3>
-          <table
+          <ul
             style={{
-              width: "100%",
-              borderCollapse: "collapse",
+              listStyle: "none",
+              padding: 0,
+              margin: 0,
               fontSize: "13px",
             }}
           >
-            <thead>
-              <tr
+            {partialPayments.map((p, i) => (
+              <li
+                key={i}
                 style={{
-                  borderBottom: "1px solid #e5e7eb",
-                  backgroundColor: "#f9fafb",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "4px 0",
+                  borderBottom: "1px solid #f3f4f6",
                 }}
               >
-                <th style={th}>Milestone</th>
-                <th style={thR}>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {partialPayments.map((p, i) => (
-                <tr key={i} style={{ borderBottom: "1px solid #f3f4f6" }}>
-                  <td style={td}>{p.paymentDuration}</td>
-                  <td style={tdR}>{fmt(p.paymentAmount)}</td>
-                </tr>
-              ))}
-              <tr>
-                <td style={{ ...td, fontWeight: 600 }}>Total Scheduled</td>
-                <td style={{ ...tdR, fontWeight: 600 }}>{fmt(totalPaid)}</td>
-              </tr>
-              <tr>
-                <td style={{ ...td, fontWeight: 600 }}>Balance</td>
-                <td style={{ ...tdR, fontWeight: 600 }}>{fmt(balance)}</td>
-              </tr>
-            </tbody>
-          </table>
+                <span>{p.paymentDuration}</span>
+                <span style={{ fontWeight: 600 }}>
+                  {fmt(p.paymentAmount)}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div
+            style={{
+              marginTop: "8px",
+              paddingTop: "8px",
+              borderTop: "1px solid #e5e7eb",
+              fontSize: "13px",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <span style={{ fontWeight: 700 }}>Total Scheduled</span>
+            <span style={{ fontWeight: 700 }}>{fmt(totalPaid)}</span>
+          </div>
+          <div
+            style={{
+              fontSize: "13px",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <span style={{ fontWeight: 700 }}>Balance</span>
+            <span style={{ fontWeight: 700 }}>{fmt(balance)}</span>
+          </div>
         </div>
       )}
 
