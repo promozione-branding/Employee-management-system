@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { PROPOSAL_CATALOG } from "@/config/new/proposalCatalogNew";
 import { Check, Plus, X } from "lucide-react";
 
@@ -17,7 +17,13 @@ const SelectorNew = ({ selectedItems = [], onChange }) => {
         it.duration === durKey
     );
 
-  const addItem = (category, pkg, durationKey, durationLabel, amountOverride) => {
+  const addItem = (
+    category,
+    pkg,
+    durationKey,
+    durationLabel,
+    amountOverride
+  ) => {
     const amount = amountOverride ?? pkg?.prices?.[durationKey] ?? 0;
     if (amount <= 0) return;
     if (isSelected(category.key, pkg.key, durationKey)) return;
@@ -135,9 +141,9 @@ const SelectorNew = ({ selectedItems = [], onChange }) => {
 
 const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
   const [durationKey, setDurationKey] = useState(category.durations[0]?.key);
+  const [useCustomDuration, setUseCustomDuration] = useState(false);
   const [customDuration, setCustomDuration] = useState("");
   const [customAmount, setCustomAmount] = useState("");
-  const [useCustomDuration, setUseCustomDuration] = useState(false);
 
   const effectiveDurationKey = useCustomDuration
     ? `custom::${customDuration.trim() || "N/A"}`
@@ -145,15 +151,21 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
 
   const effectiveDurationLabel = useCustomDuration
     ? customDuration.trim() || "Custom"
-    : category.durations.find((d) => d.key === durationKey)?.label || durationKey;
+    : category.durations.find((d) => d.key === durationKey)?.label ||
+      durationKey;
 
   const price = pkg.custom
     ? Number(customAmount || 0)
     : useCustomDuration
-    ? 0
+    ? Number(customAmount || 0)
     : pkg.prices?.[durationKey] || 0;
 
   const selected = isSelected(category.key, pkg.key, effectiveDurationKey);
+
+  const canAdd =
+    !selected &&
+    price > 0 &&
+    (!useCustomDuration || customDuration.trim().length > 0);
 
   return (
     <div
@@ -172,49 +184,45 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
         )}
       </div>
 
-      {!pkg.custom && (
-        <>
-          <div className="flex gap-1 flex-wrap">
-            {category.durations.map((d) => (
-              <button
-                key={d.key}
-                type="button"
-                onClick={() => {
-                  setDurationKey(d.key);
-                  setUseCustomDuration(false);
-                }}
-                className={`text-xs px-2 py-1 rounded-md border ${
-                  !useCustomDuration && durationKey === d.key
-                    ? "bg-gray-900 text-white border-gray-900"
-                    : "bg-white text-gray-600 border-gray-200"
-                }`}
-              >
-                {d.label}
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={() => setUseCustomDuration(true)}
-              className={`text-xs px-2 py-1 rounded-md border ${
-                useCustomDuration
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-600 border-gray-200"
-              }`}
-            >
-              Custom
-            </button>
-          </div>
+      <div className="flex gap-1 flex-wrap">
+        {category.durations.map((d) => (
+          <button
+            key={d.key}
+            type="button"
+            onClick={() => {
+              setDurationKey(d.key);
+              setUseCustomDuration(false);
+            }}
+            className={`text-xs px-2 py-1 rounded-md border ${
+              !useCustomDuration && durationKey === d.key
+                ? "bg-gray-900 text-white border-gray-900"
+                : "bg-white text-gray-600 border-gray-200"
+            }`}
+          >
+            {d.label}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => setUseCustomDuration(true)}
+          className={`text-xs px-2 py-1 rounded-md border ${
+            useCustomDuration
+              ? "bg-gray-900 text-white border-gray-900"
+              : "bg-white text-gray-600 border-gray-200"
+          }`}
+        >
+          Custom
+        </button>
+      </div>
 
-          {useCustomDuration && (
-            <input
-              type="text"
-              value={customDuration}
-              onChange={(e) => setCustomDuration(e.target.value)}
-              placeholder="e.g. 4 Months"
-              className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
-            />
-          )}
-        </>
+      {useCustomDuration && (
+        <input
+          type="text"
+          value={customDuration}
+          onChange={(e) => setCustomDuration(e.target.value)}
+          placeholder="e.g. 4 Months"
+          className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+        />
       )}
 
       {pkg.custom ? (
@@ -241,7 +249,7 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
 
       <button
         type="button"
-        disabled={selected || price <= 0 || (useCustomDuration && !customDuration.trim())}
+        disabled={!canAdd}
         onClick={() =>
           onAdd(
             category,
@@ -254,7 +262,7 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
         className={`mt-1 text-xs font-medium rounded-md py-1.5 transition ${
           selected
             ? "bg-emerald-100 text-emerald-700 cursor-default"
-            : price <= 0
+            : !canAdd
             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
             : "bg-gray-900 text-white hover:bg-gray-800"
         }`}
