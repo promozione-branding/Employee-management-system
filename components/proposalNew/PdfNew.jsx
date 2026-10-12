@@ -53,7 +53,7 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
   padding-bottom: 8px;
   margin-bottom: 14px;
 }
-.pdf-header-inline img { height: 60px; width: auto; }
+.pdf-header-inline img { height: 85px; width: auto; }
 .pdf-header-inline .info {
   text-align: right;
   font-size: 11px;
@@ -130,7 +130,7 @@ const HeaderContent = () => (
     <img
       src={PDF_LOGO_PATH}
       alt="Inquiry Bazaar"
-      style={{ height: 60, width: "auto" }}
+      style={{ height: 110, width: "auto" }}
     />
     <div
       style={{
