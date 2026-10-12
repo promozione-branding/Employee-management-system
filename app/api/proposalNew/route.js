@@ -110,10 +110,15 @@ export async function POST(req) {
     }
 
     const baseAfterDiscount = round0(subtotal - discountAmount);
+
+    // ✅ GST on base-after-discount
+    const gstAmount = round0(baseAfterDiscount * 0.18);
+
+    // ✅ TDS on base-after-discount
     const tdsAmount = tdsApplicable ? round0(baseAfterDiscount * 0.02) : 0;
-    const taxableBase = round0(baseAfterDiscount - tdsAmount);
-    const gstAmount = round0(taxableBase * 0.18);
-    const grandTotal = round0(taxableBase + gstAmount);
+
+    // ✅ Grand = baseAfterDiscount + GST − TDS
+    const grandTotal = round0(baseAfterDiscount + gstAmount - tdsAmount);
 
     const totalPartial = round0(
       partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0)
@@ -133,9 +138,9 @@ export async function POST(req) {
       return NextResponse.json(
         {
           success: false,
-          message: `Partial payments must sum to grand total. Remaining: ₹${(
+          message: `Partial payments must sum to ₹${grandTotal}. Remaining: ₹${
             grandTotal - totalPartial
-          )}`,
+          }`,
         },
         { status: 400 }
       );

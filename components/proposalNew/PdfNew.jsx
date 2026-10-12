@@ -16,110 +16,63 @@ import { PROPOSAL_CATALOG } from "@/config/new/proposalCatalogNew";
 
 const fmt = (n) =>
   Number(n || 0).toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   });
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("en-IN") : "—");
 
 const CSS_RESET = `
 * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-family: Arial, sans-serif; }
-
 @page { size: A4; margin: 0; }
+.pdf-header-fixed, .pdf-footer-fixed, .pdf-watermark-fixed { display: none; }
 
-.pdf-header-fixed,
-.pdf-footer-fixed,
-.pdf-watermark-fixed { display: none; }
-
-/* SCREEN + PRINT share the same .pdf-screen-page layout */
 .pdf-screen-page {
-  width: 210mm;
-  min-height: 297mm;
-  padding: 2mm 12mm 24mm 12mm;
-  background: #fff;
-  margin: 0 auto 12px auto;
-  position: relative;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  display: flex;
-  flex-direction: column;
+  width: 210mm; min-height: 297mm; padding: 12mm 12mm 24mm 12mm;
+  background: #fff; margin: 0 auto 12px auto; position: relative;
+  border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  display: flex; flex-direction: column;
 }
-
 .pdf-header-inline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 8px;
-  margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 14px;
 }
 .pdf-header-inline img { height: 85px; width: auto; }
-.pdf-header-inline .info {
-  text-align: right;
-  font-size: 11px;
-  line-height: 1.4;
-  color: #374151;
-}
+.pdf-header-inline .info { text-align: right; font-size: 11px; line-height: 1.4; color: #374151; }
 .pdf-header-inline .info b { color: #111827; font-size: 12px; }
 
-.pdf-body {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-}
+.pdf-body { position: relative; z-index: 1; flex: 1; }
 
 .pdf-footer-inline {
-  position: absolute;
-  bottom: 8mm;
-  left: 12mm;
-  right: 12mm;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 10px;
-  color: #6b7280;
-  padding-top: 8px;
-  border-top: 1px solid #e5e7eb;
+  position: absolute; bottom: 8mm; left: 12mm; right: 12mm;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 10px; color: #6b7280; padding-top: 8px; border-top: 1px solid #e5e7eb;
 }
-.pdf-footer-inline .left,
-.pdf-footer-inline .right { flex: 1; }
+.pdf-footer-inline .left, .pdf-footer-inline .right { flex: 1; }
 .pdf-footer-inline .right { text-align: right; }
 .pdf-footer-inline .center { flex: 0 0 auto; text-align: center; }
 
 .pdf-watermark-inline {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 0;
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%); pointer-events: none; z-index: 0;
 }
-.pdf-watermark-inline img {
-  width: 480px;
-  height: auto;
-  opacity: 0.10;
-}
+.pdf-watermark-inline img { width: 480px; height: auto; opacity: 0.10; }
 
-/* TYPOGRAPHY */
 table { width: 100%; border-collapse: collapse; }
-th, td { padding: 6px 6px; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 12px; vertical-align: top; }
+th, td { padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 12px; vertical-align: top; }
 th { background: #f3f4f6; font-weight: 600; }
 h1 { font-size: 20px; margin: 0 0 10px 0; }
 h3 { font-size: 14px; margin: 18px 0 6px 0; }
 ul { list-style: disc; padding-left: 18px; margin: 0; }
 li { font-size: 12px; margin-bottom: 2px; line-height: 1.45; }
 table tr td[style*="border: 0"] { border: 0 !important; }
-
 a { color: #111827; text-decoration: none; }
 
 @media print {
   body { margin: 0; }
   .pdf-screen-page {
-    margin: 0 !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    page-break-after: always;
-    page-break-inside: avoid;
+    margin: 0 !important; border: 0 !important; box-shadow: none !important;
+    page-break-after: always; page-break-inside: avoid;
   }
   .pdf-screen-page:last-child { page-break-after: auto; }
 }
@@ -130,7 +83,7 @@ const HeaderContent = () => (
     <img
       src={PDF_LOGO_PATH}
       alt="Inquiry Bazaar"
-      style={{ height: 110, width: "auto" }}
+      style={{ height: 85, width: "auto" }}
     />
     <div
       style={{
@@ -233,14 +186,20 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
   const client = proposal.clientId || {};
   const items = proposal.items || [];
   const checklist = proposal.checklist || [];
+  const partialPayments = proposal.partialPayments || [];
 
-  const { subtotal, discountAmount, tdsAmount, gstAmount, grandTotal } =
+  const { subtotal, discountAmount, gstAmount, tdsAmount, grandTotal } =
     computeTotals({
       items,
       discountType: proposal.discountType,
       discountInput: proposal.discountInput,
       tdsApplicable: proposal.tdsApplicable,
     });
+
+  const totalPaid = partialPayments.reduce(
+    (s, p) => s + Number(p.paymentAmount || 0),
+    0
+  );
 
   const clientAddress = [
     client.Address,
@@ -264,14 +223,13 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
   });
 
   const totalPages = 1 + (hasDeliverables ? 1 : 0) + 1;
-
   let pageCounter = 1;
 
   return (
     <div ref={ref} id="proposal-print-root">
       <style>{CSS_RESET}</style>
 
-      {/* PAGE 1 */}
+      {/* ============ PAGE 1 ============ */}
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
         <h1>Proposal</h1>
 
@@ -338,6 +296,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </tbody>
         </table>
 
+        {/* Totals block */}
         <div style={{ marginTop: "12px", marginLeft: "auto", width: "320px" }}>
           <table>
             <tbody>
@@ -361,6 +320,12 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                   </td>
                 </tr>
               )}
+              <tr>
+                <td style={{ border: 0, padding: "4px" }}>GST @ 18%</td>
+                <td style={{ border: 0, padding: "4px", textAlign: "right" }}>
+                  + {fmt(gstAmount)}
+                </td>
+              </tr>
               {tdsAmount > 0 && (
                 <tr>
                   <td style={{ border: 0, padding: "4px" }}>TDS (2%)</td>
@@ -369,12 +334,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                   </td>
                 </tr>
               )}
-              <tr>
-                <td style={{ border: 0, padding: "4px" }}>GST @ 18%</td>
-                <td style={{ border: 0, padding: "4px", textAlign: "right" }}>
-                  {fmt(gstAmount)}
-                </td>
-              </tr>
               <tr>
                 <td
                   style={{
@@ -400,10 +359,56 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </table>
         </div>
 
+        {/* In Words */}
         <div style={{ marginTop: "14px", fontSize: "12px" }}>
           <b>In Words:</b> {numberToWords(grandTotal)}
         </div>
 
+        {/* ✅ PAYMENT SCHEDULE — new block */}
+        {partialPayments.length > 0 && (
+          <div style={{ marginTop: "14px", fontSize: "11px" }}>
+            <div
+              style={{
+                fontWeight: 700,
+                fontSize: "12px",
+                marginBottom: "4px",
+              }}
+            >
+              Payment Schedule
+            </div>
+            <table style={{ width: "100%" }}>
+              <thead>
+                <tr>
+                  <th style={{ width: "60%" }}>Milestone</th>
+                  <th style={{ textAlign: "right" }}>Amount (INR)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {partialPayments.map((p, i) => (
+                  <tr key={i}>
+                    <td>{p.paymentDuration}</td>
+                    <td style={{ textAlign: "right", fontWeight: 600 }}>
+                      {fmt(p.paymentAmount)}
+                    </td>
+                  </tr>
+                ))}
+                <tr>
+                  <td style={{ fontWeight: 700 }}>Total</td>
+                  <td
+                    style={{
+                      textAlign: "right",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {fmt(totalPaid)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Legal notes */}
         <div style={{ marginTop: "16px", fontSize: "11px" }}>
           <ul>
             {LEGAL_NOTES.map((n, i) => (
@@ -412,6 +417,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </ul>
         </div>
 
+        {/* Bank details */}
         <div style={{ marginTop: "12px", fontSize: "11px", lineHeight: 1.6 }}>
           <div>
             <b>Cheque/Draft to be made in favor:</b>{" "}
@@ -444,7 +450,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         </div>
       </ScreenPage>
 
-      {/* PAGE 2 — Deliverables (only if any) */}
+      {/* ============ PAGE 2 ============ */}
       {hasDeliverables && (
         <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
           <h1 style={{ textAlign: "center" }}>
@@ -453,8 +459,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
 
           {usedCategories.map((catKey) => {
             const cat = PROPOSAL_CATALOG[catKey];
-            const sectionTitle =
-              DELIVERABLE_SECTION_MAP[catKey] || cat.label;
+            const sectionTitle = DELIVERABLE_SECTION_MAP[catKey] || cat.label;
             const tickedSections = checklist.filter((c) =>
               cat.checklist?.some((s) => s.title === c.section)
             );
@@ -496,7 +501,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         </ScreenPage>
       )}
 
-      {/* LAST PAGE — T&C */}
+      {/* ============ LAST PAGE — T&C ============ */}
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
         <h1 style={{ textAlign: "center" }}>Terms &amp; Conditions</h1>
         <ol style={{ paddingLeft: "18px", margin: 0 }}>

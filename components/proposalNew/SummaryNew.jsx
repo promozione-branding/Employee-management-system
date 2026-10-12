@@ -24,19 +24,22 @@ export const computeTotals = ({
 
   const baseAfterDiscount = round0(subtotal - discountAmount);
 
+  // ✅ GST on base-after-discount (NOT reduced by TDS)
+  const gstAmount = round0(baseAfterDiscount * gstRate);
+
+  // ✅ TDS on base-after-discount
   const tdsAmount = tdsApplicable ? round0(baseAfterDiscount * tdsRate) : 0;
 
-  const taxableBase = round0(baseAfterDiscount - tdsAmount);
-  const gstAmount = round0(taxableBase * gstRate);
-  const grandTotal = round0(taxableBase + gstAmount);
+  // ✅ Grand = baseAfterDiscount + GST − TDS
+  const grandTotal = round0(baseAfterDiscount + gstAmount - tdsAmount);
 
   return {
     subtotal,
     discountAmount,
     baseAfterDiscount,
-    tdsAmount,
-    taxableBase,
     gstAmount,
+    tdsAmount,
+    taxableBase: baseAfterDiscount,
     grandTotal,
   };
 };
@@ -54,7 +57,7 @@ export const sumPartials = (partialPayments) =>
   );
 
 const SummaryNew = (props) => {
-  const { subtotal, discountAmount, tdsAmount, gstAmount, grandTotal } =
+  const { subtotal, discountAmount, gstAmount, tdsAmount, grandTotal } =
     computeTotals(props);
 
   return (
@@ -71,23 +74,24 @@ const SummaryNew = (props) => {
           <div className="flex justify-between text-gray-600">
             <span>
               Discount
-              {props.discountType === "percentage" && props.discountInput > 0
-                ? ` (${props.discountInput}%)`
+              {props.discountType === "percentage" &&
+              Number(props.discountInput) > 0
+                ? ` (${Number(props.discountInput)}%)`
                 : ""}
             </span>
             <span>- {fmt(discountAmount)}</span>
           </div>
         )}
+        <div className="flex justify-between text-gray-600">
+          <span>GST (18%)</span>
+          <span>+ {fmt(gstAmount)}</span>
+        </div>
         {tdsAmount > 0 && (
           <div className="flex justify-between text-gray-600">
             <span>TDS (2%)</span>
             <span>- {fmt(tdsAmount)}</span>
           </div>
         )}
-        <div className="flex justify-between text-gray-600">
-          <span>GST (18%)</span>
-          <span>{fmt(gstAmount)}</span>
-        </div>
         <div className="flex justify-between font-bold text-lg text-gray-900 border-t pt-2 mt-2">
           <span>Grand Total</span>
           <span>{fmt(grandTotal)}</span>
