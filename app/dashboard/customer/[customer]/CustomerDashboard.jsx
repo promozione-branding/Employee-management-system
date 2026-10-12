@@ -1,6 +1,4 @@
-// app/dashboard/customer/[customer]/CustomerDashboard.jsx
-
-"use client";  // ⚠️ add if not already there
+"use client";
 
 import React, { useEffect, useState } from "react";
 import CustomerProposal from "../CustomerProposal";
@@ -9,14 +7,12 @@ import Customer from "../Customer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LedgerDetails from "../ledger/LedgerDetails";
 import MeetingDashboard from "../meeting/MeetingDashboard";
-import MeetingHistory from "../meeting/meetingHistory/MeetingHistory";
 import HistoryPage from "../history/page";
 import Attachment from "@/components/admin-dashboard/tabs/Attachment";
-
-// ✅ call components
 import CallPanel from "@/components/sales-dashboard/client/CallPanel";
 import CallHistory from "@/components/sales-dashboard/client/CallHistory";
 import { getCallHistoryService } from "@/service/calling";
+import ProposalTabNew from "@/components/proposalNew/ProposalTabNew";
 
 const CustomerDashboard = ({ customerId, salesPersonId }) => {
   const [callHistory, setCallHistory] = useState([]);
@@ -37,7 +33,6 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
 
   useEffect(() => {
     fetchCallHistory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerId]);
 
   return (
@@ -45,16 +40,23 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
       <Tabs defaultValue="Customer">
         <TabsList>
           <TabsTrigger value="Customer">Customer</TabsTrigger>
-          <TabsTrigger value="proposal">Proposal</TabsTrigger>
+          <TabsTrigger value="newproposal">New Proposal</TabsTrigger>
           <TabsTrigger value="invoice">Invoice</TabsTrigger>
           <TabsTrigger value="ledger">Ledger</TabsTrigger>
           <TabsTrigger value="meeting">Update</TabsTrigger>
           <TabsTrigger value="meetingHistory">History</TabsTrigger>
           <TabsTrigger value="attachment">Attachment</TabsTrigger>
+          <TabsTrigger value="proposal">Proposal</TabsTrigger>
         </TabsList>
+
         <TabsContent value="Customer">
           <Customer customerId={customerId} />
         </TabsContent>
+
+        <TabsContent value="newproposal">
+          <ProposalTabNew customerId={customerId} />
+        </TabsContent>
+
         <TabsContent value="invoice">
           <AllInvoice customerId={customerId} />
         </TabsContent>
@@ -64,36 +66,30 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
         <TabsContent value="ledger">
           <LedgerDetails customerId={customerId} />
         </TabsContent>
-
-        {/* ✅ Call panel + history inside the Update tab */}
-        {/* ✅ Update tab: existing content on top, calls below */}
-<TabsContent value="meeting">
-  <MeetingDashboard
-    customerId={customerId}
-    salesPersonId={salesPersonId}
-  />
-
-  <div className="mt-6">
-    <CallPanel
-      customerId={customerId}
-      customerName="Customer"
-      customerPhone="—"
-      virtualNumber={process.env.NEXT_PUBLIC_MYOP_VIRTUAL_NUMBER || "—"}
-      onCallStarted={() => setTimeout(fetchCallHistory, 2000)}
-    />
-
-    <div className="mb-5">
-      {callHistoryLoading ? (
-        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-6 text-center text-sm text-gray-500">
-          Loading call history…
-        </div>
-      ) : (
-        <CallHistory calls={callHistory} />
-      )}
-    </div>
-  </div>
-</TabsContent>
-
+        <TabsContent value="meeting">
+          <MeetingDashboard
+            customerId={customerId}
+            salesPersonId={salesPersonId}
+          />
+          <div className="mt-6">
+            <CallPanel
+              customerId={customerId}
+              customerName="Customer"
+              customerPhone="—"
+              virtualNumber={process.env.NEXT_PUBLIC_MYOP_VIRTUAL_NUMBER || "—"}
+              onCallStarted={() => setTimeout(fetchCallHistory, 2000)}
+            />
+            <div className="mb-5">
+              {callHistoryLoading ? (
+                <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-6 text-center text-sm text-gray-500">
+                  Loading call history…
+                </div>
+              ) : (
+                <CallHistory calls={callHistory} />
+              )}
+            </div>
+          </div>
+        </TabsContent>
         <TabsContent value="meetingHistory">
           <HistoryPage customerId={customerId} />
         </TabsContent>
