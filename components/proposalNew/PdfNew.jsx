@@ -32,12 +32,15 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
   background: #fff; margin: 0 auto 12px auto; position: relative;
   border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   display: flex; flex-direction: column;
+  overflow: hidden;
 }
+
 .pdf-header-inline {
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 14px;
+  position: relative; z-index: 2;
+  background: #fff;
 }
-  
 .pdf-header-inline img { height: 120px; width: auto; }
 .pdf-header-inline .info { text-align: right; font-size: 11px; line-height: 1.4; color: #374151; }
 .pdf-header-inline .info b { color: #111827; font-size: 12px; }
@@ -48,6 +51,8 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
   position: absolute; bottom: 8mm; left: 12mm; right: 12mm;
   display: flex; justify-content: space-between; align-items: center;
   font-size: 10px; color: #6b7280; padding-top: 8px; border-top: 1px solid #e5e7eb;
+  z-index: 2;
+  background: #fff;
 }
 .pdf-footer-inline .left, .pdf-footer-inline .right { flex: 1; }
 .pdf-footer-inline .right { text-align: right; }
@@ -55,9 +60,10 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
 
 .pdf-watermark-inline {
   position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%); pointer-events: none; z-index: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none; z-index: 0;
 }
-.pdf-watermark-inline img { width: 480px; height: auto; opacity: 0.10; }
+.pdf-watermark-inline img { width: 480px; height: auto; opacity: 0.08; }
 
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 12px; vertical-align: top; }
