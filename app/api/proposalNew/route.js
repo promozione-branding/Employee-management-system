@@ -3,6 +3,8 @@ import ProposalNew from "@/models/admin/proposalNew/ProposalNew";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { NextResponse } from "next/server";
 
+const round0 = (n) => Math.round(Number(n) || 0);
+
 export async function GET(req) {
   try {
     await connectDB();
@@ -91,16 +93,14 @@ export async function POST(req) {
         );
     }
 
-    const subtotal = items.reduce((s, it) => s + Number(it.amount || 0), 0);
+    const subtotal = round0(
+      items.reduce((s, it) => s + Number(it.amount || 0), 0)
+    );
 
-    let discountAmount = 0;
-    if (discountType === "percentage") {
-      discountAmount = Number(
-        ((subtotal * Number(discountInput || 0)) / 100).toFixed(2)
-      );
-    } else {
-      discountAmount = Number(discountInput || 0);
-    }
+    const discountAmount =
+      discountType === "percentage"
+        ? round0((subtotal * Number(discountInput || 0)) / 100)
+        : round0(discountInput || 0);
 
     if (discountAmount > subtotal) {
       return NextResponse.json(
@@ -109,21 +109,34 @@ export async function POST(req) {
       );
     }
 
-    const baseAfterDiscount = subtotal - discountAmount;
-    const tdsAmount = tdsApplicable
-      ? Number((baseAfterDiscount * 0.02).toFixed(2))
-      : 0;
-    const taxableBase = Number((baseAfterDiscount - tdsAmount).toFixed(2));
-    const gstAmount = Number((taxableBase * 0.18).toFixed(2));
-    const grandTotal = Number((taxableBase + gstAmount).toFixed(2));
+    const baseAfterDiscount = round0(subtotal - discountAmount);
+    const tdsAmount = tdsApplicable ? round0(baseAfterDiscount * 0.02) : 0;
+    const taxableBase = round0(baseAfterDiscount - tdsAmount);
+    const gstAmount = round0(taxableBase * 0.18);
+    const grandTotal = round0(taxableBase + gstAmount);
 
-    const totalPartial = partialPayments.reduce(
-      (s, p) => s + Number(p.paymentAmount || 0),
-      0
+    const totalPartial = round0(
+      partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0)
     );
+
     if (totalPartial > grandTotal) {
       return NextResponse.json(
-        { success: false, message: "Partial payments exceed grand total" },
+        {
+          success: false,
+          message: `Partial payments (₹${totalPartial}) exceed grand total (₹${grandTotal})`,
+        },
+        { status: 400 }
+      );
+    }
+
+    if (grandTotal > 0 && totalPartial !== grandTotal) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Partial payments must sum to grand total. Remaining: ₹${(
+            grandTotal - totalPartial
+          )}`,
+        },
         { status: 400 }
       );
     }

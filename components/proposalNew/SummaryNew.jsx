@@ -3,6 +3,8 @@ import React from "react";
 
 const fmt = (n) => `₹ ${Number(n || 0).toLocaleString("en-IN")}`;
 
+const round0 = (n) => Math.round(Number(n) || 0);
+
 export const computeTotals = ({
   items = [],
   discountType = "amount",
@@ -11,18 +13,22 @@ export const computeTotals = ({
   gstRate = 0.18,
   tdsRate = 0.02,
 }) => {
-  const subtotal = items.reduce((s, it) => s + Number(it.amount || 0), 0);
+  const subtotal = round0(
+    items.reduce((s, it) => s + Number(it.amount || 0), 0)
+  );
+
   const discountAmount =
     discountType === "percentage"
-      ? Number(((subtotal * Number(discountInput || 0)) / 100).toFixed(2))
-      : Number(discountInput || 0);
-  const baseAfterDiscount = Number((subtotal - discountAmount).toFixed(2));
-  const tdsAmount = tdsApplicable
-    ? Number((baseAfterDiscount * tdsRate).toFixed(2))
-    : 0;
-  const taxableBase = Number((baseAfterDiscount - tdsAmount).toFixed(2));
-  const gstAmount = Number((taxableBase * gstRate).toFixed(2));
-  const grandTotal = Number((taxableBase + gstAmount).toFixed(2));
+      ? round0((subtotal * Number(discountInput || 0)) / 100)
+      : round0(discountInput || 0);
+
+  const baseAfterDiscount = round0(subtotal - discountAmount);
+
+  const tdsAmount = tdsApplicable ? round0(baseAfterDiscount * tdsRate) : 0;
+
+  const taxableBase = round0(baseAfterDiscount - tdsAmount);
+  const gstAmount = round0(taxableBase * gstRate);
+  const grandTotal = round0(taxableBase + gstAmount);
 
   return {
     subtotal,
@@ -35,14 +41,21 @@ export const computeTotals = ({
   };
 };
 
+export const isPartialPaymentsValid = (partialPayments, grandTotal) => {
+  const total = round0(
+    partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0)
+  );
+  return total === round0(grandTotal);
+};
+
+export const sumPartials = (partialPayments) =>
+  round0(
+    partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0)
+  );
+
 const SummaryNew = (props) => {
-  const {
-    subtotal,
-    discountAmount,
-    tdsAmount,
-    gstAmount,
-    grandTotal,
-  } = computeTotals(props);
+  const { subtotal, discountAmount, tdsAmount, gstAmount, grandTotal } =
+    computeTotals(props);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">

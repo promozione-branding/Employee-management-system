@@ -35,7 +35,7 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
 .pdf-screen-page {
   width: 210mm;
   min-height: 297mm;
-  padding: 12mm 12mm 24mm 12mm;
+  padding: 2mm 12mm 24mm 12mm;
   background: #fff;
   margin: 0 auto 12px auto;
   position: relative;
