@@ -31,89 +31,11 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
 .pdf-footer-fixed,
 .pdf-watermark-fixed { display: none; }
 
-@media print {
-  body { margin: 0; }
-  .pdf-screen-page {
-    width: 210mm !important;
-    min-height: 297mm !important;
-    margin: 0 auto !important;
-    padding: 12mm 12mm 24mm 12mm !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    page-break-after: always;
-    position: relative;
-    overflow: visible;
-  }
-  .pdf-screen-page:last-child { page-break-after: auto; }
-
-  .pdf-header-inline,
-  .pdf-footer-inline { display: none !important; }
-
-  .pdf-header-fixed {
-    display: flex;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 26mm;
-    padding: 6mm 12mm 4mm 12mm;
-    align-items: center;
-    justify-content: space-between;
-    background: #fff;
-    border-bottom: 1px solid #e5e7eb;
-    z-index: 10;
-  }
-
-  .pdf-footer-fixed {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 14mm;
-    padding: 3mm 12mm;
-    align-items: center;
-    justify-content: space-between;
-    background: #fff;
-    border-top: 1px solid #e5e7eb;
-    font-size: 10px;
-    color: #6b7280;
-    z-index: 10;
-  }
-
-  .pdf-footer-fixed .left,
-  .pdf-footer-fixed .right {
-    flex: 1;
-  }
-  .pdf-footer-fixed .center {
-    text-align: center;
-    flex: 0 0 auto;
-  }
-
-  .pdf-watermark-fixed {
-    display: flex;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .pdf-watermark-fixed img {
-    width: 480px;
-    height: auto;
-    opacity: 0.10;
-  }
-
-  .pdf-body { padding-top: 26mm !important; padding-bottom: 14mm !important; }
-}
-
-/* SCREEN */
+/* SCREEN + PRINT share the same .pdf-screen-page layout */
 .pdf-screen-page {
   width: 210mm;
   min-height: 297mm;
-  padding: 12mm;
-  padding-bottom: 24mm;
+  padding: 12mm 12mm 24mm 12mm;
   background: #fff;
   margin: 0 auto 12px auto;
   position: relative;
@@ -122,7 +44,8 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
   display: flex;
   flex-direction: column;
 }
-.pdf-screen-page .pdf-header-inline {
+
+.pdf-header-inline {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -130,26 +53,22 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
   padding-bottom: 8px;
   margin-bottom: 14px;
 }
-.pdf-screen-page .pdf-header-inline img {
-  height: 60px;
-  width: auto;
-}
-.pdf-screen-page .pdf-header-inline .info {
+.pdf-header-inline img { height: 60px; width: auto; }
+.pdf-header-inline .info {
   text-align: right;
   font-size: 11px;
   line-height: 1.4;
   color: #374151;
 }
-.pdf-screen-page .pdf-header-inline .info b {
-  color: #111827;
-  font-size: 12px;
-}
-.pdf-screen-page .pdf-body {
+.pdf-header-inline .info b { color: #111827; font-size: 12px; }
+
+.pdf-body {
   position: relative;
   z-index: 1;
   flex: 1;
 }
-.pdf-screen-page .pdf-footer-inline {
+
+.pdf-footer-inline {
   position: absolute;
   bottom: 8mm;
   left: 12mm;
@@ -162,16 +81,12 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
   padding-top: 8px;
   border-top: 1px solid #e5e7eb;
 }
-.pdf-screen-page .pdf-footer-inline .left,
-.pdf-screen-page .pdf-footer-inline .right {
-  flex: 1;
-}
-.pdf-screen-page .pdf-footer-inline .right { text-align: right; }
-.pdf-screen-page .pdf-footer-inline .center {
-  flex: 0 0 auto;
-  text-align: center;
-}
-.pdf-screen-page .pdf-watermark-inline {
+.pdf-footer-inline .left,
+.pdf-footer-inline .right { flex: 1; }
+.pdf-footer-inline .right { text-align: right; }
+.pdf-footer-inline .center { flex: 0 0 auto; text-align: center; }
+
+.pdf-watermark-inline {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -179,7 +94,7 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
   pointer-events: none;
   z-index: 0;
 }
-.pdf-screen-page .pdf-watermark-inline img {
+.pdf-watermark-inline img {
   width: 480px;
   height: auto;
   opacity: 0.10;
@@ -193,11 +108,21 @@ h1 { font-size: 20px; margin: 0 0 10px 0; }
 h3 { font-size: 14px; margin: 18px 0 6px 0; }
 ul { list-style: disc; padding-left: 18px; margin: 0; }
 li { font-size: 12px; margin-bottom: 2px; line-height: 1.45; }
-
-/* Totals table: no borders on label rows */
 table tr td[style*="border: 0"] { border: 0 !important; }
 
 a { color: #111827; text-decoration: none; }
+
+@media print {
+  body { margin: 0; }
+  .pdf-screen-page {
+    margin: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    page-break-after: always;
+    page-break-inside: avoid;
+  }
+  .pdf-screen-page:last-child { page-break-after: auto; }
+}
 `;
 
 const HeaderContent = () => (
@@ -235,11 +160,7 @@ const HeaderContent = () => (
       </div>
       <div>
         Website:{" "}
-        <a
-          href={COMPANY_DETAILS.website}
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a href={COMPANY_DETAILS.website} target="_blank" rel="noreferrer">
           {COMPANY_DETAILS.website}
         </a>
       </div>
@@ -256,8 +177,8 @@ const FooterContent = ({ pageNumber, totalPages }) => (
       Page {pageNumber} of {totalPages}
     </span>
     <span className="right">
-      <a href={`tel:01142603232`}>011 - 42603232</a>,{" "}
-      <a href={`tel:+919971700871`}>+91 99717 00871</a>
+      <a href="tel:01142603232">011 - 42603232</a>,{" "}
+      <a href="tel:+919971700871">+91 99717 00871</a>
     </span>
   </>
 );
@@ -349,17 +270,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
   return (
     <div ref={ref} id="proposal-print-root">
       <style>{CSS_RESET}</style>
-
-      {/* Print-only fixed header / footer / watermark */}
-      <div className="pdf-header-fixed">
-        <HeaderContent />
-      </div>
-      <div className="pdf-footer-fixed">
-        <FooterContent pageNumber="" totalPages="" />
-      </div>
-      <div className="pdf-watermark-fixed">
-        <img src={PDF_LOGO_PATH} alt="" />
-      </div>
 
       {/* PAGE 1 */}
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>

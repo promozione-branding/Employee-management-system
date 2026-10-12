@@ -1,9 +1,9 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FileText, Eye, Trash2, Pencil, Download } from "lucide-react";
 import toast from "react-hot-toast";
 import PreviewNew from "./PreviewNew";
-import { downloadProposalPdf } from "./PdfNew";
+import PdfNew, { downloadProposalPdf } from "./PdfNew";
 import {
   listProposalNewService,
   getProposalNewByIdService,
@@ -24,6 +24,8 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
+  const [downloadTarget, setDownloadTarget] = useState(null);
+  const hiddenRef = useRef(null);
 
   const fetchList = async () => {
     if (!customerId) return;
@@ -76,15 +78,21 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
         toast.error("Failed to load proposal");
         return;
       }
-      setPreview(res.data);
-      // Wait for the preview DOM to render, then trigger the popup print
-      setTimeout(() => {
-        downloadProposalPdf(res.data);
-      }, 350);
+      setDownloadTarget(res.data);
     } catch (err) {
       toast.error("Failed to download");
     }
   };
+
+  // Once the hidden PDF is rendered, trigger the popup
+  useEffect(() => {
+    if (!downloadTarget) return;
+    const timer = setTimeout(() => {
+      downloadProposalPdf(downloadTarget);
+      setDownloadTarget(null);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [downloadTarget]);
 
   useEffect(() => {
     fetchList();
@@ -171,6 +179,23 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
 
       {preview && (
         <PreviewNew proposal={preview} onClose={() => setPreview(null)} />
+      )}
+
+      {/* Hidden PDF render — exists only briefly for the download popup */}
+      {downloadTarget && (
+        <div
+          ref={hiddenRef}
+          style={{
+            position: "fixed",
+            left: "-9999px",
+            top: "-9999px",
+            visibility: "hidden",
+            pointerEvents: "none",
+            width: "210mm",
+          }}
+        >
+          <PdfNew proposal={downloadTarget} />
+        </div>
       )}
     </>
   );
