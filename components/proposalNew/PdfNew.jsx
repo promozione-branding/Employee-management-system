@@ -28,7 +28,7 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
 .pdf-header-fixed, .pdf-footer-fixed, .pdf-watermark-fixed { display: none; }
 
 .pdf-screen-page {
-  width: 210mm; min-height: 297mm; padding: 12mm 12mm 24mm 12mm;
+  width: 210mm; min-height: 297mm; padding: 2mm 12mm 24mm 12mm;
   background: #fff; margin: 0 auto 12px auto; position: relative;
   border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   display: flex; flex-direction: column;
@@ -37,7 +37,8 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 14px;
 }
-.pdf-header-inline img { height: 85px; width: auto; }
+  
+.pdf-header-inline img { height: 120px; width: auto; }
 .pdf-header-inline .info { text-align: right; font-size: 11px; line-height: 1.4; color: #374151; }
 .pdf-header-inline .info b { color: #111827; font-size: 12px; }
 
@@ -83,7 +84,7 @@ const HeaderContent = () => (
     <img
       src={PDF_LOGO_PATH}
       alt="Inquiry Bazaar"
-      style={{ height: 85, width: "auto" }}
+      style={{ height: 120, width: "auto" }}
     />
     <div
       style={{
@@ -229,7 +230,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
     <div ref={ref} id="proposal-print-root">
       <style>{CSS_RESET}</style>
 
-      {/* ============ PAGE 1 ============ */}
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
         <h1>Proposal</h1>
 
@@ -296,7 +296,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </tbody>
         </table>
 
-        {/* Totals block */}
         <div style={{ marginTop: "12px", marginLeft: "auto", width: "320px" }}>
           <table>
             <tbody>
@@ -359,12 +358,10 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </table>
         </div>
 
-        {/* In Words */}
         <div style={{ marginTop: "14px", fontSize: "12px" }}>
           <b>In Words:</b> {numberToWords(grandTotal)}
         </div>
 
-        {/* ✅ PAYMENT SCHEDULE — new block */}
         {partialPayments.length > 0 && (
           <div style={{ marginTop: "14px", fontSize: "11px" }}>
             <div
@@ -408,7 +405,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </div>
         )}
 
-        {/* Legal notes */}
         <div style={{ marginTop: "16px", fontSize: "11px" }}>
           <ul>
             {LEGAL_NOTES.map((n, i) => (
@@ -417,7 +413,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </ul>
         </div>
 
-        {/* Bank details */}
         <div style={{ marginTop: "12px", fontSize: "11px", lineHeight: 1.6 }}>
           <div>
             <b>Cheque/Draft to be made in favor:</b>{" "}
@@ -450,7 +445,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         </div>
       </ScreenPage>
 
-      {/* ============ PAGE 2 ============ */}
       {hasDeliverables && (
         <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
           <h1 style={{ textAlign: "center" }}>
@@ -501,7 +495,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         </ScreenPage>
       )}
 
-      {/* ============ LAST PAGE — T&C ============ */}
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
         <h1 style={{ textAlign: "center" }}>Terms &amp; Conditions</h1>
         <ol style={{ paddingLeft: "18px", margin: 0 }}>
