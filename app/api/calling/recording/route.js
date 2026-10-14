@@ -29,9 +29,9 @@ export async function GET(req) {
       );
     }
 
-    // --- find call log + verify access ---
+    // --- find call + permission check ---
     const log = await CallLog.findOne({ myoperatorCallId: callId })
-      .select("_id agentErpUserId recordingUrl referenceId")
+      .select("_id agentErpUserId recordingUrl")
       .lean();
 
     if (!log) {
@@ -59,6 +59,7 @@ export async function GET(req) {
       );
     }
 
+    // --- token check ---
     const token = process.env.MYOP_API_TOKEN;
     if (!token) {
       return NextResponse.json(
@@ -76,16 +77,19 @@ export async function GET(req) {
     }
 
     // ------------------------------------------------------------
-    // Call MyOperator (confirmed working endpoint)
+    // Confirmed working endpoint (per MyOperator dev):
+    //   GET https://developers.myoperator.co/recordings/link
+    //   Query params: token, file
+    //   Response: { status:"success", code:200, url:"<S3 URL>" }
     // ------------------------------------------------------------
-    const mpRes = await fetch(
-      "https://developers.myoperator.co/search/recordings/link",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, file: recordingFile }),
-      },
-    );
+    const url = new URL("https://developers.myoperator.co/recordings/link");
+    url.searchParams.set("token", token);
+    url.searchParams.set("file", recordingFile);
+
+    const mpRes = await fetch(url.toString(), {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    });
 
     const mpData = await mpRes.json().catch(() => ({}));
 
@@ -100,62 +104,20 @@ export async function GET(req) {
       );
     }
 
-    // ------------------------------------------------------------
-    // Find the matching hit
-    // ------------------------------------------------------------
-    const hits = mpData?.data?.hits || [];
-
-    // Priority order:
-    // 1. Match by filename (exact)
-    // 2. Match by _cri (our referenceId)
-    // 3. Match by _ri (myoperatorCallId)
-    // 4. Fall back to first hit
-    const match =
-      hits.find((h) => h?._source?.filename === recordingFile) ||
-      hits.find((h) => h?._source?._cri === log.referenceId) ||
-      hits.find((h) => h?._source?._ri === callId) ||
-      hits[0];
-
-    if (!match) {
-      console.warn("[recording] no hits in response");
-      return NextResponse.json(
-        { success: false, message: "Recording not found" },
-        { status: 404 },
-      );
-    }
-
-    const src = match?._source || match;
-
-    // ------------------------------------------------------------
-    // Extract the file URL
-    // Confirmed field: _source.fileurl
-    // ------------------------------------------------------------
-    let link =
-      src?.fileurl ||
-      src?.file_url ||
-      src?.fileUrl ||
-      src?.link ||
-      src?.url ||
-      src?.recording_url ||
+    // Extract URL — confirmed at top-level `.url`
+    const link =
+      mpData?.url ||
+      mpData?.data?.url ||
+      mpData?.link ||
+      mpData?.data?.link ||
       null;
 
     if (!link) {
-      console.warn(
-        "[recording] no fileurl found. Available keys:",
-        Object.keys(src || {}),
-      );
+      console.warn("[recording] no url in response:", mpData);
       return NextResponse.json(
-        { success: false, message: "Recording URL missing in response" },
+        { success: false, message: "Recording link not available" },
         { status: 404 },
       );
-    }
-
-    // Append extension if missing — MyOperator's fileurl has no .mp3
-    const filename = src?.filename || recordingFile;
-    if (!/\.(mp3|wav|ogg|m4a)(\?|$)/i.test(link)) {
-      if (filename && /\.(mp3|wav|ogg|m4a)$/i.test(filename)) {
-        link = `${link}.mp3`;
-      }
     }
 
     return NextResponse.json({
@@ -163,7 +125,7 @@ export async function GET(req) {
       data: {
         url: link,
         callId,
-        file: filename,
+        file: recordingFile,
       },
     });
   } catch (err) {

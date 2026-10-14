@@ -64,23 +64,11 @@ function mapLog(log) {
 const CallHistory = ({ calls = [] }) => {
   const [open, setOpen] = useState(true);
   const [expanded, setExpanded] = useState(null);
-  const [loadingId, setLoadingId] = useState(null);
+  const [loadingId, setLoadingId] = useState(null);   // ← defined here
 
   const rows = (calls || []).map(mapLog);
 
   const handlePlayRecording = async (call) => {
-    // Prefer callId (myoperatorCallId) — the correct identifier for the API.
-    // Fall back to recordingFile if it's already a full URL.
-    const isUrl =
-      call.recordingFile &&
-      (call.recordingFile.startsWith("http://") ||
-        call.recordingFile.startsWith("https://"));
-
-    if (isUrl) {
-      window.open(call.recordingFile, "_blank", "noopener,noreferrer");
-      return;
-    }
-
     if (!call.callId) {
       toast.error("No call ID available for this recording");
       return;
