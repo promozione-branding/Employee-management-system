@@ -6,7 +6,7 @@ import {
   PDF_LOGO_PATH,
   COMPANY_DETAILS,
   FOOTER_LEFT,
-  FOOTER_RIGHT,      
+  FOOTER_RIGHT,
   LEGAL_NOTES,
   BANK_DETAILS,
   TERMS_AND_CONDITIONS,
@@ -30,29 +30,36 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
 .pdf-header-fixed, .pdf-footer-fixed, .pdf-watermark-fixed { display: none; }
 
 .pdf-screen-page {
-  width: 210mm; min-height: 297mm; padding: 2mm 12mm 24mm 12mm;
-  background: #fff; margin: 0 auto 12px auto; position: relative;
-  border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  display: flex; flex-direction: column;
+  width: 210mm;
+  height: 297mm;
+  max-height: 297mm;
+  padding: 2mm 12mm 32mm 12mm;
+  background: #fff;
+  margin: 0 auto 12px auto;
+  position: relative;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
 .pdf-header-inline {
   display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 14px;
+  border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 10px;
   position: relative; z-index: 2;
   background: #fff;
 }
-.pdf-header-inline img { height: 120px; width: auto; }
-.pdf-header-inline .info { text-align: right; font-size: 11px; line-height: 1.4; color: #374151; }
-.pdf-header-inline .info b { color: #111827; font-size: 12px; }
+.pdf-header-inline img { height: 110px; width: auto; }
+.pdf-header-inline .info { text-align: right; font-size: 10.5px; line-height: 1.35; color: #374151; }
+.pdf-header-inline .info b { color: #111827; font-size: 11.5px; }
 
 .pdf-body { position: relative; z-index: 1; flex: 1; }
 
 .pdf-footer-inline {
-  position: absolute; bottom: 8mm; left: 12mm; right: 12mm;
+  position: absolute; bottom: 5mm; left: 12mm; right: 12mm;
   display: flex; justify-content: space-between; align-items: center;
-  font-size: 10px; color: #6b7280; padding-top: 8px; border-top: 1px solid #e5e7eb;
+  font-size: 10px; color: #6b7280; padding-top: 6px; border-top: 1px solid #e5e7eb;
   z-index: 2;
   background: #fff;
 }
@@ -76,6 +83,44 @@ ul { list-style: disc; padding-left: 18px; margin: 0; }
 li { font-size: 12px; margin-bottom: 2px; line-height: 1.45; }
 table tr td[style*="border: 0"] { border: 0 !important; }
 a { color: #111827; text-decoration: none; }
+
+/* ---- Page 1 compact helpers ---- */
+.to-block { font-size: 11.5px; line-height: 1.55; margin-bottom: 10px; }
+.to-block .row { display: flex; gap: 6px; flex-wrap: wrap; }
+.to-block .row .label { font-weight: 700; }
+.legal-notes ul { margin-top: 4px; }
+.legal-notes li { font-size: 10.5px; line-height: 1.4; margin-bottom: 1px; }
+.bank-block { font-size: 10.5px; line-height: 1.55; margin-top: 10px; }
+
+/* ---- Payment schedule grid ---- */
+.schedule-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 6px;
+  font-size: 11px;
+}
+.schedule-grid .grid-head {
+  background: #f3f4f6;
+  font-weight: 700;
+  padding: 6px 10px;
+  color: #111827;
+  border-bottom: 1px solid #d1d5db;
+}
+.schedule-grid .grid-head.right { text-align: right; }
+.schedule-grid .cell {
+  padding: 5px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 11px;
+}
+.schedule-grid .cell.right { text-align: right; font-weight: 600; }
+.schedule-grid .cell.total {
+  font-weight: 700;
+  border-bottom: 0;
+  background: #f9fafb;
+}
 
 .deliverable-grid {
   display: grid;
@@ -165,8 +210,13 @@ a { color: #111827; text-decoration: none; }
 @media print {
   body { margin: 0; }
   .pdf-screen-page {
-    margin: 0 !important; border: 0 !important; box-shadow: none !important;
-    page-break-after: always; page-break-inside: avoid;
+    margin: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    page-break-after: always;
+    page-break-inside: avoid;
+    height: 297mm !important;
+    max-height: 297mm !important;
   }
   .pdf-screen-page:last-child { page-break-after: auto; }
 }
@@ -177,18 +227,18 @@ const HeaderContent = () => (
     <img
       src={PDF_LOGO_PATH}
       alt="Inquiry Bazaar"
-      style={{ height: 120, width: "auto" }}
+      style={{ height: 110, width: "auto" }}
     />
     <div
       style={{
         textAlign: "right",
-        fontSize: "11px",
-        lineHeight: 1.4,
+        fontSize: "10.5px",
+        lineHeight: 1.35,
         color: "#374151",
       }}
     >
       <div>
-        <b style={{ color: "#111827", fontSize: "12px" }}>
+        <b style={{ color: "#111827", fontSize: "11.5px" }}>
           {COMPANY_DETAILS.name}
         </b>
       </div>
@@ -315,7 +365,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
     );
   });
 
-  // Pages: 1 (proposal) + [1 deliverables] + 1 (services) + 1 (industries) + 1 (T&C)
   const totalPages = 3 + (hasDeliverables ? 1 : 0) + 1;
   let pageCounter = 1;
 
@@ -327,33 +376,41 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
         <h1>Proposal</h1>
 
-        <div style={{ fontSize: "12px", marginBottom: "14px" }}>
-          <div style={{ fontWeight: 700, marginBottom: "4px" }}>To,</div>
-          <div>
-            <b>Client Name:</b> {client.name || "—"}
-          </div>
-          <div>
-            <b>Company name:</b> {client.company || "—"}
+        {/* Compact To block */}
+        <div className="to-block">
+          <div style={{ fontWeight: 700, marginBottom: "2px" }}>To,</div>
+          <div className="row">
+            <span className="label">Client Name:</span>
+            <span>{client.name || "—"}</span>
+            <span style={{ marginLeft: "16px" }} className="label">
+              Company:
+            </span>
+            <span>{client.company || "—"}</span>
           </div>
           {clientAddress && (
-            <div>
-              <b>Address:</b> {clientAddress}
+            <div className="row">
+              <span className="label">Address:</span>
+              <span>{clientAddress}</span>
             </div>
           )}
           {client.GSTIN && (
-            <div>
-              <b>GST No.:</b> {client.GSTIN}
+            <div className="row">
+              <span className="label">GST No.:</span>
+              <span>{client.GSTIN}</span>
             </div>
           )}
-          <div style={{ marginTop: "4px" }}>
-            <b>Date:</b> {fmtDate(proposal.createdAt)}
-          </div>
-          <div>
-            <b>Proposal No.:</b> {proposal.proposalNumber || "—"}
+          <div className="row">
+            <span className="label">Date:</span>
+            <span>{fmtDate(proposal.createdAt)}</span>
+            <span style={{ marginLeft: "16px" }} className="label">
+              Proposal No.:
+            </span>
+            <span>{proposal.proposalNumber || "—"}</span>
           </div>
           {proposal.validTill && (
-            <div>
-              <b>Valid Till:</b> {fmtDate(proposal.validTill)}
+            <div className="row">
+              <span className="label">Valid Till:</span>
+              <span>{fmtDate(proposal.validTill)}</span>
             </div>
           )}
         </div>
@@ -390,39 +447,63 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </tbody>
         </table>
 
-        <div style={{ marginTop: "12px", marginLeft: "auto", width: "320px" }}>
+        <div style={{ marginTop: "10px", marginLeft: "auto", width: "320px" }}>
           <table>
             <tbody>
               <tr>
-                <td style={{ border: 0, padding: "4px" }}>Amount</td>
-                <td style={{ border: 0, padding: "4px", textAlign: "right" }}>
+                <td style={{ border: 0, padding: "3px 4px" }}>Amount</td>
+                <td
+                  style={{
+                    border: 0,
+                    padding: "3px 4px",
+                    textAlign: "right",
+                  }}
+                >
                   {fmt(subtotal)}
                 </td>
               </tr>
               {discountAmount > 0 && (
                 <tr>
-                  <td style={{ border: 0, padding: "4px" }}>
+                  <td style={{ border: 0, padding: "3px 4px" }}>
                     Discount
                     {proposal.discountType === "percentage" &&
                     proposal.discountInput > 0
                       ? ` (${proposal.discountInput}%)`
                       : ""}
                   </td>
-                  <td style={{ border: 0, padding: "4px", textAlign: "right" }}>
+                  <td
+                    style={{
+                      border: 0,
+                      padding: "3px 4px",
+                      textAlign: "right",
+                    }}
+                  >
                     - {fmt(discountAmount)}
                   </td>
                 </tr>
               )}
               <tr>
-                <td style={{ border: 0, padding: "4px" }}>GST @ 18%</td>
-                <td style={{ border: 0, padding: "4px", textAlign: "right" }}>
+                <td style={{ border: 0, padding: "3px 4px" }}>GST @ 18%</td>
+                <td
+                  style={{
+                    border: 0,
+                    padding: "3px 4px",
+                    textAlign: "right",
+                  }}
+                >
                   + {fmt(gstAmount)}
                 </td>
               </tr>
               {tdsAmount > 0 && (
                 <tr>
-                  <td style={{ border: 0, padding: "4px" }}>TDS (2%)</td>
-                  <td style={{ border: 0, padding: "4px", textAlign: "right" }}>
+                  <td style={{ border: 0, padding: "3px 4px" }}>TDS (2%)</td>
+                  <td
+                    style={{
+                      border: 0,
+                      padding: "3px 4px",
+                      textAlign: "right",
+                    }}
+                  >
                     - {fmt(tdsAmount)}
                   </td>
                 </tr>
@@ -431,7 +512,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                 <td
                   style={{
                     borderTop: "1px solid #111827",
-                    padding: "6px 4px",
+                    padding: "5px 4px",
                     fontWeight: 700,
                   }}
                 >
@@ -440,7 +521,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                 <td
                   style={{
                     borderTop: "1px solid #111827",
-                    padding: "6px 4px",
+                    padding: "5px 4px",
                     textAlign: "right",
                     fontWeight: 700,
                   }}
@@ -452,12 +533,13 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </table>
         </div>
 
-        <div style={{ marginTop: "14px", fontSize: "12px" }}>
+        <div style={{ marginTop: "10px", fontSize: "11.5px" }}>
           <b>In Words:</b> {numberToWords(grandTotal)}
         </div>
 
+        {/* Payment Schedule — grid */}
         {partialPayments.length > 0 && (
-          <div style={{ marginTop: "14px", fontSize: "11px" }}>
+          <div style={{ marginTop: "12px" }}>
             <div
               style={{
                 fontWeight: 700,
@@ -467,39 +549,25 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
             >
               Payment Schedule
             </div>
-            <table style={{ width: "100%" }}>
-              <thead>
-                <tr>
-                  <th style={{ width: "60%" }}>Milestone</th>
-                  <th style={{ textAlign: "right" }}>Amount (INR)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {partialPayments.map((p, i) => (
-                  <tr key={i}>
-                    <td>{p.paymentDuration}</td>
-                    <td style={{ textAlign: "right", fontWeight: 600 }}>
-                      {fmt(p.paymentAmount)}
-                    </td>
-                  </tr>
-                ))}
-                <tr>
-                  <td style={{ fontWeight: 700 }}>Total</td>
-                  <td
-                    style={{
-                      textAlign: "right",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {fmt(totalPaid)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div className="schedule-grid">
+              <div className="grid-head">Milestone</div>
+              <div className="grid-head right">Amount (INR)</div>
+
+              {partialPayments.map((p, i) => (
+                <React.Fragment key={i}>
+                  <div className="cell">{p.paymentDuration}</div>
+                  <div className="cell right">{fmt(p.paymentAmount)}</div>
+                </React.Fragment>
+              ))}
+
+              <div className="cell total">Total</div>
+              <div className="cell right total">{fmt(totalPaid)}</div>
+            </div>
           </div>
         )}
 
-        <div style={{ marginTop: "16px", fontSize: "11px" }}>
+        {/* Legal notes — compact */}
+        <div className="legal-notes" style={{ marginTop: "12px" }}>
           <ul>
             {LEGAL_NOTES.map((n, i) => (
               <li key={i}>{n}</li>
@@ -507,34 +575,34 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </ul>
         </div>
 
-        <div style={{ marginTop: "12px", fontSize: "11px", lineHeight: 1.6 }}>
+        {/* Bank block — compact */}
+        <div className="bank-block">
           <div>
             <b>Cheque/Draft to be made in favor:</b>{" "}
             <b>Inquiry Bazaar PRIVATE LIMITED</b>
           </div>
           <div>
-            <b>PAN No.:</b> {BANK_DETAILS.pan} &nbsp;&nbsp;
-            <b>CIN:</b> {BANK_DETAILS.cin}
+            <b>PAN No.:</b> {BANK_DETAILS.pan} &nbsp;&nbsp; <b>CIN:</b>{" "}
+            {BANK_DETAILS.cin}
           </div>
           <div>
-            <b>BANK ACCOUNT NO :</b> {BANK_DETAILS.account} &nbsp;&nbsp;
+            <b>BANK ACCOUNT NO :</b> {BANK_DETAILS.account} &nbsp;&nbsp;{" "}
             <b>BANK NAME :</b> {BANK_DETAILS.bank}
           </div>
           <div>
             <b>IFSC CODE :</b> {BANK_DETAILS.ifsc}
           </div>
-          <div style={{ marginTop: "4px" }}>
+          <div style={{ marginTop: "2px" }}>
             <b>Regd. Office:</b> 606 Best Business Park, Netaji Subhash Place,
             Delhi, 110034
           </div>
           <div>
             <b>CIN:</b> {BANK_DETAILS.cin}
           </div>
-         
         </div>
       </ScreenPage>
 
-      {/* ============ PAGE 2 — Deliverables (only if any) ============ */}
+      {/* ============ PAGE 2 — Deliverables ============ */}
       {hasDeliverables && (
         <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
           <h1 style={{ textAlign: "center" }}>
@@ -601,7 +669,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         </div>
       </ScreenPage>
 
-      {/* ============ PAGE 4 — INDUSTRIES WE SERVE ============ */}
+      {/* ============ PAGE 4 — INDUSTRIES ============ */}
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
         <h1 style={{ textAlign: "center", marginBottom: "18px" }}>
           Industries We Serve
