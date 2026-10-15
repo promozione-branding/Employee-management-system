@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
 import { Trash, X } from "lucide-react";
 import SelectorNew from "./SelectorNew";
-import ChecklistNew from "./ChecklistNew";
 import SummaryNew, { computeTotals, sumPartials } from "./SummaryNew";
 import HistoryNew from "./HistoryNew";
 import {
@@ -241,9 +241,7 @@ const ProposalTabNew = ({ customerId }) => {
       }
     } catch (err) {
       console.log(err);
-      toast.error(
-        err?.response?.data?.message || "Failed to save proposal"
-      );
+      toast.error(err?.response?.data?.message || "Failed to save proposal");
     } finally {
       setSaving(false);
     }
@@ -271,15 +269,12 @@ const ProposalTabNew = ({ customerId }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 flex flex-col gap-5">
+          {/* Selector now handles checklist inline per category */}
           <SelectorNew
             selectedItems={items}
             onChange={(v) => setField("items", v)}
-          />
-
-          <ChecklistNew
-            items={items}
             checklist={checklist}
-            onChange={(v) => setField("checklist", v)}
+            onChecklistChange={(v) => setField("checklist", v)}
           />
 
           <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">

@@ -1,11 +1,16 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import { PROPOSAL_CATALOG } from "@/config/new/proposalCatalogNew";
-import { Check, Plus, X } from "lucide-react";
+import { Check, Plus, X, ChevronDown } from "lucide-react";
 
 const fmt = (n) => `₹ ${Number(n || 0).toLocaleString("en-IN")}`;
 
-const SelectorNew = ({ selectedItems = [], onChange }) => {
+const SelectorNew = ({
+  selectedItems = [],
+  onChange,
+  checklist = [],
+  onChecklistChange,
+}) => {
   const categories = useMemo(() => Object.values(PROPOSAL_CATALOG), []);
   const [openCategory, setOpenCategory] = useState(categories[0]?.key || null);
 
@@ -44,13 +49,35 @@ const SelectorNew = ({ selectedItems = [], onChange }) => {
   };
 
   const removeItem = (index) => {
+    const it = selectedItems[index];
     onChange(selectedItems.filter((_, i) => i !== index));
+
+    // If no more items for that category, remove its checklist
+    if (it && onChecklistChange) {
+      const stillHasCategory = selectedItems.some(
+        (s, i) => i !== index && s.category === it.category
+      );
+      if (!stillHasCategory) {
+        const cat = PROPOSAL_CATALOG[it.category];
+        const catSections = cat?.checklist?.map((s) => s.title) || [];
+        onChecklistChange(
+          checklist.filter((c) => !catSections.includes(c.section))
+        );
+      }
+    }
+  };
+
+  const clearAll = () => {
+    onChange([]);
+    if (onChecklistChange) onChecklistChange([]);
   };
 
   return (
     <div className="w-full flex flex-col gap-4">
       {categories.map((cat) => {
         const isOpen = openCategory === cat.key;
+        const hasSelected = selectedItems.some((it) => it.category === cat.key);
+
         return (
           <div
             key={cat.key}
@@ -61,9 +88,16 @@ const SelectorNew = ({ selectedItems = [], onChange }) => {
               onClick={() => setOpenCategory(isOpen ? null : cat.key)}
               className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-100 text-left hover:bg-gray-50 transition"
             >
-              <div>
-                <h3 className="font-semibold text-gray-800">{cat.label}</h3>
-                <p className="text-xs text-gray-500">{cat.description}</p>
+              <div className="flex items-center gap-2">
+                <div>
+                  <h3 className="font-semibold text-gray-800">{cat.label}</h3>
+                  <p className="text-xs text-gray-500">{cat.description}</p>
+                </div>
+                {hasSelected && (
+                  <span className="h-5 w-5 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                    <Check className="h-3 w-3" />
+                  </span>
+                )}
               </div>
               <Plus
                 className={`h-4 w-4 text-gray-500 transition-transform ${
@@ -73,18 +107,38 @@ const SelectorNew = ({ selectedItems = [], onChange }) => {
             </button>
 
             {isOpen && (
-              <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {cat.packages.map((pkg) => (
-                  <PackageCard
-                    key={pkg.key}
-                    category={cat}
-                    pkg={pkg}
-                    selectedItems={selectedItems}
-                    onAdd={addItem}
-                    isSelected={isSelected}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {cat.packages.map((pkg) => (
+                    <PackageCard
+                      key={pkg.key}
+                      category={cat}
+                      pkg={pkg}
+                      selectedItems={selectedItems}
+                      onAdd={addItem}
+                      isSelected={isSelected}
+                    />
+                  ))}
+                </div>
+
+                {/* CHECKLIST INLINE — shows when at least one package picked */}
+                {hasSelected && cat.checklist?.length > 0 && (
+                  <div className="border-t border-gray-100 bg-gray-50/60 p-4">
+                    <p className="text-xs uppercase tracking-wide text-gray-500 mb-3">
+                      {cat.label} — Deliverables Checklist
+                    </p>
+
+                    {cat.checklist.map((section) => (
+                      <ChecklistSection
+                        key={section.title}
+                        section={section}
+                        checklist={checklist}
+                        onChange={onChecklistChange}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         );
@@ -98,7 +152,7 @@ const SelectorNew = ({ selectedItems = [], onChange }) => {
             </h3>
             <button
               type="button"
-              onClick={() => onChange([])}
+              onClick={clearAll}
               className="text-xs text-emerald-700 hover:underline"
             >
               Clear all
@@ -133,6 +187,118 @@ const SelectorNew = ({ selectedItems = [], onChange }) => {
               </li>
             ))}
           </ul>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ChecklistSection = ({ section, checklist, onChange }) => {
+  const [open, setOpen] = useState(false);
+
+  const sel = checklist.find((c) => c.section === section.title);
+  const count = sel ? sel.items.length : 0;
+  const total = section.items.length;
+  const all = count === total;
+
+  const isTicked = (item) => sel?.items?.includes(item) || false;
+
+  const toggleItem = (item) => {
+    const existing = checklist.find((c) => c.section === section.title);
+    let next;
+    if (!existing) {
+      next = [...checklist, { section: section.title, items: [item] }];
+    } else if (existing.items.includes(item)) {
+      const filtered = existing.items.filter((i) => i !== item);
+      next = filtered.length
+        ? checklist.map((c) =>
+            c.section === section.title ? { ...c, items: filtered } : c
+          )
+        : checklist.filter((c) => c.section !== section.title);
+    } else {
+      next = checklist.map((c) =>
+        c.section === section.title
+          ? { ...c, items: [...c.items, item] }
+          : c
+      );
+    }
+    onChange(next);
+  };
+
+  const toggleAll = () => {
+    const existing = checklist.find((c) => c.section === section.title);
+    let next;
+    if (all) {
+      next = checklist.filter((c) => c.section !== section.title);
+    } else {
+      const merged = existing
+        ? [...new Set([...existing.items, ...section.items])]
+        : section.items;
+      next = [
+        ...checklist.filter((c) => c.section !== section.title),
+        { section: section.title, items: merged },
+      ];
+    }
+    onChange(next);
+  };
+
+  return (
+    <div className="border border-gray-200 rounded-xl overflow-hidden bg-white mb-2">
+      <div className="flex items-center justify-between bg-gray-50 px-3 py-2">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="flex items-center gap-2 text-left"
+        >
+          <ChevronDown
+            className={`h-4 w-4 text-gray-500 transition-transform ${
+              open ? "rotate-180" : ""
+            }`}
+          />
+          <span className="text-sm font-medium text-gray-800">
+            {section.title}
+          </span>
+          <span className="text-xs text-gray-500">
+            ({count}/{total})
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={toggleAll}
+          className={`text-xs px-2 py-1 rounded-md border ${
+            all
+              ? "bg-gray-900 text-white border-gray-900"
+              : "bg-white text-gray-600 border-gray-200"
+          }`}
+        >
+          {all ? "Untick all" : "Tick all"}
+        </button>
+      </div>
+
+      {open && (
+        <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-1.5">
+          {section.items.map((item) => {
+            const ticked = isTicked(item);
+            return (
+              <label
+                key={item}
+                className={`flex items-start gap-2 text-sm rounded-md px-2 py-1.5 cursor-pointer ${
+                  ticked
+                    ? "bg-emerald-50 text-emerald-900"
+                    : "hover:bg-gray-50 text-gray-700"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={ticked}
+                  onChange={() => toggleItem(item)}
+                  className="mt-0.5 h-4 w-4 accent-emerald-600"
+                />
+                <span>{item}</span>
+              </label>
+            );
+          })}
         </div>
       )}
     </div>
