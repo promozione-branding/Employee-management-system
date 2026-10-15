@@ -26,22 +26,26 @@ const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("en-IN") : "—");
 const CSS_RESET = `
 * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-family: Arial, sans-serif; }
+
 @page { size: A4; margin: 0; }
+
 .pdf-header-fixed, .pdf-footer-fixed, .pdf-watermark-fixed { display: none; }
 
 .pdf-screen-page {
   width: 210mm;
-  height: 297mm;
-  max-height: 297mm;
-  padding: 2mm 12mm 32mm 12mm;
+  min-height: 297mm;
+  padding: 2mm 12mm 28mm 12mm;
   background: #fff;
   margin: 0 auto 12px auto;
   position: relative;
   border: 1px solid #e5e7eb;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.pdf-page-body {
+  position: relative;
+  z-index: 1;
 }
 
 .pdf-header-inline {
@@ -54,12 +58,19 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
 .pdf-header-inline .info { text-align: right; font-size: 10.5px; line-height: 1.35; color: #374151; }
 .pdf-header-inline .info b { color: #111827; font-size: 11.5px; }
 
-.pdf-body { position: relative; z-index: 1; flex: 1; }
-
+/* FOOTER STICKS TO BOTTOM OF EACH LOGICAL PAGE */
 .pdf-footer-inline {
-  position: absolute; bottom: 5mm; left: 12mm; right: 12mm;
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 10px; color: #6b7280; padding-top: 6px; border-top: 1px solid #e5e7eb;
+  position: absolute;
+  bottom: 5mm;
+  left: 12mm;
+  right: 12mm;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  color: #6b7280;
+  padding-top: 6px;
+  border-top: 1px solid #e5e7eb;
   z-index: 2;
   background: #fff;
 }
@@ -123,7 +134,7 @@ a { color: #111827; text-decoration: none; }
 }
 
 /* ============================================
-   DELIVERABLES — new layout (rows, not boxes)
+   DELIVERABLES — row layout
    ============================================ */
 .section-title-bar {
   background: linear-gradient(90deg, #1e3a5f 0%, #2563eb 100%);
@@ -241,18 +252,98 @@ a { color: #111827; text-decoration: none; }
   break-inside: avoid;
 }
 
+/* ============================================
+   PRINT MODE
+   ============================================ */
 @media print {
   body { margin: 0; }
+
+  /* Hide inline header/footer; fixed ones take over */
+  .pdf-header-inline { display: none !important; }
+  .pdf-footer-inline { display: none !important; }
+
+  /* Fixed header on every printed sheet */
+  .pdf-header-fixed {
+    display: flex !important;
+    position: fixed;
+    top: 8mm;
+    left: 12mm;
+    right: 12mm;
+    height: auto;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 6px;
+    z-index: 10;
+  }
+  .pdf-header-fixed img { height: 100px; width: auto; }
+  .pdf-header-fixed .info {
+    text-align: right;
+    font-size: 10.5px;
+    line-height: 1.35;
+    color: #374151;
+  }
+  .pdf-header-fixed .info b { color: #111827; font-size: 11.5px; }
+
+  /* Fixed footer on every printed sheet */
+  .pdf-footer-fixed {
+    display: flex !important;
+    position: fixed;
+    bottom: 6mm;
+    left: 12mm;
+    right: 12mm;
+    height: auto;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 6px;
+    font-size: 10px;
+    color: #6b7280;
+    z-index: 10;
+  }
+  .pdf-footer-fixed .left,
+  .pdf-footer-fixed .right { flex: 1; }
+  .pdf-footer-fixed .right { text-align: right; }
+  .pdf-footer-fixed .center { flex: 0 0 auto; text-align: center; }
+
+  /* Fixed watermark */
+  .pdf-watermark-fixed {
+    display: flex !important;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .pdf-watermark-fixed img { width: 480px; height: auto; opacity: 0.08; }
+
+  /* Pages flow naturally */
   .pdf-screen-page {
+    width: 210mm !important;
+    min-height: 297mm !important;
     margin: 0 !important;
     border: 0 !important;
     box-shadow: none !important;
+    padding: 30mm 12mm 22mm 12mm !important;
     page-break-after: always;
-    page-break-inside: avoid;
-    height: 297mm !important;
-    max-height: 297mm !important;
+    page-break-inside: auto;
+    overflow: visible !important;
   }
   .pdf-screen-page:last-child { page-break-after: auto; }
+
+  /* No inline watermark on print (fixed one used instead) */
+  .pdf-watermark-inline { display: none !important; }
+
+  /* Prevent awkward splits */
+  .deliverable-row,
+  .industry-card,
+  .svc-item,
+  .schedule-grid,
+  .legal-notes li,
+  .bank-block { break-inside: avoid; }
 }
 `;
 
@@ -345,7 +436,7 @@ const ScreenPage = ({ children, pageNumber, totalPages }) => (
     <div className="pdf-watermark-inline">
       <img src={PDF_LOGO_PATH} alt="" />
     </div>
-    <div className="pdf-body">
+    <div className="pdf-page-body">
       <div className="pdf-header-inline">
         <HeaderContent />
       </div>
@@ -405,6 +496,17 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
   return (
     <div ref={ref} id="proposal-print-root">
       <style>{CSS_RESET}</style>
+
+      {/* Fixed header + footer + watermark for print */}
+      <div className="pdf-header-fixed">
+        <HeaderContent />
+      </div>
+      <div className="pdf-footer-fixed">
+        <FooterContent />
+      </div>
+      <div className="pdf-watermark-fixed">
+        <img src={PDF_LOGO_PATH} alt="" />
+      </div>
 
       {/* ============ PAGE 1 — Proposal ============ */}
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
@@ -632,7 +734,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         </div>
       </ScreenPage>
 
-      {/* ============ PAGE 2 — Deliverables (row layout) ============ */}
+      {/* ============ PAGE 2 — Deliverables ============ */}
       {hasDeliverables && (
         <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
           <h1 style={{ textAlign: "center", marginBottom: "8px" }}>
