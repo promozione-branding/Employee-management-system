@@ -122,88 +122,122 @@ a { color: #111827; text-decoration: none; }
   background: #f9fafb;
 }
 
-.deliverable-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
-}
-.deliverable-box {
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 8px 10px;
-  background: transparent;
-  break-inside: avoid;
-}
-.deliverable-box .box-title {
-  font-weight: 700;
-  font-size: 12px;
-  color: #111827;
-  margin-bottom: 5px;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 4px;
-}
-.deliverable-box ul {
-  margin: 0;
-  padding-left: 14px;
-  list-style: disc;
-}
-.deliverable-box li {
-  font-size: 11px;
-  margin-bottom: 2px;
-  line-height: 1.4;
-}
-
-.services-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 10px;
-}
-.services-box {
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 10px 12px;
-  background: transparent;
-  break-inside: avoid;
-}
-.services-box .box-title {
+/* ============================================
+   DELIVERABLES — new layout (rows, not boxes)
+   ============================================ */
+.section-title-bar {
+  background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%);
+  color: #ffffff;
   font-weight: 700;
   font-size: 13px;
-  color: #1e3a8a;
-  margin-bottom: 6px;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 5px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  padding: 7px 12px;
+  border-radius: 5px;
+  margin: 14px 0 10px 0;
 }
-.services-box ul {
-  margin: 0;
-  padding-left: 14px;
-  list-style: disc;
+.section-title-bar:first-child { margin-top: 4px; }
+
+.deliverable-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px dashed #e5e7eb;
+  break-inside: avoid;
 }
-.services-box li {
-  font-size: 10.5px;
-  margin-bottom: 2px;
-  line-height: 1.35;
+.deliverable-row:last-child { border-bottom: 0; }
+.deliverable-row .row-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #1e3a8a;
+  padding-top: 1px;
+}
+.deliverable-row .row-items {
+  font-size: 11px;
   color: #374151;
+  line-height: 1.55;
+}
+.deliverable-row .row-items ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+.deliverable-row .row-items li {
+  position: relative;
+  padding-left: 12px;
+  font-size: 11px;
+  margin: 0;
+  line-height: 1.5;
+}
+.deliverable-row .row-items li::before {
+  content: "▪";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #2563eb;
+  font-size: 10px;
 }
 
-.industries-grid {
+/* ============================================
+   SERVICES — new layout
+   ============================================ */
+.services-section-title {
+  background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: 5px;
+  margin: 14px 0 10px 0;
+}
+
+.services-items-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 10px;
+  gap: 4px 14px;
 }
-.industry-pill {
+.services-items-grid .svc-item {
+  font-size: 10.5px;
+  color: #374151;
+  line-height: 1.55;
+  position: relative;
+  padding-left: 12px;
+  break-inside: avoid;
+}
+.services-items-grid .svc-item::before {
+  content: "▪";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #2563eb;
+  font-size: 10px;
+}
+
+/* ============================================
+   INDUSTRIES — new layout
+   ============================================ */
+.industries-new-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+.industry-card {
   border: 1px solid #d1d5db;
+  border-left: 4px solid #2563eb;
   border-radius: 6px;
-  padding: 12px 14px;
-  text-align: center;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
   font-size: 12px;
   font-weight: 600;
   color: #1e3a8a;
-  background: transparent;
+  text-align: center;
   break-inside: avoid;
 }
 
@@ -376,7 +410,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
         <h1>Proposal</h1>
 
-        {/* Compact To block */}
         <div className="to-block">
           <div style={{ fontWeight: 700, marginBottom: "2px" }}>To,</div>
           <div className="row">
@@ -537,7 +570,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           <b>In Words:</b> {numberToWords(grandTotal)}
         </div>
 
-        {/* Payment Schedule — grid */}
         {partialPayments.length > 0 && (
           <div style={{ marginTop: "12px" }}>
             <div
@@ -566,7 +598,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </div>
         )}
 
-        {/* Legal notes — compact */}
         <div className="legal-notes" style={{ marginTop: "12px" }}>
           <ul>
             {LEGAL_NOTES.map((n, i) => (
@@ -575,7 +606,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </ul>
         </div>
 
-        {/* Bank block — compact */}
         <div className="bank-block">
           <div>
             <b>Cheque/Draft to be made in favor:</b>{" "}
@@ -602,10 +632,10 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         </div>
       </ScreenPage>
 
-      {/* ============ PAGE 2 — Deliverables ============ */}
+      {/* ============ PAGE 2 — Deliverables (row layout) ============ */}
       {hasDeliverables && (
         <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
-          <h1 style={{ textAlign: "center" }}>
+          <h1 style={{ textAlign: "center", marginBottom: "8px" }}>
             Service Offerings and Deliverables
           </h1>
 
@@ -619,30 +649,21 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
             if (!tickedSections.length) return null;
 
             return (
-              <div key={catKey} style={{ marginBottom: "14px" }}>
-                <h3
-                  style={{
-                    background: "#f3f4f6",
-                    padding: "6px 8px",
-                    borderLeft: "3px solid #1e3a8a",
-                    margin: "12px 0 8px 0",
-                  }}
-                >
-                  {sectionTitle}
-                </h3>
+              <div key={catKey}>
+                <div className="section-title-bar">{sectionTitle}</div>
 
-                <div className="deliverable-grid">
-                  {tickedSections.map((sec) => (
-                    <div key={sec.section} className="deliverable-box">
-                      <div className="box-title">{sec.section}</div>
+                {tickedSections.map((sec) => (
+                  <div key={sec.section} className="deliverable-row">
+                    <div className="row-title">{sec.section}</div>
+                    <div className="row-items">
                       <ul>
                         {sec.items.map((it) => (
                           <li key={it}>{it}</li>
                         ))}
                       </ul>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             );
           })}
@@ -651,33 +672,33 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
 
       {/* ============ PAGE 3 — OUR SERVICES ============ */}
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
-        <h1 style={{ textAlign: "center", marginBottom: "14px" }}>
+        <h1 style={{ textAlign: "center", marginBottom: "8px" }}>
           Our Services
         </h1>
 
-        <div className="services-grid">
-          {SERVICES_CATALOG.map((section) => (
-            <div key={section.title} className="services-box">
-              <div className="box-title">{section.title}</div>
-              <ul>
-                {section.items.map((it) => (
-                  <li key={it}>{it}</li>
-                ))}
-              </ul>
+        {SERVICES_CATALOG.map((section) => (
+          <div key={section.title}>
+            <div className="services-section-title">{section.title}</div>
+            <div className="services-items-grid">
+              {section.items.map((it) => (
+                <div key={it} className="svc-item">
+                  {it}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </ScreenPage>
 
       {/* ============ PAGE 4 — INDUSTRIES ============ */}
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
-        <h1 style={{ textAlign: "center", marginBottom: "18px" }}>
+        <h1 style={{ textAlign: "center", marginBottom: "14px" }}>
           Industries We Serve
         </h1>
 
-        <div className="industries-grid">
+        <div className="industries-new-grid">
           {INDUSTRIES_SERVED.map((ind) => (
-            <div key={ind} className="industry-pill">
+            <div key={ind} className="industry-card">
               {ind}
             </div>
           ))}
