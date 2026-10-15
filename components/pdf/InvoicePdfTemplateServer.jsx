@@ -72,13 +72,24 @@ const InvoicePdfTemplateServer = ({ data }) => {
 
         {/* logo and title */}
         <View style={styles.header}>
-          <Image src={"https://res.cloudinary.com/ddfglmkbd/image/upload/v1765862267/Logo-Company_2_xnnz7x.png"} style={styles.logo} />
-          <Text style={styles.title}>
+  <Image src="/pdf/logo.png" style={styles.logo} />
+
+  <Text style={styles.title}>
     {invoiceType === "tds"
       ? "SUPPLEMENTARY TAX INVOICE(TDS)"
       : "TAX INVOICE"}
   </Text>
-        </View>
+
+  <View style={styles.topCompanyDetails}>
+    <Text style={styles.topCompanyName}>
+      Inquiry Bazaar Private Limited
+    </Text>
+    <Text>606, Best Business Park, NSP, New Delhi</Text>
+    <Text>Call us - 011 4260 3232</Text>
+    <Text>Website: www.inquirybazaar.com</Text>
+    <Text>Email - care@inquirybazaar.com</Text>
+  </View>
+</View>
 
         {/* watermark */}
         <Image src={"/blog/logo2.png"} style={styles.watermark} />

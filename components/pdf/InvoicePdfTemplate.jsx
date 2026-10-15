@@ -31,17 +31,17 @@ const Invoice = ({ data }) => {
   }
 
   const {
-  invoiceNo,
-  invoiceDate,
-  GSTIN,
-  clientAddress,
-  clientCompany,
-  clientName,
-  services = [],
-  taxType,
-  totalAmount,
-  invoiceType = "normal",
-} = data;
+    invoiceNo,
+    invoiceDate,
+    GSTIN,
+    clientAddress,
+    clientCompany,
+    clientName,
+    services = [],
+    taxType,
+    totalAmount,
+    invoiceType = "normal",
+  } = data;
 
   // -----------------------------
   // DATE FORMAT
@@ -113,13 +113,29 @@ const Invoice = ({ data }) => {
             HEADER
         ========================== */}
         <View style={styles.header}>
-          <Image src="/pdf/logo.png" style={styles.logo} />
+          <View style={styles.headerTopRow}>
+            <View style={styles.headerLogoContainer}>
+              <Image src="/pdf/logo.png" style={styles.logo} />
+            </View>
 
-         <Text style={styles.title}>
-    {invoiceType === "tds"
-      ? "SUPPLEMENTARY TAX INVOICE(TDS)"
-      : "TAX INVOICE"}
-  </Text>
+            <View style={styles.topCompanyDetails}>
+              <Text style={styles.topCompanyName}>
+                Inquiry Bazaar Private Limited
+              </Text>
+              <Text>606, Best Business Park, NSP, New Delhi</Text>
+              <Text>Call us - 011 4260 3232</Text>
+              <Text>Website: www.inquirybazaar.com</Text>
+              <Text>Email - care@inquirybazaar.com</Text>
+            </View>
+          </View>
+
+          <View style={styles.headerTitleContainer}>
+            <Text style={styles.title}>
+              {invoiceType === "tds"
+                ? "SUPPLEMENTARY TAX INVOICE(TDS)"
+                : "TAX INVOICE"}
+            </Text>
+          </View>
         </View>
 
         {/* =========================
@@ -799,27 +815,56 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
+    width: "100%",
     marginTop: 10,
     marginBottom: 20,
   },
 
+  headerTopRow: {
+    width: "100%",
+    minHeight: 90,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+
+  headerLogoContainer: {
+    width: "25%",
+    alignItems: "flex-start",
+  },
+
   logo: {
-    width: 100,
-    height: 100,
-    objectFit: "cover",
-    borderRadius: 20,
+    width: 90,
+    height: 90,
+    objectFit: "contain",
+  },
+
+  topCompanyDetails: {
+    width: "70%",
+    fontSize: 7.5,
+    lineHeight: 1.5,
+    textAlign: "right",
+    alignItems: "flex-end",
+  },
+
+  topCompanyName: {
+    fontSize: 9,
+    fontWeight: "bold",
+    marginBottom: 2,
+  },
+
+  headerTitleContainer: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 4,
   },
 
   title: {
-    top: 20,
-    left: "50%",
-    transform: "translateX(-150%)",
     fontSize: 12,
     fontWeight: "bold",
     color: "red",
+    textAlign: "center",
   },
 
   invoiceInfo: {
