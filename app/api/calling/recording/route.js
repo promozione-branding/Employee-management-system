@@ -82,6 +82,8 @@ export async function GET(req) {
     //   Query params: token, file
     //   Response: { status:"success", code:200, url:"<S3 URL>" }
     // ------------------------------------------------------------
+    // this is the url in which we pass the Authentication from the url(https://in.app.myoperator.com/integrations/developer-api/calling)
+    // and also pass the path of the file(recording) which we get from myoperator
     const url = new URL("https://developers.myoperator.co/recordings/link");
     url.searchParams.set("token", token);
     url.searchParams.set("file", recordingFile);
