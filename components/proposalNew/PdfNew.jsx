@@ -58,7 +58,6 @@ html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-famil
 .pdf-header-inline .info { text-align: right; font-size: 10.5px; line-height: 1.35; color: #374151; }
 .pdf-header-inline .info b { color: #111827; font-size: 11.5px; }
 
-/* FOOTER STICKS TO BOTTOM OF EACH LOGICAL PAGE */
 .pdf-footer-inline {
   position: absolute;
   bottom: 5mm;
@@ -95,7 +94,6 @@ li { font-size: 12px; margin-bottom: 2px; line-height: 1.45; }
 table tr td[style*="border: 0"] { border: 0 !important; }
 a { color: #111827; text-decoration: none; }
 
-/* ---- Page 1 compact helpers ---- */
 .to-block { font-size: 11.5px; line-height: 1.55; margin-bottom: 10px; }
 .to-block .row { display: flex; gap: 6px; flex-wrap: wrap; }
 .to-block .row .label { font-weight: 700; }
@@ -103,7 +101,6 @@ a { color: #111827; text-decoration: none; }
 .legal-notes li { font-size: 10.5px; line-height: 1.4; margin-bottom: 1px; }
 .bank-block { font-size: 10.5px; line-height: 1.55; margin-top: 10px; }
 
-/* ---- Payment schedule grid ---- */
 .schedule-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -134,8 +131,38 @@ a { color: #111827; text-decoration: none; }
 }
 
 /* ============================================
-   DELIVERABLES — row layout
+   DELIVERY REPORT — for deliverables page
    ============================================ */
+.delivery-title-bar {
+  background: linear-gradient(90deg, #1e3a5f 0%, #2563eb 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: 5px;
+  margin: 18px 0 10px 0;
+}
+.delivery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 11px;
+}
+.delivery-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  padding: 6px 12px;
+  background: #f9fafb;
+}
+.delivery-item .label { color: #374151; font-weight: 600; }
+.delivery-item .value { font-weight: 700; color: #1e3a5f; }
+
 .section-title-bar {
   background: linear-gradient(90deg, #1e3a5f 0%, #2563eb 100%);
   color: #ffffff;
@@ -193,9 +220,6 @@ a { color: #111827; text-decoration: none; }
   font-size: 10px;
 }
 
-/* ============================================
-   SERVICES — new layout
-   ============================================ */
 .services-section-title {
   background: linear-gradient(90deg, #1e3a5f 0%, #2563eb 100%);
   color: #ffffff;
@@ -230,9 +254,6 @@ a { color: #111827; text-decoration: none; }
   font-size: 10px;
 }
 
-/* ============================================
-   INDUSTRIES — new layout
-   ============================================ */
 .industries-new-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -252,17 +273,12 @@ a { color: #111827; text-decoration: none; }
   break-inside: avoid;
 }
 
-/* ============================================
-   PRINT MODE
-   ============================================ */
 @media print {
   body { margin: 0; }
 
-  /* Hide inline header/footer; fixed ones take over */
   .pdf-header-inline { display: none !important; }
   .pdf-footer-inline { display: none !important; }
 
-  /* Fixed header on every printed sheet */
   .pdf-header-fixed {
     display: flex !important;
     position: fixed;
@@ -286,7 +302,6 @@ a { color: #111827; text-decoration: none; }
   }
   .pdf-header-fixed .info b { color: #111827; font-size: 11.5px; }
 
-  /* Fixed footer on every printed sheet */
   .pdf-footer-fixed {
     display: flex !important;
     position: fixed;
@@ -308,7 +323,6 @@ a { color: #111827; text-decoration: none; }
   .pdf-footer-fixed .right { text-align: right; }
   .pdf-footer-fixed .center { flex: 0 0 auto; text-align: center; }
 
-  /* Fixed watermark */
   .pdf-watermark-fixed {
     display: flex !important;
     position: fixed;
@@ -320,7 +334,6 @@ a { color: #111827; text-decoration: none; }
   }
   .pdf-watermark-fixed img { width: 480px; height: auto; opacity: 0.08; }
 
-  /* Pages flow naturally */
   .pdf-screen-page {
     width: 210mm !important;
     min-height: 297mm !important;
@@ -334,14 +347,14 @@ a { color: #111827; text-decoration: none; }
   }
   .pdf-screen-page:last-child { page-break-after: auto; }
 
-  /* No inline watermark on print (fixed one used instead) */
   .pdf-watermark-inline { display: none !important; }
 
-  /* Prevent awkward splits */
   .deliverable-row,
   .industry-card,
   .svc-item,
   .schedule-grid,
+  .delivery-grid,
+  .delivery-item,
   .legal-notes li,
   .bank-block { break-inside: avoid; }
 }
@@ -455,6 +468,8 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
   const items = proposal.items || [];
   const checklist = proposal.checklist || [];
   const partialPayments = proposal.partialPayments || [];
+  const deliveredMetrics = proposal.deliveredMetrics || [];
+  const deliveryPeriod = proposal.deliveryPeriod || "weekly";
 
   const { subtotal, discountAmount, gstAmount, tdsAmount, grandTotal } =
     computeTotals({
@@ -490,7 +505,11 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
     );
   });
 
-  const totalPages = 3 + (hasDeliverables ? 1 : 0) + 1;
+  const hasDeliveryReport = deliveredMetrics.length > 0;
+
+  const showDeliverablesPage = hasDeliverables || hasDeliveryReport;
+
+  const totalPages = 3 + (showDeliverablesPage ? 1 : 0) + 1;
   let pageCounter = 1;
 
   return (
@@ -734,41 +753,59 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         </div>
       </ScreenPage>
 
-      {/* ============ PAGE 2 — Deliverables ============ */}
-      {hasDeliverables && (
+      {/* ============ PAGE 2 — Deliverables + Delivery Report ============ */}
+      {showDeliverablesPage && (
         <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
           <h1 style={{ textAlign: "center", marginBottom: "8px" }}>
             Service Offerings and Deliverables
           </h1>
 
-          {usedCategories.map((catKey) => {
-            const cat = PROPOSAL_CATALOG[catKey];
-            const sectionTitle = DELIVERABLE_SECTION_MAP[catKey] || cat.label;
-            const tickedSections = checklist.filter((c) =>
-              cat.checklist?.some((s) => s.title === c.section)
-            );
+          {hasDeliverables &&
+            usedCategories.map((catKey) => {
+              const cat = PROPOSAL_CATALOG[catKey];
+              const sectionTitle = DELIVERABLE_SECTION_MAP[catKey] || cat.label;
+              const tickedSections = checklist.filter((c) =>
+                cat.checklist?.some((s) => s.title === c.section)
+              );
 
-            if (!tickedSections.length) return null;
+              if (!tickedSections.length) return null;
 
-            return (
-              <div key={catKey}>
-                <div className="section-title-bar">{sectionTitle}</div>
+              return (
+                <div key={catKey}>
+                  <div className="section-title-bar">{sectionTitle}</div>
 
-                {tickedSections.map((sec) => (
-                  <div key={sec.section} className="deliverable-row">
-                    <div className="row-title">{sec.section}</div>
-                    <div className="row-items">
-                      <ul>
-                        {sec.items.map((it) => (
-                          <li key={it}>{it}</li>
-                        ))}
-                      </ul>
+                  {tickedSections.map((sec) => (
+                    <div key={sec.section} className="deliverable-row">
+                      <div className="row-title">{sec.section}</div>
+                      <div className="row-items">
+                        <ul>
+                          {sec.items.map((it) => (
+                            <li key={it}>{it}</li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              );
+            })}
+
+          {/* ============ DELIVERY REPORT — at the bottom ============ */}
+          {hasDeliveryReport && (
+            <div>
+              <div className="delivery-title-bar">
+                Delivery Report ({deliveryPeriod})
+              </div>
+              <div className="delivery-grid">
+                {deliveredMetrics.map((m, i) => (
+                  <div key={i} className="delivery-item">
+                    <span className="label">{m.label}</span>
+                    <span className="value">{m.count || 0}</span>
                   </div>
                 ))}
               </div>
-            );
-          })}
+            </div>
+          )}
         </ScreenPage>
       )}
 
