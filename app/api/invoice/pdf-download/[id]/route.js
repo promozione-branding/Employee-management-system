@@ -1,20 +1,15 @@
-// app/api/invoice/pdf-download/[id]/route.js
 
 import { connectDB } from "@/lib/db";
 import Invoice from "@/models/admin/invoice/Invoice";
-import InvoiceService from "@/models/admin/invoice/InvoiceService"; // Make sure to import this for population
 
 export async function GET(req, context) {
   try {
     await connectDB();
+
     const { id } = await context.params;
 
-    // Find the invoice by its ID and populate the services
-    const invoiceFromDb = await Invoice.findById(id).populate({
-      path: "services",
-      model: "InvoiceService",
-      select: "serviceName HSN price",
-    });
+    // Find invoice by ID
+    const invoiceFromDb = await Invoice.findById(id);
 
     if (!invoiceFromDb) {
       return Response.json(
@@ -28,13 +23,25 @@ export async function GET(req, context) {
       );
     }
 
+    // Convert Mongoose document to a plain object
+    const invoiceData = invoiceFromDb.toObject();
+
+    // Backward compatibility for existing invoices
+    // without an invoiceType field
+    invoiceData.invoiceType =
+      invoiceData.invoiceType || "normal";
+
     return Response.json({
       success: true,
       message: "PDF data fetched successfully",
-      data: invoiceFromDb,
+      data: invoiceData,
     });
   } catch (error) {
-    console.log("Error while fetching invoice for PDF", error);
+    console.error(
+      "Error while fetching invoice for PDF",
+      error
+    );
+
     return Response.json(
       {
         success: false,

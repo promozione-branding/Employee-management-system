@@ -1,6 +1,6 @@
-// app/sales-dashboard/clients/invoice/[id]/CreateInvoice.jsx
 
 "use client";
+
 import CommonForm from "@/components/layout/Form";
 import {
   createInviceFormControls,
@@ -12,6 +12,7 @@ import {
   createInvoiceService,
   createInvoiceServiceService,
   getAllinvoiceServices,
+  getNextInvoiceNumber,
 } from "@/service/invoice";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -27,54 +28,71 @@ const CreateInvoice = ({ id }) => {
   const router = useRouter();
 
   // ---------------- STATE ----------------
-  const [invoiceFormData, setInvoiceFormData] = useState({
-    taxType: "",
-    invoiceDate: "",
-  });
-
   const [editInvoiceServiceId, setEditInvoiceServiceId] = useState(null);
-
   const [clientDetails, setClientDetails] = useState({});
   const [serviceFormData, setServiceFormData] = useState(
-    initialInvoiceServiceFormData,
+    initialInvoiceServiceFormData
   );
   const [editData, setEditData] = useState(initialInvoiceServiceFormData);
-
   const [invoiceServiceItem, setInvoiceServiceItem] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
 
-  // 🆕 Loading states
+  // Loading states
   const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
   const [isCreatingService, setIsCreatingService] = useState(false);
   const [isUpdatingService, setIsUpdatingService] = useState(false);
 
-  const { Address, GSTIN, city, company, country, name, phone, tanNo, email } =
-    clientDetails;
+  const {
+    Address,
+    GSTIN,
+    city,
+    company,
+    country,
+    name,
+    phone,
+    tanNo,
+    email,
+  } = clientDetails;
+
+  // Invoice Type added; defaults to the existing Tax Invoice.
+  const [invoiceFormData, setInvoiceFormData] = useState({
+    invoiceType: "normal",
+    taxType: "",
+    invoiceDate: "",
+    invoiceNo: "",
+  });
+
+  // Automatically select GST tax type based on GSTIN state code.
+  useEffect(() => {
+    if (!GSTIN) return;
+
+    const stateCode = String(GSTIN).substring(0, 2);
+
+    setInvoiceFormData((prev) => ({
+      ...prev,
+      taxType: stateCode === "07" ? "SGST/CGST" : "IGST",
+    }));
+  }, [GSTIN]);
 
   // ---------------- CALCULATION ----------------
   function calculationOfTotalAmount() {
-    const totalServicePrice = selectedServices.reduce(
-      (total, service) => total + Number(service.price || 0),
-      0,
+    const taxableAmount = selectedServices.reduce(
+      (total, service) => total + Number(service?.price || 0),
+      0
     );
 
-    // let tdsAmount = 0;
+    if (invoiceFormData.taxType === "IGST") {
+      return taxableAmount + taxableAmount * 0.18;
+    }
 
-    // if (tanNo?.length !== 0) {
-    //   tdsAmount = totalServicePrice * 0.02;
-    // }
+    if (invoiceFormData.taxType === "SGST/CGST") {
+      return taxableAmount + taxableAmount * 0.09 + taxableAmount * 0.09;
+    }
 
-    const taxAmount = totalServicePrice * 0.18;
-
-    // const totalAmount = tanNo?.length
-    //   ? taxAmount + totalServicePrice - tdsAmount
-    //   : taxAmount + totalServicePrice;
-
-    const totalAmount = taxAmount + totalServicePrice;
-
-    return totalAmount;
+    return taxableAmount;
   }
 
+  // ---------------- INVOICE PAYLOAD ----------------
   const invoiceFormDate = {
     clientId: id,
     clientName: name,
@@ -83,8 +101,10 @@ const CreateInvoice = ({ id }) => {
     GSTIN,
     tanNo,
     services: selectedServices.map(({ _id }) => _id),
+    invoiceType: invoiceFormData.invoiceType || "normal",
     taxType: invoiceFormData.taxType,
     invoiceDate: invoiceFormData.invoiceDate,
+    invoiceNo: invoiceFormData.invoiceNo,
     totalAmount: calculationOfTotalAmount(),
   };
 
@@ -92,6 +112,7 @@ const CreateInvoice = ({ id }) => {
   const handleSelectService = (service) => {
     setSelectedServices((prevSelected) => {
       const isSelected = prevSelected.some((s) => s._id === service._id);
+
       return isSelected
         ? prevSelected.filter((s) => s._id !== service._id)
         : [...prevSelected, service];
@@ -100,18 +121,23 @@ const CreateInvoice = ({ id }) => {
 
   // ---------------- API CALLS ----------------
   async function allInvoiceService() {
-    const { data } = await getAllinvoiceServices();
-    setInvoiceServiceItem(data);
+    try {
+      const { data } = await getAllinvoiceServices();
+      setInvoiceServiceItem(data || []);
+    } catch (error) {
+      toast.error(error.message || "Failed to fetch services");
+    }
   }
 
   async function customerDetails() {
     try {
       const response = await getCustomerServices(id);
+
       if (response.success) {
         setClientDetails(response.data);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || "Failed to fetch customer details");
     }
   }
 
@@ -119,100 +145,163 @@ const CreateInvoice = ({ id }) => {
   async function handleInvoiceFormSubmit(e) {
     e.preventDefault();
 
-    if (selectedServices.length === 0) {
+    if (!selectedServices.length) {
       toast.error("Please select at least one service.");
       return;
     }
 
-    if (!invoiceFormData.invoiceDate || !invoiceFormData.taxType) {
-      toast.error("Please fill in Invoice Date and Tax Type.");
+    if (
+      !invoiceFormData.invoiceDate ||
+      !invoiceFormData.taxType ||
+      !invoiceFormData.invoiceType
+    ) {
+      toast.error("Please fill in Invoice Type, Invoice Date and Tax Type.");
       return;
     }
 
-    setIsCreatingInvoice(true); // 🆕 Start loading
+    if (!invoiceFormData.invoiceNo) {
+      toast.error("Please enter an invoice number.");
+      return;
+    }
 
-    const res = await createInvoiceService(invoiceFormDate);
+    if (String(invoiceFormData.invoiceNo).length > 13) {
+      toast.error("Invoice number cannot be more than 13 characters.");
+      return;
+    }
 
-    setIsCreatingInvoice(false); // 🆕 End loading
+    setIsCreatingInvoice(true);
 
-    if (res.success) {
-      toast.success("Invoice created successfully!");
-      setSelectedServices([]);
-      setInvoiceFormData({ taxType: "", invoiceDate: "" });
-      router.push(`/dashboard/customer/${id}`);
+    try {
+      const res = await createInvoiceService(invoiceFormDate);
+
+      if (res.success) {
+        toast.success("Invoice created successfully!");
+
+        setSelectedServices([]);
+
+        setInvoiceFormData({
+          invoiceType: "normal",
+          taxType: "",
+          invoiceDate: "",
+          invoiceNo: "",
+        });
+
+        router.push(`/dashboard/customer/${id}`);
+      } else {
+        toast.error(res.message || "Failed to create invoice");
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to create invoice");
+    } finally {
+      setIsCreatingInvoice(false);
     }
   }
 
   // ---------------- CREATE SERVICE ----------------
   async function handleServiceFormSubmit(e) {
     e.preventDefault();
-    setIsCreatingService(true); // 🆕
+    setIsCreatingService(true);
 
     try {
       const res = await createInvoiceServiceService(serviceFormData);
-      setIsCreatingService(false); // 🆕
 
       if (res.success) {
         toast.success("Service added successfully!");
         setServiceFormData(initialInvoiceServiceFormData);
-        allInvoiceService();
+        await allInvoiceService();
       } else {
         toast.error(res.message || "Failed to create service");
       }
     } catch (error) {
-      setIsCreatingService(false); // 🆕
       toast.error(error.message || "Unexpected error");
+    } finally {
+      setIsCreatingService(false);
     }
   }
 
   // ---------------- EDIT SERVICE ----------------
-
-  // fetching particular invoice here
   async function handleEditInvoiceService(serviceId) {
     setEditInvoiceServiceId(serviceId);
 
-    const res = await fetchInvoiceServiceById(serviceId);
-    if (res.success) {
-      const { HSN, price, serviceName } = res.data;
-      setEditData({ HSN, price, serviceName });
-    } else {
-      toast.error("Failed to fetch service details.");
+    try {
+      const res = await fetchInvoiceServiceById(serviceId);
+
+      if (res.success) {
+        const { HSN, price, serviceName } = res.data;
+        setEditData({ HSN, price, serviceName });
+      } else {
+        toast.error("Failed to fetch service details.");
+        setEditInvoiceServiceId(null);
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to fetch service details.");
+      setEditInvoiceServiceId(null);
     }
   }
 
   async function handleSubmitInvoiceService(e) {
     e.preventDefault();
-    setIsUpdatingService(true); // 🆕
+    setIsUpdatingService(true);
 
     try {
-      const res = await editInvoiceServiceById(editInvoiceServiceId, editData);
-      setIsUpdatingService(false); // 🆕
+      const res = await editInvoiceServiceById(
+        editInvoiceServiceId,
+        editData
+      );
 
       if (res.success) {
         toast.success("Service updated successfully!");
-        allInvoiceService();
+        await allInvoiceService();
         setEditInvoiceServiceId(null);
         setEditData(initialInvoiceServiceFormData);
       } else {
         toast.error(res.message || "Failed to update service");
       }
     } catch (error) {
-      setIsUpdatingService(false); // 🆕
       toast.error(error.message || "Error updating service");
+    } finally {
+      setIsUpdatingService(false);
     }
   }
 
   // ---------------- DELETE SERVICE ----------------
-  async function handleDeleteInvoiceById(id) {
+  async function handleDeleteInvoiceById(serviceId) {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this service?",
+      "Are you sure you want to delete this service?"
     );
-    if (confirmed) {
-      const res = await deleteInvoiceServiceById(id);
+
+    if (!confirmed) return;
+
+    try {
+      const res = await deleteInvoiceServiceById(serviceId);
+
       if (res.success) {
         toast.success("Service deleted.");
-        allInvoiceService();
+        await allInvoiceService();
+        setSelectedServices((prev) =>
+          prev.filter((service) => service._id !== serviceId)
+        );
+      } else {
+        toast.error(res.message || "Failed to delete service");
       }
+    } catch (error) {
+      toast.error(error.message || "Failed to delete service");
+    }
+  }
+
+  // ---------------- INVOICE NUMBER ----------------
+  async function getInvoiceNumber() {
+    try {
+      const res = await getNextInvoiceNumber();
+
+      if (res.success) {
+        setInvoiceFormData((prev) => ({
+          ...prev,
+          invoiceNo: res.invoiceNo,
+        }));
+      }
+    } catch (error) {
+      toast.error("Failed to get invoice number");
     }
   }
 
@@ -220,13 +309,14 @@ const CreateInvoice = ({ id }) => {
   useEffect(() => {
     customerDetails();
     allInvoiceService();
+    getInvoiceNumber();
   }, []);
 
   return (
     <div>
-      <p className="font-bold text-2xl text-center">Create Invoice</p>
+      <p className="text-center text-2xl font-bold">Create Invoice</p>
 
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 ">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <div>
           {/* INVOICE FORM */}
           <CommonForm
@@ -235,46 +325,55 @@ const CreateInvoice = ({ id }) => {
             setFormData={setInvoiceFormData}
             onSubmit={handleInvoiceFormSubmit}
             buttonText="Create Invoice"
-            isBtnDisabled={isCreatingInvoice} // 🆕
+            isBtnDisabled={isCreatingInvoice}
           />
 
           {/* SERVICE SELECTION GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border-t-2 mt-6 py-4">
+          <div className="mt-6 grid grid-cols-1 gap-4 border-t-2 py-4 md:grid-cols-2 lg:grid-cols-3">
             {invoiceServiceItem.map((item) => (
               <div key={item?._id} className="flex flex-col">
                 <button
+                  type="button"
                   onClick={() => handleSelectService(item)}
-                  className={`group block rounded-t-lg p-4 border shadow-sm transition-all duration-300 ease-in-out 
-                    ${
-                      selectedServices.some((s) => s?._id === item?._id)
-                        ? "bg-blue-100 border-blue-400"
-                        : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
-                    }`}
+                  className={`group block rounded-t-lg border p-4 shadow-sm transition-all duration-300 ease-in-out ${
+                    selectedServices.some((s) => s?._id === item?._id)
+                      ? "border-blue-400 bg-blue-100"
+                      : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
+                  }`}
                 >
                   <div className="text-center">
-                    <p className="font-semibold text-gray-800 capitalize mt-5">
+                    <p className="mt-5 font-semibold capitalize text-gray-800">
                       {item?.serviceName}
                     </p>
                   </div>
-                  <div className="text-center">HSN CODE: {item?.HSN}</div>
-                  <div className="mt-2 text-lg font-bold text-black text-center">
+
+                  <div className="text-center">
+                    HSN CODE: {item?.HSN}
+                  </div>
+
+                  <div className="mt-2 text-center text-lg font-bold text-black">
                     Price: ₹{item?.price?.toLocaleString("en-IN")}
                   </div>
                 </button>
 
-                <div className="flex justify-between px-4 py-3 border rounded-b-2xl ">
-                  <div
+                <div className="flex justify-between rounded-b-2xl border px-4 py-3">
+                  <button
+                    type="button"
                     onClick={() => handleEditInvoiceService(item?._id)}
-                    className="bg-blue-300 p-2 rounded-full cursor-pointer"
+                    className="cursor-pointer rounded-full bg-blue-300 p-2"
+                    aria-label={`Edit ${item?.serviceName}`}
                   >
                     <Edit />
-                  </div>
-                  <div
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={() => handleDeleteInvoiceById(item?._id)}
-                    className="bg-red-300 p-2 rounded-full cursor-pointer"
+                    className="cursor-pointer rounded-full bg-red-300 p-2"
+                    aria-label={`Delete ${item?.serviceName}`}
                   >
                     <Trash />
-                  </div>
+                  </button>
                 </div>
               </div>
             ))}
@@ -282,12 +381,13 @@ const CreateInvoice = ({ id }) => {
         </div>
 
         {/* RIGHT SIDE */}
-        <div className="flex flex-col mt-10 gap-5">
+        <div className="mt-10 flex flex-col gap-5">
           {/* CLIENT DETAILS */}
-          <div className="border p-6 rounded-lg shadow-md bg-gray-50">
-            <h2 className="text-xl font-semibold mb-1 border-b pb-1 text-gray-700">
+          <div className="rounded-lg border bg-gray-50 p-6 shadow-md">
+            <h2 className="mb-1 border-b pb-1 text-xl font-semibold text-gray-700">
               Client Details
             </h2>
+
             <div className="space-y-1 text-gray-600">
               <p>
                 <strong>Company:</strong> {company}
@@ -325,10 +425,12 @@ const CreateInvoice = ({ id }) => {
                 ? handleSubmitInvoiceService
                 : handleServiceFormSubmit
             }
-            buttonText={editInvoiceServiceId ? "Update Service" : "Add Service"}
+            buttonText={
+              editInvoiceServiceId ? "Update Service" : "Add Service"
+            }
             isBtnDisabled={
               editInvoiceServiceId ? isUpdatingService : isCreatingService
-            } // 🆕
+            }
           />
         </div>
       </div>

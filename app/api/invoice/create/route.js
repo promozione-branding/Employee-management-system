@@ -25,6 +25,20 @@ export async function POST(req) {
     }
 
     const data = await req.json();
+    
+// Validate invoice type; preserve normal invoice behavior for older clients.
+const invoiceType = data.invoiceType || "normal";
+
+if (!["normal", "tds"].includes(invoiceType)) {
+  return NextResponse.json(
+    {
+      success: false,
+      message: "Invalid invoice type.",
+    }, 
+    { status: 400 }
+  );
+}
+
 
     // 1. FIND CUSTOMER
     const findCustomer = await Customer.findById(data.clientId);
@@ -136,11 +150,14 @@ export async function POST(req) {
     const totalAmount = taxableAmount + taxAmount;
 
     // 10. CREATE INVOICE
-    const invoice = await Invoice.create({
-      ...data,
-      services: serviceSnapshot,
-      totalAmount,
-    });
+   
+const invoice = await Invoice.create({
+  ...data,
+  invoiceType,
+  services: serviceSnapshot,
+  totalAmount,
+});
+
 
     // 11. CREATE AUDIT HISTORY
     const { _id } = await createAuditLog({

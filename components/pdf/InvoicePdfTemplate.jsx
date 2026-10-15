@@ -31,16 +31,17 @@ const Invoice = ({ data }) => {
   }
 
   const {
-    invoiceNo,
-    invoiceDate,
-    GSTIN,
-    clientAddress,
-    clientCompany,
-    clientName,
-    services = [],
-    taxType,
-    totalAmount,
-  } = data;
+  invoiceNo,
+  invoiceDate,
+  GSTIN,
+  clientAddress,
+  clientCompany,
+  clientName,
+  services = [],
+  taxType,
+  totalAmount,
+  invoiceType = "normal",
+} = data;
 
   // -----------------------------
   // DATE FORMAT
@@ -114,7 +115,11 @@ const Invoice = ({ data }) => {
         <View style={styles.header}>
           <Image src="/pdf/logo.png" style={styles.logo} />
 
-          <Text style={styles.title}>TAX INVOICE</Text>
+         <Text style={styles.title}>
+    {invoiceType === "tds"
+      ? "SUPPLEMENTARY TAX INVOICE(TDS)"
+      : "TAX INVOICE"}
+  </Text>
         </View>
 
         {/* =========================

@@ -311,7 +311,20 @@ export const editFormControls = [
   },
 ];
 
+
 export const createInviceFormControls = [
+  {
+    label: "Invoice Type",
+    name: "invoiceType",
+    componentType: "select",
+    options: [
+      { id: "normal", label: "Tax Invoice" },
+      {
+        id: "tds",
+        label: "SUPPLEMENTARY TAX INVOICE(TDS)",
+      },
+    ],
+  },
   {
     label: "Tax Type",
     name: "taxType",
@@ -335,6 +348,7 @@ export const createInviceFormControls = [
     type: "date",
   },
 ];
+
 
 export const createServiceForInvoice = [
   {
