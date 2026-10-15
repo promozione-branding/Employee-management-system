@@ -8,9 +8,12 @@ import toast from "react-hot-toast";
 import { Trash, X } from "lucide-react";
 import SelectorNew from "./SelectorNew";
 import ChecklistNew from "./ChecklistNew";
-import SummaryNew, { computeTotals } from "./SummaryNew";
+import SummaryNew, { computeTotals, sumPartials } from "./SummaryNew";
 import HistoryNew from "./HistoryNew";
-import { createProposalNewService } from "@/service/proposalNew";
+import {
+  createProposalNewService,
+  updateProposalNewService,
+} from "@/service/proposalNew";
 
 const DURATION_OPTIONS = [
   "Advance Payment",
@@ -78,10 +81,7 @@ const ProposalTabNew = ({ customerId }) => {
     tdsApplicable,
   });
 
-  const totalPaid = partialPayments.reduce(
-    (s, p) => s + Number(p.paymentAmount || 0),
-    0
-  );
+  const totalPaid = sumPartials(partialPayments);
   const balance = grandTotal - totalPaid;
 
   const isCustomDur = paymentForm.paymentDuration === "__custom_text__";
@@ -207,7 +207,8 @@ const ProposalTabNew = ({ customerId }) => {
 
     try {
       setSaving(true);
-      const res = await createProposalNewService({
+
+      const payload = {
         clientId: customerId,
         items,
         discountType,
@@ -220,17 +221,29 @@ const ProposalTabNew = ({ customerId }) => {
         notes,
         validTill,
         paymentMethod,
-      });
+      };
+
+      const res = editingProposal
+        ? await updateProposalNewService(editingProposal._id, payload)
+        : await createProposalNewService(payload);
+
       if (res.success) {
-        toast.success("Proposal created");
+        toast.success(
+          editingProposal ? "Proposal updated" : "Proposal created"
+        );
         resetForm();
         setRefreshKey((k) => k + 1);
       } else {
-        toast.error(res.message || "Failed to create");
+        toast.error(
+          res.message ||
+            (editingProposal ? "Failed to update" : "Failed to create")
+        );
       }
     } catch (err) {
       console.log(err);
-      toast.error(err?.response?.data?.message || "Failed to create proposal");
+      toast.error(
+        err?.response?.data?.message || "Failed to save proposal"
+      );
     } finally {
       setSaving(false);
     }
@@ -244,7 +257,7 @@ const ProposalTabNew = ({ customerId }) => {
         <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
           <p className="text-sm text-amber-800">
             Editing <strong>{editingProposal.proposalNumber}</strong> — saving
-            will create a new version
+            will update this proposal
           </p>
           <button
             type="button"
@@ -521,7 +534,11 @@ const ProposalTabNew = ({ customerId }) => {
           size="lg"
           className="min-w-[240px]"
         >
-          {saving ? "Saving…" : "Save Proposal"}
+          {saving
+            ? "Saving…"
+            : isEditing
+            ? "Update Proposal"
+            : "Save Proposal"}
         </Button>
         {isEditing && (
           <Button variant="outline" onClick={resetForm}>

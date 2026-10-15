@@ -17,6 +17,11 @@ export const createProposalNewService = async (payload) => {
   return data;
 };
 
+export const updateProposalNewService = async (id, payload) => {
+  const { data } = await axiosInstance.put(`${BASE}/${id}`, payload);
+  return data;
+};
+
 export const deleteProposalNewService = async (id) => {
   const { data } = await axiosInstance.delete(`${BASE}/${id}`);
   return data;
