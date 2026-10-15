@@ -6,11 +6,13 @@ import {
   PDF_LOGO_PATH,
   COMPANY_DETAILS,
   FOOTER_LEFT,
-  FOOTER_RIGHT,
+  FOOTER_RIGHT,      
   LEGAL_NOTES,
   BANK_DETAILS,
   TERMS_AND_CONDITIONS,
   DELIVERABLE_SECTION_MAP,
+  SERVICES_CATALOG,
+  INDUSTRIES_SERVED,
 } from "@/config/new/proposalPdfNew";
 import { PROPOSAL_CATALOG } from "@/config/new/proposalCatalogNew";
 
@@ -105,6 +107,59 @@ a { color: #111827; text-decoration: none; }
   font-size: 11px;
   margin-bottom: 2px;
   line-height: 1.4;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.services-box {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: transparent;
+  break-inside: avoid;
+}
+.services-box .box-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #1e3a8a;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.services-box ul {
+  margin: 0;
+  padding-left: 14px;
+  list-style: disc;
+}
+.services-box li {
+  font-size: 10.5px;
+  margin-bottom: 2px;
+  line-height: 1.35;
+  color: #374151;
+}
+
+.industries-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+.industry-pill {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 12px 14px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e3a8a;
+  background: transparent;
+  break-inside: avoid;
 }
 
 @media print {
@@ -260,13 +315,15 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
     );
   });
 
-  const totalPages = 1 + (hasDeliverables ? 1 : 0) + 1;
+  // Pages: 1 (proposal) + [1 deliverables] + 1 (services) + 1 (industries) + 1 (T&C)
+  const totalPages = 3 + (hasDeliverables ? 1 : 0) + 1;
   let pageCounter = 1;
 
   return (
     <div ref={ref} id="proposal-print-root">
       <style>{CSS_RESET}</style>
 
+      {/* ============ PAGE 1 — Proposal ============ */}
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
         <h1>Proposal</h1>
 
@@ -473,15 +530,11 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           <div>
             <b>CIN:</b> {BANK_DETAILS.cin}
           </div>
-          <div>
-            <a href="tel:01142603232">011 42603232</a> •{" "}
-            <a href="mailto:customercare@inquirybazaar.com">
-              customercare@inquirybazaar.com
-            </a>
-          </div>
+         
         </div>
       </ScreenPage>
 
+      {/* ============ PAGE 2 — Deliverables (only if any) ============ */}
       {hasDeliverables && (
         <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
           <h1 style={{ textAlign: "center" }}>
@@ -528,6 +581,42 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         </ScreenPage>
       )}
 
+      {/* ============ PAGE 3 — OUR SERVICES ============ */}
+      <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
+        <h1 style={{ textAlign: "center", marginBottom: "14px" }}>
+          Our Services
+        </h1>
+
+        <div className="services-grid">
+          {SERVICES_CATALOG.map((section) => (
+            <div key={section.title} className="services-box">
+              <div className="box-title">{section.title}</div>
+              <ul>
+                {section.items.map((it) => (
+                  <li key={it}>{it}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </ScreenPage>
+
+      {/* ============ PAGE 4 — INDUSTRIES WE SERVE ============ */}
+      <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
+        <h1 style={{ textAlign: "center", marginBottom: "18px" }}>
+          Industries We Serve
+        </h1>
+
+        <div className="industries-grid">
+          {INDUSTRIES_SERVED.map((ind) => (
+            <div key={ind} className="industry-pill">
+              {ind}
+            </div>
+          ))}
+        </div>
+      </ScreenPage>
+
+      {/* ============ LAST PAGE — T&C ============ */}
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
         <h1 style={{ textAlign: "center" }}>Terms &amp; Conditions</h1>
         <ol style={{ paddingLeft: "18px", margin: 0 }}>

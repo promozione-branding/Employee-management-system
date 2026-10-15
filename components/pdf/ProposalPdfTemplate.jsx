@@ -119,7 +119,7 @@ const ProposalPdfTemplate = ({ data }) => {
           Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi, 110034,
         </Text>
         <Text>CIN: U92112DL2024PTC432424</Text>
-        <Text>011 42603232 • customercare@inquirybazaar.com</Text>
+       
       </View>
     </View>
   );
