@@ -1,7 +1,7 @@
 export const PDF_LOGO_PATH = "/pdf/logo.png";
 
 export const COMPANY_DETAILS = {
-  name: "Inquiry Bazaar Pvt Ltd",
+  name: "606-Inquiry Bazaar Pvt Ltd",
   address: "Best Business Park, NSP, Delhi",
   phone: "011 42603232",
   email: "customercare@inquirybazaar.com",
@@ -9,7 +9,7 @@ export const COMPANY_DETAILS = {
 };
 
 export const FOOTER_LEFT = "customercare@inquirybazaar.com";
-export const FOOTER_RIGHT = "011 - 42603232, +91 99717 00871";
+export const FOOTER_RIGHT = "011 - 42603232";
 
 export const LEGAL_NOTES = [
   "This is an application for Inquiry Bazaar Private Limited services. An order confirmation may be done on phone/email before booking the order.",

@@ -75,6 +75,38 @@ li { font-size: 12px; margin-bottom: 2px; line-height: 1.45; }
 table tr td[style*="border: 0"] { border: 0 !important; }
 a { color: #111827; text-decoration: none; }
 
+.deliverable-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.deliverable-box {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: transparent;
+  break-inside: avoid;
+}
+.deliverable-box .box-title {
+  font-weight: 700;
+  font-size: 12px;
+  color: #111827;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+.deliverable-box ul {
+  margin: 0;
+  padding-left: 14px;
+  list-style: disc;
+}
+.deliverable-box li {
+  font-size: 11px;
+  margin-bottom: 2px;
+  line-height: 1.4;
+}
+
 @media print {
   body { margin: 0; }
   .pdf-screen-page {
@@ -137,8 +169,7 @@ const FooterContent = ({ pageNumber, totalPages }) => (
       Page {pageNumber} of {totalPages}
     </span>
     <span className="right">
-      <a href="tel:01142603232">011 - 42603232</a>,{" "}
-      <a href="tel:+919971700871">+91 99717 00871</a>
+      <a href="tel:01142603232">011 - 42603232</a>
     </span>
   </>
 );
@@ -467,34 +498,30 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
             if (!tickedSections.length) return null;
 
             return (
-              <div key={catKey} style={{ marginBottom: "16px" }}>
+              <div key={catKey} style={{ marginBottom: "14px" }}>
                 <h3
                   style={{
                     background: "#f3f4f6",
                     padding: "6px 8px",
                     borderLeft: "3px solid #1e3a8a",
+                    margin: "12px 0 8px 0",
                   }}
                 >
                   {sectionTitle}
                 </h3>
-                {tickedSections.map((sec) => (
-                  <div key={sec.section} style={{ marginBottom: "8px" }}>
-                    <div
-                      style={{
-                        fontWeight: 600,
-                        fontSize: "12px",
-                        marginTop: "6px",
-                      }}
-                    >
-                      {sec.section}
+
+                <div className="deliverable-grid">
+                  {tickedSections.map((sec) => (
+                    <div key={sec.section} className="deliverable-box">
+                      <div className="box-title">{sec.section}</div>
+                      <ul>
+                        {sec.items.map((it) => (
+                          <li key={it}>{it}</li>
+                        ))}
+                      </ul>
                     </div>
-                    <ul style={{ marginTop: "3px" }}>
-                      {sec.items.map((it) => (
-                        <li key={it}>{it}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             );
           })}
