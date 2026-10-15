@@ -148,16 +148,41 @@ export const SERVICES_CATALOG = [
 ];
 
 export const INDUSTRIES_SERVED = [
-  "Education & Learning",
-  "Packaging",
-  "Scientific Instruments",
-  "Automotive",
-  "Forklifts & Cranes",
-  "Corporate Gifts",
+  // B2B & Industrial Sectors
+  "Manufacturing",
+  "Industrial Machinery & Equipment",
+  "Automotive & Components",
+  "Construction & Building Materials",
+  "Electrical & Electronics",
+  "Chemicals & Pharmaceuticals",
+  "Packaging & Printing",
+  "Scientific & Laboratory Equipment",
+  "Metal & Steel",
+  "Agriculture & Farming",
+  "Transportation & Logistics",
+  "Wholesale & Distribution",
+  "Renewable Energy",
+
+  // Software & Technology
+  "Information Technology",
+  "Software Development",
+  "SaaS & Cloud Solutions",
+  "Web & App Development",
+  "IT Consulting & Services",
+  "Cybersecurity & Networking",
+
+  // Business & Professional Services
+  
+  "Real Estate & Infrastructure",
+  "Corporate & Enterprise Services",
+
+  // Consumer & Growth Industries
+  "Education & E-Learning",
   "Medical & Healthcare",
-  "Tiles & Marbles",
-  "Jewellery",
-  "Construction",
   "Food & Beverages",
-  "Printing",
+  "E-commerce & Retail",
+  "Cosmetics & Personal Care",
+  "Fashion & Apparel",
+  "Furniture & Interiors",
+
 ];

@@ -126,7 +126,7 @@ a { color: #111827; text-decoration: none; }
    DELIVERABLES — new layout (rows, not boxes)
    ============================================ */
 .section-title-bar {
-  background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%);
+  background: linear-gradient(90deg, #1e3a5f 0%, #2563eb 100%);
   color: #ffffff;
   font-weight: 700;
   font-size: 13px;
@@ -150,7 +150,7 @@ a { color: #111827; text-decoration: none; }
 .deliverable-row .row-title {
   font-size: 11.5px;
   font-weight: 700;
-  color: #1e3a8a;
+  color: #1e3a5f;
   padding-top: 1px;
 }
 .deliverable-row .row-items {
@@ -186,7 +186,7 @@ a { color: #111827; text-decoration: none; }
    SERVICES — new layout
    ============================================ */
 .services-section-title {
-  background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%);
+  background: linear-gradient(90deg, #1e3a5f 0%, #2563eb 100%);
   color: #ffffff;
   font-weight: 700;
   font-size: 13px;
@@ -230,13 +230,13 @@ a { color: #111827; text-decoration: none; }
 }
 .industry-card {
   border: 1px solid #d1d5db;
-  border-left: 4px solid #2563eb;
+  border-left: 4px solid #1e3a5f;
   border-radius: 6px;
   padding: 14px 16px;
   background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
   font-size: 12px;
   font-weight: 600;
-  color: #1e3a8a;
+  color: #1e3a5f;
   text-align: center;
   break-inside: avoid;
 }
