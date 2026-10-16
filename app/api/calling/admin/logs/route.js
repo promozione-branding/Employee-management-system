@@ -6,7 +6,6 @@ import { getAuthUser } from "@/lib/getAuthUser";
 import CallLog from "@/models/employee/sales/CallLog";
 import mongoose from "mongoose";
 
-// Helper — date range from query
 function getDateRange(searchParams) {
   const preset = searchParams.get("preset") || "today";
   const from = searchParams.get("from");
@@ -31,9 +30,7 @@ function getDateRange(searchParams) {
   if (preset === "custom" && from && to) {
     fromDate = new Date(from);
     toDate = new Date(to);
-    // if to has no time part, extend to end of day
     if (!to.includes("T")) {
-      toDate = new Date(to);
       toDate.setDate(toDate.getDate() + 1);
     }
   } else if (preset === "yesterday") {
@@ -46,7 +43,6 @@ function getDateRange(searchParams) {
     fromDate = new Date(startUTC.getTime() - 29 * 24 * 60 * 60 * 1000);
     toDate = new Date(startUTC.getTime() + 24 * 60 * 60 * 1000);
   } else {
-    // today (default)
     fromDate = startUTC;
     toDate = new Date(startUTC.getTime() + 24 * 60 * 60 * 1000);
   }
@@ -88,7 +84,6 @@ export async function GET(req) {
 
     const { fromDate, toDate } = getDateRange(searchParams);
 
-    // Build match
     const match = {
       startedAt: { $gte: fromDate, $lt: toDate },
     };
@@ -121,13 +116,8 @@ export async function GET(req) {
 
     const skip = (page - 1) * limit;
 
-    // Fetch logs + count + summary in parallel
-    const [logs, total, summaryRaw] = await Promise.all([
-      CallLog.find(match)
-        .sort({ startedAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+    const [logs, total, summaryRaw, agentPerfRaw] = await Promise.all([
+      CallLog.find(match).sort({ startedAt: -1 }).skip(skip).limit(limit).lean(),
       CallLog.countDocuments(match),
       CallLog.aggregate([
         { $match: match },
@@ -156,6 +146,80 @@ export async function GET(req) {
           },
         },
       ]),
+      CallLog.aggregate([
+        {
+          $match: {
+            startedAt: { $gte: fromDate, $lt: toDate },
+            ...(status === "connected"
+              ? { connected: true }
+              : status === "missed"
+                ? { status: { $in: ["missed", "failed", "busy", "cancelled"] } }
+                : {}),
+            ...(direction ? { direction } : {}),
+          },
+        },
+        {
+          $group: {
+            _id: "$agentErpUserId",
+            agentName: { $first: "$agentName" },
+            agentEmail: { $first: "$agentEmail" },
+            totalCalls: { $sum: 1 },
+            connectedCalls: {
+              $sum: { $cond: [{ $eq: ["$connected", true] }, 1, 0] },
+            },
+            missedCalls: {
+              $sum: {
+                $cond: [
+                  {
+                    $in: [
+                      "$status",
+                      ["missed", "failed", "busy", "cancelled"],
+                    ],
+                  },
+                  1,
+                  0,
+                ],
+              },
+            },
+            inboundCalls: {
+              $sum: { $cond: [{ $eq: ["$direction", "inbound"] }, 1, 0] },
+            },
+            outboundCalls: {
+              $sum: { $cond: [{ $eq: ["$direction", "outbound"] }, 1, 0] },
+            },
+            connectedDurationSeconds: {
+              $sum: {
+                $cond: [{ $eq: ["$connected", true] }, "$durationSeconds", 0],
+              },
+            },
+            uniqueCustomers: { $addToSet: "$customerPhone" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            agentErpUserId: "$_id",
+            agentName: 1,
+            agentEmail: 1,
+            totalCalls: 1,
+            connectedCalls: 1,
+            missedCalls: 1,
+            inboundCalls: 1,
+            outboundCalls: 1,
+            connectedDurationSeconds: 1,
+            uniqueCustomerCount: {
+              $size: {
+                $filter: {
+                  input: "$uniqueCustomers",
+                  as: "c",
+                  cond: { $and: [{ $ne: ["$$c", null] }, { $ne: ["$$c", ""] }] },
+                },
+              },
+            },
+          },
+        },
+        { $sort: { totalCalls: -1 } },
+      ]),
     ]);
 
     const summary = summaryRaw[0] || {
@@ -169,6 +233,17 @@ export async function GET(req) {
       ? Math.round((summary.connectedCalls / summary.totalCalls) * 100)
       : 0;
 
+    const agentPerformance = agentPerfRaw.map((r) => ({
+      ...r,
+      totalTalkMinutes: +(r.connectedDurationSeconds / 60).toFixed(1),
+      avgTalkSeconds: r.connectedCalls
+        ? Math.round(r.connectedDurationSeconds / r.connectedCalls)
+        : 0,
+      connectRate: r.totalCalls
+        ? Math.round((r.connectedCalls / r.totalCalls) * 100)
+        : 0,
+    }));
+
     return NextResponse.json({
       success: true,
       data: {
@@ -179,6 +254,7 @@ export async function GET(req) {
           total,
           pages: Math.ceil(total / limit),
         },
+        agentPerformance,
       },
       summary,
       range: { from: fromDate, to: toDate },

@@ -22,7 +22,6 @@ export default function CallLogsFilters({
 
   return (
     <div className="bg-white rounded-lg border border-slate-200 p-4 mb-5 space-y-4">
-      {/* Presets */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-slate-500 uppercase mr-1">
           Range
@@ -46,7 +45,6 @@ export default function CallLogsFilters({
         ))}
       </div>
 
-      {/* Custom date row */}
       {filters.preset === "custom" && (
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
@@ -77,9 +75,7 @@ export default function CallLogsFilters({
         </div>
       )}
 
-      {/* Row: agent, status, direction, search */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        {/* Agent */}
         <select
           value={filters.agentId || ""}
           onChange={(e) => {
@@ -96,7 +92,6 @@ export default function CallLogsFilters({
           ))}
         </select>
 
-        {/* Status */}
         <select
           value={filters.status || ""}
           onChange={(e) => {
@@ -111,7 +106,6 @@ export default function CallLogsFilters({
           <option value="failed">Failed only</option>
         </select>
 
-        {/* Direction */}
         <select
           value={filters.direction || ""}
           onChange={(e) => {
@@ -125,7 +119,6 @@ export default function CallLogsFilters({
           <option value="inbound">Inbound</option>
         </select>
 
-        {/* Search */}
         <div className="relative">
           <Search className="h-4 w-4 absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -134,9 +127,7 @@ export default function CallLogsFilters({
             value={filters.q || ""}
             onChange={(e) => update({ q: e.target.value })}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                onApply?.({ ...filters, page: 1 });
-              }
+              if (e.key === "Enter") onApply?.({ ...filters, page: 1 });
             }}
             className="w-full border border-slate-200 rounded-md pl-8 pr-2 py-2 text-sm"
           />

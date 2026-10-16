@@ -14,6 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import {
   getAdminCallLogsService,
@@ -77,12 +79,13 @@ export default function CallLogs() {
   const [logs, setLogs] = useState([]);
   const [summary, setSummary] = useState(null);
   const [pagination, setPagination] = useState(null);
+  const [agentPerformance, setAgentPerformance] = useState([]);
+  const [perfOpen, setPerfOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const [agents, setAgents] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loadingRecording, setLoadingRecording] = useState(null);
 
-  // Load agents once
   useEffect(() => {
     (async () => {
       try {
@@ -94,7 +97,6 @@ export default function CallLogs() {
     })();
   }, []);
 
-  // Load logs on filters change
   const fetchLogs = useCallback(async (f) => {
     setLoading(true);
     try {
@@ -102,6 +104,7 @@ export default function CallLogs() {
       if (res.success) {
         setLogs(res.data?.logs || []);
         setPagination(res.data?.pagination || null);
+        setAgentPerformance(res.data?.agentPerformance || []);
         setSummary(res.summary || null);
       } else {
         toast.error(res.message || "Failed to load");
@@ -139,13 +142,14 @@ export default function CallLogs() {
     }
   };
 
-  const changePage = (p) => {
-    setFilters((prev) => ({ ...prev, page: p }));
+  const changePage = (p) => setFilters((prev) => ({ ...prev, page: p }));
+
+  const applyAgentFilter = (agentId) => {
+    setFilters((prev) => ({ ...prev, agentId, page: 1 }));
   };
 
   return (
     <div className="w-full">
-      {/* Header */}
       <div className="mb-5">
         <h1 className="text-xl md:text-3xl font-bold text-slate-900">
           Call Logs
@@ -155,7 +159,6 @@ export default function CallLogs() {
         </p>
       </div>
 
-      {/* Filters */}
       <CallLogsFilters
         filters={filters}
         setFilters={setFilters}
@@ -163,7 +166,6 @@ export default function CallLogs() {
         onApply={(next) => setFilters(next)}
       />
 
-      {/* Summary tiles */}
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
           <SummaryTile label="Total" value={summary.totalCalls} />
@@ -181,7 +183,100 @@ export default function CallLogs() {
         </div>
       )}
 
-      {/* Table */}
+      {agentPerformance.length > 0 && (
+        <div className="mb-5 bg-white rounded-lg border border-slate-200 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setPerfOpen((p) => !p)}
+            className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200 hover:bg-slate-100 transition text-left"
+          >
+            <div>
+              <h3 className="font-semibold text-slate-800">
+                Agent Performance
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {agentPerformance.length} agent
+                {agentPerformance.length !== 1 ? "s" : ""} with calls in this
+                range · click a row to filter
+              </p>
+            </div>
+            {perfOpen ? (
+              <ChevronUp className="h-4 w-4 text-slate-500" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-slate-500" />
+            )}
+          </button>
+
+          {perfOpen && (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-100">
+                <thead className="bg-white">
+                  <tr>
+                    <Th>Agent</Th>
+                    <Th center>Total</Th>
+                    <Th center>Connected</Th>
+                    <Th center>Missed</Th>
+                    <Th center>In / Out</Th>
+                    <Th center>Clients</Th>
+                    <Th center>Talk Time</Th>
+                    <Th center>Rate</Th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {agentPerformance.map((a) => (
+                    <tr
+                      key={a.agentErpUserId}
+                      onClick={() => applyAgentFilter(a.agentErpUserId)}
+                      className="hover:bg-blue-50/50 cursor-pointer transition"
+                    >
+                      <td className="px-4 py-3">
+                        <p className="text-sm font-medium text-slate-800 truncate max-w-[200px]">
+                          {a.agentName || "—"}
+                        </p>
+                        <p className="text-xs text-slate-500 truncate max-w-[200px]">
+                          {a.agentEmail || ""}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3 text-center text-sm font-semibold text-slate-800">
+                        {a.totalCalls}
+                      </td>
+                      <td className="px-4 py-3 text-center text-sm font-semibold text-emerald-600">
+                        {a.connectedCalls}
+                      </td>
+                      <td className="px-4 py-3 text-center text-sm font-semibold text-red-500">
+                        {a.missedCalls}
+                      </td>
+                      <td className="px-4 py-3 text-center text-xs text-slate-600">
+                        {a.inboundCalls} / {a.outboundCalls}
+                      </td>
+                      <td className="px-4 py-3 text-center text-sm text-slate-700">
+                        {a.uniqueCustomerCount}
+                      </td>
+                      <td className="px-4 py-3 text-center text-sm text-slate-700">
+                        {a.totalTalkMinutes}m
+                      </td>
+                      <td className="px-4 py-3 text-center text-sm">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                            a.connectRate >= 60
+                              ? "bg-emerald-50 text-emerald-700"
+                              : a.connectRate >= 30
+                                ? "bg-amber-50 text-amber-700"
+                                : "bg-red-50 text-red-700"
+                          }`}
+                        >
+                          {a.connectRate}%
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
@@ -311,7 +406,6 @@ export default function CallLogs() {
           </table>
         </div>
 
-        {/* Pagination */}
         {pagination && pagination.pages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 bg-slate-50">
             <p className="text-xs text-slate-500">
@@ -340,7 +434,6 @@ export default function CallLogs() {
         )}
       </div>
 
-      {/* Row details modal */}
       {selected && (
         <div
           className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
@@ -362,10 +455,7 @@ export default function CallLogs() {
             <div className="p-5 space-y-3 text-sm">
               <Row label="Agent" value={selected.agentName || "—"} />
               <Row label="Agent Email" value={selected.agentEmail || "—"} />
-              <Row
-                label="Customer"
-                value={selected.customerName || "—"}
-              />
+              <Row label="Customer" value={selected.customerName || "—"} />
               <Row
                 label="Customer Phone"
                 value={selected.customerPhone || "—"}
@@ -376,14 +466,8 @@ export default function CallLogs() {
                 label="Duration"
                 value={formatDuration(selected.durationSeconds)}
               />
-              <Row
-                label="Started"
-                value={formatDateTime(selected.startedAt)}
-              />
-              <Row
-                label="Ended"
-                value={formatDateTime(selected.endedAt)}
-              />
+              <Row label="Started" value={formatDateTime(selected.startedAt)} />
+              <Row label="Ended" value={formatDateTime(selected.endedAt)} />
               {selected.disposition && (
                 <Row label="Disposition" value={selected.disposition} />
               )}
