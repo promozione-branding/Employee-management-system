@@ -60,42 +60,50 @@ const Client = () => {
   }, [employee?._id]);
 
   /* ---------------- Create / Edit ---------------- */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ 
+/* ---------------- Create / Edit ---------------- */
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    for (const c of salesClientFC) {
-      if (
-        !["tanNo", "notes", "website", "meetingDate"].includes(c.name) &&
-        !formData[c.name]
-      ) {
-        return toast.error(`Please fill ${c.label}`);
-      }
-    }
+  // Only client name and phone number are mandatory
+  if (!formData.name?.trim()) {
+    return toast.error("Please enter client name");
+  }
 
-    const formDataTemplate = {
-      salesExecutive: employee?._id,
-      ...formData,
-    };
+  if (!String(formData.phone ?? "").trim()) {
+    return toast.error("Please enter client phone number");
+  }
 
-    try {
-      const res = editingId
-        ? await editCustomerServices(editingId, formData)
-        : await createClientService(formDataTemplate);
-
-      if (res.success) {
-        toast.success(res.message || "Saved successfully");
-        resetForm();
-        fetchCustomers();
-      }
-    } catch (error) {
-      console.log(error);
-      if (error.response?.data?.errors?.length) {
-        error.response.data.errors.forEach((err) => toast.error(err.message));
-      } else {
-        toast.error(error.response?.data?.message || "Something went wrong");
-      }
-    }
+  const formDataTemplate = {
+    salesExecutive: employee?._id,
+    ...formData,
   };
+
+  try {
+    const res = editingId
+      ? await editCustomerServices(editingId, formData)
+      : await createClientService(formDataTemplate);
+
+    if (res.success) {
+      toast.success(res.message || "Saved successfully");
+      resetForm();
+      fetchCustomers();
+    }
+  } catch (error) {
+    console.log(error);
+
+    if (error.response?.data?.errors?.length) {
+      error.response.data.errors.forEach((err) =>
+        toast.error(err.message)
+      );
+    } else {
+      toast.error(
+        error.response?.data?.message || "Something went wrong"
+      );
+    }
+  }
+};
+
 
   /* ---------------- Edit ---------------- */
   const handleEdit = async (id) => {

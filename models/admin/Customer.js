@@ -1,94 +1,158 @@
-// models/admin/Customer.js
 
 import mongoose from "mongoose";
 
 const CustomerSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    company: { type: String, required: true },
-    tanNo: {
+    name: {
       type: String,
-    },
-    email: { type: String, lowercase: true, trim: true },
-    GSTIN: {
-      type: String,
-      required: true,
-      minlength: 15,
-      maxlength: 15,
-      validate: {
-        validator: (v) => /^[0-9A-Z]{15}$/.test(v),
-        message: "Invalid GSTIN format",
-      },
-    },
-    phone: {
-      type: Number,
       required: true,
       trim: true,
     },
+
+    company: {
+      type: String,
+      trim: true,
+    },
+
+    tanNo: {
+      type: String,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      lowercase: true,
+      trim: true,
+    },
+
+    GSTIN: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      validate: {
+        validator: function (value) {
+          if (value == null || value.trim() === "") {
+            return true;
+          }
+
+          return /^[0-9A-Z]{15}$/.test(value);
+        },
+        message:
+          "GSTIN must contain exactly 15 valid alphanumeric characters",
+      },
+    },
+
+    phone: {
+      type: Number,
+      required: true,
+    },
+
     website: {
       type: String,
+      trim: true,
     },
-    Address: { type: String, required: true },
-    city: { type: String },
-    state: { type: String },
-    pincode: { type: String },
-    country: { type: String },
-    meetingDate: { type: String },
-    salesPersonEmail: { type: String },
-    SalesPersonName: { type: String },
+
+    Address: {
+      type: String,
+      trim: true,
+    },
+
+    city: {
+      type: String,
+      trim: true,
+    },
+
+    state: {
+      type: String,
+      trim: true,
+    },
+
+    pincode: {
+      type: String,
+      trim: true,
+    },
+
+    country: {
+      type: String,
+      trim: true,
+    },
+
+    meetingDate: {
+      type: String,
+    },
+
+    salesPersonEmail: {
+      type: String,
+    },
+
+    SalesPersonName: {
+      type: String,
+    },
+
     salesExecutive: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Employee",
       },
     ],
+
     notes: [
       {
         type: String,
       },
     ],
+
     invoices: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Invoice",
       },
     ],
+
     proposals: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Proposal",
       },
     ],
+
     ledger: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Ledger",
     },
+
     projectCycle: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ProjectCycle",
     },
+
     meetingUpdate: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Meeting",
     },
+
     history: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "AuditHistory",
       },
     ],
+
     workDetails: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "EmployeeWorkDetail",
       },
     ],
+
     isPaid: {
       type: Boolean,
       default: false,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  }
 );
 
 CustomerSchema.index(
@@ -105,10 +169,9 @@ CustomerSchema.index(
       email: 3,
       GSTIN: 2,
     },
-  },
+  }
 );
 
-// ⚡ PERFORMANCE INDEXES
 CustomerSchema.index({ phone: 1 });
 CustomerSchema.index({ createdAt: -1 });
 CustomerSchema.index({ GSTIN: 1 });
