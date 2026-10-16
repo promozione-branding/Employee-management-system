@@ -5,6 +5,7 @@
 import { MyClient } from "@/components/admin-dashboard/dashboard/MyClient";
 import KPI from "@/components/admin-dashboard/dashboard/KPI";
 import Employees from "@/components/admin-dashboard/dashboard/Employees";
+import Callinfo from "@/components/admin-dashboard/dashboard/Callinfo";
 import RecentActivity from "@/components/admin-dashboard/dashboard/RecentActivity";
 import Announcement from "@/components/admin-dashboard/dashboard/Announcement";
 import TodayMeeting from "@/components/admin-dashboard/dashboard/TodayMeeting";
@@ -27,12 +28,18 @@ const Dashboard = () => {
       {/* KPI Cards */}
       <KPI />
 
+      {/* Call data — full width */}
+      <div className="w-full my-5">
+        <Callinfo />
+      </div>
+
+      {/* Calendar + Employees */}
       <div className="flex flex-col gap-10 lg:flex-row lg:gap-5">
         <AdminCalendar />
         <Employees />
       </div>
-      {/* employee  */}
 
+      {/* Reminder / Activity / Clients */}
       <div className="grid lg:grid-cols-3 gap-5 my-5">
         <AdminReminder />
         <RecentActivity />

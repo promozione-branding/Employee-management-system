@@ -28,8 +28,6 @@ export async function initiateCallService(customerId) {
 
 // ------------------------------------------------------------
 // Fetch call history for a client
-// scope: "self" = only logged-in user's calls
-//        "all"  = all calls for the client (admin/manager)
 // ------------------------------------------------------------
 export async function getCallHistoryService(customerId, scope = "self") {
   const qs = new URLSearchParams();
@@ -44,15 +42,61 @@ export async function getCallHistoryService(customerId, scope = "self") {
 }
 
 // ------------------------------------------------------------
-// Fetch a temporary recording link for a recording file
-// `file` = recording filename from CallLog.recordingUrl
+// Recording link
 // ------------------------------------------------------------
-// service/calling.js — replace getRecordingLinkService
-
 export async function getRecordingLinkService(callId) {
   if (!callId) throw new Error("callId is required");
   const qs = new URLSearchParams({ callId }).toString();
   const res = await fetch(`${BASE}/recording?${qs}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  return handle(res);
+}
+
+// ------------------------------------------------------------
+// Salesperson: today's call stats
+// ------------------------------------------------------------
+export async function dailyCallStatsService(agentId) {
+  if (!agentId) throw new Error("agentId is required");
+  const res = await fetch(`${BASE}/dashboard/daily-stats/${agentId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  return handle(res);
+}
+
+// ------------------------------------------------------------
+// Admin: today's call stats for all agents
+// ------------------------------------------------------------
+export async function getAdminDailyCallStatsService() {
+  const res = await fetch(`${BASE}/dashboard/admin-daily-stats`, {
+    method: "GET",
+    credentials: "include",
+  });
+  return handle(res);
+}
+
+// ------------------------------------------------------------
+// Admin: paginated call logs with filters
+// ------------------------------------------------------------
+export async function getAdminCallLogsService(params = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") qs.set(k, v);
+  });
+  const res = await fetch(`${BASE}/admin/logs?${qs.toString()}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  return handle(res);
+}
+
+// ------------------------------------------------------------
+// Admin: list of agents (for filter dropdown)
+// ------------------------------------------------------------
+export async function getAdminAgentsService() {
+  const res = await fetch(`${BASE}/admin/agents`, {
     method: "GET",
     credentials: "include",
   });
