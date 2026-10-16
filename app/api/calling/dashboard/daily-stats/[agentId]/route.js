@@ -4,7 +4,38 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { getAuthUser } from "@/lib/getAuthUser";
 import CallLog from "@/models/employee/sales/CallLog";
+import Employee from "@/models/employee/Employee";
 import mongoose from "mongoose";
+
+// ------------------------------------------------------------
+// Get start/end of "today" in IST, as UTC Date objects
+// ------------------------------------------------------------
+function getISTDayRange() {
+  const IST_OFFSET_MIN = 330; // +5:30
+  const now = new Date();
+
+  // shift to IST wall clock
+  const nowIST = new Date(now.getTime() + IST_OFFSET_MIN * 60 * 1000);
+
+  // start of day in IST wall clock
+  const startIST = new Date(
+    Date.UTC(
+      nowIST.getUTCFullYear(),
+      nowIST.getUTCMonth(),
+      nowIST.getUTCDate(),
+      0,
+      0,
+      0,
+      0,
+    ),
+  );
+
+  // shift back to UTC
+  const startUTC = new Date(startIST.getTime() - IST_OFFSET_MIN * 60 * 1000);
+  const endUTC = new Date(startUTC.getTime() + 24 * 60 * 60 * 1000);
+
+  return { startUTC, endUTC };
+}
 
 export async function GET(req, { params }) {
   try {
@@ -26,31 +57,44 @@ export async function GET(req, { params }) {
       );
     }
 
-    // --- today range (IST) ---
-    const now = new Date();
-    // shift to IST for day boundary calc
-    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
-    const nowIST = new Date(now.getTime() + IST_OFFSET_MS);
-    const startIST = new Date(
-      nowIST.getFullYear(),
-      nowIST.getMonth(),
-      nowIST.getDate(),
-    );
-    const endIST = new Date(
-      nowIST.getFullYear(),
-      nowIST.getMonth(),
-      nowIST.getDate() + 1,
-    );
-    const startOfDay = new Date(startIST.getTime() - IST_OFFSET_MS);
-    const endOfDay = new Date(endIST.getTime() - IST_OFFSET_MS);
+    // --- resolve Employee from User id ---
+    let employeeObjectId = null;
 
-    const agentObjectId = new mongoose.Types.ObjectId(agentId);
+    const empByUser = await Employee.findOne({ user: agentId })
+      .select("_id")
+      .lean();
+    if (empByUser) {
+      employeeObjectId = empByUser._id;
+    } else {
+      const empById = await Employee.findById(agentId).select("_id").lean();
+      if (empById) employeeObjectId = empById._id;
+    }
+
+    if (!employeeObjectId) {
+      return NextResponse.json(
+        { success: false, message: "Employee not found for this id" },
+        { status: 404 },
+      );
+    }
+
+    const { startUTC, endUTC } = getISTDayRange();
+
+    console.log(
+      "[daily-stats] IST day range (UTC):",
+      startUTC.toISOString(),
+      "→",
+      endUTC.toISOString(),
+      "| employee:",
+      employeeObjectId,
+    );
+
+    const agentObjectId = new mongoose.Types.ObjectId(employeeObjectId);
 
     const result = await CallLog.aggregate([
       {
         $match: {
           agentErpUserId: agentObjectId,
-          startedAt: { $gte: startOfDay, $lt: endOfDay },
+          startedAt: { $gte: startUTC, $lt: endUTC },
         },
       },
       {
@@ -120,7 +164,6 @@ export async function GET(req, { params }) {
       uniqueCustomerCount: 0,
     };
 
-    // Format talk time in minutes (1 decimal)
     stats.totalTalkMinutes = +(stats.connectedDurationSeconds / 60).toFixed(1);
     stats.avgTalkSeconds = stats.connectedCalls
       ? Math.round(stats.connectedDurationSeconds / stats.connectedCalls)
@@ -134,7 +177,8 @@ export async function GET(req, { params }) {
       success: true,
       message: "Today's call stats",
       data: stats,
-      date: startOfDay.toISOString(),
+      range: { startUTC, endUTC },
+      employeeId: employeeObjectId,
     });
   } catch (error) {
     console.error("[/api/calling/dashboard/daily-stats]", error);
