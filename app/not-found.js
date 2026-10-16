@@ -1,3 +1,5 @@
+// app/not-found.js
+
 
 "use client";
 

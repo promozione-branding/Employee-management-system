@@ -1,3 +1,5 @@
+// models/admin/Customer.js
+
 
 import mongoose from "mongoose";
 

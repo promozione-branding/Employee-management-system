@@ -1,3 +1,5 @@
+// app/sales-dashboard/clients/[clientId]/[salesPersonId]/ClientDetails.jsx
+
 "use client";
 
 import React from "react";

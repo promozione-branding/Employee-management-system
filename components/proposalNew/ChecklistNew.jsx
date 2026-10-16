@@ -1,3 +1,5 @@
+// components/proposalNew/ChecklistNew.jsx
+
 "use client";
 import React, { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";

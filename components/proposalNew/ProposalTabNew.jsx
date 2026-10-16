@@ -1,3 +1,5 @@
+// components/proposalNew/ProposalTabNew.jsx
+
 "use client";
 
 import React, { useState } from "react";

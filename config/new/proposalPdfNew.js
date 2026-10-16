@@ -1,3 +1,5 @@
+// config/new/proposalPdfNew.js
+
 export const PDF_LOGO_PATH = "/pdf/logo.png";
 
 export const COMPANY_DETAILS = {
