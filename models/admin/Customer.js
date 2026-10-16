@@ -174,7 +174,15 @@ CustomerSchema.index(
 
 CustomerSchema.index({ phone: 1 });
 CustomerSchema.index({ createdAt: -1 });
-CustomerSchema.index({ GSTIN: 1 });
+CustomerSchema.index(
+  { GSTIN: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      GSTIN: { $type: "string", $gt: "" },
+    },
+  }
+);
 CustomerSchema.index({ salesExecutive: 1 });
 CustomerSchema.index({ city: 1 });
 

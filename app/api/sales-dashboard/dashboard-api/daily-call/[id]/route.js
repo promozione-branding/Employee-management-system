@@ -39,7 +39,7 @@ export async function GET(req, { params }) {
 
           "meetingUpdate.createdAt": {
             $gte: startOfDay,
-            $lt: endOfDay,
+            $lt: endOfDay, 
           },
         },
       },

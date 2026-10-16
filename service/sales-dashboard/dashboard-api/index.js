@@ -18,7 +18,7 @@ export async function recentActivityService(id) {
 
 export async function dailyCallService(id) {
   const { data } = await axiosInstance.get(
-    `/api/sales-dashboard/dashboard-api/daily-call/${id}`,
+    `/api/sales-dashboard/dashboard-api/daily-call/${id}`, 
   );
   return data;
 }
@@ -64,6 +64,12 @@ export async function totalClientCount(id) {
     `/api/sales-dashboard/dashboard-api/total-client/${id}`,
   );
 
+  return data;
+}
+export async function dailyCallStatsService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/calling/dashboard/daily-stats/${id}`,
+  );
   return data;
 }
 
