@@ -13,6 +13,9 @@ async function handle(res) {
   return data;
 }
 
+// ------------------------------------------------------------
+// Initiate an outbound call (click-to-call)
+// ------------------------------------------------------------
 export async function initiateCallService(customerId) {
   const res = await fetch(`${BASE}/initiate`, {
     method: "POST",
@@ -23,6 +26,9 @@ export async function initiateCallService(customerId) {
   return handle(res);
 }
 
+// ------------------------------------------------------------
+// Fetch call history for a client
+// ------------------------------------------------------------
 export async function getCallHistoryService(customerId, scope = "self") {
   const qs = new URLSearchParams();
   if (customerId) qs.set("customerId", customerId);
@@ -35,6 +41,9 @@ export async function getCallHistoryService(customerId, scope = "self") {
   return handle(res);
 }
 
+// ------------------------------------------------------------
+// Recording link for a call
+// ------------------------------------------------------------
 export async function getRecordingLinkService(callId) {
   if (!callId) throw new Error("callId is required");
   const qs = new URLSearchParams({ callId }).toString();
@@ -45,6 +54,9 @@ export async function getRecordingLinkService(callId) {
   return handle(res);
 }
 
+// ------------------------------------------------------------
+// Salesperson: today's call stats (self)
+// ------------------------------------------------------------
 export async function dailyCallStatsService(agentId) {
   if (!agentId) throw new Error("agentId is required");
   const res = await fetch(`${BASE}/dashboard/daily-stats/${agentId}`, {
@@ -54,6 +66,9 @@ export async function dailyCallStatsService(agentId) {
   return handle(res);
 }
 
+// ------------------------------------------------------------
+// Admin: today's call stats for ALL agents
+// ------------------------------------------------------------
 export async function getAdminDailyCallStatsService() {
   const res = await fetch(`${BASE}/dashboard/admin-daily-stats`, {
     method: "GET",
@@ -62,6 +77,9 @@ export async function getAdminDailyCallStatsService() {
   return handle(res);
 }
 
+// ------------------------------------------------------------
+// Admin: paginated call logs with filters
+// ------------------------------------------------------------
 export async function getAdminCallLogsService(params = {}) {
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
@@ -74,8 +92,27 @@ export async function getAdminCallLogsService(params = {}) {
   return handle(res);
 }
 
+// ------------------------------------------------------------
+// Admin: list of agents (for filter dropdown)
+// ------------------------------------------------------------
 export async function getAdminAgentsService() {
   const res = await fetch(`${BASE}/admin/agents`, {
+    method: "GET",
+    credentials: "include",
+  });
+  return handle(res);
+}
+
+// ------------------------------------------------------------
+// Client-specific call history (used on client detail page)
+// scope: "all" (default) | "self"
+// ------------------------------------------------------------
+export async function getClientCallsService(customerId, scope = "all") {
+  if (!customerId) throw new Error("customerId is required");
+  const qs = new URLSearchParams();
+  if (scope) qs.set("scope", scope);
+
+  const res = await fetch(`${BASE}/client/${customerId}?${qs.toString()}`, {
     method: "GET",
     credentials: "include",
   });

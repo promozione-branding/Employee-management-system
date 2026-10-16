@@ -22,16 +22,6 @@ const HistoryTab = ({ customerId }) => {
       icon: <Users />,
       href: `/sales-dashboard/clients/history/client-history/${customerId}`,
     },
-    // {
-    //   label: "Client Proposals",
-    //   icon: <TableProperties />,
-    //   href: `/dashboard/customer/history/client-proposal/${customerId}`,
-    // },
-    // {
-    //   label: "Client Invoice",
-    //   icon: <Album />,
-    //   href: `/dashboard/customer/history/client-invoice/${customerId}`,
-    // },
     {
       label: "Work Details",
       icon: <Activity />,
