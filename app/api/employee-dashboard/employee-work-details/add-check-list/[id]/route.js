@@ -32,44 +32,92 @@ export async function PATCH(req, { params }) {
       );
     }
 
-    const existingKeys = new Set(workDetail.checklist.map((item) => item.key));
+    // 🗺️ Map existing items by key for O(1) upsert
+    const existingByKey = new Map(
+      workDetail.checklist.map((item) => [item.key, item]),
+    );
 
-    const newItems = [];
+    let addedCount = 0;
+    let updatedCount = 0;
 
     for (const item of checklistItems) {
       if (!item.key || !item.label) continue;
 
-      if (!existingKeys.has(item.key)) {
-        newItems.push({
+      const existing = existingByKey.get(item.key);
+
+      if (existing) {
+        // ✅ UPDATE: only overwrite fields that were actually sent.
+        //    This keeps old data intact when partial payloads arrive.
+        if (typeof item.completed === "boolean") {
+          existing.completed = item.completed;
+
+          // Only reset completedAt when explicitly completing from pending.
+          // Don't clobber an existing completedAt with null unless user
+          // explicitly un-completed it (completed === false).
+          if (item.completed === false) {
+            existing.completedAt = null;
+          } else if (item.completedAt) {
+            existing.completedAt = new Date(item.completedAt);
+          } else if (!existing.completedAt) {
+            existing.completedAt = new Date();
+          }
+        }
+
+        if (item.completedBy !== undefined && item.completedBy !== null) {
+          existing.completedBy = item.completedBy;
+        }
+
+        if (item.remarks !== undefined) existing.remarks = item.remarks;
+        if (item.proofUrl !== undefined) existing.proofUrl = item.proofUrl;
+
+        // Keep label in sync if the template was renamed
+        if (item.label && existing.label !== item.label) {
+          existing.label = item.label;
+        }
+
+        updatedCount++;
+      } else {
+        // ➕ CREATE: new custom (or template) item
+        workDetail.checklist.push({
           key: item.key,
           label: item.label,
           completed: item.completed ?? false,
-          completedBy: item.completedBy,
-          completedAt: item.completed ? new Date() : null,
+          completedBy: item.completedBy ?? undefined,
+          completedAt: item.completed
+            ? item.completedAt
+              ? new Date(item.completedAt)
+              : new Date()
+            : null,
           remarks: item.remarks ?? "",
           proofUrl: item.proofUrl ?? "",
         });
+
+        existingByKey.set(item.key, item); // keep map accurate
+        addedCount++;
       }
     }
 
-    if (!newItems.length) {
+    if (!addedCount && !updatedCount) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "No new checklist items to add",
-        },
-        { status: 409 },
+        { success: false, message: "No checklist changes to save" },
+        { status: 200 }, // ⬅️ 200 not 409 — no-op is not an error
       );
     }
 
-    workDetail.checklist.push(...newItems);
+    // 📊 Progress: count all completed items, use max(totalField, actual)
+    //    so totalField never goes below the real array length.
+    const completeField = workDetail.checklist.filter((i) => i.completed).length;
+    const safeTotal =
+      Math.max(Number(totalField) || 0, workDetail.checklist.length) ||
+      workDetail.checklist.length;
 
-    // Update progress
     workDetail.progressPercentage = {
-      departmentType: workDetail.department,
-      totalField: totalField,
-      completeField: workDetail.checklist.filter((item) => item.completed)
-        .length,
+      departmentType:
+        workDetail.department === "SALES"
+          ? workDetail.progressPercentage?.departmentType ?? "OTHER"
+          : workDetail.department,
+      totalField: safeTotal,
+      completeField,
     };
 
     await workDetail.save();
@@ -77,15 +125,16 @@ export async function PATCH(req, { params }) {
     return NextResponse.json(
       {
         success: true,
-        message: "Checklist items added successfully",
-        addedCount: newItems.length,
+        message: `Checklist saved (${addedCount} added, ${updatedCount} updated)`,
+        addedCount,
+        updatedCount,
         data: workDetail.checklist,
+        progressPercentage: workDetail.progressPercentage,
       },
       { status: 200 },
     );
   } catch (error) {
     console.error("PATCH Checklist Error:", error);
-
     return NextResponse.json(
       { success: false, message: "Internal Server Error" },
       { status: 500 },
