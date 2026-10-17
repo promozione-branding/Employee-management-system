@@ -78,3 +78,18 @@ export async function getAdminCalenderService(id) {
   const { data } = await axiosInstance.get(`/api/admin-dashboard-api/admin/calender/get/${id}`);
   return data;
 }
+
+// ------------------------------------------------------------
+// Admin: fetch client reminders (meeting updates with reminderAt)
+// ------------------------------------------------------------
+export async function getAdminClientRemindersService(params = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") qs.set(k, v);
+  });
+  const url = `/api/admin-dashboard-api/admin/reminder/clients${
+    qs.toString() ? `?${qs.toString()}` : ""
+  }`;
+  const { data } = await axiosInstance.get(url);
+  return data;
+}
