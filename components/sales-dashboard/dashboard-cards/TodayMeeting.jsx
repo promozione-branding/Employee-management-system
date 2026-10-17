@@ -66,7 +66,6 @@ const TodayMeeting = () => {
     fetchTodayMeeting();
   }, [fetchTodayMeeting]);
 
-  // Compute salesPersonId — try Employee._id, then User._id
   const salesPersonId = employee?._id || employee?.user?._id;
 
   if (loading && todayMeetingData.length === 0) {
@@ -88,7 +87,6 @@ const TodayMeeting = () => {
         <h2 className="text-lg font-bold text-gray-800">Meetings</h2>
       </div>
 
-      {/* Filter bar */}
       <div className="flex flex-wrap gap-1.5 mb-3 shrink-0">
         {PRESETS.map((p) => (
           <button
@@ -135,6 +133,7 @@ const TodayMeeting = () => {
                 setTo("");
               }}
               className="p-1 rounded hover:bg-gray-100"
+              title="Clear dates"
             >
               <X className="h-3.5 w-3.5 text-gray-500" />
             </button>
@@ -142,7 +141,6 @@ const TodayMeeting = () => {
         </div>
       )}
 
-      {/* Scrollable list */}
       <div className="flex-1 min-h-0 overflow-y-auto pr-1 meeting-scroll">
         <div className="flex flex-col gap-3">
           {todayMeetingData?.length > 0 ? (
@@ -156,6 +154,12 @@ const TodayMeeting = () => {
                   <h3 className="font-semibold text-gray-700 text-sm truncate max-w-[180px]">
                     {meeting.clientName || "Unknown client"}
                   </h3>
+                  {/* NEW: company name */}
+                  {meeting.company && (
+                    <p className="text-[11px] text-gray-500 truncate max-w-[180px]">
+                      {meeting.company}
+                    </p>
+                  )}
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full capitalize inline-block mt-1 ${
                       meeting.updateType === "call"

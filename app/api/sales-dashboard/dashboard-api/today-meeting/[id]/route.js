@@ -5,15 +5,11 @@ import { connectDB } from "@/lib/db";
 import Meeting from "@/models/admin/meeting/Meeting";
 import mongoose from "mongoose";
 
-// ------------------------------------------------------------
-// Compute UTC date range from preset + custom from/to (IST-aware)
-// ------------------------------------------------------------
 function getRange(preset, fromStr, toStr) {
   const IST_OFFSET_MIN = 330;
   const now = new Date();
   const nowIST = new Date(now.getTime() + IST_OFFSET_MIN * 60 * 1000);
 
-  // Midnight IST today, in UTC
   const startOfTodayIST = new Date(
     Date.UTC(
       nowIST.getUTCFullYear(),
@@ -51,14 +47,13 @@ function getRange(preset, fromStr, toStr) {
     let toDate;
     if (toStr) {
       toDate = new Date(`${toStr}T00:00:00+05:30`);
-      toDate = new Date(toDate.getTime() + dayMs); // include the "to" day
+      toDate = new Date(toDate.getTime() + dayMs);
     } else {
       toDate = new Date(fromDate.getTime() + dayMs);
     }
     return { from: fromDate, to: toDate };
   }
 
-  // default = today
   return {
     from: startOfTodayUTC,
     to: new Date(startOfTodayUTC.getTime() + dayMs),
@@ -106,6 +101,7 @@ export async function GET(req, { params }) {
           _id: "$meetingUpdate._id",
           clientId: "$meetingUpdate.clientId",
           clientName: { $arrayElemAt: ["$clientData.name", 0] },
+          company: { $arrayElemAt: ["$clientData.company", 0] },
           updateType: "$meetingUpdate.updateType",
           status: "$meetingUpdate.status",
           note: "$meetingUpdate.note",
