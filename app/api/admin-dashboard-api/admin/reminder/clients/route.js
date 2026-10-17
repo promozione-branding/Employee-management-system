@@ -71,25 +71,14 @@ export async function GET(req) {
     const fromStr = searchParams.get("from") || "";
     const toStr = searchParams.get("to") || "";
     const type = searchParams.get("type") || "all";
-    const agentId = searchParams.get("agentId") || "";
 
     const { from, to } = getRange(preset, fromStr, toStr);
 
+    // ALWAYS filter by the logged-in user's own reminders
     const match = {
+      "meetingUpdate.salesPersonId": new mongoose.Types.ObjectId(user._id),
       "meetingUpdate.reminderAt": { $gte: from, $lt: to },
     };
-
-    if (agentId && mongoose.Types.ObjectId.isValid(agentId)) {
-      // Filter by agent (User._id on the meeting update)
-      match["meetingUpdate.salesPersonId"] = new mongoose.Types.ObjectId(
-        agentId,
-      );
-    } else if (user.role !== "admin" && user.role !== "ADMIN") {
-      // Managers see their own created reminders
-      match["meetingUpdate.salesPersonId"] = new mongoose.Types.ObjectId(
-        user._id,
-      );
-    }
 
     if (type !== "all") {
       match["meetingUpdate.updateType"] = type;
@@ -108,31 +97,15 @@ export async function GET(req) {
         },
       },
       {
-        $lookup: {
-          from: "users",
-          localField: "meetingUpdate.salesPersonId",
-          foreignField: "_id",
-          as: "salesPersonData",
-        },
-      },
-      {
         $project: {
           _id: "$meetingUpdate._id",
           clientId: "$meetingUpdate.clientId",
           clientName: { $arrayElemAt: ["$clientData.name", 0] },
           company: { $arrayElemAt: ["$clientData.company", 0] },
-          salesPersonId: "$meetingUpdate.salesPersonId",
-          salesPersonName: {
-            $ifNull: [
-              { $arrayElemAt: ["$salesPersonData.username", 0] },
-              "Unknown",
-            ],
-          },
           updateType: "$meetingUpdate.updateType",
           status: "$meetingUpdate.status",
           note: "$meetingUpdate.note",
           reminderAt: "$meetingUpdate.reminderAt",
-          meetingAt: "$meetingUpdate.meetingAt",
         },
       },
     ];
@@ -142,7 +115,7 @@ export async function GET(req) {
     return NextResponse.json(
       {
         success: true,
-        message: "Client reminders",
+        message: "My client reminders",
         data: reminders,
         range: { from, to, preset, type },
       },

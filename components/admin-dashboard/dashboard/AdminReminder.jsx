@@ -2,10 +2,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  getReminderService,
-  createReminderService,
-} from "@/service/employee-dashboard/reminder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AtSign, Bell, CalendarDays, X } from "lucide-react";
@@ -217,7 +213,6 @@ const AdminReminder = () => {
       {/* ================= MY REMINDERS TAB ================= */}
       {activeTab === "mine" && (
         <>
-          {/* Create Reminder */}
           <div className="flex flex-col md:flex-row gap-3 mb-6 w-full shrink-0">
             <Input
               placeholder="Reminder description"
@@ -252,12 +247,11 @@ const AdminReminder = () => {
             </div>
           )}
 
-          {/* List */}
           <div className="flex-1 min-h-0 overflow-y-auto reminder-scroll">
             {loading ? (
               <ul className="space-y-3">
                 {[...Array(4)].map((_, i) => (
-                  <li key={i} className="p-3 border rounded-lg">
+                  <li key={i} className="p-3 border rounded-lg bg-white">
                     <Skeleton height={20} width="70%" />
                     <Skeleton height={14} width="40%" className="mt-2" />
                   </li>
@@ -270,10 +264,12 @@ const AdminReminder = () => {
                 {reminders.map((item) => (
                   <li
                     key={item._id}
-                    className="flex items-center justify-between p-3 border rounded-lg bg-white"
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white"
                   >
                     <div>
-                      <p className="font-medium">{item.description}</p>
+                      <p className="font-medium text-gray-800">
+                        {item.description}
+                      </p>
                       <p className="text-xs text-slate-500">
                         ⏰ {new Date(item.reminderAt).toLocaleString()}
                       </p>
@@ -391,7 +387,7 @@ const AdminReminder = () => {
                       href={`${clientBase}/${activity.clientId}`}
                       className="block"
                     >
-                      <div className="p-3 bg-white rounded-lg border border-gray-100 hover:shadow-sm hover:border-blue-200 transition-all">
+                      <div className="p-3 bg-white rounded-lg border border-gray-200 hover:shadow-sm hover:border-gray-300 transition-all">
                         <div className="flex justify-between items-start gap-2">
                           <div className="min-w-0">
                             <h3 className="font-semibold text-gray-800 text-sm truncate">
@@ -415,34 +411,28 @@ const AdminReminder = () => {
                                 },
                               )}
                             </p>
-                            {activity.salesPersonName && (
-                              <p className="text-[11px] text-slate-500 truncate mt-1">
-                                <span className="text-slate-400">by</span>{" "}
-                                <b>{activity.salesPersonName}</b>
-                              </p>
-                            )}
                           </div>
                           <div className="flex flex-col items-end gap-1 shrink-0">
                             <span
                               className={`text-[10px] px-2 py-0.5 rounded-full capitalize font-medium ${
                                 activity.updateType === "call"
-                                  ? "bg-blue-100 text-blue-700"
+                                  ? "bg-blue-100 text-blue-600"
                                   : activity.updateType === "meeting"
-                                    ? "bg-purple-100 text-purple-700"
-                                    : "bg-gray-100 text-gray-700"
+                                    ? "bg-purple-100 text-purple-600"
+                                    : "bg-gray-100 text-gray-600"
                               }`}
                             >
                               {activity.updateType}
                             </span>
                             {activity.status && (
-                              <span className="text-[10px] px-2 py-0.5 rounded-full capitalize bg-yellow-50 text-yellow-700 border border-yellow-100">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full capitalize bg-yellow-50 text-yellow-600 border border-yellow-100">
                                 {String(activity.status).replace(/-/g, " ")}
                               </span>
                             )}
                           </div>
                         </div>
                         {activity.note && (
-                          <div className="mt-2 text-xs text-gray-600 bg-slate-50 p-2 rounded border border-slate-100">
+                          <div className="mt-2 text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-100">
                             <p className="line-clamp-2">{activity.note}</p>
                           </div>
                         )}
