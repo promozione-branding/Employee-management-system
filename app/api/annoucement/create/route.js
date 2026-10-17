@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Announcement from "@/models/admin/Announcement";
 import { getAuthUser } from "@/lib/getAuthUser";
-import User from "@/models/admin/User";
 
 export async function POST(req) {
   try {
@@ -12,7 +11,6 @@ export async function POST(req) {
 
     const body = await req.json();
 
-    // 🔐 AUTH (optional but recommended)
     const authUser = await getAuthUser(req);
     if (!authUser) {
       return NextResponse.json(
@@ -39,15 +37,18 @@ export async function POST(req) {
       );
     }
 
-    // 🧾 CREATE ANNOUNCEMENT
-    const announcement = await Announcement.create({
+    // Strip empty date strings — these were causing Mongoose CastError
+    const payload = {
       title,
       content,
       targetDepartment,
-      startDate,
-      endDate,
       author: authUser?._id,
-    });
+    };
+
+    if (startDate && startDate !== "") payload.startDate = new Date(startDate);
+    if (endDate && endDate !== "") payload.endDate = new Date(endDate);
+
+    const announcement = await Announcement.create(payload);
 
     return NextResponse.json(
       {
@@ -62,7 +63,8 @@ export async function POST(req) {
     return NextResponse.json(
       {
         success: false,
-        message: "Server error while creating announcement",
+        message:
+          error?.message || "Server error while creating announcement",
       },
       { status: 500 },
     );

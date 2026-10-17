@@ -9,8 +9,14 @@ export async function employeeClientService(id) {
   return data;
 }
 
-export async function announcementService() {
-  const { data } = await axiosInstance.get("/api/annoucement/get");
+// Accepts optional designation → filters announcements
+export async function announcementService(designation) {
+  const qs = new URLSearchParams();
+  if (designation) qs.set("designation", designation);
+  const url = `/api/annoucement/get${
+    qs.toString() ? `?${qs.toString()}` : ""
+  }`;
+  const { data } = await axiosInstance.get(url);
   return data;
 }
 
@@ -22,7 +28,6 @@ export async function createAnnouncementService(formData) {
   return data;
 }
 
-
 export async function employeeRecentActivityService(id) {
   const { data } = await axiosInstance.get(
     `/api/employee-dashboard/dashboard/recent-activity/${id}`,
@@ -31,6 +36,8 @@ export async function employeeRecentActivityService(id) {
 }
 
 export async function allEmployeeContactService() {
-  const { data } = await axiosInstance.get("/api/employee-dashboard/dashboard/contact");
+  const { data } = await axiosInstance.get(
+    "/api/employee-dashboard/dashboard/contact",
+  );
   return data;
 }
