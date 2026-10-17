@@ -14,6 +14,18 @@ export async function todayMeetingService(id, params = {}) {
   return data;
 }
 
+export async function todayReminderService(id, params = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") qs.set(k, v);
+  });
+  const url = `/api/sales-dashboard/dashboard-api/today-reminder/${id}${
+    qs.toString() ? `?${qs.toString()}` : ""
+  }`;
+  const { data } = await axiosInstance.get(url);
+  return data;
+}
+
 export async function recentActivityService(id) {
   const { data } = await axiosInstance.get(
     `/api/sales-dashboard/dashboard-api/recent-activity/${id}`,
@@ -24,13 +36,6 @@ export async function recentActivityService(id) {
 export async function dailyCallService(id) {
   const { data } = await axiosInstance.get(
     `/api/sales-dashboard/dashboard-api/daily-call/${id}`,
-  );
-  return data;
-}
-
-export async function todayReminderService(id) {
-  const { data } = await axiosInstance.get(
-    `/api/sales-dashboard/dashboard-api/today-reminder/${id}`,
   );
   return data;
 }
@@ -64,7 +69,7 @@ export async function totalClientCount(id) {
 }
 
 // ------------------------------------------------------------
-// Daily call stats (from CallLog, per agent) — used by DailyCall card
+// Daily call stats (from CallLog, per agent)
 // ------------------------------------------------------------
 export async function dailyCallStatsService(id) {
   const { data } = await axiosInstance.get(
