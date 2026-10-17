@@ -1,95 +1,135 @@
 // app/api/sales-dashboard/dashboard-api/today-meeting/[id]/route.js
 
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Meeting from "@/models/admin/meeting/Meeting";
-import { NextResponse } from "next/server";
 import mongoose from "mongoose";
+
+// ------------------------------------------------------------
+// Compute UTC date range from preset + custom from/to (IST-aware)
+// ------------------------------------------------------------
+function getRange(preset, fromStr, toStr) {
+  const IST_OFFSET_MIN = 330;
+  const now = new Date();
+  const nowIST = new Date(now.getTime() + IST_OFFSET_MIN * 60 * 1000);
+
+  // Midnight IST today, in UTC
+  const startOfTodayIST = new Date(
+    Date.UTC(
+      nowIST.getUTCFullYear(),
+      nowIST.getUTCMonth(),
+      nowIST.getUTCDate(),
+      0, 0, 0, 0,
+    ),
+  );
+  const startOfTodayUTC = new Date(
+    startOfTodayIST.getTime() - IST_OFFSET_MIN * 60 * 1000,
+  );
+
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  if (preset === "yesterday") {
+    return {
+      from: new Date(startOfTodayUTC.getTime() - dayMs),
+      to: startOfTodayUTC,
+    };
+  }
+  if (preset === "tomorrow") {
+    return {
+      from: new Date(startOfTodayUTC.getTime() + dayMs),
+      to: new Date(startOfTodayUTC.getTime() + 2 * dayMs),
+    };
+  }
+  if (preset === "next3") {
+    return {
+      from: startOfTodayUTC,
+      to: new Date(startOfTodayUTC.getTime() + 3 * dayMs),
+    };
+  }
+  if (preset === "custom" && fromStr) {
+    const fromDate = new Date(`${fromStr}T00:00:00+05:30`);
+    let toDate;
+    if (toStr) {
+      toDate = new Date(`${toStr}T00:00:00+05:30`);
+      toDate = new Date(toDate.getTime() + dayMs); // include the "to" day
+    } else {
+      toDate = new Date(fromDate.getTime() + dayMs);
+    }
+    return { from: fromDate, to: toDate };
+  }
+
+  // default = today
+  return {
+    from: startOfTodayUTC,
+    to: new Date(startOfTodayUTC.getTime() + dayMs),
+  };
+}
 
 export async function GET(req, { params }) {
   try {
     await connectDB();
 
     const { id } = await params;
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { success: false, message: "Invalid salesPersonId" },
+        { success: false, message: "Invalid salesperson id" },
         { status: 400 },
       );
     }
 
-    const now = new Date();
+    const { searchParams } = new URL(req.url);
+    const preset = searchParams.get("preset") || "today";
+    const fromStr = searchParams.get("from") || "";
+    const toStr = searchParams.get("to") || "";
 
-    const startOfDay = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate(),
-        0,
-        0,
-        0,
-        0,
-      ),
-    );
+    const { from, to } = getRange(preset, fromStr, toStr);
 
-    const endOfDay = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate(),
-        23,
-        59,
-        59,
-        999,
-      ),
-    );
-
-    const meetings = await Meeting.aggregate([
+    const pipeline = [
       { $unwind: "$meetingUpdate" },
-
       {
         $match: {
           "meetingUpdate.salesPersonId": new mongoose.Types.ObjectId(id),
-          "meetingUpdate.meetingAt": {
-            $gte: startOfDay,
-            $lte: endOfDay,
-          },
+          "meetingUpdate.meetingAt": { $gte: from, $lt: to },
         },
       },
-
+      { $sort: { "meetingUpdate.meetingAt": 1 } },
       {
         $lookup: {
           from: "customers",
           localField: "meetingUpdate.clientId",
           foreignField: "_id",
-          as: "clientDetails",
+          as: "clientData",
         },
       },
-
-      { $unwind: { path: "$clientDetails", preserveNullAndEmptyArrays: true } },
-
       {
         $project: {
           _id: "$meetingUpdate._id",
-          meetingAt: "$meetingUpdate.meetingAt",
+          clientId: "$meetingUpdate.clientId",
+          clientName: { $arrayElemAt: ["$clientData.name", 0] },
           updateType: "$meetingUpdate.updateType",
-          clientId: "$clientDetails._id",
-          clientName: "$clientDetails.name", // 👈 only name
+          status: "$meetingUpdate.status",
+          note: "$meetingUpdate.note",
+          meetingAt: "$meetingUpdate.meetingAt",
+          reminderAt: "$meetingUpdate.reminderAt",
         },
       },
+    ];
 
-      { $sort: { meetingAt: 1 } },
-    ]);
+    const meetings = await Meeting.aggregate(pipeline);
 
-    return NextResponse.json({
-      success: true,
-      message: "Today's meetings",
-      data: meetings,
-    });
-  } catch (error) {
-    console.error(error);
     return NextResponse.json(
-      { success: false, message: "Server error" },
+      {
+        success: true,
+        message: "Meetings",
+        data: meetings,
+        range: { from, to, preset },
+      },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error("[today-meeting]", error);
+    return NextResponse.json(
+      { success: false, message: "Server error", error: error.message },
       { status: 500 },
     );
   }
