@@ -1,10 +1,18 @@
+
 // app/sales-dashboard/clients/Clients.jsx
 
 "use client";
 
 import ExecutiveClientList from "@/components/sales-dashboard/auth-role/executive/client/ExecutiveClientList";
 import SrClientList from "@/components/sales-dashboard/auth-role/sr-manager/client/SrClientList";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 
 const Clients = () => {
@@ -14,17 +22,43 @@ const Clients = () => {
     return <div>Loading...</div>;
   }
 
-  const srManager = employee?.basicDetails?.authRole === "SR_MANAGER";
+  // Read the role from whichever user/employee fields are available.
+  const roles = [
+    employee?.role,
+    employee?.user?.role,
+    employee?.basicDetails?.authRole,
+  ]
+    .filter(Boolean)
+    .map((role) => String(role).toUpperCase());
+
+  // Sales users, SR Managers, and Executives can view all clients.
+  const canViewAllClients = [
+    "SALES",
+    "SR_MANAGER",
+    "EXECUTIVE",
+  ].some((role) => roles.includes(role));
 
   return (
-    <Tabs defaultValue={srManager ? "allClients" : "myCLients"} className="">
+    <Tabs defaultValue="myCLients" className="w-full">
       <TabsList>
-        {srManager && <TabsTrigger value="allClients">All Client</TabsTrigger>}
-        <TabsTrigger value="myCLients">My Client</TabsTrigger>
+        <TabsTrigger value="myCLients">
+          My Clients
+        </TabsTrigger>
+        {canViewAllClients && (
+          <TabsTrigger value="allClients">
+            All Clients
+          </TabsTrigger>
+        )}
+
+        
       </TabsList>
-      <TabsContent value="allClients">
-        <SrClientList />
-      </TabsContent>
+
+      {canViewAllClients && (
+        <TabsContent value="allClients">
+          <SrClientList />
+        </TabsContent>
+      )}
+
       <TabsContent value="myCLients">
         <ExecutiveClientList />
       </TabsContent>
