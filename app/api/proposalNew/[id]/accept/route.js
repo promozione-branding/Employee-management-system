@@ -20,13 +20,15 @@ export async function POST(req, { params }) {
     if (!proposal) {
       return NextResponse.json({ success: false, message: "Invalid token" }, { status: 404 });
     }
+    
     if (proposal.status === "accepted") {
       return NextResponse.json({ success: true, message: "Already accepted" }, { status: 200 });
     }
 
     proposal.status = "accepted";
     proposal.acceptedAt = new Date();
-    proposal.acceptedByEmail = proposal.clientId?.email || "";
+    // Save the email of the person who actually clicked accept
+    proposal.acceptedByEmail = proposal.sentToEmail || proposal.clientId?.email || "";
     await proposal.save();
 
     const baseUrl = process.env.APP_URL || process.env.BACKEND_URL || "http://localhost:3000";
@@ -55,14 +57,35 @@ export async function POST(req, { params }) {
 
     try {
       const transporter = getTransporter();
+      
+      // ✅ TO: The person who actually received and clicked the link
+      const mainRecipient = proposal.sentToEmail || proposal.clientId?.email;
+      
+      if (!mainRecipient) {
+        throw new Error("No recipient email found.");
+      }
+
+      // ✅ CC: Our company + The client's owner email (if different from who accepted)
+      const ccEmails = new Set();
+      
+      // 1. Add our company email
+      if (process.env.YOUR_EMAIL_ADDRESS) {
+        ccEmails.add(process.env.YOUR_EMAIL_ADDRESS);
+      }
+      
+      // 2. Add the client's owner email if it's different from the main recipient
+      if (proposal.clientId?.email && proposal.clientId.email !== mainRecipient) {
+        ccEmails.add(proposal.clientId.email);
+      }
+
       const mailOptions = {
         from: MAIL_FROM,
-        to: proposal.clientId?.email,
-        cc: process.env.YOUR_EMAIL_ADDRESS, 
+        to: mainRecipient, // e.g., client@ab.com
+        cc: ccEmails.size > 0 ? Array.from(ccEmails).join(", ") : undefined, // e.g., accounts@... , bijay@...
         subject: `Welcome to Inquiry Bazaar — Proposal Accepted`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; color: #111827;">
-            <p>Dear ${proposal.clientId?.name},</p>
+            <p>Dear ${proposal.clientId?.name || "Client"},</p>
             <p>Thank you for accepting proposal <strong>${proposal.proposalNumber}</strong>. We're delighted to welcome you to <strong>Inquiry Bazaar Pvt Ltd</strong>.</p>
             <p><strong>Please find your officially accepted proposal PDF attached to this email for your records.</strong></p>
             <p>Our team will reach out shortly to kick off your project.</p>

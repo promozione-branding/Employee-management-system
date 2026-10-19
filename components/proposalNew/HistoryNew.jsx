@@ -14,6 +14,9 @@ import {
 const fmt = (n) => `₹ ${Number(n || 0).toLocaleString("en-IN")}`;
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
+// Simple email regex validator
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
 const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -70,7 +73,6 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
     } catch (err) { toast.error("Failed to download"); }
   };
 
-  // ✅ Fetch full proposal to get the exact client email
   const openMailModal = async (id) => {
     try {
       toast.loading("Loading email...", { id: "load-email" });
@@ -78,9 +80,15 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
       toast.dismiss("load-email");
       
       if (res.success && res.data) {
-        setDefaultEmail(res.data.clientId?.email || "");
+        const clientEmail = res.data.clientId?.email || "";
+        setDefaultEmail(clientEmail);
+        // If the stored default email is invalid, default to custom
+        if (!isValidEmail(clientEmail)) {
+          setSelectedEmailType("custom");
+        } else {
+          setSelectedEmailType("default");
+        }
         setMailTargetId(id);
-        setSelectedEmailType("default");
         setCustomEmail("");
         setMailModalOpen(true);
       }
@@ -91,8 +99,15 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
   };
 
   const handleSendMail = async () => {
-    const finalEmail = selectedEmailType === "custom" ? customEmail.trim() : defaultEmail;
-    if (!finalEmail) return toast.error("Please provide a valid email address");
+    let finalEmail = selectedEmailType === "custom" ? customEmail.trim() : defaultEmail.trim();
+
+    // ✅ VALIDATION
+    if (!finalEmail) {
+      return toast.error("Please provide a valid email address");
+    }
+    if (!isValidEmail(finalEmail)) {
+      return toast.error(`"${finalEmail}" is not a valid email format.`);
+    }
 
     try {
       setMailing(true);
@@ -156,11 +171,13 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
             
             <div className="p-4 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                  <input type="radio" checked={selectedEmailType === "default"} onChange={() => setSelectedEmailType("default")} className="h-4 w-4 accent-indigo-600" />
+                <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${!isValidEmail(defaultEmail) ? "opacity-50" : ""}`}>
+                  <input type="radio" checked={selectedEmailType === "default"} onChange={() => setSelectedEmailType("default")} disabled={!isValidEmail(defaultEmail)} className="h-4 w-4 accent-indigo-600" />
                   <div>
                     <p className="text-sm font-medium text-gray-800">Send to Client's Email</p>
-                    <p className="text-xs text-gray-500">{defaultEmail || "No email on record"}</p>
+                    <p className={`text-xs ${!isValidEmail(defaultEmail) ? "text-red-500" : "text-gray-500"}`}>
+                      {defaultEmail || "No email on record"} {!isValidEmail(defaultEmail) && "(Invalid)"}
+                    </p>
                   </div>
                 </label>
 

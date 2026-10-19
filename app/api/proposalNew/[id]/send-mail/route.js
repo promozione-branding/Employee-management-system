@@ -6,6 +6,8 @@ import { getTransporter, MAIL_FROM } from "@/lib/mailerNew";
 import crypto from "crypto";
 import mongoose from "mongoose";
 
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
 export async function POST(req, { params }) {
   try {
     await connectDB();
@@ -15,7 +17,6 @@ export async function POST(req, { params }) {
     const { id } = await params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ success: false, message: "Invalid id" }, { status: 400 });
 
-    // ✅ Safely parse the body
     let body;
     try {
       body = await req.json();
@@ -25,18 +26,23 @@ export async function POST(req, { params }) {
     
     const targetEmail = body.email;
     if (!targetEmail) return NextResponse.json({ success: false, message: "Target email required" }, { status: 400 });
+    
+    // ✅ Backend validation
+    if (!isValidEmail(targetEmail)) {
+      return NextResponse.json({ success: false, message: "Invalid email format" }, { status: 400 });
+    }
 
     const proposal = await ProposalNew.findById(id).populate({ path: "clientId", select: "name company email phone" });
     if (!proposal) return NextResponse.json({ success: false, message: "Proposal not found" }, { status: 404 });
     
-    // ✅ Check if client exists before accessing properties
     if (!proposal.clientId) {
-      return NextResponse.json({ success: false, message: "Client data missing from this proposal" }, { status: 400 });
+      return NextResponse.json({ success: false, message: "Client data missing" }, { status: 400 });
     }
     
     if (!proposal.acceptToken) proposal.acceptToken = crypto.randomBytes(24).toString("hex");
     proposal.status = "sent";
     proposal.sentAt = new Date();
+    proposal.sentToEmail = targetEmail;
     await proposal.save();
 
     const baseUrl = process.env.APP_URL || process.env.BACKEND_URL || "http://localhost:3000";
@@ -88,7 +94,6 @@ export async function POST(req, { params }) {
     return NextResponse.json({ success: true, message: "Proposal mail sent" }, { status: 200 });
   } catch (error) {
     console.log("sendProposalMail error:", error);
-    // ✅ This ensures we always return JSON, so the frontend doesn't crash
     return NextResponse.json({ success: false, message: error.message || "Server error" }, { status: 500 });
   }
 }

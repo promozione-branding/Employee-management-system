@@ -63,9 +63,9 @@ const ProposalNewSchema = new mongoose.Schema(
     paymentMethod: { type: String, default: "" },
     status: { type: String, enum: ["draft", "sent", "accepted", "rejected"], default: "draft" },
     
-    // Fields for accepting
     acceptToken: { type: String, index: true },
     sentAt: { type: Date },
+    sentToEmail: { type: String }, // ✅ Added
     acceptedAt: { type: Date },
     acceptedByEmail: { type: String },
     acceptedIp: { type: String },
