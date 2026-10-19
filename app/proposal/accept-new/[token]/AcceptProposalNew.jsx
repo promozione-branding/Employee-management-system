@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import PdfNew from "@/components/proposalNew/PdfNew";
@@ -12,6 +12,32 @@ export default function AcceptProposalNew({ token }) {
   const [loading, setLoading] = useState(false);
   const [proposalId, setProposalId] = useState("");
   const [proposalData, setProposalData] = useState(null);
+
+  // ✅ PDF Scaling State
+  const containerRef = useRef(null);
+  const [scale, setScale] = useState(1);
+  const [containerHeight, setContainerHeight] = useState("auto");
+
+  // Calculate exact scale on mount/resize
+  useEffect(() => {
+    const updateScale = () => {
+      if (!containerRef.current) return;
+      // The PDF is 210mm wide (approx 794px at 96dpi)
+      const pdfWidth = 794; 
+      const containerWidth = containerRef.current.clientWidth;
+      const newScale = containerWidth / pdfWidth;
+      setScale(newScale);
+      
+      // The PDF is 297mm tall (approx 1123px at 96dpi)
+      const pdfHeight = 1123;
+      const scaledHeight = pdfHeight * newScale;
+      setContainerHeight(`${scaledHeight}px`);
+    };
+
+    updateScale();
+    window.addEventListener("resize", updateScale);
+    return () => window.removeEventListener("resize", updateScale);
+  }, [step]); // Recalculate when step changes to "terms"
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -41,10 +67,9 @@ export default function AcceptProposalNew({ token }) {
 
   const handleAccept = () => {
     if (!agreed) return toast.error("Please tick the box to agree");
-    
     setLoading(true);
     
-    // ✅ Force a tiny delay so the browser can paint the loading overlay before the heavy API request blocks the thread
+    // 100ms delay ensures the loading spinner renders before the API call starts
     setTimeout(async () => {
       try {
         const res = await axios.post(`/api/proposalNew/${proposalId}/accept`, { token });
@@ -64,40 +89,6 @@ export default function AcceptProposalNew({ token }) {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center py-6 md:py-10 px-2 md:px-4 relative">
-      {/* ✅ FIXED: PDF Scaling and Container Height */}
-      <style>{`
-        .pdf-viewer-wrapper {
-          width: 100%;
-          max-width: 100%;
-          overflow: hidden;
-          display: flex;
-          justify-content: center;
-          background: #e5e7eb;
-          border-radius: 8px;
-          position: relative;
-        }
-        @media (max-width: 768px) {
-          .pdf-viewer-wrapper {
-            /* 297mm (A4 height) * 0.45 scale = ~133mm. Converted to vh/vw for mobile */
-            height: 75vw; 
-            overflow-y: auto;
-            align-items: flex-start;
-          }
-          .pdf-scale-inner {
-            transform: scale(0.45);
-            transform-origin: top center;
-            width: 210mm;
-          }
-        }
-        @media (min-width: 769px) {
-          .pdf-viewer-wrapper {
-            padding: 20px 0;
-            height: auto;
-            overflow-x: auto;
-          }
-        }
-      `}</style>
-
       <div className="w-full max-w-4xl">
         <div className="text-center mb-6 md:mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Inquiry Bazaar Pvt Ltd</h1>
@@ -121,11 +112,28 @@ export default function AcceptProposalNew({ token }) {
           <div className="flex flex-col gap-6">
             <div className="bg-white rounded-2xl shadow-lg p-2 md:p-4">
               <h2 className="text-lg md:text-xl font-bold mb-2 md:mb-4 px-2">Proposal Preview</h2>
-              <div className="pdf-viewer-wrapper border">
-                <div className="pdf-scale-inner origin-top transform">
+              
+              {/* ✅ PERFECT MOBILE PDF VIEWER */}
+              <div 
+                ref={containerRef}
+                className="w-full bg-gray-200 rounded-lg overflow-y-auto overflow-x-hidden border relative"
+                style={{ 
+                  height: window.innerWidth < 768 ? "65vh" : "auto", 
+                  maxHeight: window.innerWidth < 768 ? "65vh" : "none" 
+                }}
+              >
+                <div 
+                  style={{
+                    width: "210mm", // A4 fixed width
+                    transform: `scale(${scale})`,
+                    transformOrigin: "top left",
+                    height: containerHeight, // Fixes the bottom blank space
+                  }}
+                >
                   <PdfNew proposal={proposalData} />
                 </div>
               </div>
+
             </div>
 
             <div className="bg-white rounded-2xl shadow-lg p-5 md:p-6 max-w-2xl mx-auto w-full">
@@ -155,7 +163,7 @@ export default function AcceptProposalNew({ token }) {
         )}
       </div>
 
-      {/* ✅ FIXED: Full-Screen Loading Overlay */}
+      {/* Full-Screen Loading Overlay */}
       {loading && step === "terms" && (
         <div className="fixed inset-0 z-50 bg-gray-900/80 flex items-center justify-center backdrop-blur-sm transition-opacity duration-300">
           <div className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full mx-4 flex flex-col items-center text-center">
