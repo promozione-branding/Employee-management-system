@@ -32,7 +32,27 @@ export async function POST(req, { params }) {
     console.log("Launching Puppeteer to generate PDF...");
     const browser = await puppeteer.launch({ headless: "new", args: ["--no-sandbox", "--disable-setuid-sandbox"] });
     const page = await browser.newPage();
+    
+    // ✅ PASS AUTH COOKIES from the current request to Puppeteer
+    const cookies = req.headers.get("cookie");
+    if (cookies) {
+      const cookieParams = cookies.split(";").map((c) => {
+        const [name, ...rest] = c.trim().split("=");
+        return {
+          name,
+          value: rest.join("="),
+          domain: new URL(baseUrl).hostname,
+          path: "/",
+        };
+      });
+      await page.setCookie(...cookieParams);
+    }
+
     await page.goto(`${baseUrl}/proposal/pdf-print-new/${id}`, { waitUntil: "networkidle0" });
+    
+    // Wait for React to render the PDF
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+
     const pdfBuffer = await page.pdf({ format: "A4", printBackground: true, margin: { top: "0", right: "0", bottom: "0", left: "0" } });
     await browser.close();
     console.log("PDF Generated successfully!");
