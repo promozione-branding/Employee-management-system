@@ -1,9 +1,9 @@
 // app/api/customer/meeting/is-new-meeting-check/[id]/route.js
 
-import "@/models/admin/User";
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
 import Customer from "@/models/admin/Customer";
+import Meeting from "@/models/admin/meeting/Meeting";
 
 export async function GET(req, { params }) {
   try {
@@ -15,6 +15,7 @@ export async function GET(req, { params }) {
       .populate({
         path: "meetingUpdate",
         select: "_id",
+        model: Meeting,
       });
 
     if (meetingHistory?.meetingUpdate) {
@@ -25,9 +26,7 @@ export async function GET(req, { params }) {
           newMeeting: false,
           data: meetingHistory,
         },
-        {
-          status: 200,
-        }
+        { status: 200 },
       );
     } else {
       return NextResponse.json(
@@ -36,9 +35,7 @@ export async function GET(req, { params }) {
           message: "Create new meeting",
           newMeeting: true,
         },
-        {
-          status: 200,
-        }
+        { status: 200 },
       );
     }
   } catch (error) {
@@ -48,9 +45,7 @@ export async function GET(req, { params }) {
         success: false,
         message: "Error while fetch customer meeting history",
       },
-      {
-        status: 500,
-      }
+      { status: 500 },
     );
   }
 }
