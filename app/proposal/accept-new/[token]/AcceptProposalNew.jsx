@@ -39,38 +39,61 @@ export default function AcceptProposalNew({ token }) {
     } finally { setLoading(false); }
   };
 
-  const handleAccept = async () => {
+  const handleAccept = () => {
     if (!agreed) return toast.error("Please tick the box to agree");
-    try {
-      setLoading(true);
-      const res = await axios.post(`/api/proposalNew/${proposalId}/accept`, { token });
-      if (res.data?.success) { toast.success("Accepted!"); setStep("done"); }
-      else toast.error(res.data?.message || "Failed");
-    } catch (err) {
-      toast.error("Failed to accept");
-    } finally { setLoading(false); }
+    
+    setLoading(true);
+    
+    // ✅ Force a tiny delay so the browser can paint the loading overlay before the heavy API request blocks the thread
+    setTimeout(async () => {
+      try {
+        const res = await axios.post(`/api/proposalNew/${proposalId}/accept`, { token });
+        if (res.data?.success) { 
+          toast.success("Accepted!"); 
+          setStep("done"); 
+        } else {
+          toast.error(res.data?.message || "Failed");
+        }
+      } catch (err) {
+        toast.error("Failed to accept");
+      } finally { 
+        setLoading(false); 
+      }
+    }, 100);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center py-6 md:py-10 px-2 md:px-4">
-      {/* ✅ CSS FIX FOR MOBILE PDF SCALING */}
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center py-6 md:py-10 px-2 md:px-4 relative">
+      {/* ✅ FIXED: PDF Scaling and Container Height */}
       <style>{`
-        .pdf-wrapper {
+        .pdf-viewer-wrapper {
           width: 100%;
           max-width: 100%;
-          overflow-x: auto;
+          overflow: hidden;
           display: flex;
           justify-content: center;
-          background: #f3f4f6;
+          background: #e5e7eb;
           border-radius: 8px;
-          padding: 10px;
+          position: relative;
         }
         @media (max-width: 768px) {
+          .pdf-viewer-wrapper {
+            /* 297mm (A4 height) * 0.45 scale = ~133mm. Converted to vh/vw for mobile */
+            height: 75vw; 
+            overflow-y: auto;
+            align-items: flex-start;
+          }
           .pdf-scale-inner {
             transform: scale(0.45);
             transform-origin: top center;
             width: 210mm;
-            margin-bottom: -55%; /* Compensate for the height lost during scaling */
+          }
+        }
+        @media (min-width: 769px) {
+          .pdf-viewer-wrapper {
+            padding: 20px 0;
+            height: auto;
+            overflow-x: auto;
           }
         }
       `}</style>
@@ -87,24 +110,22 @@ export default function AcceptProposalNew({ token }) {
               <p className="text-sm text-gray-700">Enter your registered email and the last 7 digits of your phone number to verify.</p>
               <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border rounded-md px-3 py-2" required />
               <input type="text" placeholder="Last 7 digits of phone" value={phoneLast7} onChange={(e) => setPhoneLast7(e.target.value.replace(/\D/g, "").slice(0, 7))} maxLength={7} className="w-full border rounded-md px-3 py-2" required />
-              <button type="submit" disabled={loading} className="bg-blue-900 text-white rounded-md py-2 font-semibold hover:bg-blue-800 disabled:opacity-50">{loading ? "Verifying…" : "Verify"}</button>
+              <button type="submit" disabled={loading} className="bg-blue-900 text-white rounded-md py-2 font-semibold hover:bg-blue-800 disabled:opacity-50">
+                {loading ? "Verifying…" : "Verify"}
+              </button>
             </form>
           </div>
         )}
 
         {step === "terms" && proposalData && (
           <div className="flex flex-col gap-6">
-            
-            {/* ✅ Mobile-Friendly PDF Container */}
-            <div className="bg-white rounded-2xl shadow-lg p-2 md:p-4 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-lg p-2 md:p-4">
               <h2 className="text-lg md:text-xl font-bold mb-2 md:mb-4 px-2">Proposal Preview</h2>
-              
-              <div className="pdf-wrapper">
+              <div className="pdf-viewer-wrapper border">
                 <div className="pdf-scale-inner origin-top transform">
                   <PdfNew proposal={proposalData} />
                 </div>
               </div>
-              
             </div>
 
             <div className="bg-white rounded-2xl shadow-lg p-5 md:p-6 max-w-2xl mx-auto w-full">
@@ -118,8 +139,8 @@ export default function AcceptProposalNew({ token }) {
                 <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5 h-5 w-5 accent-blue-700 shrink-0" />
                 <span>I have reviewed the proposal PDF and I agree to the Terms & Conditions.</span>
               </label>
-              <button type="button" onClick={handleAccept} disabled={!agreed || loading} className="w-full bg-blue-900 text-white rounded-md py-3 text-lg font-semibold hover:bg-blue-800 disabled:opacity-50">
-                {loading ? "Accepting…" : "Accept Proposal"}
+              <button type="button" onClick={handleAccept} disabled={!agreed} className="w-full bg-blue-900 text-white rounded-md py-3 text-lg font-semibold hover:bg-blue-800 disabled:opacity-50">
+                Accept Proposal
               </button>
             </div>
           </div>
@@ -133,6 +154,18 @@ export default function AcceptProposalNew({ token }) {
           </div>
         )}
       </div>
+
+      {/* ✅ FIXED: Full-Screen Loading Overlay */}
+      {loading && step === "terms" && (
+        <div className="fixed inset-0 z-50 bg-gray-900/80 flex items-center justify-center backdrop-blur-sm transition-opacity duration-300">
+          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full mx-4 flex flex-col items-center text-center">
+            <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-6"></div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Accepting Proposal</h3>
+            <p className="text-sm text-gray-500">Please wait while we generate your official PDF receipt and send the confirmation email.</p>
+            <p className="text-xs text-gray-400 mt-4">This may take a few seconds...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
