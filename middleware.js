@@ -3,7 +3,13 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const PUBLIC_ROUTES = ["/login", "/register", "/login-otp", "/forgot-password"];
+const PUBLIC_ROUTES = [
+  "/login",
+  "/register",
+  "/login-otp",
+  "/forgot-password",
+];
+
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const ROLE_REDIRECT = {
@@ -17,11 +23,19 @@ export async function middleware(req) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
 
-  const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
-
   /* =======================
      🔓 PUBLIC ROUTES
   ======================== */
+  // Allow proposal accept and print pages without login (for clients and Puppeteer)
+  if (
+    pathname.startsWith("/proposal/accept-new") ||
+    pathname.startsWith("/proposal/pdf-print-new")
+  ) {
+    return NextResponse.next();
+  }
+
+  const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+
   if (isPublicRoute) {
     if (!token) return NextResponse.next();
 
@@ -94,4 +108,3 @@ export async function middleware(req) {
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
-

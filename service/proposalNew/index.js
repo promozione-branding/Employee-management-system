@@ -21,7 +21,18 @@ export const deleteProposalNewService = async (id) => {
   const { data } = await axiosInstance.delete(`${BASE}/${id}`);
   return data;
 };
-export const sendProposalMailService = async (id) => {
-  const { data } = await axiosInstance.post(`${BASE}/${id}/send-mail`);
+
+// ✅ FIXED: Now accepts the payload and passes it to the backend
+export const sendProposalMailService = async (id, payload) => {
+  const { data } = await axiosInstance.post(`${BASE}/${id}/send-mail`, payload);
+  return data;
+};
+
+export const verifyProposalNewService = async (id, payload) => {
+  const { data } = await axiosInstance.post(`${BASE}/${id}/verify`, payload);
+  return data;
+};
+export const acceptProposalNewService = async (id, payload) => {
+  const { data } = await axiosInstance.post(`${BASE}/${id}/accept`, payload);
   return data;
 };

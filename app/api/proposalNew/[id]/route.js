@@ -1,5 +1,3 @@
-// app/api/proposalNew/[id]/route.js
-
 import { connectDB } from "@/lib/db";
 import ProposalNew from "@/models/admin/proposalNew/ProposalNew";
 import { getAuthUser } from "@/lib/getAuthUser";
@@ -8,15 +6,10 @@ import mongoose from "mongoose";
 
 const round0 = (n) => Math.round(Number(n) || 0);
 
+// ✅ PUBLIC ROUTE (No auth check so clients can view the PDF via link)
 export async function GET(req, { params }) {
   try {
     await connectDB();
-    const authUser = await getAuthUser(req);
-    if (!authUser)
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
 
     const { id } = await params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
