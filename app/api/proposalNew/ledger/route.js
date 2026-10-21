@@ -37,6 +37,7 @@ export async function POST(req) {
       voucher: body.voucher,
       debit: Number(body.debit) || 0,
       credit: Number(body.credit) || 0,
+      extraAmount: Number(body.extraAmount) || 0,
       transactionId: body.transactionId,
       isConfidential: Boolean(body.isConfidential)
     });
@@ -60,12 +61,28 @@ export async function PUT(req) {
         voucher: body.voucher,
         debit: Number(body.debit) || 0,
         credit: Number(body.credit) || 0,
+        extraAmount: Number(body.extraAmount) || 0,
         transactionId: body.transactionId,
       },
       { new: true }
     );
 
     return NextResponse.json({ success: true, data: updated }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req) {
+  try {
+    await connectDB();
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) return NextResponse.json({ success: false, message: "ID required" }, { status: 400 });
+
+    await LedgerNew.findByIdAndDelete(id);
+    return NextResponse.json({ success: true, message: "Deleted" }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }

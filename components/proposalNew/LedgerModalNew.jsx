@@ -1,23 +1,51 @@
 "use client";
-import React, { useState } from "react";
-import { createLedgerNewService, updateLedgerNewService } from "@/service/proposalNew/ledgerNew";
+import React, { useState, useEffect } from "react";
+import { createLedgerNewService, updateLedgerNewService, deleteLedgerNewService } from "@/service/proposalNew/ledgerNew";
 import toast from "react-hot-toast";
-import { X } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 
 export default function LedgerModalNew({ customerId, onClose, onSuccess, isSecretUnlocked, initialData, preselectedProposal }) {
   const isEditing = !!initialData;
 
   const [form, setForm] = useState({
-    proposalId: initialData?.proposalId || preselectedProposal?._id || "",
-    method: initialData?.voucher || "net-banking",
-    particulars: initialData?.particulars || (preselectedProposal ? `Proposal #${preselectedProposal.proposalNumber}` : ""),
-    transactionId: initialData?.transactionId || "",
-    transactionDate: initialData ? new Date(initialData.date).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
-    amount: initialData ? (initialData.debit > 0 ? initialData.debit : initialData.credit) : (preselectedProposal?.grandTotal || ""),
-    isConfidential: initialData?.isConfidential || isSecretUnlocked,
+    proposalId: "",
+    method: "net-banking",
+    particulars: "",
+    transactionId: "",
+    transactionDate: new Date().toISOString().split("T")[0],
+    amount: "",
+    addonAmount: "",
+    isConfidential: false,
   });
   
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isEditing) {
+      setForm({
+        proposalId: initialData.proposalId || "",
+        method: initialData.voucher || "net-banking",
+        // Remove the prefix we added before, just use original particulars
+        particulars: initialData.particulars.replace(" (Service Used)", "") || "",
+        transactionId: initialData.transactionId || "",
+        transactionDate: new Date(initialData.date).toISOString().split("T")[0],
+        amount: initialData.credit || initialData.debit || "",
+        addonAmount: initialData.extraAmount || "",
+        isConfidential: initialData.isConfidential || false,
+      });
+    } else {
+      setForm({
+        proposalId: preselectedProposal?._id || "",
+        method: "net-banking",
+        particulars: preselectedProposal ? `Proposal #${preselectedProposal.proposalNumber}` : "",
+        transactionId: "",
+        transactionDate: new Date().toISOString().split("T")[0],
+        amount: preselectedProposal?.grandTotal || "",
+        addonAmount: "",
+        isConfidential: isSecretUnlocked,
+      });
+    }
+  }, [isEditing, initialData, preselectedProposal, isSecretUnlocked]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,6 +53,10 @@ export default function LedgerModalNew({ customerId, onClose, onSuccess, isSecre
 
     try {
       setLoading(true);
+      const baseAmt = Number(form.amount);
+      const addonAmt = Number(form.addonAmount) || 0;
+      const totalCredit = baseAmt + addonAmt;
+
       const payload = {
         customerId,
         entryId: initialData?._id,
@@ -32,8 +64,9 @@ export default function LedgerModalNew({ customerId, onClose, onSuccess, isSecre
         date: form.transactionDate,
         particulars: form.particulars,
         voucher: form.method,
-        debit: Number(form.amount),
-        credit: 0,
+        debit: 0, // ✅ Always 0 for a payment
+        credit: totalCredit, // ✅ Payment goes to Credit
+        extraAmount: addonAmt,
         transactionId: form.transactionId,
         isConfidential: form.isConfidential,
       };
@@ -43,11 +76,30 @@ export default function LedgerModalNew({ customerId, onClose, onSuccess, isSecre
         toast.success("Entry updated");
       } else {
         await createLedgerNewService(payload);
-        toast.success("Funds added");
+        toast.success("Payment logged");
       }
       onSuccess();
     } catch (err) {
       toast.error("Failed to save entry");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this entry? This cannot be undone.")) return;
+    
+    try {
+      setLoading(true);
+      const res = await deleteLedgerNewService(initialData._id);
+      if (res.success) {
+        toast.success("Entry deleted");
+        onSuccess();
+      } else {
+        toast.error("Failed to delete");
+      }
+    } catch (err) {
+      toast.error("Failed to delete entry");
     } finally {
       setLoading(false);
     }
@@ -59,7 +111,7 @@ export default function LedgerModalNew({ customerId, onClose, onSuccess, isSecre
         
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="font-semibold text-lg text-gray-800">
-            {isEditing ? "Edit Entry" : "Add Funds / Entry"}
+            {isEditing ? "Edit Entry" : "Add Payment (Credit)"}
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><X className="h-5 w-5" /></button>
         </div>
@@ -92,8 +144,13 @@ export default function LedgerModalNew({ customerId, onClose, onSuccess, isSecre
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700">Amount (₹)</label>
+            <label className="text-sm font-medium text-gray-700">Amount Received (₹)</label>
             <input type="number" value={form.amount} onChange={(e) => setForm({...form, amount: e.target.value})} placeholder="Enter Amount" className="w-full mt-1 border rounded-md px-3 py-2 text-sm" required />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700">Add-on Payment (₹) <span className="text-gray-400 font-normal">(Optional)</span></label>
+            <input type="number" value={form.addonAmount} onChange={(e) => setForm({...form, addonAmount: e.target.value})} placeholder="Extra amount paid" className="w-full mt-1 border rounded-md px-3 py-2 text-sm" />
           </div>
 
           {isSecretUnlocked && !isEditing && (
@@ -105,9 +162,16 @@ export default function LedgerModalNew({ customerId, onClose, onSuccess, isSecre
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="w-full mt-2 bg-blue-900 text-white py-2 rounded-md font-semibold hover:bg-blue-800 disabled:opacity-50">
-            {loading ? "Saving..." : (isEditing ? "Update Entry" : "Submit")}
-          </button>
+          <div className="flex gap-2 mt-2">
+            {isEditing && (
+              <button type="button" onClick={handleDelete} disabled={loading} className="px-4 bg-red-50 text-red-600 border border-red-200 rounded-md font-semibold hover:bg-red-100 disabled:opacity-50 flex items-center justify-center">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+            <button type="submit" disabled={loading} className="flex-1 bg-blue-900 text-white py-2 rounded-md font-semibold hover:bg-blue-800 disabled:opacity-50">
+              {loading ? "Saving..." : (isEditing ? "Update Entry" : "Record Payment")}
+            </button>
+          </div>
         </form>
 
       </div>
