@@ -56,12 +56,13 @@ function DashboardContent({ customerId, salesPersonId }) {
           <TabsTrigger value="invoice">Invoice</TabsTrigger>
           
           <TabsTrigger value="newledger">New Ledger</TabsTrigger>
-          <TabsTrigger value="ledger">Ledger</TabsTrigger>
+          
 
           <TabsTrigger value="meeting">Update</TabsTrigger>
           <TabsTrigger value="meetingHistory">History</TabsTrigger>
           <TabsTrigger value="attachment">Attachment</TabsTrigger>
           <TabsTrigger value="proposal">Proposal</TabsTrigger>
+          <TabsTrigger value="ledger">Ledger</TabsTrigger>
         </TabsList>
 
         <TabsContent value="Customer">
