@@ -1,8 +1,7 @@
-// app/dashboard/customer/[customer]/CustomerDashboard.jsx
-
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import CustomerProposal from "../CustomerProposal";
 import AllInvoice from "../invoice/AllInvoice";
 import Customer from "../Customer";
@@ -15,8 +14,14 @@ import CallPanel from "@/components/sales-dashboard/client/CallPanel";
 import CallHistory from "@/components/sales-dashboard/client/CallHistory";
 import { getCallHistoryService } from "@/service/calling";
 import ProposalTabNew from "@/components/proposalNew/ProposalTabNew";
+import LedgerTabNew from "@/components/proposalNew/LedgerTabNew";
 
-const CustomerDashboard = ({ customerId, salesPersonId }) => {
+function DashboardContent({ customerId, salesPersonId }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || "Customer";
+  
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [callHistory, setCallHistory] = useState([]);
   const [callHistoryLoading, setCallHistoryLoading] = useState(false);
 
@@ -37,14 +42,22 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
     fetchCallHistory();
   }, [customerId]);
 
+  const handleTabChange = (val) => {
+    setActiveTab(val);
+    router.replace(`?tab=${val}`);
+  };
+
   return (
     <div className="flex w-full flex-col gap-6">
-      <Tabs defaultValue="Customer">
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
           <TabsTrigger value="Customer">Customer</TabsTrigger>
           <TabsTrigger value="newproposal">New Proposal</TabsTrigger>
           <TabsTrigger value="invoice">Invoice</TabsTrigger>
+          
+          <TabsTrigger value="newledger">New Ledger</TabsTrigger>
           <TabsTrigger value="ledger">Ledger</TabsTrigger>
+
           <TabsTrigger value="meeting">Update</TabsTrigger>
           <TabsTrigger value="meetingHistory">History</TabsTrigger>
           <TabsTrigger value="attachment">Attachment</TabsTrigger>
@@ -62,6 +75,11 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
         <TabsContent value="invoice">
           <AllInvoice customerId={customerId} />
         </TabsContent>
+        
+        <TabsContent value="newledger">
+          <LedgerTabNew customerId={customerId} />
+        </TabsContent>
+
         <TabsContent value="proposal">
           <CustomerProposal customerId={customerId} />
         </TabsContent>
@@ -101,6 +119,12 @@ const CustomerDashboard = ({ customerId, salesPersonId }) => {
       </Tabs>
     </div>
   );
-};
+}
 
-export default CustomerDashboard;
+export default function CustomerDashboard({ customerId, salesPersonId }) {
+  return (
+    <Suspense fallback={<div className="p-10 text-center text-gray-500">Loading Dashboard...</div>}>
+      <DashboardContent customerId={customerId} salesPersonId={salesPersonId} />
+    </Suspense>
+  );
+}

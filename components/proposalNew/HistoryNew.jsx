@@ -14,9 +14,6 @@ import {
 const fmt = (n) => `₹ ${Number(n || 0).toLocaleString("en-IN")}`;
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
-// Simple email regex validator
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
 const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -80,15 +77,9 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
       toast.dismiss("load-email");
       
       if (res.success && res.data) {
-        const clientEmail = res.data.clientId?.email || "";
-        setDefaultEmail(clientEmail);
-        // If the stored default email is invalid, default to custom
-        if (!isValidEmail(clientEmail)) {
-          setSelectedEmailType("custom");
-        } else {
-          setSelectedEmailType("default");
-        }
+        setDefaultEmail(res.data.clientId?.email || "");
         setMailTargetId(id);
+        setSelectedEmailType("default");
         setCustomEmail("");
         setMailModalOpen(true);
       }
@@ -99,15 +90,8 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
   };
 
   const handleSendMail = async () => {
-    let finalEmail = selectedEmailType === "custom" ? customEmail.trim() : defaultEmail.trim();
-
-    // ✅ VALIDATION
-    if (!finalEmail) {
-      return toast.error("Please provide a valid email address");
-    }
-    if (!isValidEmail(finalEmail)) {
-      return toast.error(`"${finalEmail}" is not a valid email format.`);
-    }
+    const finalEmail = selectedEmailType === "custom" ? customEmail.trim() : defaultEmail.trim();
+    if (!finalEmail) return toast.error("Please provide a valid email address");
 
     try {
       setMailing(true);
@@ -147,6 +131,7 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
             </div>
             <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-gray-800">{fmt(p.grandTotal)}</span>
+              
               <button onClick={() => handleView(p._id)} className="text-blue-600 hover:text-blue-800" title="View"><Eye className="h-4 w-4" /></button>
               <button onClick={() => handleEdit(p._id)} className="text-amber-600 hover:text-amber-800" title="Edit"><Pencil className="h-4 w-4" /></button>
               <button onClick={() => handleDownload(p._id)} className="text-emerald-600 hover:text-emerald-800" title="Download PDF"><Download className="h-4 w-4" /></button>
@@ -164,46 +149,31 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
           <div className="bg-white rounded-2xl shadow-lg max-w-md w-full overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="font-semibold text-gray-800">Send Proposal Mail</h3>
-              <button onClick={() => setMailModalOpen(false)} className="text-gray-400 hover:text-gray-600">
-                <X className="h-5 w-5" />
-              </button>
+              <button onClick={() => setMailModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="h-5 w-5" /></button>
             </div>
-            
             <div className="p-4 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${!isValidEmail(defaultEmail) ? "opacity-50" : ""}`}>
-                  <input type="radio" checked={selectedEmailType === "default"} onChange={() => setSelectedEmailType("default")} disabled={!isValidEmail(defaultEmail)} className="h-4 w-4 accent-indigo-600" />
+                <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input type="radio" checked={selectedEmailType === "default"} onChange={() => setSelectedEmailType("default")} className="h-4 w-4 accent-indigo-600" />
                   <div>
                     <p className="text-sm font-medium text-gray-800">Send to Client's Email</p>
-                    <p className={`text-xs ${!isValidEmail(defaultEmail) ? "text-red-500" : "text-gray-500"}`}>
-                      {defaultEmail || "No email on record"} {!isValidEmail(defaultEmail) && "(Invalid)"}
-                    </p>
+                    <p className="text-xs text-gray-500">{defaultEmail || "No email on record"}</p>
                   </div>
                 </label>
-
                 <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                   <input type="radio" checked={selectedEmailType === "custom"} onChange={() => setSelectedEmailType("custom")} className="h-4 w-4 accent-indigo-600" />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-800">Send to Custom Email</p>
                     {selectedEmailType === "custom" && (
-                      <input 
-                        type="email" 
-                        value={customEmail} 
-                        onChange={(e) => setCustomEmail(e.target.value)} 
-                        placeholder="accounts@client.com" 
-                        className="w-full mt-2 border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500" 
-                      />
+                      <input type="email" value={customEmail} onChange={(e) => setCustomEmail(e.target.value)} placeholder="accounts@client.com" className="w-full mt-2 border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500" />
                     )}
                   </div>
                 </label>
               </div>
             </div>
-
             <div className="p-4 border-t bg-gray-50 flex justify-end gap-2">
               <button onClick={() => setMailModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">Cancel</button>
-              <button onClick={handleSendMail} disabled={mailing} className="px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50">
-                {mailing ? "Sending..." : "Send Mail"}
-              </button>
+              <button onClick={handleSendMail} disabled={mailing} className="px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50">{mailing ? "Sending..." : "Send Mail"}</button>
             </div>
           </div>
         </div>
