@@ -9,7 +9,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue, 
 } from "@/components/ui/select";
 import { createKeyWordFormControls } from "@/config/employee";
 import { getCustomerSeoProjectCycleService } from "@/service/customer";
@@ -169,86 +169,111 @@ const SeoSheet = ({ clientId }) => {
           <div className="text-center py-4">Loading keywords...</div>
         ) : keywordList.length > 0 ? (
           <div className="overflow-x-auto rounded-lg border border-gray-200">
-            <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 font-medium text-gray-900 text-left">
-                    Website
-                  </th>
-                  <th className="px-4 py-2 font-medium text-gray-900 text-left">
-                    Keyword
-                  </th>
-                  <th className="px-4 py-2 font-medium text-gray-900 text-left">
-                    Type
-                  </th>
-                  <th className="px-4 py-2 font-medium text-gray-900 text-center">
-                    Current Position
-                  </th>
-                  <th className="px-4 py-2 font-medium text-gray-900 text-center">
-                    Page
-                  </th>
-                  <th className="px-4 py-2 font-medium text-gray-900 text-right">
-                    Last Updated
-                  </th>
-                  <th className="px-4 py-2 font-medium text-gray-900 text-right">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {Object.entries(groupedKeywords).map(([projectId, projectData]) => (
-                  <React.Fragment key={projectId}>
+  <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
+    <thead className="bg-gray-50">
+      <tr>
+        <th className="px-4 py-2 font-medium text-gray-900 text-left">
+          Website
+        </th>
+        <th className="px-4 py-2 font-medium text-gray-900 text-left">
+          Keyword
+        </th>
+        <th className="px-4 py-2 font-medium text-gray-900 text-left">
+          Type
+        </th>
+        <th className="px-4 py-2 font-medium text-gray-900 text-center">
+          Previous (Pos - Page - Date)
+        </th>
+        <th className="px-4 py-2 font-medium text-gray-900 text-center">
+          Current (Pos - Page - Date)
+        </th>
+        <th className="px-4 py-2 font-medium text-gray-900 text-right">
+          Action
+        </th>
+      </tr>
+    </thead>
+    <tbody className="divide-y divide-gray-200">
+      {Object.entries(groupedKeywords).map(([projectId, projectData]) => (
+        <React.Fragment key={projectId}>
 
-                    {/* PROJECT HEADER ROW */}
-                    <tr className="bg-gray-100">
-                      <td
-                        colSpan={7}
-                        className="px-4 py-3 font-bold text-gray-800"
-                      >
-                        {projectData.projectName}
-                      </td>
-                    </tr>
+          {/* PROJECT HEADER ROW */}
+          <tr className="bg-gray-100">
+            <td
+              colSpan={6}
+              className="px-4 py-3 font-bold text-gray-800"
+            >
+              {projectData.projectName}
+            </td>
+          </tr>
 
-                    {/* PROJECT KEYWORDS */}
-                    {projectData.keywords.map((item) => {
-                      const latestRanking =
-                        item.rankings?.[item.rankings.length - 1];
+          {/* PROJECT KEYWORDS */}
+          {projectData.keywords.map((item) => {
+            const latestRanking =
+              item.rankings?.[item.rankings.length - 1];
+            const previousRanking =
+              item.rankings?.[item.rankings.length - 2];
 
-                      return (
-                        <tr key={item._id}>
-                          <td></td>
-                          <td className="px-4 py-2 text-gray-700">
-                            {item.keyword}
-                          </td>
+            const previousDate = previousRanking
+              ? new Date(
+                  previousRanking.createdAt ||
+                    previousRanking.updatedAt ||
+                    previousRanking.date ||
+                    item.updatedAt,
+                ).toLocaleDateString()
+              : null;
 
-                          <td className="px-4 py-2 text-gray-700 capitalize">
-                            {item.type}
-                          </td>
+            const currentDate = latestRanking
+              ? new Date(
+                  latestRanking.createdAt ||
+                    latestRanking.updatedAt ||
+                    latestRanking.date ||
+                    item.updatedAt,
+                ).toLocaleDateString()
+              : null;
 
-                          <td className="px-4 py-2 text-center text-gray-700">
-                            {latestRanking?.position || "N/A"}
-                          </td>
+            return (
+              <tr key={item._id}>
+                <td></td>
+                <td className="px-4 py-2 text-gray-700">
+                  {item.keyword}
+                </td>
 
-                          <td className="px-4 py-2 text-center text-gray-700">
-                            {latestRanking?.page || "N/A"}
-                          </td>
+                <td className="px-4 py-2 text-gray-700 capitalize">
+                  {item.type}
+                </td>
 
-                          <td className="px-4 py-2 text-right text-gray-700">
-                            {new Date(item.updatedAt).toLocaleDateString()}
-                          </td>
-                          <td className="px-4 py-2 text-right text-gray-700">
-                            <button onClick={() => handleDeleteKeyword(item._id)} className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-md">
-                              <Trash2 size={18} />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                <td className="px-4 py-2 text-center text-gray-700 whitespace-nowrap">
+                  {previousRanking
+                    ? `${previousRanking.position ?? "N/A"} - ${
+                        previousRanking.page ?? "N/A"
+                      } - ${previousDate}`
+                    : "N/A"}
+                </td>
+
+                <td className="px-4 py-2 text-center text-gray-700 whitespace-nowrap">
+                  {latestRanking
+                    ? `${latestRanking.position ?? "N/A"} - ${
+                        latestRanking.page ?? "N/A"
+                      } - ${currentDate}`
+                    : "N/A"}
+                </td>
+
+                <td className="px-4 py-2 text-right text-gray-700">
+                  <button
+                    onClick={() => handleDeleteKeyword(item._id)}
+                    className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-md"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
+        </React.Fragment>
+      ))}
+    </tbody>
+  </table>
+</div>
         ) : (
           <div className="text-gray-500 italic">
             No keywords tracked for this client yet.
