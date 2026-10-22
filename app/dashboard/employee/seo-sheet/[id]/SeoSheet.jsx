@@ -9,11 +9,15 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue, 
+  SelectValue,
 } from "@/components/ui/select";
 import { createKeyWordFormControls } from "@/config/employee";
 import { getCustomerSeoProjectCycleService } from "@/service/customer";
-import { createKeyService, deleteKeywordService, getSeoSheetService } from "@/service/customer/work";
+import {
+  createKeyService,
+  deleteKeywordService,
+  getSeoSheetService,
+} from "@/service/customer/work";
 import { Trash2 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -29,7 +33,6 @@ const SeoSheet = ({ clientId }) => {
   const [keywordList, setKeywordList] = useState([]);
   const [keyLoading, setKeyLoading] = useState(true);
 
-  // console.log(keywordList, "res");
   async function createKeywordHandle(e) {
     e.preventDefault();
 
@@ -83,7 +86,9 @@ const SeoSheet = ({ clientId }) => {
   }
 
   async function handleDeleteKeyword(id) {
-    const confirmed = window.confirm("Are you sure you want to delete this keyword?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this keyword?"
+    );
 
     if (!confirmed) return;
     try {
@@ -102,12 +107,10 @@ const SeoSheet = ({ clientId }) => {
     }
   }
 
-  // console.log(keywordFormData)
-
   useEffect(() => {
     if (clientId) {
       fetchKeyHandler();
-      fetchCustomerProjectCycle()
+      fetchCustomerProjectCycle();
     }
   }, [clientId]);
 
@@ -135,10 +138,12 @@ const SeoSheet = ({ clientId }) => {
           </div>
 
           <Select
-            onValueChange={(value) => setKeywordFormData({
-              ...keywordFormData,
-              projectId: value,
-            })}
+            onValueChange={(value) =>
+              setKeywordFormData({
+                ...keywordFormData,
+                projectId: value,
+              })
+            }
             value={keywordFormData.projectId}
           >
             <SelectTrigger className="w-full">
@@ -164,113 +169,129 @@ const SeoSheet = ({ clientId }) => {
       </div>
 
       <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Keyword Performance</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">Keyword Performance</h2>
+          <span className="text-xs text-gray-500">
+            Format: Position - Page - Date
+          </span>
+        </div>
+
         {keyLoading ? (
           <div className="text-center py-4">Loading keywords...</div>
         ) : keywordList.length > 0 ? (
           <div className="overflow-x-auto rounded-lg border border-gray-200">
-  <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
-    <thead className="bg-gray-50">
-      <tr>
-        <th className="px-4 py-2 font-medium text-gray-900 text-left">
-          Website
-        </th>
-        <th className="px-4 py-2 font-medium text-gray-900 text-left">
-          Keyword
-        </th>
-        <th className="px-4 py-2 font-medium text-gray-900 text-left">
-          Type
-        </th>
-        <th className="px-4 py-2 font-medium text-gray-900 text-center">
-          Before Previous (Pos - Page - Date)
-        </th>
-        <th className="px-4 py-2 font-medium text-gray-900 text-center">
-          Previous (Pos - Page - Date)
-        </th>
-        <th className="px-4 py-2 font-medium text-gray-900 text-center">
-          Current (Pos - Page - Date)
-        </th>
-        <th className="px-4 py-2 font-medium text-gray-900 text-right">
-          Action
-        </th>
-      </tr>
-    </thead>
-    <tbody className="divide-y divide-gray-200">
-      {Object.entries(groupedKeywords).map(([projectId, projectData]) => (
-        <React.Fragment key={projectId}>
+            <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-2 font-medium text-gray-900 text-left">
+                    Website
+                  </th>
+                  <th className="px-4 py-2 font-medium text-gray-900 text-left">
+                    Keyword
+                  </th>
+                  <th className="px-4 py-2 font-medium text-gray-900 text-left">
+                    Type
+                  </th>
+                  <th className="px-4 py-2 font-medium text-gray-900 text-center">
+                    Earlier
+                    <span className="block text-[11px] font-normal text-gray-500">
+                      Pos - Page - Date
+                    </span>
+                  </th>
+                  <th className="px-4 py-2 font-medium text-gray-900 text-center">
+                    Previous
+                    <span className="block text-[11px] font-normal text-gray-500">
+                      Pos - Page - Date
+                    </span>
+                  </th>
+                  <th className="px-4 py-2 font-medium text-gray-900 text-center">
+                    Latest
+                    <span className="block text-[11px] font-normal text-gray-500">
+                      Pos - Page - Date
+                    </span>
+                  </th>
+                  <th className="px-4 py-2 font-medium text-gray-900 text-right">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {Object.entries(groupedKeywords).map(
+                  ([projectId, projectData]) => (
+                    <React.Fragment key={projectId}>
+                      {/* PROJECT HEADER ROW */}
+                      <tr className="bg-gray-100">
+                        <td
+                          colSpan={7}
+                          className="px-4 py-3 font-bold text-gray-800"
+                        >
+                          {projectData.projectName}
+                        </td>
+                      </tr>
 
-          {/* PROJECT HEADER ROW */}
-          <tr className="bg-gray-100">
-            <td
-              colSpan={7}
-              className="px-4 py-3 font-bold text-gray-800"
-            >
-              {projectData.projectName}
-            </td>
-          </tr>
+                      {/* PROJECT KEYWORDS */}
+                      {projectData.keywords.map((item) => {
+                        const latestRanking =
+                          item.rankings?.[item.rankings.length - 1];
+                        const previousRanking =
+                          item.rankings?.[item.rankings.length - 2];
+                        const earlierRanking =
+                          item.rankings?.[item.rankings.length - 3];
 
-          {/* PROJECT KEYWORDS */}
-          {projectData.keywords.map((item) => {
-            const currentRanking =
-              item.rankings?.[item.rankings.length - 1];
-            const previousRanking =
-              item.rankings?.[item.rankings.length - 2];
-            const beforePreviousRanking =
-              item.rankings?.[item.rankings.length - 3];
+                        // renders "pos - page - date" or "N/A"
+                        const formatRanking = (ranking) => {
+                          if (!ranking) return "N/A";
+                          const date = new Date(
+                            ranking.createdAt ||
+                              ranking.updatedAt ||
+                              ranking.date ||
+                              item.updatedAt
+                          ).toLocaleDateString();
+                          return `${ranking.position ?? "N/A"} - ${
+                            ranking.page ?? "N/A"
+                          } - ${date}`;
+                        };
 
-            // helper to render "pos - page - date"
-            const formatRanking = (ranking) => {
-              if (!ranking) return "N/A";
-              const date = new Date(
-                ranking.createdAt ||
-                  ranking.updatedAt ||
-                  ranking.date ||
-                  item.updatedAt,
-              ).toLocaleDateString();
-              return `${ranking.position ?? "N/A"} - ${
-                ranking.page ?? "N/A"
-              } - ${date}`;
-            };
+                        return (
+                          <tr key={item._id}>
+                            <td></td>
+                            <td className="px-4 py-2 text-gray-700">
+                              {item.keyword}
+                            </td>
 
-            return (
-              <tr key={item._id}>
-                <td></td>
-                <td className="px-4 py-2 text-gray-700">
-                  {item.keyword}
-                </td>
+                            <td className="px-4 py-2 text-gray-700 capitalize">
+                              {item.type}
+                            </td>
 
-                <td className="px-4 py-2 text-gray-700 capitalize">
-                  {item.type}
-                </td>
+                            <td className="px-4 py-2 text-center text-gray-700 whitespace-nowrap">
+                              {formatRanking(earlierRanking)}
+                            </td>
 
-                <td className="px-4 py-2 text-center text-gray-700 whitespace-nowrap">
-                  {formatRanking(beforePreviousRanking)}
-                </td>
+                            <td className="px-4 py-2 text-center text-gray-700 whitespace-nowrap">
+                              {formatRanking(previousRanking)}
+                            </td>
 
-                <td className="px-4 py-2 text-center text-gray-700 whitespace-nowrap">
-                  {formatRanking(previousRanking)}
-                </td>
+                            <td className="px-4 py-2 text-center text-gray-700 whitespace-nowrap">
+                              {formatRanking(latestRanking)}
+                            </td>
 
-                <td className="px-4 py-2 text-center text-gray-700 whitespace-nowrap">
-                  {formatRanking(currentRanking)}
-                </td>
-
-                <td className="px-4 py-2 text-right text-gray-700">
-                  <button
-                    onClick={() => handleDeleteKeyword(item._id)}
-                    className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-md"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </React.Fragment>
-      ))}
-    </tbody>
-  </table>
-</div>
+                            <td className="px-4 py-2 text-right text-gray-700">
+                              <button
+                                onClick={() => handleDeleteKeyword(item._id)}
+                                className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-md"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </React.Fragment>
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <div className="text-gray-500 italic">
             No keywords tracked for this client yet.
