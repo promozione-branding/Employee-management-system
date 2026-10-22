@@ -182,6 +182,9 @@ const SeoSheet = ({ clientId }) => {
           Type
         </th>
         <th className="px-4 py-2 font-medium text-gray-900 text-center">
+          Before Previous (Pos - Page - Date)
+        </th>
+        <th className="px-4 py-2 font-medium text-gray-900 text-center">
           Previous (Pos - Page - Date)
         </th>
         <th className="px-4 py-2 font-medium text-gray-900 text-center">
@@ -199,7 +202,7 @@ const SeoSheet = ({ clientId }) => {
           {/* PROJECT HEADER ROW */}
           <tr className="bg-gray-100">
             <td
-              colSpan={6}
+              colSpan={7}
               className="px-4 py-3 font-bold text-gray-800"
             >
               {projectData.projectName}
@@ -208,28 +211,26 @@ const SeoSheet = ({ clientId }) => {
 
           {/* PROJECT KEYWORDS */}
           {projectData.keywords.map((item) => {
-            const latestRanking =
+            const currentRanking =
               item.rankings?.[item.rankings.length - 1];
             const previousRanking =
               item.rankings?.[item.rankings.length - 2];
+            const beforePreviousRanking =
+              item.rankings?.[item.rankings.length - 3];
 
-            const previousDate = previousRanking
-              ? new Date(
-                  previousRanking.createdAt ||
-                    previousRanking.updatedAt ||
-                    previousRanking.date ||
-                    item.updatedAt,
-                ).toLocaleDateString()
-              : null;
-
-            const currentDate = latestRanking
-              ? new Date(
-                  latestRanking.createdAt ||
-                    latestRanking.updatedAt ||
-                    latestRanking.date ||
-                    item.updatedAt,
-                ).toLocaleDateString()
-              : null;
+            // helper to render "pos - page - date"
+            const formatRanking = (ranking) => {
+              if (!ranking) return "N/A";
+              const date = new Date(
+                ranking.createdAt ||
+                  ranking.updatedAt ||
+                  ranking.date ||
+                  item.updatedAt,
+              ).toLocaleDateString();
+              return `${ranking.position ?? "N/A"} - ${
+                ranking.page ?? "N/A"
+              } - ${date}`;
+            };
 
             return (
               <tr key={item._id}>
@@ -243,19 +244,15 @@ const SeoSheet = ({ clientId }) => {
                 </td>
 
                 <td className="px-4 py-2 text-center text-gray-700 whitespace-nowrap">
-                  {previousRanking
-                    ? `${previousRanking.position ?? "N/A"} - ${
-                        previousRanking.page ?? "N/A"
-                      } - ${previousDate}`
-                    : "N/A"}
+                  {formatRanking(beforePreviousRanking)}
                 </td>
 
                 <td className="px-4 py-2 text-center text-gray-700 whitespace-nowrap">
-                  {latestRanking
-                    ? `${latestRanking.position ?? "N/A"} - ${
-                        latestRanking.page ?? "N/A"
-                      } - ${currentDate}`
-                    : "N/A"}
+                  {formatRanking(previousRanking)}
+                </td>
+
+                <td className="px-4 py-2 text-center text-gray-700 whitespace-nowrap">
+                  {formatRanking(currentRanking)}
                 </td>
 
                 <td className="px-4 py-2 text-right text-gray-700">
