@@ -172,7 +172,7 @@ const SeoSheet = ({ clientId }) => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold">Keyword Performance</h2>
           <span className="text-xs text-gray-500">
-            Format: Position - Page - Date
+            Format: Page - Position - Date
           </span>
         </div>
 
@@ -195,19 +195,19 @@ const SeoSheet = ({ clientId }) => {
                   <th className="px-4 py-2 font-medium text-gray-900 text-center">
                     Earlier
                     <span className="block text-[11px] font-normal text-gray-500">
-                      Pos - Page - Date
+                      Page - Pos - Date
                     </span>
                   </th>
                   <th className="px-4 py-2 font-medium text-gray-900 text-center">
                     Previous
                     <span className="block text-[11px] font-normal text-gray-500">
-                      Pos - Page - Date
+                      Page - Pos - Date
                     </span>
                   </th>
                   <th className="px-4 py-2 font-medium text-gray-900 text-center">
                     Latest
                     <span className="block text-[11px] font-normal text-gray-500">
-                      Pos - Page - Date
+                      Page - Pos - Date
                     </span>
                   </th>
                   <th className="px-4 py-2 font-medium text-gray-900 text-right">
@@ -238,7 +238,7 @@ const SeoSheet = ({ clientId }) => {
                         const earlierRanking =
                           item.rankings?.[item.rankings.length - 3];
 
-                        // renders "pos - page - date" or "N/A"
+                        // renders "page - position - date" or "N/A"
                         const formatRanking = (ranking) => {
                           if (!ranking) return "N/A";
                           const date = new Date(
@@ -247,8 +247,8 @@ const SeoSheet = ({ clientId }) => {
                               ranking.date ||
                               item.updatedAt
                           ).toLocaleDateString();
-                          return `${ranking.position ?? "N/A"} - ${
-                            ranking.page ?? "N/A"
+                          return `${ranking.page ?? "N/A"} - ${
+                            ranking.position ?? "N/A"
                           } - ${date}`;
                         };
 
