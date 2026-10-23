@@ -6,6 +6,9 @@ import Meeting from "@/models/admin/meeting/Meeting";
 import Customer from "@/models/admin/Customer";
 import User from "@/models/admin/User";
 import nodemailer from "nodemailer";
+import { recordEdit } from "@/lib/auditLog";
+import { getAuthUser } from "@/lib/getAuthUser";
+import { withAudit } from "@/lib/withAudit";
 
 export async function PUT(req, { params }) {
   try {
@@ -56,6 +59,27 @@ export async function PUT(req, { params }) {
     });
 
     await meeting.save();
+
+    // ── NEW: Audit Hook ──
+    try {
+      const authUser = await getAuthUser(req);
+      if (authUser) {
+        await recordEdit({
+          clientId,
+          module: "meeting",
+          entityId: meeting._id,
+          action: "UPDATE",
+          summary: `Added ${updateType || "general"} update: ${note ? `"${note.substring(0, 40)}..."` : "No note"}`,
+          actor: { userId: authUser._id },
+          isConfidential: false,
+          afterSnapshot: meeting.meetingUpdate[meeting.meetingUpdate.length - 1],
+          req,
+        });
+      }
+    } catch (auditErr) {
+      console.error("[edit-history] failed to record meeting update:", auditErr);
+    }
+    // ── END AUDIT HOOK ──
 
     // =========================================================
     // FIND CUSTOMER

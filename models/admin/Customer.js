@@ -1,3 +1,4 @@
+import { auditPlugin } from "@/lib/auditPlugin";
 // models/admin/Customer.js
 
 

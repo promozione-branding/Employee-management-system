@@ -1,6 +1,7 @@
 // models/employee/sales/CallLog.js
 
 import mongoose from "mongoose";
+import { auditPlugin } from "@/lib/auditPlugin"; // 👈 Added for Edit History
 
 const CallLogSchema = new mongoose.Schema(
   {
@@ -148,6 +149,11 @@ CallLogSchema.index({ myoperatorCallId: 1 }, { sparse: true });
 
 // 7) Company-scoped queries (if you ever go multi-tenant)
 CallLogSchema.index({ companyId: 1, startedAt: -1 });
+
+// ============================================================
+// 🔗 AUDIT PLUGIN (This connects calls to Edit History!)
+// ============================================================
+CallLogSchema.plugin(auditPlugin, { module: "call" });
 
 const CallLog =
   mongoose.models.CallLog || mongoose.model("CallLog", CallLogSchema);

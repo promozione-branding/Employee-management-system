@@ -1,6 +1,7 @@
 // models/admin/meeting/Meeting.js
 
 import mongoose from "mongoose";
+import { auditPlugin } from "@/lib/auditPlugin";
 
 const MeetingSchema = new mongoose.Schema(
   {
@@ -24,24 +25,19 @@ const MeetingSchema = new mongoose.Schema(
           },
           status: String,
           note: String,
-          reminderAt: {
-            type: Date,
-          },
-          meetingAt: {
-            type: Date,
-          },
-          reminderSent: {
-            type: Boolean,
-            default: false,
-          },
+          reminderAt: { type: Date },
+          meetingAt: { type: Date },
+          reminderSent: { type: Boolean, default: false },
         },
-
         { timestamps: true, strictPopulate: false },
       ),
     ],
   },
   { timestamps: true },
 );
+
+// 👇 THIS IS THE MISSING LINK 👇
+MeetingSchema.plugin(auditPlugin, { module: "meeting" });
 
 const Meeting =
   mongoose.models.Meeting || mongoose.model("Meeting", MeetingSchema);

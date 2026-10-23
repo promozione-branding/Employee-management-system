@@ -8,6 +8,7 @@ import {
   Album,
   BadgeIndianRupee,
   BanknoteArrowUp,
+  History,
   NotebookTabs,
   Paperclip,
   SquareChartGantt,
@@ -57,6 +58,11 @@ const HistoryPage = ({ customerId }) => {
       label: "Invoice",
       icon: <BanknoteArrowUp />,
       href: `/dashboard/customer/history/client-invoice/${customerId}`,
+    },
+    {
+      label: "Edit History",
+      icon: <History />,
+      href: `/dashboard/customer/history/client-edithistory/${customerId}`,
     },
   ];
 

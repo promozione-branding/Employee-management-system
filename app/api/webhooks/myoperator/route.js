@@ -5,7 +5,9 @@ import { connectDB } from "@/lib/db";
 import CallLog from "@/models/employee/sales/CallLog";
 import Employee from "@/models/employee/Employee";
 import Customer from "@/models/admin/Customer";
+import User from "@/models/admin/User";
 import { durationToSeconds, normalizePhone } from "@/lib/myoperator";
+import { recordEdit } from "@/lib/auditLog";
 
 // ------------------------------------------------------------
 // Map MyOperator event types to our statuses
@@ -13,7 +15,7 @@ import { durationToSeconds, normalizePhone } from "@/lib/myoperator";
 function mapEventToStatus(eventType, payload) {
   const t = (eventType || "").toLowerCase();
   if (t === "call.initiated") return "initiated";
-  if (t === "call.dial_begin") return null; // don't change
+  if (t === "call.dial_begin") return null;
   if (t === "call.answered") return "answered";
   if (t === "call.end") {
     const s = (payload?.status || "").toLowerCase();
@@ -22,14 +24,11 @@ function mapEventToStatus(eventType, payload) {
     if (s === "failed") return "failed";
     return "completed";
   }
-  if (t === "call.summary") return null; // enrich only
-  if (t === "disposition") return null; // tag only
+  if (t === "call.summary") return null;
+  if (t === "disposition") return null;
   return null;
 }
 
-// ------------------------------------------------------------
-// Extract agent info from a payload's legs[]
-// ------------------------------------------------------------
 function extractAgent(payload) {
   const legs = payload?.legs || [];
   for (const leg of legs) {
@@ -47,10 +46,6 @@ function extractAgent(payload) {
   return null;
 }
 
-// ------------------------------------------------------------
-// Try to find an Employee by MyOperator UUID
-// (now stored inside basicDetails)
-// ------------------------------------------------------------
 async function findEmployeeByMyoperatorUuid(uuid) {
   if (!uuid) return null;
   try {
@@ -65,14 +60,10 @@ async function findEmployeeByMyoperatorUuid(uuid) {
   }
 }
 
-// ------------------------------------------------------------
-// Try to find a Customer by phone number
-// ------------------------------------------------------------
 async function findCustomerByPhone(phone) {
   if (!phone) return null;
   try {
-    const digits = String(phone).replace(/\D/g, "").slice(-10); // last 10 digits
-    // Customer.phone is Number in your model — so we match with a regex on digits
+    const digits = String(phone).replace(/\D/g, "").slice(-10);
     return await Customer.findOne({
       $expr: {
         $regexMatch: {
@@ -89,14 +80,10 @@ async function findCustomerByPhone(phone) {
   }
 }
 
-// ------------------------------------------------------------
-// POST — receive webhook events from MyOperator
-// ------------------------------------------------------------
 export async function POST(req) {
   try {
     await connectDB();
 
-    // --- header diagnostic ---
     console.log(
       "[webhook] headers:",
       JSON.stringify({
@@ -106,7 +93,6 @@ export async function POST(req) {
       }),
     );
 
-    // --- soft secret check ---
     const secret = req.headers.get("x-myop-webhook-secret");
     if (
       process.env.MYOP_WEBHOOK_SECRET &&
@@ -115,10 +101,8 @@ export async function POST(req) {
       console.warn("[webhook] secret mismatch");
     }
 
-    // ---- parse body (MUST come before any use of `body`) ----
     const body = await req.json();
 
-    // --- richer diagnostic (safe to remove later) ---
     console.log(
       "[webhook] received:",
       JSON.stringify(
@@ -133,21 +117,6 @@ export async function POST(req) {
           ref_id: body.payload?.ref_id,
           customer_identifier: body.customer_identifier,
           system_identifier: body.system_identifier,
-          payload_keys: Object.keys(body.payload || {}),
-          legs: (body.payload?.legs || []).map((l) => ({
-            type: l.type,
-            phone: l.phone_number,
-            result: l.result,
-            dial_status: l.dial_status,
-            dept_id: l.dept_id,
-            started: l.started_at,
-            answered: l.answered_at,
-            ended: l.ended_at,
-            ring: l.ring_duration,
-            talk: l.talk_duration,
-            agent_uuid: l.agent?.uuid,
-            agent_name: l.agent?.name,
-          })),
         },
         null,
         2,
@@ -165,25 +134,18 @@ export async function POST(req) {
     } = body || {};
 
     if (!session_id) {
-      console.warn("[webhook] no session_id", body);
       return NextResponse.json({ success: true, note: "no session_id" });
     }
 
-    // ------------------------------------------------------------
-    // 1. FIND OR CREATE the CallLog
-    // ------------------------------------------------------------
     let log = await CallLog.findOne({ myoperatorCallId: session_id });
 
-    // Fallback 1: match by our reference_id (client_ref_id in payload)
     if (!log && payload?.client_ref_id) {
       log = await CallLog.findOne({ referenceId: payload.client_ref_id });
     }
-    // Fallback 2: match by myoperator internal ref_id
     if (!log && payload?.ref_id) {
       log = await CallLog.findOne({ myoperatorCallId: payload.ref_id });
     }
 
-    // Fallback 3: if still nothing and this is call.initiated, create one
     if (!log && event_type === "call.initiated") {
       const isIncoming = direction === "incoming";
       const ourNumber = normalizePhone(system_identifier);
@@ -216,16 +178,9 @@ export async function POST(req) {
     }
 
     if (!log) {
-      console.warn(
-        "[webhook] no matching CallLog for session_id:",
-        session_id,
-      );
       return NextResponse.json({ success: true, note: "no matching log" });
     }
 
-    // ------------------------------------------------------------
-    // 2. UPDATE fields based on event type
-    // ------------------------------------------------------------
     const newStatus = mapEventToStatus(event_type, payload);
     if (newStatus) log.status = newStatus;
 
@@ -285,9 +240,6 @@ export async function POST(req) {
       if (comment?.content) log.note = comment.content;
     }
 
-    // ------------------------------------------------------------
-    // 3. Try to link Customer if not linked yet
-    // ------------------------------------------------------------
     if (!log.customerId && log.customerPhone) {
       const cust = await findCustomerByPhone(log.customerPhone);
       if (cust) {
@@ -297,9 +249,6 @@ export async function POST(req) {
       }
     }
 
-    // ------------------------------------------------------------
-    // 4. Bookkeeping
-    // ------------------------------------------------------------
     log.lastEventType = event_type || "";
     log.lastEventAt = new Date(timestamp || Date.now());
 
@@ -311,6 +260,73 @@ export async function POST(req) {
 
     await log.save();
 
+    // ── NEW: Audit Hook ──
+    try {
+      if (log.customerId) {
+        const t = (event_type || "").toLowerCase();
+
+        let action = null;
+        let summary = null;
+
+        if (t === "call.initiated") {
+          action = "CALL";
+          summary = `${log.direction === "inbound" ? "Inbound" : "Outbound"} call initiated — ${log.customerName || log.customerPhone || "unknown"}`;
+        } else if (t === "call.answered") {
+          action = "CALL";
+          summary = `Call answered — ${log.customerName || log.customerPhone || "unknown"}`;
+        } else if (t === "call.end") {
+          const dur = log.durationSeconds
+            ? `${Math.floor(log.durationSeconds / 60)}m ${log.durationSeconds % 60}s`
+            : "0s";
+          if (log.status === "missed") {
+            action = "STATUS_CHANGE";
+            summary = `Call missed — ${log.customerName || log.customerPhone || "unknown"}`;
+          } else if (log.status === "failed") {
+            action = "STATUS_CHANGE";
+            summary = `Call failed — ${log.customerName || log.customerPhone || "unknown"}`;
+          } else {
+            action = "CALL";
+            summary = `Call completed — ${dur} · ${log.customerName || log.customerPhone || "unknown"}`;
+          }
+        } else if (t === "disposition") {
+          action = "STATUS_CHANGE";
+          summary = `Disposition set: ${log.disposition || "(none)"}`;
+        }
+
+        if (action && summary) {
+          // Find the User account linked to this agent (if any)
+          let systemUserId = null;
+          if (log.agentErpUserId) {
+            const emp = await Employee.findById(log.agentErpUserId)
+              .select("user")
+              .lean();
+            systemUserId = emp?.user || null;
+          }
+
+          console.log("[AUDIT DEBUG] Attempting to record call for client:", log.customerId, "Action:", action);
+          await recordEdit({
+            clientId: log.customerId,
+            module: "call",
+            entityId: log._id,
+            action,
+            summary,
+            changes: [],
+            actor: {
+              userId: systemUserId,          // <-- real User ID or null
+              name: log.agentName || "System",
+              email: log.agentEmail || "",
+              role: "system",
+            },
+            isConfidential: false,
+            req,
+          });
+        }
+      }
+    } catch (auditErr) {
+      console.error("[edit-history] failed to record call event:", auditErr);
+    }
+    // ── END ──
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[/api/webhooks/myoperator]", err);
@@ -318,9 +334,6 @@ export async function POST(req) {
   }
 }
 
-// ------------------------------------------------------------
-// GET — health check
-// ------------------------------------------------------------
 export async function GET() {
   return NextResponse.json({ ok: true, service: "myoperator-webhook" });
 }

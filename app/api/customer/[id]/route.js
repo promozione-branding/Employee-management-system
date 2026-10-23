@@ -7,6 +7,7 @@ import SalesEmployee from "@/models/employee/sales/SalesEmployee";
 import Employee from "@/models/employee/Employee";
 import { createAuditLog } from "@/utils/createAuditLog";
 import { getAuthUser } from "@/lib/getAuthUser";
+import { recordEdit, diffObjects } from "@/lib/auditLog";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
@@ -120,6 +121,24 @@ export async function DELETE(req, { params }) {
       oldData,
       userId: authUser._id,
     });
+
+    // ── NEW: mirror to unified EditHistory ──
+    try {
+      await recordEdit({
+        clientId: customer._id,
+        module: "customer",
+        entityId: customer._id,
+        action: "DELETE",
+        summary: `Deleted customer "${customer.name}"`,
+        actor: { userId: authUser._id },
+        isConfidential: false,
+        beforeSnapshot: oldData,
+        req,
+      });
+    } catch (auditErr) {
+      console.error("[edit-history] failed to record customer delete:", auditErr);
+    }
+    // ── END ──
 
     return NextResponse.json(
       {
@@ -424,6 +443,29 @@ export async function PUT(req, { params }) {
       editedCustomer.history.push(auditLog._id);
       await editedCustomer.save();
     }
+
+    // ── NEW: mirror to unified EditHistory ──
+    try {
+      const changes = diffObjects(oldData, editedCustomer.toObject());
+      if (changes.length > 0) {
+        await recordEdit({
+          clientId: editedCustomer._id,
+          module: "customer",
+          entityId: editedCustomer._id,
+          action: "UPDATE",
+          summary: `Updated customer profile (${changes.length} field${changes.length === 1 ? "" : "s"} changed)`,
+          changes,
+          actor: { userId: authUser._id },
+          isConfidential: false,
+          beforeSnapshot: oldData,
+          afterSnapshot: editedCustomer.toObject(),
+          req,
+        });
+      }
+    } catch (auditErr) {
+      console.error("[edit-history] failed to record customer update:", auditErr);
+    }
+    // ── END ──
 
     return NextResponse.json(
       {
