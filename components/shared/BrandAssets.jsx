@@ -1,7 +1,7 @@
 // components/shared/BrandAssets.jsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
@@ -11,7 +11,7 @@ import {
   uploadBrandAsset,
 } from "@/service/customer/brandAssets";
 
-/* -------------------- small helpers -------------------- */
+/* -------------------- helpers -------------------- */
 function CopyBtn({ text, label = "Copy" }) {
   if (!text) return null;
   return (
@@ -60,11 +60,9 @@ function FilePreview({ url }) {
   );
 }
 
-/* --------------- dynamic list input (websites, maid) --------------- */
 function ListEditor({ label, placeholder, values, onChange, type = "text" }) {
   const add = () => onChange([...(values || []), ""]);
-  const remove = (i) =>
-    onChange((values || []).filter((_, idx) => idx !== i));
+  const remove = (i) => onChange((values || []).filter((_, idx) => idx !== i));
   const set = (i, v) => {
     const next = [...(values || [])];
     next[i] = v;
@@ -106,60 +104,136 @@ function ListEditor({ label, placeholder, values, onChange, type = "text" }) {
   );
 }
 
-/* --------------- multi-file uploader (logos, products) --------------- */
-function MultiFileUploader({ label, folder, urls, onChange }) {
+/* ---------- multi-file uploader (drag & drop + description) ---------- */
+function MultiFileUploader({ label, folder, files, onChange }) {
   const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const inputRef = useRef(null);
 
-  async function handleFiles(e) {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
+  async function uploadFiles(picked) {
+    if (!picked.length) return;
     try {
       setUploading(true);
-      const uploaded = [];
-      for (const f of files) {
+      const added = [];
+      for (const f of picked) {
         const res = await uploadBrandAsset(f, folder);
-        if (res?.success && res?.url) uploaded.push(res.url);
+        if (res?.success && res?.url) {
+          added.push({ url: res.url, description: "" });
+        }
       }
-      if (uploaded.length) {
-        onChange([...(urls || []), ...uploaded]);
-        toast.success(`${uploaded.length} file(s) uploaded`);
+      if (added.length) {
+        onChange([...(files || []), ...added]);
+        toast.success(`${added.length} file(s) uploaded`);
       }
     } catch (err) {
       toast.error(err?.response?.data?.message || "Upload failed");
     } finally {
       setUploading(false);
-      e.target.value = "";
     }
   }
 
-  const remove = (i) => onChange((urls || []).filter((_, idx) => idx !== i));
+  function onPick(e) {
+    const picked = Array.from(e.target.files || []);
+    e.target.value = "";
+    uploadFiles(picked);
+  }
+
+  function onDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  }
+
+  function onDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }
+
+  function onDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const picked = Array.from(e.dataTransfer?.files || []);
+    uploadFiles(picked);
+  }
+
+  const remove = (i) => onChange((files || []).filter((_, idx) => idx !== i));
+  const setDesc = (i, v) => {
+    const next = [...(files || [])];
+    next[i] = { ...next[i], description: v };
+    onChange(next);
+  };
 
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium">{label}</p>
-      <Input type="file" multiple onChange={handleFiles} />
-      {uploading && <p className="text-xs text-blue-500">Uploading...</p>}
-      <div className="grid grid-cols-2 gap-2">
-        {(urls || []).map((u, i) => (
-          <div
-            key={`${u}-${i}`}
-            className="flex items-center gap-2 rounded-md border p-2"
-          >
-            <FilePreview url={u} />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs">{u.split("/").pop()}</p>
-              <div className="mt-1 flex gap-1">
-                <DownloadBtn url={u} />
-                <CopyBtn text={u} label="Copy URL" />
-                <button
-                  type="button"
-                  onClick={() => remove(i)}
-                  className="rounded-md border px-2 py-1 text-xs text-red-600 hover:bg-red-50"
-                >
-                  ✕
-                </button>
+
+      {/* Hidden native input — click-to-browse */}
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={onPick}
+      />
+
+      {/* Dropzone */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
+        }}
+        onDragOver={onDragOver}
+        onDragEnter={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+        className={`cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition ${
+          isDragging
+            ? "border-emerald-500 bg-emerald-50"
+            : "border-slate-300 bg-slate-50 hover:border-slate-400 hover:bg-slate-100"
+        } ${uploading ? "pointer-events-none opacity-60" : ""}`}
+      >
+        <p className="text-sm font-medium text-slate-700">
+          {uploading
+            ? "Uploading..."
+            : isDragging
+            ? "Drop files to upload"
+            : "Drag & drop files here, or click to browse"}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Multiple files supported — any format
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {(files || []).map((f, i) => (
+          <div key={`${f.url}-${i}`} className="rounded-md border p-2">
+            <div className="flex items-center gap-2">
+              <FilePreview url={f.url} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs">{f.url.split("/").pop()}</p>
+                <div className="mt-1 flex gap-1">
+                  <DownloadBtn url={f.url} />
+                  <CopyBtn text={f.url} label="Copy URL" />
+                  <button
+                    type="button"
+                    onClick={() => remove(i)}
+                    className="rounded-md border px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
             </div>
+            <Input
+              className="mt-2"
+              placeholder="Description (optional)"
+              value={f.description || ""}
+              onChange={(e) => setDesc(i, e.target.value)}
+            />
           </div>
         ))}
       </div>
@@ -195,7 +269,21 @@ export default function BrandAssets({ clientId }) {
         const res = await getBrandAssets(clientId);
         if (!alive) return;
         setCanEdit(!!res?.canEdit);
-        setForm({ ...empty, ...(res?.data || {}) });
+        const d = res?.data || {};
+        setForm({
+          ...empty,
+          ...d,
+          logos: (d.logos || []).map((x) =>
+            typeof x === "string"
+              ? { url: x, description: "" }
+              : { url: x.url, description: x.description || "" }
+          ),
+          products: (d.products || []).map((x) =>
+            typeof x === "string"
+              ? { url: x, description: "" }
+              : { url: x.url, description: x.description || "" }
+          ),
+        });
       } catch (err) {
         toast.error(err?.response?.data?.message || "Failed to load brand info");
       } finally {
@@ -219,7 +307,21 @@ export default function BrandAssets({ clientId }) {
       const res = await updateBrandAssets(clientId, form);
       if (res?.success) {
         toast.success(res.message || "Saved");
-        setForm({ ...empty, ...(res.data || {}) });
+        const d = res.data || {};
+        setForm({
+          ...empty,
+          ...d,
+          logos: (d.logos || []).map((x) =>
+            typeof x === "string"
+              ? { url: x, description: "" }
+              : { url: x.url, description: x.description || "" }
+          ),
+          products: (d.products || []).map((x) =>
+            typeof x === "string"
+              ? { url: x, description: "" }
+              : { url: x.url, description: x.description || "" }
+          ),
+        });
       }
     } catch (err) {
       toast.error(err?.response?.data?.message || "Save failed");
@@ -298,14 +400,14 @@ export default function BrandAssets({ clientId }) {
           <MultiFileUploader
             label="Logos (any format)"
             folder="brand-assets/logos"
-            urls={form.logos}
+            files={form.logos}
             onChange={(v) => setForm((p) => ({ ...p, logos: v }))}
           />
 
           <MultiFileUploader
             label="Products (any format)"
             folder="brand-assets/products"
-            urls={form.products}
+            files={form.products}
             onChange={(v) => setForm((p) => ({ ...p, products: v }))}
           />
 
@@ -410,18 +512,23 @@ export default function BrandAssets({ clientId }) {
         {form.logos?.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm font-medium">Logos</p>
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-              {form.logos.map((u, i) => (
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+              {form.logos.map((f, i) => (
                 <div
-                  key={`${u}-${i}`}
-                  className="flex items-center gap-2 rounded-md border p-2"
+                  key={`${f.url}-${i}`}
+                  className="flex items-start gap-2 rounded-md border p-2"
                 >
-                  <FilePreview url={u} />
+                  <FilePreview url={f.url} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs">{u.split("/").pop()}</p>
+                    <p className="truncate text-xs">{f.url.split("/").pop()}</p>
+                    {f.description && (
+                      <p className="mt-1 text-xs text-slate-600">
+                        {f.description}
+                      </p>
+                    )}
                     <div className="mt-1 flex gap-1">
-                      <DownloadBtn url={u} />
-                      <CopyBtn text={u} label="Copy URL" />
+                      <DownloadBtn url={f.url} />
+                      <CopyBtn text={f.url} label="Copy URL" />
                     </div>
                   </div>
                 </div>
@@ -433,18 +540,23 @@ export default function BrandAssets({ clientId }) {
         {form.products?.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm font-medium">Products</p>
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-              {form.products.map((u, i) => (
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+              {form.products.map((f, i) => (
                 <div
-                  key={`${u}-${i}`}
-                  className="flex items-center gap-2 rounded-md border p-2"
+                  key={`${f.url}-${i}`}
+                  className="flex items-start gap-2 rounded-md border p-2"
                 >
-                  <FilePreview url={u} />
+                  <FilePreview url={f.url} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs">{u.split("/").pop()}</p>
+                    <p className="truncate text-xs">{f.url.split("/").pop()}</p>
+                    {f.description && (
+                      <p className="mt-1 text-xs text-slate-600">
+                        {f.description}
+                      </p>
+                    )}
                     <div className="mt-1 flex gap-1">
-                      <DownloadBtn url={u} />
-                      <CopyBtn text={u} label="Copy URL" />
+                      <DownloadBtn url={f.url} />
+                      <CopyBtn text={f.url} label="Copy URL" />
                     </div>
                   </div>
                 </div>

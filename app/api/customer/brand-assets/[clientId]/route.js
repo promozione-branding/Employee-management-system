@@ -17,8 +17,41 @@ function sanitizeStringArray(arr) {
 
 function sanitizePhone(v) {
   if (v == null) return "";
-  const s = String(v).replace(/\D/g, "");
-  return s;
+  return String(v).replace(/\D/g, "");
+}
+
+// Accept: ["url", { url, description }] -> [{ url, description }]
+function sanitizeFiles(arr) {
+  // Accept: string JSON, array, or mixed
+  if (typeof arr === "string") {
+    try { arr = JSON.parse(arr); } catch { arr = []; }
+  }
+  if (!Array.isArray(arr)) return [];
+  return arr
+    .map((item) => {
+      if (typeof item === "string") {
+        // could itself be a JSON-encoded object, or a bare URL
+        const t = item.trim();
+        if (t.startsWith("{")) {
+          try {
+            const o = JSON.parse(t);
+            return { url: String(o.url || "").trim(),
+                     description: String(o.description || "").trim() };
+          } catch { return null; }
+        }
+        return { url: t, description: "" };
+      }
+      if (item && typeof item === "object" && item.url) {
+        return {
+          url: String(item.url).trim(),
+          description: typeof item.description === "string"
+            ? item.description.trim()
+            : "",
+        };
+      }
+      return null;
+    })
+    .filter((x) => x && x.url);
 }
 
 /* ================= GET (any authenticated user) ================= */
@@ -44,9 +77,26 @@ export async function GET(req, { params }) {
 
     const doc = await ClientBrandAsset.findOne({ clientId }).lean();
 
+    // Normalize legacy bare-string files for the UI
+    const norm = doc
+      ? {
+          ...doc,
+          logos: (doc.logos || []).map((x) =>
+            typeof x === "string"
+              ? { url: x, description: "" }
+              : { url: x.url, description: x.description || "" }
+          ),
+          products: (doc.products || []).map((x) =>
+            typeof x === "string"
+              ? { url: x, description: "" }
+              : { url: x.url, description: x.description || "" }
+          ),
+        }
+      : null;
+
     return NextResponse.json({
       success: true,
-      data: doc || null,
+      data: norm,
       canEdit: WRITE_ROLES.includes(authUser.role),
     });
   } catch (error) {
@@ -108,12 +158,11 @@ export async function PUT(req, { params }) {
       secondaryPhone,
       websites: sanitizeStringArray(body.websites),
       maidIds: sanitizeStringArray(body.maidIds).map((e) => e.toLowerCase()),
-      logos: sanitizeStringArray(body.logos),
-      products: sanitizeStringArray(body.products),
+      logos: sanitizeFiles(body.logos),
+      products: sanitizeFiles(body.products),
       updatedBy: authUser._id,
     };
 
-    // Use .save() so auditPlugin hooks fire correctly
     let doc = await ClientBrandAsset.findOne({ clientId });
     if (!doc) {
       doc = new ClientBrandAsset({ clientId, ...update });
@@ -125,6 +174,8 @@ export async function PUT(req, { params }) {
       doc.logos = update.logos;
       doc.products = update.products;
       doc.updatedBy = update.updatedBy;
+      doc.markModified("logos");
+      doc.markModified("products");
     }
     await doc.save();
 
