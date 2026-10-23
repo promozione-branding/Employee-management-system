@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import TimePicker from "@/components/ui/time-picker";
 import toast from "react-hot-toast";
 import {
   addNewMeetingUpdate,
@@ -444,64 +445,17 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
   }, [customerId]);
 
   return (
-    <div className="flex flex-col-reverse">
-      <div>
-        {loadingEmailList ? (
-          <div className="border-dashed border-2 text-gray-500 text-center p-5 rounded-2xl mt-5">
-            There is no email found
-          </div>
-        ) : (
-          <div className="flex gap-4 my-3 flex-wrap">
-            {emailListData.map((item) => {
-              return (
-                <button
-                  onClick={() => handleSelectEmail(item)}
-                  key={item?._id}
-                  className={`p-2 border rounded-lg shadow-sm text-sm font-medium text-gray-700 duration-300 capitalize ${
-                    selectEmail.some((s) => s?._id === item?._id)
-                      ? "bg-blue-50 border-emerald-500 scale-105"
-                      : "bg-white border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  @{item?.email?.split("@")[0]}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* --- Call panel (wired) --- */}
-      <CallPanel
-        customerId={customerId}
-        customerName="Customer"
-        customerPhone="—"
-        virtualNumber={process.env.NEXT_PUBLIC_MYOP_VIRTUAL_NUMBER || "—"}
-        onCallStarted={() => {
-          // refresh history a moment later
-          setTimeout(fetchCallHistory, 2000);
-        }}
-      />
-
-      {/* --- Call history (wired) --- */}
-      <div className="mb-5">
-        {callHistoryLoading ? (
-          <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-6 text-center text-sm text-gray-500">
-            Loading call history…
-          </div>
-        ) : (
-          <CallHistory calls={callHistory} />
-        )}
-      </div>
-
-      <div className="flex gap-10 ">
-        <div className="w-1/3">
-          <h2 className="font-bold text-2xl text-center mb-5">Call Update</h2>
+    <div className="space-y-6">
+      {/* ---- 3 forms (now on top) ---- */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {/* ===== Call Update ===== */}
+        <div className="rounded-2xl border bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-lg font-bold text-slate-800">Call Update</h2>
           <form
             onSubmit={newMeeting ? handleCallSubmit : updateCallSubmit}
-            className="flex flex-col gap-2"
+            className="flex flex-col gap-3"
           >
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
               <Label>Call Update</Label>
               <Select
                 value={callForm.status}
@@ -518,7 +472,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
               <Label>Note</Label>
               <Textarea
                 value={callForm.note}
@@ -527,14 +481,13 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 }
               />
             </div>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
               <Label>Reminder</Label>
-              <div className="grid gap-2 grid-cols-2">
-                <Input
-                  type="time"
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <TimePicker
                   value={callForm.reminderTime}
-                  onChange={(e) =>
-                    setCallForm({ ...callForm, reminderTime: e.target.value })
+                  onChange={(v) =>
+                    setCallForm({ ...callForm, reminderTime: v })
                   }
                 />
                 <Input
@@ -546,16 +499,12 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
               <Label>Meeting Date</Label>
-              <div className="grid gap-2 grid-cols-2">
-                <Input
-                  type="time"
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <TimePicker
                   value={callForm.meetingTime}
-                  onChange={(e) =>
-                    setCallForm({ ...callForm, meetingTime: e.target.value })
-                  }
+                  onChange={(v) => setCallForm({ ...callForm, meetingTime: v })}
                 />
                 <Input
                   type="date"
@@ -566,22 +515,22 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-
-            <Button className={"w-full"} disabled={loading}>
-              Call Update
+            <Button className="w-full" disabled={loading}>
+              {loading ? "Saving…" : "Call Update"}
             </Button>
           </form>
         </div>
 
-        <div className="w-1/3">
-          <h2 className="font-bold text-2xl text-center mb-5">
+        {/* ===== Meeting Update ===== */}
+        <div className="rounded-2xl border bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-lg font-bold text-slate-800">
             Meeting Update
           </h2>
           <form
             onSubmit={newMeeting ? handleMeetingSubmit : updateMeetingSubmit}
-            className="flex flex-col gap-2"
+            className="flex flex-col gap-3"
           >
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
               <Label>Interested</Label>
               <Select
                 required
@@ -599,7 +548,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
               <Label>Note</Label>
               <Textarea
                 required
@@ -609,17 +558,13 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 }
               />
             </div>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
               <Label>Reminder</Label>
-              <div className="grid gap-2 grid-cols-2">
-                <Input
-                  type="time"
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <TimePicker
                   value={meetingForm.reminderTime}
-                  onChange={(e) =>
-                    setMeetingForm({
-                      ...meetingForm,
-                      reminderTime: e.target.value,
-                    })
+                  onChange={(v) =>
+                    setMeetingForm({ ...meetingForm, reminderTime: v })
                   }
                 />
                 <Input
@@ -634,18 +579,13 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
               <Label>Meeting Date</Label>
-              <div className="grid gap-2 grid-cols-2">
-                <Input
-                  type="time"
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <TimePicker
                   value={meetingForm.meetingTime}
-                  onChange={(e) =>
-                    setMeetingForm({
-                      ...meetingForm,
-                      meetingTime: e.target.value,
-                    })
+                  onChange={(v) =>
+                    setMeetingForm({ ...meetingForm, meetingTime: v })
                   }
                 />
                 <Input
@@ -660,19 +600,20 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-            <Button className={"w-full"}>Meeting Update</Button>
+            <Button className="w-full">Meeting Update</Button>
           </form>
         </div>
 
-        <div className="w-1/3">
-          <h2 className="font-bold text-2xl text-center mb-5">
+        {/* ===== General Update ===== */}
+        <div className="rounded-2xl border bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-lg font-bold text-slate-800">
             General Update
           </h2>
           <form
             onSubmit={newMeeting ? handleGeneralSubmit : updateGeneralSubmit}
-            className="flex flex-col gap-2"
+            className="flex flex-col gap-3"
           >
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
               <Label>Note</Label>
               <Textarea
                 required
@@ -682,17 +623,13 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 }
               />
             </div>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
               <Label>Reminder</Label>
-              <div className="grid gap-2 grid-cols-2">
-                <Input
-                  type="time"
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <TimePicker
                   value={generalForm.reminderTime}
-                  onChange={(e) =>
-                    setGeneralForm({
-                      ...generalForm,
-                      reminderTime: e.target.value,
-                    })
+                  onChange={(v) =>
+                    setGeneralForm({ ...generalForm, reminderTime: v })
                   }
                 />
                 <Input
@@ -707,18 +644,13 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
               <Label>Meeting Date</Label>
-              <div className="grid gap-2 grid-cols-2">
-                <Input
-                  type="time"
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <TimePicker
                   value={generalForm.meetingTime}
-                  onChange={(e) =>
-                    setGeneralForm({
-                      ...generalForm,
-                      meetingTime: e.target.value,
-                    })
+                  onChange={(v) =>
+                    setGeneralForm({ ...generalForm, meetingTime: v })
                   }
                 />
                 <Input
@@ -733,9 +665,68 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-            <Button className={"w-full"}>generate Update</Button>
+            <Button className="w-full">General Update</Button>
           </form>
         </div>
+      </div>
+
+      {/* ---- Email chips (below forms) ---- */}
+      <div className="rounded-2xl border bg-white p-4 shadow-sm">
+        <p className="mb-3 text-sm font-semibold text-slate-700">
+          Notify sales people (optional)
+        </p>
+        {loadingEmailList ? (
+          <div className="rounded-xl border-2 border-dashed p-4 text-center text-sm text-gray-500">
+            Loading emails…
+          </div>
+        ) : emailListData.length === 0 ? (
+          <div className="rounded-xl border-2 border-dashed p-4 text-center text-sm text-gray-500">
+            No emails found
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {emailListData.map((item) => {
+              const selected = selectEmail.some((s) => s?._id === item?._id);
+              return (
+                <button
+                  type="button"
+                  onClick={() => handleSelectEmail(item)}
+                  key={item?._id}
+                  className={`rounded-lg border px-3 py-1.5 text-sm font-medium capitalize transition ${
+                    selected
+                      ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                      : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  @{item?.email?.split("@")[0]}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ---- Call Panel ---- */}
+      <CallPanel
+        customerId={customerId}
+        customerName="Customer"
+        customerPhone="—"
+        virtualNumber={process.env.NEXT_PUBLIC_MYOP_VIRTUAL_NUMBER || "—"}
+        onCallStarted={() => {
+          setTimeout(fetchCallHistory, 2000);
+        }}
+      />
+
+      {/* ---- Call History ---- */}
+      <div className="rounded-2xl border bg-white p-4 shadow-sm">
+        <p className="mb-3 text-sm font-semibold text-slate-700">Call History</p>
+        {callHistoryLoading ? (
+          <div className="rounded-xl border-2 border-dashed p-4 text-center text-sm text-gray-500">
+            Loading call history…
+          </div>
+        ) : (
+          <CallHistory calls={callHistory} />
+        )}
       </div>
     </div>
   );
