@@ -19,3 +19,85 @@ export async function getEditHistoryMetaService() {
     },
   };
 }
+
+/* ================================================================
+   History service functions — all follow the same { success, data, message }
+   pattern as getEditHistoryService above.
+   ================================================================ */
+
+async function _get(url) {
+  const res = await fetch(url);
+  const data = await res.json();
+  if (!data.success) throw new Error(data.message || "Failed to fetch");
+  return data;
+}
+
+/** Work detail history for a client/work item */
+export async function GetClientWorkDetailHistory(id) {
+  if (!id) return { success: false, message: "id is required", data: [] };
+  try {
+    return await _get(`/api/customer/history/work-details/${id}`);
+  } catch (err) {
+    return { success: false, message: err.message, data: [] };
+  }
+}
+
+/** Invoice history */
+export async function getClientInoviceHistoryService(id) {
+  if (!id) return { success: false, message: "id is required", data: [] };
+  try {
+    return await _get(`/api/customer/history/invoice/${id}`);
+  } catch (err) {
+    return { success: false, message: err.message, data: [] };
+  }
+}
+
+/** Deleted proposal history */
+export async function getClientProposalDeletedHistory(id) {
+  if (!id) return { success: false, message: "id is required", data: [] };
+  try {
+    return await _get(`/api/customer/history/proposal/deleted-proposal/${id}`);
+  } catch (err) {
+    return { success: false, message: err.message, data: [] };
+  }
+}
+
+/** Proposal history */
+export async function getClientProposalHistoryService(id) {
+  if (!id) return { success: false, message: "id is required", data: [] };
+  try {
+    return await _get(`/api/customer/history/proposal/${id}`);
+  } catch (err) {
+    return { success: false, message: err.message, data: [] };
+  }
+}
+
+/** Proposal update history */
+export async function getClientProposalUpdateHistory(id) {
+  if (!id) return { success: false, message: "id is required", data: [] };
+  try {
+    return await _get(`/api/customer/history/proposal/edit-proposal/${id}`);
+  } catch (err) {
+    return { success: false, message: err.message, data: [] };
+  }
+}
+
+/** Team update admin history for a client */
+export async function getTeamUpdateAdminService(clientId) {
+  if (!clientId) return { success: false, message: "clientId is required", data: [] };
+  try {
+    return await _get(`/api/customer/history/team-update/${clientId}`);
+  } catch (err) {
+    return { success: false, message: err.message, data: [] };
+  }
+}
+
+/** SEO report history */
+export async function seoReportHistoryService(id) {
+  if (!id) return { success: false, message: "id is required", data: [] };
+  try {
+    return await _get(`/api/customer/history/seo-report/${id}`);
+  } catch (err) {
+    return { success: false, message: err.message, data: [] };
+  }
+}
