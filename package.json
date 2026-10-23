@@ -10,7 +10,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1009.0",
+    "@aws-sdk/client-s3": "^3.1156.0",
     "@fullcalendar/core": "^6.1.19",
     "@fullcalendar/daygrid": "^6.1.19",
     "@fullcalendar/interaction": "^6.1.19",
@@ -40,6 +40,7 @@
     "jspdf": "^3.0.4",
     "lucide-react": "^0.554.0",
     "mongoose": "^8.20.0",
+    "nanoid": "^6.0.2",
     "next": "16.0.10",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.11",

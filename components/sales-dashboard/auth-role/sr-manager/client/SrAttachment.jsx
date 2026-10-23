@@ -15,6 +15,7 @@ import {
 import { getAllEmailService } from "@/service/team-update";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import BrandAssets from "@/components/shared/BrandAssets";
 
 const Attachment = ({ clientId }) => {
   const [attachmentFormData, setAttachmentFormData] = useState(
@@ -165,6 +166,7 @@ const Attachment = ({ clientId }) => {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(320px,380px)_1fr]">
+      <div className="lg:col-span-2"><BrandAssets clientId={clientId} /></div>
       <Card className="h-fit">
         <CardHeader>
           <CardTitle>Create Attachment</CardTitle>

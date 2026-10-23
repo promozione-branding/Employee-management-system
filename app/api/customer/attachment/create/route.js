@@ -8,7 +8,7 @@ import { sendAttachmentEmail } from "@/lib/email/sendAttachmentEmail";
 
 export async function POST(req) {
   try {
-    await connectDB();
+    await connectDB(); 
 
     const body = await req.json();
 
