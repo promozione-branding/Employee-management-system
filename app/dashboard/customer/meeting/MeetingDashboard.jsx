@@ -22,6 +22,24 @@ import {
 } from "@/service/meeting";
 import { SalesPeopleMeetingService } from "@/service/customer";
 
+// Convert local date + "HH:mm" -> ISO string with browser tz offset.
+// Keeps DB instant correct (fixes "5:05 shows as 11:56" issues).
+const toLocalISO = (dateStr, timeStr) => {
+  if (!dateStr || !timeStr) return undefined;
+  const [y, mo, d] = dateStr.split("-").map(Number);
+  const [h, mi] = timeStr.split(":").map(Number);
+  if ([y, mo, d, h, mi].some((n) => Number.isNaN(n))) return undefined;
+  const local = new Date(y, mo - 1, d, h, mi, 0, 0);
+  const pad = (n) => String(n).padStart(2, "0");
+  const off = -local.getTimezoneOffset();
+  const sign = off >= 0 ? "+" : "-";
+  const abs = Math.abs(off);
+  const offsetStr = `${sign}${pad(Math.floor(abs / 60))}:${pad(abs % 60)}`;
+  return `${local.getFullYear()}-${pad(local.getMonth() + 1)}-${pad(
+    local.getDate(),
+  )}T${pad(local.getHours())}:${pad(local.getMinutes())}:00${offsetStr}`;
+};
+
 const MeetingDashboard = ({ customerId, salesPersonId }) => {
   const [loading, setLoading] = useState(false);
   const [newMeeting, setNewMeeting] = useState(false);
@@ -69,14 +87,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       updateType: "call",
       status: callForm?.status,
       note: callForm?.note,
-      meetingAt:
-        callForm.meetingDate && callForm.meetingTime
-          ? `${callForm.meetingDate}T${callForm.meetingTime}`
-          : undefined,
-      reminderAt:
-        callForm.reminderDate && callForm.reminderTime
-          ? `${callForm.reminderDate}T${callForm.reminderTime}`
-          : undefined,
+      meetingAt: toLocalISO(callForm.meetingDate, callForm.meetingTime),
+      reminderAt: toLocalISO(callForm.reminderDate, callForm.reminderTime),
     };
     if (!formData?.salesPersonId || !formData?.clientId) {
       toast.error("client id and salesPersonId not found");
@@ -117,14 +129,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       updateType: "call",
       status: callForm?.status,
       note: callForm?.note,
-      meetingAt:
-        callForm.meetingDate && callForm.meetingTime
-          ? `${callForm.meetingDate}T${callForm.meetingTime}`
-          : undefined,
-      reminderAt:
-        callForm.reminderDate && callForm.reminderTime
-          ? `${callForm.reminderDate}T${callForm.reminderTime}`
-          : undefined,
+      meetingAt: toLocalISO(callForm.meetingDate, callForm.meetingTime),
+      reminderAt: toLocalISO(callForm.reminderDate, callForm.reminderTime),
     };
 
     if (!formData?.salesPersonId || !formData?.clientId) {
@@ -170,14 +176,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       updateType: "meeting",
       status: meetingForm?.status,
       note: meetingForm?.note,
-      meetingAt:
-        meetingForm.meetingDate && meetingForm.meetingTime
-          ? `${meetingForm.meetingDate}T${meetingForm.meetingTime}`
-          : undefined,
-      reminderAt:
-        meetingForm.reminderDate && meetingForm.reminderTime
-          ? `${meetingForm.reminderDate}T${meetingForm.reminderTime}`
-          : undefined,
+      meetingAt: toLocalISO(meetingForm.meetingDate, meetingForm.meetingTime),
+      reminderAt: toLocalISO(meetingForm.reminderDate, meetingForm.reminderTime),
     };
     if (!formData?.salesPersonId || !formData?.clientId) {
       toast.error("client id and salesPersonId not found");
@@ -218,14 +218,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       updateType: "meeting",
       status: meetingForm?.status,
       note: meetingForm?.note,
-      meetingAt:
-        meetingForm.meetingDate && meetingForm.meetingTime
-          ? `${meetingForm.meetingDate}T${meetingForm.meetingTime}`
-          : undefined,
-      reminderAt:
-        meetingForm.reminderDate && meetingForm.reminderTime
-          ? `${meetingForm.reminderDate}T${meetingForm.reminderTime}`
-          : undefined,
+      meetingAt: toLocalISO(meetingForm.meetingDate, meetingForm.meetingTime),
+      reminderAt: toLocalISO(meetingForm.reminderDate, meetingForm.reminderTime),
     };
 
     if (!formData?.salesPersonId || !formData?.clientId) {
@@ -271,14 +265,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       clientId: customerId,
       updateType: "general",
       note: generalForm?.note,
-      meetingAt:
-        generalForm.meetingDate && generalForm.meetingTime
-          ? `${generalForm.meetingDate}T${generalForm.meetingTime}`
-          : undefined,
-      reminderAt:
-        generalForm.reminderDate && generalForm.reminderTime
-          ? `${generalForm.reminderDate}T${generalForm.reminderTime}`
-          : undefined,
+      meetingAt: toLocalISO(generalForm.meetingDate, generalForm.meetingTime),
+      reminderAt: toLocalISO(generalForm.reminderDate, generalForm.reminderTime),
     };
     if (!formData?.salesPersonId || !formData?.clientId) {
       toast.error("client id and salesPersonId not found");
@@ -317,14 +305,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       clientId: customerId,
       updateType: "general",
       note: generalForm?.note,
-      meetingAt:
-        generalForm.meetingDate && generalForm.meetingTime
-          ? `${generalForm.meetingDate}T${generalForm.meetingTime}`
-          : undefined,
-      reminderAt:
-        generalForm.reminderDate && generalForm.reminderTime
-          ? `${generalForm.reminderDate}T${generalForm.reminderTime}`
-          : undefined,
+      meetingAt: toLocalISO(generalForm.meetingDate, generalForm.meetingTime),
+      reminderAt: toLocalISO(generalForm.reminderDate, generalForm.reminderTime),
     };
 
     if (!formData?.salesPersonId || !formData?.clientId) {
@@ -405,33 +387,23 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
   }, [customerId]);
 
   return (
-    <div className="space-y-6">
-      {/* ---- Email chips ---- */}
-      <div className="rounded-2xl border bg-white p-4 shadow-sm">
-        <p className="mb-3 text-sm font-semibold text-slate-700">
-          Notify sales people (optional)
-        </p>
+    <div className="flex flex-col-reverse">
+      <div>
         {loadingEmailList ? (
-          <div className="rounded-xl border-2 border-dashed p-4 text-center text-sm text-gray-500">
-            Loading emails…
-          </div>
-        ) : emailListData.length === 0 ? (
-          <div className="rounded-xl border-2 border-dashed p-4 text-center text-sm text-gray-500">
-            No emails found
+          <div className="border-dashed border-2 text-gray-500 text-center p-5 rounded-2xl mt-5">
+            There is no email found
           </div>
         ) : (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-4 my-3 flex-wrap">
             {emailListData.map((item) => {
-              const selected = selectEmail.some((s) => s?._id === item?._id);
               return (
                 <button
-                  type="button"
                   onClick={() => handleSelectEmail(item)}
                   key={item?._id}
-                  className={`rounded-lg border px-3 py-1.5 text-sm font-medium capitalize transition ${
-                    selected
-                      ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                      : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                  className={`p-2 border rounded-lg shadow-sm text-sm font-medium text-gray-700 duration-300 capitalize ${
+                    selectEmail.some((s) => s?._id === item?._id)
+                      ? "bg-blue-50 border-emerald-500 scale-105"
+                      : "bg-white border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   @{item?.email?.split("@")[0]}
@@ -442,16 +414,14 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
         )}
       </div>
 
-      {/* ---- 3 forms ---- */}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {/* ===== Call Update ===== */}
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-bold text-slate-800">Call Update</h2>
+        <div className="w-full">
+          <h2 className="font-bold text-2xl text-center mb-5">Call Update</h2>
           <form
             onSubmit={newMeeting ? handleCallSubmit : updateCallSubmit}
-            className="flex flex-col gap-3"
+            className="flex flex-col gap-2"
           >
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-3">
               <Label>Call Update</Label>
               <Select
                 value={callForm.status}
@@ -468,7 +438,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-3">
               <Label>Note</Label>
               <Textarea
                 value={callForm.note}
@@ -477,9 +447,9 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 }
               />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-3">
               <Label>Reminder</Label>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 grid-cols-2">
                 <TimePicker
                   value={callForm.reminderTime}
                   onChange={(v) =>
@@ -495,9 +465,10 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-            <div className="flex flex-col gap-1.5">
+
+            <div className="flex flex-col gap-3">
               <Label>Meeting Date</Label>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 grid-cols-2">
                 <TimePicker
                   value={callForm.meetingTime}
                   onChange={(v) => setCallForm({ ...callForm, meetingTime: v })}
@@ -511,22 +482,22 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-            <Button className="w-full" disabled={loading}>
-              {loading ? "Saving…" : "Call Update"}
+
+            <Button className={"w-full"} disabled={loading}>
+              Call Update
             </Button>
           </form>
         </div>
 
-        {/* ===== Meeting Update ===== */}
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-bold text-slate-800">
+        <div className="w-full">
+          <h2 className="font-bold text-2xl text-center mb-5">
             Meeting Update
           </h2>
           <form
             onSubmit={newMeeting ? handleMeetingSubmit : updateMeetingSubmit}
-            className="flex flex-col gap-3"
+            className="flex flex-col gap-2"
           >
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-3">
               <Label>Interested</Label>
               <Select
                 required
@@ -544,7 +515,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-3">
               <Label>Note</Label>
               <Textarea
                 required
@@ -554,9 +525,9 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 }
               />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-3">
               <Label>Reminder</Label>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 grid-cols-2">
                 <TimePicker
                   value={meetingForm.reminderTime}
                   onChange={(v) =>
@@ -575,9 +546,10 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-            <div className="flex flex-col gap-1.5">
+
+            <div className="flex flex-col gap-3">
               <Label>Meeting Date</Label>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 grid-cols-2">
                 <TimePicker
                   value={meetingForm.meetingTime}
                   onChange={(v) =>
@@ -596,20 +568,19 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-            <Button className="w-full">Meeting Update</Button>
+            <Button className={"w-full"}>Meeting Update</Button>
           </form>
         </div>
 
-        {/* ===== General Update ===== */}
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-bold text-slate-800">
+        <div className="w-full">
+          <h2 className="font-bold text-2xl text-center mb-5">
             General Update
           </h2>
           <form
             onSubmit={newMeeting ? handleGeneralSubmit : updateGeneralSubmit}
-            className="flex flex-col gap-3"
+            className="flex flex-col gap-2"
           >
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-3">
               <Label>Note</Label>
               <Textarea
                 required
@@ -619,9 +590,9 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 }
               />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-3">
               <Label>Reminder</Label>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 grid-cols-2">
                 <TimePicker
                   value={generalForm.reminderTime}
                   onChange={(v) =>
@@ -640,9 +611,10 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-            <div className="flex flex-col gap-1.5">
+
+            <div className="flex flex-col gap-3">
               <Label>Meeting Date</Label>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 grid-cols-2">
                 <TimePicker
                   value={generalForm.meetingTime}
                   onChange={(v) =>
@@ -661,7 +633,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-            <Button className="w-full">General Update</Button>
+            <Button className={"w-full"}>generate Update</Button>
           </form>
         </div>
       </div>
