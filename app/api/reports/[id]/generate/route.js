@@ -3,8 +3,6 @@ import { connectDB } from "@/lib/db";
 import ReportClient from "@/models/admin/ReportClient";
 import Report from "@/models/admin/Report";
 import { requireReportAdmin } from "@/lib/reportingAuth";
-import { getGA4, getGSC, getGoogleAds } from "@/lib/google";
-import { getMetaAds, getMetaPage } from "@/lib/meta";
 import mongoose from "mongoose";
 
 export const maxDuration = 60;
@@ -33,7 +31,9 @@ async function fetchAll(arr, fn) {
 export async function POST(req, { params }) {
   const auth = await requireReportAdmin(req);
   if (!auth.ok) return Response.json({ error: auth.error }, { status: auth.status });
-  if (!mongoose.isValidObjectId(params.id)) return Response.json({ error: "Bad id" }, { status: 400 });
+  
+  const { id } = await params; // 🔒 Next.js 16 requires await
+  if (!mongoose.isValidObjectId(id)) return Response.json({ error: "Bad id" }, { status: 400 });
 
   await connectDB();
   const body = await req.json();
@@ -42,8 +42,11 @@ export async function POST(req, { params }) {
   const startISO = start.toISOString().slice(0, 10);
   const endISO = end.toISOString().slice(0, 10);
 
-  const client = await ReportClient.findById(params.id).lean();
+  const client = await ReportClient.findById(id).lean();
   if (!client) return Response.json({ error: "Client not found" }, { status: 404 });
+
+  const { getGA4, getGSC, getGoogleAds } = await import("@/lib/google");
+  const { getMetaAds, getMetaPage } = await import("@/lib/meta");
 
   const [ga4, gsc, gads, metaAds, metaPage] = await Promise.all([
     fetchAll(client.ga4PropertyIds,       (id) => getGA4(id, startISO, endISO)),
@@ -54,7 +57,7 @@ export async function POST(req, { params }) {
   ]);
 
   const report = await Report.create({
-    clientId: params.id,
+    clientId: id,
     periodType, periodStart: start, periodEnd: end,
     data: { client, ga4, gsc, gads, metaAds, metaPage },
     createdBy: auth.user._id,

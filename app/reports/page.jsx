@@ -66,8 +66,9 @@ export default function ReportsPage() {
                 <td className="p-2 text-xs">
                   GA4: {c.ga4PropertyIds?.length || 0} · GSC: {c.gscSiteUrls?.length || 0} · GAds: {c.googleAdsCustomerIds?.length || 0} · Meta: {c.metaAdAccountIds?.length || 0}
                 </td>
-                <td className="p-2">
+                <td className="p-2 space-x-2 whitespace-nowrap">
                   <Link href={`/reports/${c._id}`} className="px-3 py-1 text-sm bg-blue-600 text-white rounded">Open</Link>
+                  <Link href={`/reports/discover?clientId=${c._id}`} className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 rounded">✏️ Edit</Link>
                 </td>
               </tr>
             ))}

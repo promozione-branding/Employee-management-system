@@ -10,6 +10,7 @@ export default function ReportClientDetail({ params }) {
   const [period, setPeriod] = useState("weekly");
   const [busy, setBusy] = useState(false);
   const [emails, setEmails] = useState("");
+  const [latestReportId, setLatestReportId] = useState(null);
 
   async function load() {
     const res = await fetch(`/api/reports/clients/${id}`);
@@ -33,10 +34,12 @@ export default function ReportClientDetail({ params }) {
     } finally { setBusy(false); }
   }
 
-  async function generateAndSend() {
-    if (!confirm(`Generate and send ${period} report?`)) return;
-    setBusy(true);
+  async function generateAndSend(sendEmail = false) {
+    if (sendEmail && !confirm(`Generate and send ${period} report via email?`)) return;
+    if (!sendEmail) setBusy(true);
+
     try {
+      // 1. Generate the report data
       const gen = await fetch(`/api/reports/${id}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -45,13 +48,23 @@ export default function ReportClientDetail({ params }) {
       const genJson = await gen.json();
       if (!gen.ok) throw new Error(genJson.error || "Generate failed");
 
-      const send = await fetch(`/api/reports/${genJson.reportId}/send`, { method: "POST" });
-      const sendJson = await send.json();
-      if (!send.ok) throw new Error(sendJson.error || "Send failed");
+      setLatestReportId(genJson.reportId);
 
-      alert(`Sent to: ${sendJson.to}`);
-    } catch (e) { alert(`Error: ${e.message}`); }
-    finally { setBusy(false); }
+      if (sendEmail) {
+        // 2. Send the email (only if requested)
+        const send = await fetch(`/api/reports/${genJson.reportId}/send`, { method: "POST" });
+        const sendJson = await send.json();
+        if (!send.ok) throw new Error(sendJson.error || "Send failed");
+        alert(`Sent to: ${sendJson.to}`);
+      } else {
+        // 2. Just open the PDF in a new tab
+        window.open(`/api/reports/${genJson.reportId}/view`, "_blank");
+      }
+    } catch (e) { 
+      alert(`Error: ${e.message}`); 
+    } finally { 
+      setBusy(false); 
+    }
   }
 
   if (!client) return <div className="p-6">Loading...</div>;
@@ -77,14 +90,40 @@ export default function ReportClientDetail({ params }) {
         <div><b>Meta Pages:</b> {client.metaPageIds?.join(", ") || "—"}</div>
       </div>
 
-      <div className="border rounded p-4 flex gap-2 items-center">
-        <select value={period} onChange={e => setPeriod(e.target.value)} className="border rounded px-2 py-1">
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-        </select>
-        <button onClick={generateAndSend} disabled={busy} className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50">
-          {busy ? "Working..." : "Generate & Send"}
-        </button>
+      <div className="border rounded p-4 flex flex-col gap-4 bg-gray-50">
+        <div className="flex gap-2 items-center">
+          <label className="text-sm font-medium">Period:</label>
+          <select value={period} onChange={e => setPeriod(e.target.value)} className="border rounded px-2 py-1">
+            <option value="weekly">Last 7 Days (Weekly)</option>
+            <option value="monthly">Last Month (Monthly)</option>
+          </select>
+        </div>
+
+        <div className="flex gap-2">
+          <button 
+            onClick={() => generateAndSend(false)} 
+            disabled={busy} 
+            className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50 hover:bg-blue-700"
+          >
+            {busy ? "Generating..." : "👁️ Generate & View PDF"}
+          </button>
+
+          <button 
+            onClick={() => generateAndSend(true)} 
+            disabled={busy} 
+            className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50 hover:bg-green-700"
+          >
+            {busy ? "Working..." : "📧 Generate & Send Email"}
+          </button>
+        </div>
+
+        {latestReportId && (
+          <div className="text-sm mt-2">
+            <a href={`/api/reports/${latestReportId}/view`} target="_blank" className="text-blue-600 underline">
+              Open the report you just generated
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
