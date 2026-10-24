@@ -99,6 +99,14 @@ export async function middleware(req) {
       );
     }
 
+    // 👇👇👇 NEW BLOCK: Reports module - Admin & Manager only 👇👇👇
+    if (pathname.startsWith("/reports") && !["admin", "manager"].includes(role)) {
+      return NextResponse.redirect(
+        new URL(ROLE_REDIRECT[role] || "/login", req.url),
+      );
+    }
+    // 👆👆👆 END NEW BLOCK 👆👆👆
+
     return NextResponse.next();
   } catch {
     return NextResponse.redirect(new URL("/login", req.url));
