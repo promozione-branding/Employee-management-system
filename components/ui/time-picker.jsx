@@ -47,8 +47,8 @@ export default function TimePicker({ value = "", onChange, className = "" }) {
   // ---------- geometry ----------
   const SIZE = 260;
   const CENTER = SIZE / 2;
-  const OUTER_RADIUS = 100; // number ring
-  const INNER_RADIUS = 62; // hand length
+  const OUTER_RADIUS = 100;
+  const INNER_RADIUS = 62;
 
   const hours = useMemo(() => [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], []);
   const minutes = useMemo(
@@ -59,14 +59,12 @@ export default function TimePicker({ value = "", onChange, className = "" }) {
   const currentNumbers = mode === "hour" ? hours : minutes;
   const currentValue = mode === "hour" ? hour12 : minute;
 
-  // angle in degrees, 0° = 12 o'clock, clockwise
   const angleFor = (num, list) => {
     const idx = list.indexOf(num);
     return (idx / list.length) * 360;
   };
   const currentAngle = angleFor(currentValue, currentNumbers);
 
-  // hand tip in SVG coords (angle 0 = up)
   const handTip = (() => {
     const rad = ((currentAngle - 90) * Math.PI) / 180;
     return {
@@ -96,7 +94,6 @@ export default function TimePicker({ value = "", onChange, className = "" }) {
     }
   };
 
-  // ---------- display on trigger ----------
   const display = useMemo(
     () =>
       `${String(hour12).padStart(2, "0")}:${String(minute).padStart(
@@ -126,20 +123,60 @@ export default function TimePicker({ value = "", onChange, className = "" }) {
     };
   }, [open]);
 
-  // ---------- position popover ----------
-  const [pos, setPos] = useState({ top: 0, left: 0 });
-  useEffect(() => {
-    if (!open || !triggerRef.current) return;
+  // ---------- smart positioning (stays on screen) ----------
+  const POP_W = 300;
+  const POP_H = 420; // approx panel height (header + clock + footer)
+  const MARGIN = 8;
+
+  const [pos, setPos] = useState({ top: 0, left: 0, placement: "bottom" });
+
+  const computePosition = () => {
+    if (!triggerRef.current) return;
     const r = triggerRef.current.getBoundingClientRect();
-    const POP_W = 300;
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+
+    const spaceBelow = vh - r.bottom - MARGIN;
+    const spaceAbove = r.top - MARGIN;
+
+    // Prefer below; flip above only if below doesn't fit AND above has more room
+    let placement = "bottom";
+    if (spaceBelow < POP_H && spaceAbove > spaceBelow) placement = "top";
+
+    let top;
+    if (placement === "bottom") {
+      top = r.bottom + MARGIN;
+    } else {
+      top = r.top - POP_H - MARGIN;
+    }
+
+    // Final clamp so it never goes off-screen vertically
+    if (top < MARGIN) top = MARGIN;
+    if (top + POP_H > vh - MARGIN) top = vh - POP_H - MARGIN;
+
+    // Horizontal clamp
     let left = r.left;
-    if (left + POP_W > window.innerWidth - 8) left = window.innerWidth - POP_W - 8;
-    setPos({ top: r.bottom + 8, left });
+    if (left + POP_W > vw - MARGIN) left = vw - POP_W - MARGIN;
+    if (left < MARGIN) left = MARGIN;
+
+    setPos({ top, left, placement });
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    computePosition();
+    const onScrollOrResize = () => computePosition();
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   return (
     <div className={className}>
-      {/* trigger */}
       <button
         ref={triggerRef}
         type="button"
@@ -179,7 +216,7 @@ export default function TimePicker({ value = "", onChange, className = "" }) {
               top: pos.top,
               left: pos.left,
               zIndex: 9999,
-              width: 300,
+              width: POP_W,
             }}
             className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
           >
@@ -242,15 +279,12 @@ export default function TimePicker({ value = "", onChange, className = "" }) {
                 onClick={handleClockClick}
               >
                 <svg width={SIZE} height={SIZE} className="cursor-pointer">
-                  {/* subtle ring */}
                   <circle
                     cx={CENTER}
                     cy={CENTER}
                     r={OUTER_RADIUS + 22}
                     fill="#f8fafc"
                   />
-
-                  {/* hand */}
                   <line
                     x1={CENTER}
                     y1={CENTER}
@@ -262,9 +296,9 @@ export default function TimePicker({ value = "", onChange, className = "" }) {
                   />
                   <circle cx={CENTER} cy={CENTER} r={4} fill="#0f172a" />
 
-                  {/* numbers */}
                   {currentNumbers.map((n) => {
-                    const a = (angleFor(n, currentNumbers) - 90) * (Math.PI / 180);
+                    const a =
+                      (angleFor(n, currentNumbers) - 90) * (Math.PI / 180);
                     const x = CENTER + OUTER_RADIUS * Math.cos(a);
                     const y = CENTER + OUTER_RADIUS * Math.sin(a);
                     const selected = currentValue === n;
