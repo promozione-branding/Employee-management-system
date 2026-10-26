@@ -12,6 +12,7 @@ import {
   Search,
   Bell,
   UserCircle,
+  FileBarChart,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -60,6 +61,11 @@ const SideBar = ({ children }) => {
       label: "Employee",
       icon: <IdCardLanyard size={22} />,
     },
+    {
+      href: "/reports",
+      label: "Clients Reporttt",
+      icon: <FileBarChart size={22} />,
+    }
   ];
 
 
