@@ -1,4 +1,3 @@
-// app/reports/discover/page.jsx
 "use client";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -16,7 +15,9 @@ function DiscoverForm() {
   
   // Search states
   const [gscSearch, setGscSearch] = useState("");
-  const [adsSearch, setAdsSearch] = useState(""); // 👈 New Search for Google Ads
+  const [gadsSearch, setGadsSearch] = useState("");
+  const [metaAdsSearch, setMetaAdsSearch] = useState("");
+  const [metaPageSearch, setMetaPageSearch] = useState("");
   
   const [selection, setSelection] = useState({
     ga4PropertyIds: [], gscSiteUrls: [], googleAdsCustomerIds: [],
@@ -81,18 +82,16 @@ function DiscoverForm() {
     finally { setBusy(false); }
   }
 
-  if (loading) return <div className="p-6">Loading accounts...</div>;
+  if (loading) return <div className="p-6">Loading accounts from Google + Meta...</div>;
 
-  // Filter Lists based on search
-  const filteredGsc = (google?.gsc || []).filter(site => site.siteUrl.toLowerCase().includes(gscSearch.toLowerCase()));
-  
-  const filteredAds = (google?.googleAds || []).filter(acc => 
-    (acc.name || "").toLowerCase().includes(adsSearch.toLowerCase()) || 
-    (acc.customerId || "").includes(adsSearch)
-  );
+  // Filter Lists
+  const filteredGsc = (google?.gsc || []).filter(s => s.siteUrl.toLowerCase().includes(gscSearch.toLowerCase()));
+  const filteredGads = (google?.googleAds || []).filter(a => (a.name || "").toLowerCase().includes(gadsSearch.toLowerCase()) || (a.customerId || "").includes(gadsSearch));
+  const filteredMetaAds = (meta?.adAccounts || []).filter(a => (a.name || "").toLowerCase().includes(metaAdsSearch.toLowerCase()) || (a.id || "").includes(metaAdsSearch));
+  const filteredMetaPages = (meta?.pages || []).filter(p => (p.name || "").toLowerCase().includes(metaPageSearch.toLowerCase()) || (p.id || "").includes(metaPageSearch));
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">{editClientId ? "Edit Client Accounts" : "Add Report Client"}</h1>
       
       <div className="border rounded p-4 mb-4 space-y-3 bg-white shadow-sm">
@@ -104,37 +103,34 @@ function DiscoverForm() {
           <label className="block text-sm font-medium text-gray-700 mb-1">Emails (comma separated)</label>
           <input value={emails} onChange={e => setEmails(e.target.value)} className="w-full border rounded px-3 py-2" />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Websites (comma separated)</label>
-          <input value={websites} onChange={e => setWebsites(e.target.value)} className="w-full border rounded px-3 py-2" />
-        </div>
       </div>
 
       <div className="space-y-4">
         <Section title="GA4 Properties" items={google?.ga4} idKey="propertyId" labelKey="displayName" extraKey="account" selected={selection.ga4PropertyIds} toggle={v => toggle("ga4PropertyIds", v)} error={google?.ga4Error} />
         
-        {/* GSC SECTION with Search */}
         <div className="border border-blue-200 p-3 rounded bg-blue-50 mb-2">
-          <label className="block text-sm font-medium text-blue-800 mb-1">🔍 Search Console Sites (Search to filter)</label>
-          <input 
-            value={gscSearch} onChange={e => setGscSearch(e.target.value)} 
-            placeholder="Type a domain name..." className="w-full border border-blue-300 rounded px-3 py-2 mb-3"
-          />
-          <Section title="Filtered Sites" items={filteredGsc} idKey="siteUrl" labelKey="siteUrl" extraKey="permissionLevel" selected={selection.gscSiteUrls} toggle={v => toggle("gscSiteUrls", v)} error={google?.gscError} />
+          <label className="block text-sm font-medium text-blue-800 mb-1">🔍 Search Console Sites</label>
+          <input value={gscSearch} onChange={e => setGscSearch(e.target.value)} placeholder="Search by domain..." className="w-full border border-blue-300 rounded px-3 py-2 mb-3" />
+          <Section title="Sites" items={filteredGsc} idKey="siteUrl" labelKey="siteUrl" extraKey="permissionLevel" selected={selection.gscSiteUrls} toggle={v => toggle("gscSiteUrls", v)} error={google?.gscError} />
         </div>
 
-        {/* GOOGLE ADS SECTION with Search */}
         <div className="border border-orange-200 p-3 rounded bg-orange-50 mb-2">
-          <label className="block text-sm font-medium text-orange-800 mb-1">🔍 Google Ads Accounts (Search by Name or ID)</label>
-          <input 
-            value={adsSearch} onChange={e => setAdsSearch(e.target.value)} 
-            placeholder="Type an account name or ID..." className="w-full border border-orange-300 rounded px-3 py-2 mb-3"
-          />
-          <Section title="Filtered Accounts" items={filteredAds} idKey="customerId" labelKey="name" extraKey="currency" selected={selection.googleAdsCustomerIds} toggle={v => toggle("googleAdsCustomerIds", v)} error={google?.googleAdsError} />
+          <label className="block text-sm font-medium text-orange-800 mb-1">🔍 Google Ads Accounts</label>
+          <input value={gadsSearch} onChange={e => setGadsSearch(e.target.value)} placeholder="Search by name or ID..." className="w-full border border-orange-300 rounded px-3 py-2 mb-3" />
+          <Section title="Accounts" items={filteredGads} idKey="customerId" labelKey="name" extraKey="currency" selected={selection.googleAdsCustomerIds} toggle={v => toggle("googleAdsCustomerIds", v)} error={google?.googleAdsError} />
         </div>
 
-        <Section title="Meta Ad Accounts" items={meta?.adAccounts} idKey="id" labelKey="name" extraKey="currency" selected={selection.metaAdAccountIds} toggle={v => toggle("metaAdAccountIds", v)} error={meta?.adAccountsError} />
-        <Section title="Meta Pages" items={meta?.pages} idKey="id" labelKey="name" extraKey="link" selected={selection.metaPageIds} toggle={v => toggle("metaPageIds", v)} error={meta?.pagesError} />
+        <div className="border border-purple-200 p-3 rounded bg-purple-50 mb-2">
+          <label className="block text-sm font-medium text-purple-800 mb-1">🔍 Meta Ad Accounts</label>
+          <input value={metaAdsSearch} onChange={e => setMetaAdsSearch(e.target.value)} placeholder="Search by name or ID..." className="w-full border border-purple-300 rounded px-3 py-2 mb-3" />
+          <Section title="Accounts" items={filteredMetaAds} idKey="id" labelKey="name" extraKey="currency" selected={selection.metaAdAccountIds} toggle={v => toggle("metaAdAccountIds", v)} error={meta?.adAccountsError} />
+        </div>
+
+        <div className="border border-indigo-200 p-3 rounded bg-indigo-50 mb-2">
+          <label className="block text-sm font-medium text-indigo-800 mb-1">🔍 Meta Pages</label>
+          <input value={metaPageSearch} onChange={e => setMetaPageSearch(e.target.value)} placeholder="Search by name or ID..." className="w-full border border-indigo-300 rounded px-3 py-2 mb-3" />
+          <Section title="Pages" items={filteredMetaPages} idKey="id" labelKey="name" extraKey="link" selected={selection.metaPageIds} toggle={v => toggle("metaPageIds", v)} error={meta?.pagesError} />
+        </div>
       </div>
 
       <div className="mt-6 sticky bottom-4">
@@ -147,27 +143,20 @@ function DiscoverForm() {
 }
 
 function Section({ title, items, idKey, labelKey, extraKey, selected, toggle, error }) {
-  if (error) return (
-    <div className="border-2 border-red-400 bg-red-50 p-4 rounded">
-      <h3 className="font-bold text-red-800">{title}: Error</h3>
-      <p className="text-sm text-red-700 font-mono mt-1">{error}</p>
-    </div>
-  );
+  if (error) return <div className="border-2 border-red-400 bg-red-50 p-4 rounded"><h3 className="font-bold text-red-800">{title}: Error</h3><p className="text-sm text-red-700 font-mono mt-1">{error}</p></div>;
   if (!items || items.length === 0) return <div className="border p-3 rounded text-sm text-gray-500">{title}: none found</div>;
   return (
     <div className="border p-3 rounded bg-white">
       <h3 className="font-semibold mb-2">{title} <span className="text-xs text-gray-500">({items.length})</span></h3>
-      <div className="space-y-1 max-h-72 overflow-auto">
+      <div className="space-y-1 max-h-60 overflow-auto">
         {items.map(item => {
-          const id = item[idKey];
-          const label = item[labelKey] || id;
-          const extra = extraKey ? item[extraKey] : null;
+          const id = item[idKey]; const label = item[labelKey] || id; const extra = extraKey ? item[extraKey] : null;
           return (
             <label key={id} className="flex items-center gap-2 text-sm p-1 hover:bg-gray-50 rounded cursor-pointer">
               <input type="checkbox" checked={selected.includes(id)} onChange={() => toggle(id)} className="w-4 h-4" />
               <span className="font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-700">{id}</span>
-              <span>{label}</span>
-              {extra && <span className="text-xs text-gray-400">({extra})</span>}
+              <span className="truncate">{label}</span>
+              {extra && <span className="text-xs text-gray-400 ml-auto">({extra})</span>}
             </label>
           );
         })}
@@ -177,9 +166,5 @@ function Section({ title, items, idKey, labelKey, extraKey, selected, toggle, er
 }
 
 export default function DiscoverPage() {
-  return (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <DiscoverForm />
-    </Suspense>
-  );
+  return <Suspense fallback={<div className="p-6">Loading...</div>}><DiscoverForm /></Suspense>;
 }

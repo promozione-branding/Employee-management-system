@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 export default function ReportClientDetail({ params }) {
   const router = useRouter();
   const { id } = use(params);
-  
   const [client, setClient] = useState(null);
   const [busy, setBusy] = useState(false);
   const [periodType, setPeriodType] = useState("monthly");
@@ -34,7 +33,6 @@ export default function ReportClientDetail({ params }) {
 
       setLatestReportId(genJson.reportId);
       window.open(`/api/reports/${genJson.reportId}/view`, "_blank");
-      
     } catch (e) { alert(`Error: ${e.message}`); } finally { setBusy(false); }
   }
 
@@ -51,36 +49,29 @@ export default function ReportClientDetail({ params }) {
            <a href={`/reports/discover?clientId=${id}`} className="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-gray-800 transition">✏️ Edit Accounts</a>
         </div>
         
-        <div className="text-sm space-y-2">
-          <div className="flex gap-2 border-b pb-2">
-            <span className="font-medium w-32">GSC Sites:</span>
-            <div className="flex flex-wrap gap-1">
-              {client.gscSiteUrls?.length ? client.gscSiteUrls.map(u => <span key={u} className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">{u}</span>) : <span className="text-gray-400">None</span>}
-            </div>
-          </div>
-          <div className="flex gap-2 border-b pb-2">
-            <span className="font-medium w-32">GA4 Properties:</span>
-            <div className="flex flex-wrap gap-1">
-              {client.ga4PropertyIds?.length ? client.ga4PropertyIds.map(u => <span key={u} className="bg-green-50 text-green-700 px-2 py-0.5 rounded border border-green-100">{u}</span>) : <span className="text-gray-400">None</span>}
-            </div>
-          </div>
+        <div className="text-sm space-y-3">
           <div className="flex gap-2 border-b pb-2">
             <span className="font-medium w-32">Google Ads:</span>
             <div className="flex flex-wrap gap-1">
               {client.googleAdsCustomerIds?.length ? client.googleAdsCustomerIds.map(u => <span key={u} className="bg-orange-50 text-orange-700 px-2 py-0.5 rounded border border-orange-100">{u}</span>) : <span className="text-gray-400">None</span>}
             </div>
           </div>
-          {/* 👈 ADDED META HERE */}
           <div className="flex gap-2 border-b pb-2">
             <span className="font-medium w-32">Meta Ad Accounts:</span>
             <div className="flex flex-wrap gap-1">
               {client.metaAdAccountIds?.length ? client.metaAdAccountIds.map(u => <span key={u} className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-100">{u}</span>) : <span className="text-gray-400">None</span>}
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 border-b pb-2">
             <span className="font-medium w-32">Meta Pages:</span>
             <div className="flex flex-wrap gap-1">
               {client.metaPageIds?.length ? client.metaPageIds.map(u => <span key={u} className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-100">{u}</span>) : <span className="text-gray-400">None</span>}
+            </div>
+          </div>
+          <div className="flex gap-2 border-b pb-2">
+            <span className="font-medium w-32">GSC Sites:</span>
+            <div className="flex flex-wrap gap-1">
+              {client.gscSiteUrls?.length ? client.gscSiteUrls.map(u => <span key={u} className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">{u}</span>) : <span className="text-gray-400">None</span>}
             </div>
           </div>
         </div>
