@@ -1,119 +1,121 @@
-// components/reports/ReportPDF.jsx
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Svg, Polyline } from "@react-pdf/renderer";
 
 const s = StyleSheet.create({
-  page: { padding: 32, fontSize: 10, fontFamily: "Helvetica" },
-  title: { fontSize: 20, marginBottom: 4, fontWeight: 700 },
-  sub: { fontSize: 10, color: "#666", marginBottom: 20 },
-  section: { marginBottom: 16 },
-  h2: { fontSize: 13, marginBottom: 8, paddingBottom: 4, borderBottom: "1 solid #ddd" },
-  row: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 3 },
-  label: { color: "#444" },
-  value: { fontWeight: 700 },
-  card: { backgroundColor: "#f5f5f5", padding: 10, marginBottom: 10, borderRadius: 4 },
-  err: { color: "#a00", fontSize: 8, marginTop: 4 },
+  page: { padding: 40, fontSize: 10, fontFamily: "Helvetica", backgroundColor: "#ffffff" },
+  header: { marginBottom: 20, borderBottom: "2 solid #eaebed", paddingBottom: 10 },
+  title: { fontSize: 24, fontWeight: 700, color: "#1a202c" },
+  sub: { fontSize: 12, color: "#718096", marginTop: 4 },
+  
+  // Grids
+  grid: { flexDirection: "row", justifyContent: "space-between", gap: 8, marginBottom: 15 },
+  box: { flex: 1, backgroundColor: "#f7fafc", padding: 10, borderRadius: 6, border: "1 solid #e2e8f0" },
+  boxLabel: { fontSize: 8, color: "#718096", textTransform: "uppercase", marginBottom: 4, fontWeight: 700 },
+  boxValue: { fontSize: 14, fontWeight: "bold", color: "#2d3748" },
+
+  section: { marginBottom: 15 },
+  h2: { fontSize: 12, fontWeight: 700, color: "#2d3748", marginBottom: 8 },
+  chartBox: { border: "1 solid #e2e8f0", borderRadius: 6, padding: 8, backgroundColor: "#fff" },
+  chartLabel: { fontSize: 8, color: "#a0aec0", marginTop: 4, textAlign: "center" }
 });
 
-function Row({ label, value }) {
+function MetricBox({ label, value }) {
   return (
-    <View style={s.row}>
-      <Text style={s.label}>{label}</Text>
-      <Text style={s.value}>{value ?? "-"}</Text>
+    <View style={s.box}>
+      <Text style={s.boxLabel}>{label}</Text>
+      <Text style={s.boxValue}>{value ?? "0"}</Text>
     </View>
   );
 }
 
-function sum(arr, path) {
-  return arr.reduce((acc, item) => {
-    const v = path.split(".").reduce((o, k) => o?.[k], item);
-    return acc + (Number(v) || 0);
-  }, 0);
+function LineChart({ data, color }) {
+  if (!data || data.length < 2) return <Text style={{ fontSize: 8, color: "#ccc", padding: 10 }}>Not enough data to draw chart</Text>;
+  
+  const max = Math.max(...data, 1);
+  const points = data.map((val, i) => {
+    const x = (i / (data.length - 1)) * 400;
+    const y = 60 - (val / max) * 60; 
+    return `${x},${y}`;
+  }).join(" ");
+
+  return (
+    <Svg width="100%" height="60" viewBox="0 0 400 60" preserveAspectRatio="none">
+      <Polyline fill="none" stroke={color} strokeWidth="3" points={points} />
+    </Svg>
+  );
 }
 
 export function ReportPDF({ report }) {
   const d = report.data || {};
   const c = d.client || {};
-  const ga4Rows = d.ga4 || [];
-  const gscRows = d.gsc || [];
-  const gadsRows = d.gads || [];
-  const metaAdsRows = d.metaAds || [];
+  
+  // --- Google Calculations ---
+  const gscTotals = d.gsc?.map(x => x.data?.totals || {}) || [];
+  const totalGscClicks = gscTotals.reduce((a, b) => a + (b.clicks || 0), 0);
+  const totalGscImpr = gscTotals.reduce((a, b) => a + (b.impressions || 0), 0);
+  
+  const gadsTotals = d.gads?.map(x => x.data?.totals || {}) || [];
+  const totalAdsClicks = gadsTotals.reduce((a, b) => a + (b.clicks || 0), 0);
+  const totalAdsCost = gadsTotals.reduce((a, b) => a + (b.cost || 0), 0);
+  
+  // --- Meta Calculations ---
+  const metaTotals = d.metaAds || [];
+  const totalMetaSpend = metaTotals.reduce((a, b) => a + Number(b.spend || 0), 0);
+  const totalMetaClicks = metaTotals.reduce((a, b) => a + Number(b.clicks || 0), 0);
+  const totalMetaImpr = metaTotals.reduce((a, b) => a + Number(b.impressions || 0), 0);
 
-  const ga4Data = ga4Rows.map(r => r.data?.rows?.[0]?.metricValues?.map(m => m.value) || []);
-  const ga4Sessions = ga4Data.reduce((a, m) => a + Number(m[0] || 0), 0);
-  const ga4Users = ga4Data.reduce((a, m) => a + Number(m[1] || 0), 0);
-  const ga4Conversions = ga4Data.reduce((a, m) => a + Number(m[3] || 0), 0);
+  // --- Chart Data ---
+  const gscChartData = d.gsc?.[0]?.data?.daily?.map(r => r.clicks) || [];
+  const gadsChartData = d.gads?.[0]?.data?.daily?.map(r => r.clicks) || [];
+  // Note: Meta Daily data requires specific API calls, we'll just show the totals for now.
 
-  const gscClicks = sum(gscRows, "data.totals.clicks");
-  const gscImpressions = sum(gscRows, "data.totals.impressions");
-
-  const adsImpressions = sum(gadsRows, "data.impressions");
-  const adsClicks = sum(gadsRows, "data.clicks");
-  const adsCost = sum(gadsRows, "data.cost");
-
-  const metaSpend = sum(metaAdsRows, "data.spend");
-  const metaImpr = sum(metaAdsRows, "data.impressions");
-  const metaClicks = sum(metaAdsRows, "data.clicks");
-
-  const fmt = (n) => (n == null ? "-" : Number(n).toLocaleString("en-IN"));
-  const money = (n) => (n == null ? "-" : `Rs.${Number(n).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`);
-
-  const label =
-    report.periodType === "weekly"  ? "Weekly Performance Report" :
-    report.periodType === "monthly" ? "Monthly Performance Report" :
-                                      "Performance Report";
+  const fmt = (n) => Number(n || 0).toLocaleString();
+  const money = (n) => `Rs. ${Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
   return (
     <Document>
       <Page size="A4" style={s.page}>
-        <Text style={s.title}>{label}</Text>
-        <Text style={s.sub}>
-          {c.name} | {new Date(report.periodStart).toLocaleDateString("en-IN")} to {new Date(report.periodEnd).toLocaleDateString("en-IN")}
-        </Text>
+        
+        <View style={s.header}>
+          <Text style={s.title}>Performance Report</Text>
+          <Text style={s.sub}>{c.name} | {new Date(report.periodStart).toLocaleDateString()} - {new Date(report.periodEnd).toLocaleDateString()}</Text>
+        </View>
 
+        {/* Row 1: SEO & Google Ads */}
+        <Text style={{ fontSize: 11, fontWeight: "bold", marginBottom: 8, color: "#4a5568" }}>Google Channels</Text>
+        <View style={s.grid}>
+          <MetricBox label="SEO Clicks" value={fmt(totalGscClicks)} />
+          <MetricBox label="SEO Impressions" value={fmt(totalGscImpr)} />
+          <MetricBox label="Ads Clicks" value={fmt(totalAdsClicks)} />
+          <MetricBox label="Ads Spend" value={money(totalAdsCost)} />
+        </View>
+
+        {/* Row 2: Meta Ads */}
+        <Text style={{ fontSize: 11, fontWeight: "bold", marginBottom: 8, color: "#4a5568" }}>Meta Channels</Text>
+        <View style={s.grid}>
+          <MetricBox label="Meta Spend" value={money(totalMetaSpend)} />
+          <MetricBox label="Meta Clicks" value={fmt(totalMetaClicks)} />
+          <MetricBox label="Meta Impressions" value={fmt(totalMetaImpr)} />
+        </View>
+
+        {/* Charts */}
         <View style={s.section}>
-          <Text style={s.h2}>Google Analytics (GA4)</Text>
-          <View style={s.card}>
-            <Row label="Total Sessions" value={fmt(ga4Sessions)} />
-            <Row label="Active Users"   value={fmt(ga4Users)} />
-            <Row label="Conversions"    value={fmt(ga4Conversions)} />
+          <Text style={s.h2}>Search Console Trend</Text>
+          <View style={s.chartBox}>
+            <LineChart data={gscChartData} color="#3182ce" />
+            <Text style={s.chartLabel}>Daily organic clicks</Text>
           </View>
         </View>
 
         <View style={s.section}>
-          <Text style={s.h2}>Search Console</Text>
-          <View style={s.card}>
-            <Row label="Total Clicks"      value={fmt(gscClicks)} />
-            <Row label="Total Impressions" value={fmt(gscImpressions)} />
-          </View>
-          {gscRows[0]?.data?.topQueries?.slice(0, 5).map((q, i) => (
-            <Text key={i} style={{ fontSize: 9, marginTop: 2 }}>
-              {q.keys?.[0]} — {q.clicks} clicks, {q.impressions} impressions
-            </Text>
-          ))}
-        </View>
-
-        <View style={s.section}>
-          <Text style={s.h2}>Google Ads</Text>
-          <View style={s.card}>
-            <Row label="Impressions" value={fmt(adsImpressions)} />
-            <Row label="Clicks"      value={fmt(adsClicks)} />
-            <Row label="Cost"        value={money(adsCost)} />
-          </View>
-          {d.gads?.[0]?.error && <Text style={s.err}>Google Ads error: {d.gads[0].error}</Text>}
-          {d.gads?.[0]?.data?.skipped && <Text style={s.err}>Google Ads not configured yet</Text>}
-        </View>
-
-        <View style={s.section}>
-          <Text style={s.h2}>Meta Ads</Text>
-          <View style={s.card}>
-            <Row label="Spend"       value={money(metaSpend)} />
-            <Row label="Impressions" value={fmt(metaImpr)} />
-            <Row label="Clicks"      value={fmt(metaClicks)} />
+          <Text style={s.h2}>Google Ads Trend</Text>
+          <View style={s.chartBox}>
+            <LineChart data={gadsChartData} color="#e53e3e" />
+            <Text style={s.chartLabel}>Daily paid clicks</Text>
           </View>
         </View>
 
-        <Text style={{ ...s.sub, marginTop: 20 }}>
-          Generated by Promozione Branding | {new Date().toLocaleString("en-IN")}
+        <Text style={{ position: "absolute", bottom: 30, left: 40, right: 40, textAlign: "center", fontSize: 9, color: "#a0aec0" }}>
+          Generated by Promozione Branding on {new Date().toLocaleString()}
         </Text>
       </Page>
     </Document>
