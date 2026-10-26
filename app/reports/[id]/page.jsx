@@ -1,4 +1,3 @@
-// app/reports/[id]/page.jsx
 "use client";
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
@@ -6,60 +5,42 @@ import { useRouter } from "next/navigation";
 export default function ReportClientDetail({ params }) {
   const router = useRouter();
   const { id } = use(params);
+  
   const [client, setClient] = useState(null);
-  const [period, setPeriod] = useState("weekly");
   const [busy, setBusy] = useState(false);
-  const [emails, setEmails] = useState("");
+  
+  // Date states
+  const [periodType, setPeriodType] = useState("monthly");
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd, setCustomEnd] = useState("");
+  
+  // Report state
   const [latestReportId, setLatestReportId] = useState(null);
 
   async function load() {
     const res = await fetch(`/api/reports/clients/${id}`);
     const json = await res.json();
     setClient(json.client);
-    setEmails((json.client?.emails || []).join(", "));
   }
 
   useEffect(() => { load(); }, [id]);
 
-  async function saveEmails() {
+  async function handleGenerate() {
     setBusy(true);
     try {
-      await fetch(`/api/reports/clients/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emails: emails.split(",").map(e => e.trim()).filter(Boolean) }),
-      });
-      await load();
-      alert("Saved");
-    } finally { setBusy(false); }
-  }
-
-  async function generateAndSend(sendEmail = false) {
-    if (sendEmail && !confirm(`Generate and send ${period} report via email?`)) return;
-    if (!sendEmail) setBusy(true);
-
-    try {
-      // 1. Generate the report data
       const gen = await fetch(`/api/reports/${id}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ periodType: period }),
+        body: JSON.stringify({ periodType, start: customStart, end: customEnd }),
       });
       const genJson = await gen.json();
       if (!gen.ok) throw new Error(genJson.error || "Generate failed");
 
       setLatestReportId(genJson.reportId);
-
-      if (sendEmail) {
-        // 2. Send the email (only if requested)
-        const send = await fetch(`/api/reports/${genJson.reportId}/send`, { method: "POST" });
-        const sendJson = await send.json();
-        if (!send.ok) throw new Error(sendJson.error || "Send failed");
-        alert(`Sent to: ${sendJson.to}`);
-      } else {
-        // 2. Just open the PDF in a new tab
-        window.open(`/api/reports/${genJson.reportId}/view`, "_blank");
-      }
+      
+      // Auto-open the PDF in a new tab
+      window.open(`/api/reports/${genJson.reportId}/view`, "_blank");
+      
     } catch (e) { 
       alert(`Error: ${e.message}`); 
     } finally { 
@@ -71,59 +52,65 @@ export default function ReportClientDetail({ params }) {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <button onClick={() => router.push("/reports")} className="text-sm text-blue-600 mb-2">← Back</button>
-      <h1 className="text-2xl font-bold mb-4">{client.name}</h1>
+      <button onClick={() => router.push("/reports")} className="text-sm text-blue-600 mb-2 hover:underline">← Back to Clients</button>
+      <h1 className="text-3xl font-bold mb-6">{client.name}</h1>
 
-      <div className="border rounded p-4 mb-4">
-        <label className="block text-sm text-gray-600 mb-1">Emails (comma separated)</label>
-        <div className="flex gap-2">
-          <input value={emails} onChange={e => setEmails(e.target.value)} className="flex-1 border rounded px-2 py-1" />
-          <button onClick={saveEmails} disabled={busy} className="px-3 py-1 bg-green-600 text-white rounded">Save</button>
+      <div className="border rounded p-6 bg-white shadow-sm mb-6">
+        <h2 className="text-lg font-semibold mb-4">Generate Report</h2>
+        
+        <div className="flex flex-col gap-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Select Date Range</label>
+            <div className="flex gap-4 items-center flex-wrap">
+              <select 
+                value={periodType} 
+                onChange={e => setPeriodType(e.target.value)} 
+                className="border rounded px-3 py-2 bg-gray-50"
+              >
+                <option value="weekly">Last 7 Days</option>
+                <option value="monthly">Last 1 Month</option>
+                <option value="3month">Last 3 Months</option>
+                <option value="6month">Last 6 Months</option>
+                <option value="custom">Custom Date Range</option>
+              </select>
+
+              {periodType === "custom" && (
+                <div className="flex items-center gap-2">
+                  <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} className="border rounded px-2 py-1.5" />
+                  <span>to</span>
+                  <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} className="border rounded px-2 py-1.5" />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="border rounded p-4 mb-4 text-sm space-y-1">
-        <div><b>GA4:</b> {client.ga4PropertyIds?.join(", ") || "—"}</div>
-        <div><b>GSC:</b> {client.gscSiteUrls?.join(", ") || "—"}</div>
-        <div><b>Google Ads:</b> {client.googleAdsCustomerIds?.join(", ") || "—"}</div>
-        <div><b>Meta Ads:</b> {client.metaAdAccountIds?.join(", ") || "—"}</div>
-        <div><b>Meta Pages:</b> {client.metaPageIds?.join(", ") || "—"}</div>
-      </div>
-
-      <div className="border rounded p-4 flex flex-col gap-4 bg-gray-50">
-        <div className="flex gap-2 items-center">
-          <label className="text-sm font-medium">Period:</label>
-          <select value={period} onChange={e => setPeriod(e.target.value)} className="border rounded px-2 py-1">
-            <option value="weekly">Last 7 Days (Weekly)</option>
-            <option value="monthly">Last Month (Monthly)</option>
-          </select>
-        </div>
-
-        <div className="flex gap-2">
-          <button 
-            onClick={() => generateAndSend(false)} 
-            disabled={busy} 
-            className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50 hover:bg-blue-700"
-          >
-            {busy ? "Generating..." : "👁️ Generate & View PDF"}
-          </button>
-
-          <button 
-            onClick={() => generateAndSend(true)} 
-            disabled={busy} 
-            className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50 hover:bg-green-700"
-          >
-            {busy ? "Working..." : "📧 Generate & Send Email"}
-          </button>
-        </div>
+        <button 
+          onClick={handleGenerate} 
+          disabled={busy} 
+          className="w-full py-3 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 disabled:opacity-50"
+        >
+          {busy ? "Generating PDF..." : "📄 Generate & View Report"}
+        </button>
 
         {latestReportId && (
-          <div className="text-sm mt-2">
-            <a href={`/api/reports/${latestReportId}/view`} target="_blank" className="text-blue-600 underline">
-              Open the report you just generated
+          <div className="text-center mt-4">
+            <a href={`/api/reports/${latestReportId}/view`} target="_blank" className="text-blue-600 underline text-sm font-medium">
+              Click here if the PDF didn't open automatically
             </a>
           </div>
         )}
+      </div>
+      
+      {/* Show what accounts are connected (Read Only) */}
+      <div className="border rounded p-6 bg-gray-50 text-sm">
+        <h3 className="font-semibold mb-2">Connected Accounts</h3>
+        <ul className="space-y-1 text-gray-700">
+          <li><b>GSC Sites:</b> {client.gscSiteUrls?.length || 0}</li>
+          <li><b>GA4 Properties:</b> {client.ga4PropertyIds?.length || 0}</li>
+          <li><b>Google Ads:</b> {client.googleAdsCustomerIds?.length || 0}</li>
+          <li className="pt-2 text-blue-600"><a href={`/reports/discover?clientId=${id}`}>Edit connected accounts →</a></li>
+        </ul>
       </div>
     </div>
   );
