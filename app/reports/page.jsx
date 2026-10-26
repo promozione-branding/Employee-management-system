@@ -22,6 +22,19 @@ export default function ReportsPage() {
 
   useEffect(() => { load(); }, []);
 
+  // 👈 DELETE HANDLER
+  async function handleDelete(id, name) {
+    if (!confirm(`Are you sure you want to delete the report for "${name}"?\n\nThis will remove it from the reporting database.`)) return;
+    
+    try {
+      const res = await fetch(`/api/reports/clients/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete");
+      load(); // Refresh the list
+    } catch (e) {
+      alert(`Error: ${e.message}`);
+    }
+  }
+
   if (loading) return <div className="p-6">Loading...</div>;
 
   return (
@@ -69,6 +82,7 @@ export default function ReportsPage() {
                 <td className="p-2 space-x-2 whitespace-nowrap">
                   <Link href={`/reports/${c._id}`} className="px-3 py-1 text-sm bg-blue-600 text-white rounded">Open</Link>
                   <Link href={`/reports/discover?clientId=${c._id}`} className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 rounded">✏️ Edit</Link>
+                  <button onClick={() => handleDelete(c._id, c.name)} className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded">🗑️ Delete</button>
                 </td>
               </tr>
             ))}

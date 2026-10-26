@@ -1,4 +1,3 @@
-// app/api/reports/[id]/generate/route.js
 import { connectDB } from "@/lib/db";
 import ReportClient from "@/models/admin/ReportClient";
 import Report from "@/models/admin/Report";
@@ -7,16 +6,18 @@ import mongoose from "mongoose";
 
 export const maxDuration = 60;
 
-function resolvePeriod(periodType, customStart, customEnd) {
+function resolvePeriod(type, customStart, customEnd) {
   const now = new Date();
-  if (periodType === "weekly") {
-    const end = new Date(now); const start = new Date(now); start.setDate(start.getDate() - 7);
-    return { start, end };
-  }
-  if (periodType === "monthly") {
-    return { start: new Date(now.getFullYear(), now.getMonth() - 1, 1), end: new Date(now.getFullYear(), now.getMonth(), 0) };
-  }
-  return { start: new Date(customStart), end: new Date(customEnd) };
+  const end = new Date(now);
+  let start = new Date(now);
+
+  if (type === "weekly") start.setDate(start.getDate() - 7);
+  else if (type === "monthly") start.setMonth(start.getMonth() - 1);
+  else if (type === "3month") start.setMonth(start.getMonth() - 3);
+  else if (type === "6month") start.setMonth(start.getMonth() - 6);
+  else return { start: new Date(customStart), end: new Date(customEnd) };
+
+  return { start, end };
 }
 
 async function fetchAll(arr, fn) {
@@ -31,14 +32,12 @@ async function fetchAll(arr, fn) {
 export async function POST(req, { params }) {
   const auth = await requireReportAdmin(req);
   if (!auth.ok) return Response.json({ error: auth.error }, { status: auth.status });
-  
-  const { id } = await params; // 🔒 Next.js 16 requires await
+  const { id } = await params;
   if (!mongoose.isValidObjectId(id)) return Response.json({ error: "Bad id" }, { status: 400 });
 
   await connectDB();
   const body = await req.json();
-  const periodType = body.periodType || "weekly";
-  const { start, end } = resolvePeriod(periodType, body.start, body.end);
+  const { start, end } = resolvePeriod(body.periodType, body.start, body.end);
   const startISO = start.toISOString().slice(0, 10);
   const endISO = end.toISOString().slice(0, 10);
 
@@ -48,20 +47,43 @@ export async function POST(req, { params }) {
   const { getGA4, getGSC, getGoogleAds } = await import("@/lib/google");
   const { getMetaAds, getMetaPage } = await import("@/lib/meta");
 
-  const [ga4, gsc, gads, metaAds, metaPage] = await Promise.all([
-    fetchAll(client.ga4PropertyIds,       (id) => getGA4(id, startISO, endISO)),
-    fetchAll(client.gscSiteUrls,          (id) => getGSC(id, startISO, endISO)),
-    fetchAll(client.googleAdsCustomerIds, (id) => getGoogleAds(id, startISO, endISO)),
-    fetchAll(client.metaAdAccountIds,     (id) => getMetaAds(id, startISO, endISO)),
-    fetchAll(client.metaPageIds,          (id) => getMetaPage(id, startISO, endISO)),
+  // 👈 FETCH SEO KEYWORDS IF LINKED
+  let seoData = {};
+  if (client.customerId) {
+    try {
+      const SeoSheet = (await import("@/models/admin/SeoSheet")).default; 
+      const sheet = await SeoSheet.findOne({ clientId: client.customerId }).lean();
+      
+      if (sheet && sheet.keywords) {
+        sheet.keywords.forEach(kw => {
+          const siteName = kw.project?.projectName || "Unknown Website";
+          if (!seoData[siteName]) seoData[siteName] = [];
+          
+          const latestRank = kw.rankings && kw.rankings.length > 0 
+            ? kw.rankings[kw.rankings.length - 1] : null;
+            
+          seoData[siteName].push({
+            keyword: kw.keyword,
+            page: latestRank ? latestRank.page : "-",
+            position: latestRank ? latestRank.position : "-",
+          });
+        });
+      }
+    } catch (e) { console.error("SEO Fetch Error:", e.message); }
+  }
+
+  const [ga4, gsc, gads, metaAds] = await Promise.all([
+    fetchAll(client.ga4PropertyIds,       (cid) => getGA4(cid, startISO, endISO)),
+    fetchAll(client.gscSiteUrls,          (cid) => getGSC(cid, startISO, endISO)),
+    fetchAll(client.googleAdsCustomerIds, (cid) => getGoogleAds(cid, startISO, endISO)),
+    fetchAll(client.metaAdAccountIds,     (cid) => getMetaAds(cid, startISO, endISO)),
   ]);
 
   const report = await Report.create({
-    clientId: id,
-    periodType, periodStart: start, periodEnd: end,
-    data: { client, ga4, gsc, gads, metaAds, metaPage },
+    clientId: id, periodType: body.periodType, periodStart: start, periodEnd: end,
+    data: { client, ga4, gsc, gads, metaAds, seoData }, 
     createdBy: auth.user._id,
   });
 
-  return Response.json({ reportId: report._id, periodType, periodStart: start, periodEnd: end });
+  return Response.json({ reportId: report._id });
 }

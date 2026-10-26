@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 const ReportClientSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
+    customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", sparse: true }, // 👈 Link to your existing ERP
     emails: [{ type: String, trim: true, lowercase: true }],
     websites: [{ type: String, trim: true }],
 
@@ -13,19 +14,11 @@ const ReportClientSchema = new mongoose.Schema(
     metaAdAccountIds:     [{ type: String, trim: true }],
     metaPageIds:          [{ type: String, trim: true }],
 
-    status: {
-      type: String,
-      enum: ["active", "paused"],
-      default: "active",
-    },
+    status: { type: String, enum: ["active", "paused"], default: "active" },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );
 
-ReportClientSchema.index({ status: 1, createdAt: -1 });
-ReportClientSchema.index({ name: "text" });
-
-export default mongoose.models.ReportClient ||
-  mongoose.model("ReportClient", ReportClientSchema);
+export default mongoose.models.ReportClient || mongoose.model("ReportClient", ReportClientSchema);
