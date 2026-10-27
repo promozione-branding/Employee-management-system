@@ -1,13 +1,25 @@
 import { Document, Page, Text, View, StyleSheet, Svg, Path, Image } from "@react-pdf/renderer";
+import fs from "fs";
+import path from "path";
 
-// 👈 PASTE YOUR BASE64 STRINGS HERE
-const LOGO_BASE64 = "YOUR_BASE64_LOGO_HERE";
-const THANKYOU_BASE64 = "YOUR_BASE64_THANKYOU_HERE";
+// 👈 READ IMAGES DIRECTLY FROM PUBLIC FOLDER (No Base64 needed)
+// Note: This only works on the server (API routes), which is where the PDF is generated.
+let logoBuffer = null;
+let thankyouBuffer = null;
+
+try {
+  const logoPath = path.join(process.cwd(), "public/blog/inquiry-bazaar-logo.png");
+  if (fs.existsSync(logoPath)) logoBuffer = fs.readFileSync(logoPath);
+
+  const thankyouPath = path.join(process.cwd(), "public/blog/thank-you.png");
+  if (fs.existsSync(thankyouPath)) thankyouBuffer = fs.readFileSync(thankyouPath);
+} catch (e) {
+  console.error("Error loading images for PDF:", e);
+}
 
 const s = StyleSheet.create({
   coverPage: { padding: 60, backgroundColor: "#ffffff", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%" },
   page: { padding: 30, fontSize: 10, fontFamily: "Helvetica", backgroundColor: "#ffffff" },
-  
   thankyouPage: { padding: 0, backgroundColor: "#ffffff", height: "100%" },
   thankyouImage: { width: "100%", height: "100%", objectFit: "cover" },
   
@@ -71,9 +83,10 @@ export function ReportPDF({ report }) {
   const metaCampaigns = d.metaAds?.[0]?.data?.campaigns || [];
 
   // --- SEO Data ---
-  // 👈 FIXED: Now it checks if kw.page is 1 or 2
+  // 👈 STRICT FILTER: Extract number and check if it is 1 or 2
   const filteredSeo = (d.seoKeywords || []).filter(kw => {
-    const pageNum = Number(kw.page);
+    const pageStr = String(kw.page || "").replace(/[^0-9]/g, ""); 
+    const pageNum = parseInt(pageStr, 10);
     return pageNum === 1 || pageNum === 2;
   });
 
@@ -84,10 +97,8 @@ export function ReportPDF({ report }) {
     <Document>
       {/* PAGE 1: COVER */}
       <Page size="A4" style={s.coverPage}>
-        {/* 👈 USING BASE64 LOGO */}
-        {LOGO_BASE64 !== "YOUR_BASE64_LOGO_HERE" && (
-          <Image src={LOGO_BASE64} style={{ width: 250, marginBottom: 40 }} />
-        )}
+        {/* 👈 USING BUFFER FROM FILE SYSTEM */}
+        {logoBuffer && <Image src={{ data: logoBuffer, format: "png" }} style={{ width: 250, marginBottom: 40 }} />}
         
         <Text style={{ fontSize: 32, fontWeight: "bold", color: "#1a202c", marginBottom: 10, textAlign: "center" }}>PERFORMANCE REPORT</Text>
         <Text style={{ fontSize: 20, color: "#ed8936", fontWeight: "bold", marginBottom: 40, textAlign: "center" }}>{c.name}</Text>
@@ -216,10 +227,8 @@ export function ReportPDF({ report }) {
 
       {/* PAGE 5: FULL IMAGE THANK YOU PAGE */}
       <Page size="A4" style={s.thankyouPage}>
-        {/* 👈 USING BASE64 THANK YOU IMAGE */}
-        {THANKYOU_BASE64 !== "YOUR_BASE64_THANKYOU_HERE" && (
-          <Image src={THANKYOU_BASE64} style={s.thankyouImage} />
-        )}
+        {/* 👈 USING BUFFER FROM FILE SYSTEM */}
+        {thankyouBuffer && <Image src={{ data: thankyouBuffer, format: "png" }} style={s.thankyouImage} />}
       </Page>
     </Document>
   );
