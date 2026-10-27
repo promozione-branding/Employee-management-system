@@ -18,18 +18,14 @@ const s = StyleSheet.create({
   header: { marginBottom: 25, borderBottom: "2 solid #eaebed", paddingBottom: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end" },
   title: { fontSize: 22, fontWeight: 700, color: "#1a202c" },
   sub: { fontSize: 10, color: "#718096", marginTop: 4 },
-  
-  // 👈 Fixed Spacing for Site Headers
   siteHeader: { fontSize: 14, fontWeight: "bold", color: "#1a202c", marginTop: 25, marginBottom: 12, backgroundColor: "#f7fafc", padding: 10, borderRadius: 4, borderLeft: "4 solid #2b6cb0" },
   sectionTitle: { fontSize: 12, fontWeight: "bold", color: "#2d3748", marginTop: 15, marginBottom: 10, borderBottom: "1 solid #e2e8f0", paddingBottom: 4 },
   
-  // 👈 Better Metric Boxes
   grid: { flexDirection: "row", gap: 12, marginBottom: 15 },
   box: { flex: 1, backgroundColor: "#ffffff", padding: 15, borderRadius: 8, border: "1 solid #e2e8f0" },
   boxLabel: { fontSize: 9, color: "#718096", textTransform: "uppercase", marginBottom: 6, fontWeight: 700, letterSpacing: 0.5 },
   boxValue: { fontSize: 20, fontWeight: "bold", color: "#2d3748", marginBottom: 6 },
   
-  // 👈 Comparison Text
   comparison: { fontSize: 9, fontWeight: "bold", lineHeight: 1.3 },
   up: { color: "#38a169" },
   down: { color: "#e53e3e" },
@@ -44,7 +40,6 @@ const s = StyleSheet.create({
   tableCellCenter: { padding: 10, fontSize: 10, flex: 1, textAlign: "center", color: "#4a5568" },
 });
 
-// 👈 CALCULATE PERCENTAGE CHANGE (READABLE TEXT)
 function calculateChange(current, previous) {
   const c = typeof current === "string" ? parseFloat(current.replace(/[^0-9.-]+/g, "")) : Number(current);
   const p = typeof previous === "string" ? parseFloat(previous.replace(/[^0-9.-]+/g, "")) : Number(previous);
@@ -71,45 +66,25 @@ function MetricBox({ label, current, previous, format }) {
   );
 }
 
-// 👈 BEAUTIFUL GOOGLE ANALYTICS STYLE GRAPH
 function SmoothChart({ data, color }) {
   if (!data || data.length < 2) return <Text style={{ fontSize: 10, color: "#a0aec0", padding: 20, textAlign: "center" }}>Not enough data to render chart</Text>;
-  
   const max = Math.max(...data, 1);
-  const width = 500;
-  const height = 80; 
-  const stepX = width / (data.length - 1);
-  
+  const width = 500; const height = 80; const stepX = width / (data.length - 1);
   let path = `M 0,${height - (data[0] / max) * height}`;
   for (let i = 1; i < data.length; i++) {
-    const x1 = (i - 1) * stepX; 
-    const y1 = height - (data[i - 1] / max) * height;
-    const x2 = i * stepX; 
-    const y2 = height - (data[i] / max) * height;
+    const x1 = (i - 1) * stepX; const y1 = height - (data[i - 1] / max) * height;
+    const x2 = i * stepX; const y2 = height - (data[i] / max) * height;
     const cx = (x1 + x2) / 2;
     path += ` C ${cx},${y1} ${cx},${y2} ${x2},${y2}`;
   }
-
-  return (
-    <Svg width="100%" height="80" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
-      <Path d={`M 0,${height/2} L ${width},${height/2}`} stroke="#edf2f7" strokeWidth="1" />
-      <Path d={`M 0,${height} L ${width},${height}`} stroke="#edf2f7" strokeWidth="1" />
-      <Path d={path} fill="none" stroke={color} strokeWidth="4" />
-    </Svg>
-  );
+  return <Svg width="100%" height="80" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none"><Path d={`M 0,${height/2} L ${width},${height/2}`} stroke="#edf2f7" strokeWidth="1" /><Path d={`M 0,${height} L ${width},${height}`} stroke="#edf2f7" strokeWidth="1" /><Path d={path} fill="none" stroke={color} strokeWidth="4" /></Svg>;
 }
 
 export function ReportPDF({ report }) {
   const d = report.data || {};
   const c = d.client || {};
   
-  // 👈 Clean URL and Remove "act_" from Meta IDs
-  const cleanUrl = (url) => {
-    if (!url) return "Unknown";
-    return url.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "").replace(/^act_/i, ""); 
-  };
-  
-  const fmt = (n) => Number(n || 0).toLocaleString("en-IN");
+  const cleanUrl = (url) => url ? url.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "").replace(/^act_/i, "") : "Unknown";
 
   // Group SEO by Website
   const seoByWebsite = {};
@@ -155,7 +130,8 @@ export function ReportPDF({ report }) {
           const adsChart = adsData?.daily?.map(r => r.clicks) || [];
 
           return (
-            <View key={site.id} style={{ marginBottom: 20 }} wrap={false}>
+            // 👈 Removed wrap={false} to prevent the crash
+            <View key={site.id} style={{ marginBottom: 20 }}>
               <Text style={s.siteHeader}>🌐 {cleanUrl(site.id)}</Text>
               
               <Text style={s.sectionTitle}>Search Console (SEO)</Text>
@@ -200,7 +176,7 @@ export function ReportPDF({ report }) {
           const pageChart = pageData?.daily?.map(r => r.views) || [];
 
           return (
-            <View key={acc.id} style={{ marginBottom: 20 }} wrap={false}>
+            <View key={acc.id} style={{ marginBottom: 20 }}>
               <Text style={s.siteHeader}>📱 {cleanUrl(acc.id)}</Text>
               
               <Text style={s.sectionTitle}>Meta Ads</Text>
@@ -237,7 +213,7 @@ export function ReportPDF({ report }) {
           <Text style={{ fontSize: 12, color: "#718096", marginTop: 20 }}>No keywords found ranking on Page 1 or 2.</Text>
         ) : (
           Object.entries(seoByWebsite).map(([website, keywords]) => (
-            <View key={website} style={{ marginBottom: 20 }} wrap={false}>
+            <View key={website} style={{ marginBottom: 20 }}>
               <Text style={s.siteHeader}>🌐 {cleanUrl(website)}</Text>
               <View style={s.table}>
                 <View style={[s.tableRow, s.tableHeader]}>
