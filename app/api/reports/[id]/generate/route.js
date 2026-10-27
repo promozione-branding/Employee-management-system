@@ -12,16 +12,25 @@ export const maxDuration = 60;
 
 function resolvePeriod(type, customStart, customEnd) {
   const now = new Date();
-  const end = new Date(now);
+  let end = new Date(now);
   let start = new Date(now);
 
   if (type === "weekly") start.setDate(start.getDate() - 7);
   else if (type === "monthly") start.setMonth(start.getMonth() - 1);
   else if (type === "3month") start.setMonth(start.getMonth() - 3);
   else if (type === "6month") start.setMonth(start.getMonth() - 6);
-  else return { start: new Date(customStart), end: new Date(customEnd) };
+  else { start = new Date(customStart); end = new Date(customEnd); }
 
-  return { start, end };
+  // Calculate previous period of the same length
+  const diffTime = Math.abs(end - start);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  const prevEnd = new Date(start); prevEnd.setDate(prevEnd.getDate() - 1);
+  const prevStart = new Date(prevEnd); prevStart.setDate(prevStart.getDate() - diffDays);
+
+  return { 
+    start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10),
+    prevStart: prevStart.toISOString().slice(0, 10), prevEnd: prevEnd.toISOString().slice(0, 10)
+  };
 }
 
 async function fetchAll(arr, fn) {
@@ -41,52 +50,56 @@ export async function POST(req, { params }) {
 
   await connectDB();
   const body = await req.json();
-  const { start, end } = resolvePeriod(body.periodType, body.start, body.end);
-  const startISO = start.toISOString().slice(0, 10);
-  const endISO = end.toISOString().slice(0, 10);
+  const { start, end, prevStart, prevEnd } = resolvePeriod(body.periodType, body.start, body.end);
 
   const client = await ReportClient.findById(id).lean();
   if (!client) return Response.json({ error: "Client not found" }, { status: 404 });
 
   const { getGA4, getGSC, getGoogleAds } = await import("@/lib/google");
-  const { getMetaAds } = await import("@/lib/meta");
+  const { getMetaAds, getMetaPage } = await import("@/lib/meta");
 
-  // 👈 FETCH SEO KEYWORDS WITH CORRECT PATHS
+  // FETCH SEO KEYWORDS
   let seoKeywords = [];
-  let seoData = {};
   if (client.customerId) {
     try {
       const SeoSheet = (await import("@/models/employee/seoEmployee/SeoSheet")).default; 
       const Keyword = (await import("@/models/employee/seoEmployee/Keyword")).default; 
+      const sheet = await SeoSheet.findOne({ clientId: client.customerId }).populate({ path: "keywords", model: Keyword }).lean();
       
-      const sheet = await SeoSheet.findOne({ clientId: client.customerId })
-        .populate({ path: "keywords", model: Keyword })
-        .lean();
-      
-      if (sheet && sheet.keywords) {
-        seoKeywords = sheet.keywords.map(kw => {
-          const sortedRankings = (kw.rankings || []).sort((a, b) => new Date(b.date) - new Date(a.date));
-          const latestRank = sortedRankings.length > 0 ? sortedRankings[0] : null;
-          return { 
-            keyword: kw.keyword, 
-            page: latestRank ? latestRank.page : "-", 
-            position: latestRank ? latestRank.position : "-" 
-          };
-        });
-      }
+      // Find this block inside the generate route and update it:
+if (sheet && sheet.keywords) {
+  seoKeywords = sheet.keywords.map(kw => {
+    const sortedRankings = (kw.rankings || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const latestRank = sortedRankings.length > 0 ? sortedRankings[0] : null;
+    
+    // 👈 We pass the project name (website) along with the keyword
+    let websiteName = "General";
+    if (kw.projectId && kw.projectId.projectDuration && kw.projectId.projectDuration.length > 0) {
+       websiteName = kw.projectId.projectDuration[0].projectName;
+    }
+
+    return { 
+      keyword: kw.keyword, 
+      page: latestRank ? latestRank.page : "-", 
+      position: latestRank ? latestRank.position : "-",
+      website: websiteName
+    };
+  });
+}
     } catch (e) { console.error("SEO Fetch Error:", e.message); }
   }
 
-  const [ga4, gsc, gads, metaAds] = await Promise.all([
-    fetchAll(client.ga4PropertyIds,       (cid) => getGA4(cid, startISO, endISO)),
-    fetchAll(client.gscSiteUrls,          (cid) => getGSC(cid, startISO, endISO)),
-    fetchAll(client.googleAdsCustomerIds, (cid) => getGoogleAds(cid, startISO, endISO)),
-    fetchAll(client.metaAdAccountIds,     (cid) => getMetaAds(cid, startISO, endISO)),
+  const [ga4, gsc, gads, metaAds, metaPage] = await Promise.all([
+    fetchAll(client.ga4PropertyIds,       (cid) => getGA4(cid, start, end)),
+    fetchAll(client.gscSiteUrls,          (cid) => getGSC(cid, start, end, prevStart, prevEnd)),
+    fetchAll(client.googleAdsCustomerIds, (cid) => getGoogleAds(cid, start, end, prevStart, prevEnd)),
+    fetchAll(client.metaAdAccountIds,     (cid) => getMetaAds(cid, start, end, prevStart, prevEnd)),
+    fetchAll(client.metaPageIds,          (cid) => getMetaPage(cid, start, end, prevStart, prevEnd)),
   ]);
 
   const report = await Report.create({
-    clientId: id, periodType: body.periodType, periodStart: start, periodEnd: end,
-    data: { client, ga4, gsc, gads, metaAds, seoKeywords, seoData }, 
+    clientId: id, periodType: body.periodType, periodStart: new Date(start), periodEnd: new Date(end),
+    data: { client, ga4, gsc, gads, metaAds, metaPage, seoKeywords }, 
     createdBy: auth.user._id,
   });
 
