@@ -8,8 +8,8 @@ export async function GET(req) {
   const appId = process.env.META_APP_ID;
   const redirectUri = `${process.env.NEXT_PUBLIC_URL}/api/reports/auth/meta/callback`;
   
-  // Permissions needed for Ads and Pages
-  const scope = "ads_read,read_insights,pages_read_engagement,business_management";
+  // 👈 REMOVED read_insights. Added pages_show_list (required for pages).
+  const scope = "ads_read,pages_read_engagement,pages_show_list,business_management";
 
   const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
 
