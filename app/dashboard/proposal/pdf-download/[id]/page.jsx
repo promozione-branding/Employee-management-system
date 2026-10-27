@@ -1,12 +1,9 @@
-// app/dashboard/proposal/pdf-download/[id]/page.jsx
+import ProposalPdfClient from "./ProposalPdfClient";
 
-import ProposalPdf from './ProposalPdf'
+const Page = async ({ params }) => {
+  const { id } = await params;
 
-const page = async({params}) => {
-  const {id} = await params;
-  return (
-    <ProposalPdf id={id}/>
-  )
-}
+  return <ProposalPdfClient id={id} />;
+};
 
-export default page
+export default Page;
