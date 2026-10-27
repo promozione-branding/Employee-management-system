@@ -944,7 +944,7 @@ const styles = StyleSheet.create({
     paddingLeft: 30,
     paddingRight: 30,
     fontSize: 10,
-    fontFamily: "Helvetica",
+    fontFamily: "Roboto",
     lineHeight: 1.5,
     position: "relative",
   },
