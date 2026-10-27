@@ -1,4 +1,3 @@
-// app/reports/page.jsx
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -22,17 +21,12 @@ export default function ReportsPage() {
 
   useEffect(() => { load(); }, []);
 
-  // 👈 DELETE HANDLER
   async function handleDelete(id, name) {
-    if (!confirm(`Are you sure you want to delete the report for "${name}"?\n\nThis will remove it from the reporting database.`)) return;
-    
+    if (!confirm(`Are you sure you want to delete the report for "${name}"?`)) return;
     try {
-      const res = await fetch(`/api/reports/clients/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete");
-      load(); // Refresh the list
-    } catch (e) {
-      alert(`Error: ${e.message}`);
-    }
+      await fetch(`/api/reports/clients/${id}`, { method: "DELETE" });
+      load();
+    } catch (e) { alert(`Error: ${e.message}`); }
   }
 
   if (loading) return <div className="p-6">Loading...</div>;
@@ -43,7 +37,10 @@ export default function ReportsPage() {
         <h1 className="text-2xl font-bold">Client Reports</h1>
         <div className="space-x-2">
           <a href="/api/reports/auth/google" className={`px-3 py-1 text-sm rounded ${status?.googleConnected ? "bg-green-100 text-green-700" : "bg-red-600 text-white"}`}>
-            {status?.googleConnected ? "✓ Google Connected" : "Connect Google (Admin)"}
+            {status?.googleConnected ? "✓ Google Connected" : "Connect Google"}
+          </a>
+          <a href="/api/reports/auth/meta" className={`px-3 py-1 text-sm rounded ${status?.metaConnected ? "bg-green-100 text-green-700" : "bg-blue-600 text-white"}`}>
+            {status?.metaConnected ? "✓ Meta Connected" : "Connect Meta"}
           </a>
           <Link href="/reports/discover" className="px-3 py-1 text-sm bg-purple-600 text-white rounded">+ Add Client</Link>
         </div>
@@ -51,7 +48,7 @@ export default function ReportsPage() {
 
       <div className="mb-4 grid grid-cols-4 gap-2 text-xs">
         <StatusCard label="Google OAuth" on={status?.googleConnected} />
-        <StatusCard label="Meta Token" on={status?.metaConfigured} />
+        <StatusCard label="Meta Token" on={status?.metaConnected} />
         <StatusCard label="Google Ads API" on={status?.googleAdsConfigured} />
         <StatusCard label="Resend Email" on={status?.resendConfigured} />
       </div>

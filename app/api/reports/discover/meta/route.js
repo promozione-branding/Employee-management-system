@@ -1,5 +1,6 @@
-// app/api/reports/discover/meta/route.js
 import { requireReportAdmin } from "@/lib/reportingAuth";
+import { connectDB } from "@/lib/db";
+import MetaSetting from "@/models/admin/MetaSetting";
 
 const VERSION = "v20.0";
 
@@ -7,12 +8,13 @@ export async function GET(req) {
   const auth = await requireReportAdmin(req);
   if (!auth.ok) return Response.json({ error: auth.error }, { status: auth.status });
 
-  const token = process.env.META_SYSTEM_USER_TOKEN;
-  if (!token) return Response.json({ adAccountsError: "META_SYSTEM_USER_TOKEN is missing in .env" }, { status: 200 });
+  await connectDB();
+  const setting = await MetaSetting.findOne({ key: "meta_access_token" }).lean();
+  if (!setting?.value) return Response.json({ error: "Meta not connected. Click 'Connect Meta'." }, { status: 400 });
 
+  const token = setting.value;
   const result = { adAccounts: [], pages: [] };
 
-  // Fetch Ad Accounts
   try {
     const r1 = await fetch(`https://graph.facebook.com/${VERSION}/me/adaccounts?access_token=${token}&fields=id,name,account_status,currency&limit=200`);
     const j1 = await r1.json();
@@ -20,7 +22,6 @@ export async function GET(req) {
     result.adAccounts = (j1.data || []).map((a) => ({ id: a.id, name: a.name, status: a.account_status, currency: a.currency }));
   } catch (e) { result.adAccountsError = e.message; }
 
-  // Fetch Pages
   try {
     const r2 = await fetch(`https://graph.facebook.com/${VERSION}/me/accounts?access_token=${token}&fields=id,name,link&limit=200`);
     const j2 = await r2.json();
