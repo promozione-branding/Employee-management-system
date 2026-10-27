@@ -1,12 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Loading from "@/components/layout/Loading";
 
-const ProposalPdf = dynamic(() => import("./ProposalPdf"), {
-    ssr: false,
-    loading: () => <Loading />,
-});
+const ProposalPdf = dynamic(
+    () => import("./ProposalPdf"),
+    {
+        ssr: false,
+        loading: () => <p>Loading PDF...</p>,
+    }
+);
 
 export default function ProposalPdfClient({ id }) {
     return <ProposalPdf id={id} />;

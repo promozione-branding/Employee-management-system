@@ -1,15 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { PDFViewer } from "@react-pdf/renderer";
 import Loading from "@/components/layout/Loading";
 import ProposalPdfTemplate from "@/components/pdf/ProposalPdfTemplate";
 import { pdfDownloadService } from "@/service/proposal";
 import { useEffect, useState } from "react";
 
-const PDFViewer = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.PDFViewer),
-  { ssr: false }
-);
+// const PDFViewer = dynamic(
+//   () => import("@react-pdf/renderer").then((mod) => mod.PDFViewer),
+//   { ssr: false }
+// );
 
 export default function ProposalPdf({ id }) {
   const [loading, setLoading] = useState(true);
