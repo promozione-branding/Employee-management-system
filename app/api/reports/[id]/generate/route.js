@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { connectDB } from "@/lib/db";
 import ReportClient from "@/models/admin/ReportClient";
 import Report from "@/models/admin/Report";
@@ -45,28 +47,29 @@ export async function POST(req, { params }) {
   if (!client) return Response.json({ error: "Client not found" }, { status: 404 });
 
   const { getGA4, getGSC, getGoogleAds } = await import("@/lib/google");
-  const { getMetaAds, getMetaPage } = await import("@/lib/meta");
+  const { getMetaAds } = await import("@/lib/meta");
 
-  // 👈 FETCH SEO KEYWORDS IF LINKED
+  // 👈 FETCH SEO KEYWORDS WITH CORRECT PATHS
+  let seoKeywords = [];
   let seoData = {};
   if (client.customerId) {
     try {
-      const SeoSheet = (await import("@/models/admin/SeoSheet")).default; 
-      const sheet = await SeoSheet.findOne({ clientId: client.customerId }).lean();
+      const SeoSheet = (await import("@/models/employee/seoEmployee/SeoSheet")).default; 
+      const Keyword = (await import("@/models/employee/seoEmployee/Keyword")).default; 
+      
+      const sheet = await SeoSheet.findOne({ clientId: client.customerId })
+        .populate({ path: "keywords", model: Keyword })
+        .lean();
       
       if (sheet && sheet.keywords) {
-        sheet.keywords.forEach(kw => {
-          const siteName = kw.project?.projectName || "Unknown Website";
-          if (!seoData[siteName]) seoData[siteName] = [];
-          
-          const latestRank = kw.rankings && kw.rankings.length > 0 
-            ? kw.rankings[kw.rankings.length - 1] : null;
-            
-          seoData[siteName].push({
-            keyword: kw.keyword,
-            page: latestRank ? latestRank.page : "-",
-            position: latestRank ? latestRank.position : "-",
-          });
+        seoKeywords = sheet.keywords.map(kw => {
+          const sortedRankings = (kw.rankings || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+          const latestRank = sortedRankings.length > 0 ? sortedRankings[0] : null;
+          return { 
+            keyword: kw.keyword, 
+            page: latestRank ? latestRank.page : "-", 
+            position: latestRank ? latestRank.position : "-" 
+          };
         });
       }
     } catch (e) { console.error("SEO Fetch Error:", e.message); }
@@ -81,7 +84,7 @@ export async function POST(req, { params }) {
 
   const report = await Report.create({
     clientId: id, periodType: body.periodType, periodStart: start, periodEnd: end,
-    data: { client, ga4, gsc, gads, metaAds, seoData }, 
+    data: { client, ga4, gsc, gads, metaAds, seoKeywords, seoData }, 
     createdBy: auth.user._id,
   });
 
