@@ -3,6 +3,7 @@
 import { connectDB } from "@/lib/db";
 import SeoSheet from "@/models/employee/seoEmployee/SeoSheet";
 import ProjectCycle from "@/models/admin/ProjectCycle";
+import Keyword from "@/models/employee/seoEmployee/Keyword"; // 👈 ADDED THIS IMPORT TO PREVENT CRASH
 import { NextResponse } from "next/server";
 
 export async function GET(req, { params }) {
@@ -15,6 +16,7 @@ export async function GET(req, { params }) {
     const getSeoSheet = await SeoSheet.findOne({ clientId: id })
       .populate({
         path: "keywords",
+        model: Keyword, // 👈 Explicitly telling Mongoose to use the imported modelbjj
         populate: {
           path: "rankings.employeeID",
           select: "basicDetails.name",

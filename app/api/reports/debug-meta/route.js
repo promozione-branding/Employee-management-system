@@ -1,39 +1,37 @@
 export const dynamic = "force-dynamic";
 import { connectDB } from "@/lib/db";
 import MetaSetting from "@/models/admin/MetaSetting";
-import { getMetaPage } from "@/lib/meta";
 
 export async function GET(req) {
   await connectDB();
   
   const setting = await MetaSetting.findOne({ key: "meta_access_token" }).lean();
-  if (!setting?.value) {
-    return Response.json({ error: "No token found in MongoDB." });
-  }
+  if (!setting?.value) return Response.json({ error: "No token in DB" });
 
   const url = new URL(req.url);
-  const pageId = url.searchParams.get("pageId") || "836394063190352"; 
-  const start = url.searchParams.get("start") || "2026-10-01";
-  const end = url.searchParams.get("end") || "2026-10-27";
+  const pageId = url.searchParams.get("pageId") || "102795055865301"; 
+  
+  // 1. Get Page Token
+  const tokenRes = await fetch(`https://graph.facebook.com/v26.0/${pageId}?fields=access_token&access_token=${setting.value}`);
+  const tokenJson = await tokenRes.json();
+  const pageToken = tokenJson.access_token;
 
-  try {
-    console.log(`\n=== FETCHING DATA FOR PAGE: ${pageId} ===`);
-    console.log(`Date Range: ${start} to ${end}`);
-    
-    // We are calling the exact same function the PDF uses
-    const pageData = await getMetaPage(pageId, start, end, "2026-09-01", "2026-09-27");
-    
-    console.log("✅ SUCCESS! Data returned from Meta:", JSON.stringify(pageData, null, 2));
+  if (!pageToken) return Response.json({ error: "Could not get Page Token", raw: tokenJson });
 
-    return Response.json({
-      success: true,
-      page_data: pageData
-    });
-  } catch (error) {
-    console.error("❌ FAILED! Error returned from Meta:", error.message);
-    return Response.json({
-      success: false,
-      error: error.message
-    });
-  }
+  // 2. Fetch Raw Insights using UNIX TIMESTAMPS (Meta's preferred format)
+  const since = Math.floor(new Date("2026-09-01").getTime() / 1000);
+  const until = Math.floor(new Date("2026-10-27").getTime() / 1000);
+
+  const insightsUrl = `https://graph.facebook.com/v26.0/${pageId}/insights?metric=page_media_view,page_post_engagements,page_fan_adds&period=day&since=${since}&until=${until}&access_token=${pageToken}`;
+  
+  const res = await fetch(insightsUrl);
+  const rawJson = await res.json();
+
+  // 3. Return EVERYTHING to the browser
+  return Response.json({
+    success: true,
+    page_id: pageId,
+    url_called: insightsUrl,
+    raw_meta_response: rawJson // 👈 THIS IS THE HOLY GRAIL
+  });
 }

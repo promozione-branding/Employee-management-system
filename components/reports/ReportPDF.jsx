@@ -86,12 +86,13 @@ export function ReportPDF({ report }) {
   
   const cleanUrl = (url) => url ? url.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "").replace(/^act_/i, "") : "Unknown";
 
-  // Group SEO by Website
+  // 👈 Group SEO Keywords by Website
   const seoByWebsite = {};
   (d.seoKeywords || []).forEach(kw => {
     const pageNum = parseInt(String(kw.page || "").replace(/[^0-9]/g, ""), 10);
     if (pageNum === 1 || pageNum === 2) {
-      const site = kw.website || "General Keywords";
+      // If website is missing, fall back to "General Keywords" (but ideally the API sends it)
+      const site = kw.website || "General Keywords"; 
       if (!seoByWebsite[site]) seoByWebsite[site] = [];
       seoByWebsite[site].push(kw);
     }
@@ -99,7 +100,6 @@ export function ReportPDF({ report }) {
 
   return (
     <Document>
-      {/* PAGE 1: COVER */}
       <Page size="A4" style={s.coverPage}>
         {logoBuffer && <Image src={{ data: logoBuffer, format: "png" }} style={{ width: 250, marginBottom: 40 }} />}
         <Text style={{ fontSize: 32, fontWeight: "bold", color: "#1a202c", marginBottom: 10, textAlign: "center" }}>PERFORMANCE REPORT</Text>
@@ -112,103 +112,82 @@ export function ReportPDF({ report }) {
         </View>
       </Page>
 
-      {/* PAGE 2: GOOGLE REPORT */}
+      {/* GOOGLE PAGE */}
       <Page size="A4" style={s.page} wrap>
-        <View style={s.header}>
-          <View><Text style={s.title}>Google Performance</Text><Text style={s.sub}>{c.name}</Text></View>
-        </View>
-
+        <View style={s.header}><Text style={s.title}>Google Performance</Text><Text style={s.sub}>{c.name}</Text></View>
         {(d.gsc || []).map((site, index) => {
           if (site.error) return null;
-          const t = site.data.totals || {};
-          const p = site.data.prevTotals || {};
-          const chartData = site.data.daily?.map(r => r.clicks) || [];
-
-          const adsData = d.gads?.[index]?.data;
-          const adsT = adsData?.totals || {};
-          const adsP = adsData?.prevTotals || {};
-          const adsChart = adsData?.daily?.map(r => r.clicks) || [];
-
+          const t = site.data.totals || {}; const p = site.data.prevTotals || {};
+          const adsData = d.gads?.[index]?.data; const adsT = adsData?.totals || {}; const adsP = adsData?.prevTotals || {};
           return (
-            // 👈 Removed wrap={false} to prevent the crash
             <View key={site.id} style={{ marginBottom: 20 }}>
               <Text style={s.siteHeader}>🌐 {cleanUrl(site.id)}</Text>
-              
               <Text style={s.sectionTitle}>Search Console (SEO)</Text>
               <View style={s.grid}>
                 <MetricBox label="Clicks" current={t.clicks} previous={p.clicks} />
                 <MetricBox label="Impressions" current={t.impressions} previous={p.impressions} />
                 <MetricBox label="Avg Position" current={t.position ? Number(t.position).toFixed(1) : "0"} previous={p.position ? Number(p.position).toFixed(1) : "0"} />
               </View>
-              <View style={s.chartBox}><SmoothChart data={chartData} color="#3182ce" /></View>
-
-              {adsData && (
-                <>
+              <View style={s.chartBox}><SmoothChart data={site.data.daily?.map(r => r.clicks) || []} color="#3182ce" /></View>
+              {adsData && (<>
                   <Text style={s.sectionTitle}>Google Ads</Text>
                   <View style={s.grid}>
                     <MetricBox label="Clicks" current={adsT.clicks} previous={adsP.clicks} />
                     <MetricBox label="Cost" current={adsT.cost} previous={adsP.cost} format="money" />
                     <MetricBox label="Conversions" current={adsT.conversions} previous={adsP.conversions} />
                   </View>
-                  <View style={s.chartBox}><SmoothChart data={adsChart} color="#e53e3e" /></View>
-                </>
-              )}
+                  <View style={s.chartBox}><SmoothChart data={adsData.daily?.map(r => r.clicks) || []} color="#e53e3e" /></View>
+              </>)}
             </View>
           );
         })}
       </Page>
 
-      {/* PAGE 3: META REPORT */}
+      {/* META PAGE */}
       <Page size="A4" style={s.page} wrap>
-        <View style={s.header}>
-          <View><Text style={s.title}>Meta Performance</Text><Text style={s.sub}>{c.name}</Text></View>
-        </View>
+        <View style={s.header}><Text style={s.title}>Meta Performance</Text><Text style={s.sub}>{c.name}</Text></View>
+        
+        {(!d.metaAds || d.metaAds.length === 0) && (
+          <Text style={{ fontSize: 12, color: "#e53e3e", marginTop: 20 }}>No Meta Ad Accounts were found for this report.</Text>
+        )}
 
         {(d.metaAds || []).map((acc, index) => {
-          if (acc.error) return null;
-          const t = acc.data.totals || {};
-          const p = acc.data.prevTotals || {};
-          const chartData = acc.data.daily?.map(r => r.clicks) || [];
+          if (acc.error) return (
+            <View key={acc.id} style={{ marginBottom: 20 }}>
+              <Text style={s.siteHeader}>📱 {cleanUrl(acc.id)}</Text>
+              <Text style={{ fontSize: 10, color: "#e53e3e" }}>Error loading data: {acc.error}</Text>
+            </View>
+          );
 
-          const pageData = d.metaPage?.[index]?.data;
-          const pageT = pageData || {};
-          const pageP = pageData?.prevTotals || {};
-          const pageChart = pageData?.daily?.map(r => r.views) || [];
-
+          const t = acc.data?.totals || {}; const p = acc.data?.prevTotals || {};
+          const pageData = d.metaPage?.[index]?.data; const pageT = pageData || {}; const pageP = pageData?.prevTotals || {};
+          
           return (
             <View key={acc.id} style={{ marginBottom: 20 }}>
               <Text style={s.siteHeader}>📱 {cleanUrl(acc.id)}</Text>
-              
               <Text style={s.sectionTitle}>Meta Ads</Text>
               <View style={s.grid}>
                 <MetricBox label="Spend" current={t.spend} previous={p.spend} format="money" />
                 <MetricBox label="Clicks" current={t.clicks} previous={p.clicks} />
                 <MetricBox label="Reach" current={t.reach} previous={p.reach} />
               </View>
-              <View style={s.chartBox}><SmoothChart data={chartData} color="#805ad5" /></View>
+              <View style={s.chartBox}><SmoothChart data={acc.data?.daily?.map(r => r.clicks) || []} color="#805ad5" /></View>
 
-              {pageData && (
-                <>
-                  <Text style={s.sectionTitle}>Facebook Page Insights</Text>
-                  <View style={s.grid}>
-                    <MetricBox label="Views" current={pageT.views} previous={pageP.views} />
-                    <MetricBox label="Interactions" current={pageT.interactions} previous={pageP.interactions} />
-                    <MetricBox label="New Followers" current={pageT.followers} previous={pageP.followers} />
-                  </View>
-                  <View style={s.chartBox}><SmoothChart data={pageChart} color="#38a169" /></View>
-                </>
-              )}
+              <Text style={s.sectionTitle}>Facebook Page Insights</Text>
+              <View style={s.grid}>
+                <MetricBox label="Views" current={pageT.views || 0} previous={pageP.views || 0} />
+                <MetricBox label="Interactions" current={pageT.interactions || 0} previous={pageP.interactions || 0} />
+                <MetricBox label="New Followers" current={pageT.followers || 0} previous={pageP.followers || 0} />
+              </View>
+              <View style={s.chartBox}><SmoothChart data={pageData?.daily?.map(r => r.views) || []} color="#38a169" /></View>
             </View>
           );
         })}
       </Page>
 
-      {/* PAGE 4: SEO REPORT */}
+      {/* SEO PAGE */}
       <Page size="A4" style={s.page}>
-        <View style={s.header}>
-          <View><Text style={s.title}>SEO Keyword Rankings</Text><Text style={s.sub}>Top Rankings (Page 1 & 2)</Text></View>
-        </View>
-
+        <View style={s.header}><Text style={s.title}>SEO Keyword Rankings</Text><Text style={s.sub}>Top Rankings (Page 1 & 2)</Text></View>
         {Object.keys(seoByWebsite).length === 0 ? (
           <Text style={{ fontSize: 12, color: "#718096", marginTop: 20 }}>No keywords found ranking on Page 1 or 2.</Text>
         ) : (
@@ -217,15 +196,11 @@ export function ReportPDF({ report }) {
               <Text style={s.siteHeader}>🌐 {cleanUrl(website)}</Text>
               <View style={s.table}>
                 <View style={[s.tableRow, s.tableHeader]}>
-                  <Text style={s.tableCellWide}>Keyword</Text>
-                  <Text style={s.tableCellCenter}>Page</Text>
-                  <Text style={s.tableCellCenter}>Position</Text>
+                  <Text style={s.tableCellWide}>Keyword</Text><Text style={s.tableCellCenter}>Page</Text><Text style={s.tableCellCenter}>Position</Text>
                 </View>
                 {keywords.map((kw, i) => (
                   <View key={i} style={[s.tableRow, i === keywords.length - 1 ? { borderBottomWidth: 0 } : {}]}>
-                    <Text style={s.tableCellWide}>{kw.keyword}</Text>
-                    <Text style={s.tableCellCenter}>Page {kw.page}</Text>
-                    <Text style={s.tableCellCenter}>#{kw.position}</Text>
+                    <Text style={s.tableCellWide}>{kw.keyword}</Text><Text style={s.tableCellCenter}>Page {kw.page}</Text><Text style={s.tableCellCenter}>#{kw.position}</Text>
                   </View>
                 ))}
               </View>
@@ -234,7 +209,6 @@ export function ReportPDF({ report }) {
         )}
       </Page>
 
-      {/* PAGE 5: THANK YOU */}
       <Page size="A4" style={s.thankyouPage}>
         {thankyouBuffer && <Image src={{ data: thankyouBuffer, format: "png" }} style={s.thankyouImage} />}
       </Page>

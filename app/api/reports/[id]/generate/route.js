@@ -1,5 +1,3 @@
-// app/api/reports/[id]/generate/route.js
-
 export const dynamic = "force-dynamic";
 
 import { connectDB } from "@/lib/db";
@@ -12,16 +10,23 @@ export const maxDuration = 60;
 
 function resolvePeriod(type, customStart, customEnd) {
   const now = new Date();
-  let end = new Date(now);
-  let start = new Date(now);
+  
+  // 👈 Initialize as let
+  let start;
+  let end;
 
-  if (type === "weekly") start.setDate(start.getDate() - 7);
-  else if (type === "monthly") start.setMonth(start.getMonth() - 1);
-  else if (type === "3month") start.setMonth(start.getMonth() - 3);
-  else if (type === "6month") start.setMonth(start.getMonth() - 6);
-  else { start = new Date(customStart); end = new Date(customEnd); }
+  if (type === "custom") {
+    start = new Date(customStart);
+    end = new Date(customEnd);
+  } else {
+    end = new Date(now);
+    start = new Date(now);
+    if (type === "weekly") start.setDate(start.getDate() - 7);
+    else if (type === "monthly") start.setMonth(start.getMonth() - 1);
+    else if (type === "3month") start.setMonth(start.getMonth() - 3);
+    else if (type === "6month") start.setMonth(start.getMonth() - 6);
+  }
 
-  // Calculate previous period of the same length
   const diffTime = Math.abs(end - start);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
   const prevEnd = new Date(start); prevEnd.setDate(prevEnd.getDate() - 1);
@@ -58,34 +63,35 @@ export async function POST(req, { params }) {
   const { getGA4, getGSC, getGoogleAds } = await import("@/lib/google");
   const { getMetaAds, getMetaPage } = await import("@/lib/meta");
 
-  // FETCH SEO KEYWORDS
   let seoKeywords = [];
   if (client.customerId) {
     try {
       const SeoSheet = (await import("@/models/employee/seoEmployee/SeoSheet")).default; 
       const Keyword = (await import("@/models/employee/seoEmployee/Keyword")).default; 
-      const sheet = await SeoSheet.findOne({ clientId: client.customerId }).populate({ path: "keywords", model: Keyword }).lean();
+      const ProjectCycle = (await import("@/models/admin/ProjectCycle")).default;
       
-      // Find this block inside the generate route and update it:
-if (sheet && sheet.keywords) {
-  seoKeywords = sheet.keywords.map(kw => {
-    const sortedRankings = (kw.rankings || []).sort((a, b) => new Date(b.date) - new Date(a.date));
-    const latestRank = sortedRankings.length > 0 ? sortedRankings[0] : null;
-    
-    // 👈 We pass the project name (website) along with the keyword
-    let websiteName = "General";
-    if (kw.projectId && kw.projectId.projectDuration && kw.projectId.projectDuration.length > 0) {
-       websiteName = kw.projectId.projectDuration[0].projectName;
-    }
+      const sheet = await SeoSheet.findOne({ clientId: client.customerId }).populate({ path: "keywords", model: Keyword }).lean();
+      const projectCycles = await ProjectCycle.find({ clientId: client.customerId }).lean();
+      
+      if (sheet && sheet.keywords) {
+        seoKeywords = sheet.keywords.map(kw => {
+          const sortedRankings = (kw.rankings || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+          const latestRank = sortedRankings.length > 0 ? sortedRankings[0] : null;
+          
+          let websiteName = "General";
+          if (kw.projectId) {
+             const cycle = projectCycles.find(p => p._id.toString() === kw.projectId.toString());
+             if (cycle && cycle.projectDuration?.length > 0) websiteName = cycle.projectDuration[0].projectName;
+          }
 
-    return { 
-      keyword: kw.keyword, 
-      page: latestRank ? latestRank.page : "-", 
-      position: latestRank ? latestRank.position : "-",
-      website: websiteName
-    };
-  });
-}
+          return { 
+            keyword: kw.keyword, 
+            page: latestRank ? latestRank.page : "-", 
+            position: latestRank ? latestRank.position : "-",
+            website: websiteName
+          };
+        });
+      }
     } catch (e) { console.error("SEO Fetch Error:", e.message); }
   }
 
