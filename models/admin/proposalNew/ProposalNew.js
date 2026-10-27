@@ -1,3 +1,5 @@
+// models/admin/proposalNew/ProposalNew.js
+
 import mongoose from "mongoose";
 
 const ProposalItemSchema = new mongoose.Schema(

@@ -1,3 +1,5 @@
+// app/dashboard/proposal/pdf-download/[id]/ProposalPdfClient.jsx
+
 "use client";
 
 import dynamic from "next/dynamic";

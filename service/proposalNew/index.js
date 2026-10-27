@@ -1,3 +1,5 @@
+// service/proposalNew/index.js
+
 import axiosInstance from "@/service/axiosInstance";
 const BASE = "/api/proposalNew";
 

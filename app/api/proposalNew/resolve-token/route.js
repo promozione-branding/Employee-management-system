@@ -1,3 +1,5 @@
+// app/api/proposalNew/resolve-token/route.js
+
 import { connectDB } from "@/lib/db";
 import ProposalNew from "@/models/admin/proposalNew/ProposalNew";
 import { NextResponse } from "next/server";

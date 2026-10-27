@@ -1,3 +1,5 @@
+// app/api/reports/auth/meta/route.js
+
 import { requireReportAdmin } from "@/lib/reportingAuth";
 import { NextResponse } from "next/server";
 

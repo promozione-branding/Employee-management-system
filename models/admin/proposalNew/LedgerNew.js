@@ -1,3 +1,5 @@
+// models/admin/proposalNew/LedgerNew.js
+
 import mongoose from "mongoose";
 
 const LedgerEntryNewSchema = new mongoose.Schema(

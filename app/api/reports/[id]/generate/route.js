@@ -1,3 +1,5 @@
+// app/api/reports/[id]/generate/route.js
+
 export const dynamic = "force-dynamic";
 
 import { connectDB } from "@/lib/db";

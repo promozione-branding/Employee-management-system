@@ -1,3 +1,5 @@
+// app/dashboard/proposal/pdf-download/[id]/page.jsx
+
 import ProposalPdfClient from "./ProposalPdfClient";
 
 const Page = async ({ params }) => {

@@ -1,3 +1,5 @@
+// app/api/reports/auth/meta/callback/route.js
+
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import MetaSetting from "@/models/admin/MetaSetting";

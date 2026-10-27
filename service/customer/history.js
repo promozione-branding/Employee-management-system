@@ -1,3 +1,5 @@
+// service/customer/history.js
+
 export async function getEditHistoryService(customerId, params = {}) {
   const query = new URLSearchParams(params).toString();
   const url = `/api/customer/${customerId}/edit-history${query ? `?${query}` : ""}`;

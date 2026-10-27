@@ -1,3 +1,5 @@
+// components/proposalNew/LedgerModalNew.jsx
+
 "use client";
 import React, { useState, useEffect } from "react";
 import { createLedgerNewService, updateLedgerNewService, deleteLedgerNewService } from "@/service/proposalNew/ledgerNew";

@@ -1,3 +1,5 @@
+// app/api/reports/discover/meta/route.js
+
 import { requireReportAdmin } from "@/lib/reportingAuth";
 import { connectDB } from "@/lib/db";
 import MetaSetting from "@/models/admin/MetaSetting";

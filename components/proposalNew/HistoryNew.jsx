@@ -1,3 +1,5 @@
+// components/proposalNew/HistoryNew.jsx
+
 "use client";
 import React, { useEffect, useState } from "react";
 import { FileText, Eye, Trash2, Pencil, Download, Mail, X } from "lucide-react";

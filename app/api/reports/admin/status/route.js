@@ -1,3 +1,5 @@
+// app/api/reports/admin/status/route.js
+
 import { connectDB } from "@/lib/db";
 import ReportSetting from "@/models/admin/ReportSetting";
 import MetaSetting from "@/models/admin/MetaSetting";

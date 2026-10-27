@@ -1,3 +1,5 @@
+// service/proposalNew/ledgerNew.js
+
 import axiosInstance from "@/service/axiosInstance";
 const BASE = "/api/proposalNew/ledger";
 
