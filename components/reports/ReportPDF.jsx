@@ -22,9 +22,9 @@ const s = StyleSheet.create({
   sectionTitle: { fontSize: 12, fontWeight: "bold", color: "#2d3748", marginTop: 15, marginBottom: 10, borderBottom: "1 solid #e2e8f0", paddingBottom: 4 },
   
   grid: { flexDirection: "row", gap: 12, marginBottom: 15 },
-  box: { flex: 1, backgroundColor: "#ffffff", padding: 15, borderRadius: 8, border: "1 solid #e2e8f0" },
+  box: { flex: 1, backgroundColor: "#ffffff", padding: 12, borderRadius: 8, border: "1 solid #e2e8f0" },
   boxLabel: { fontSize: 9, color: "#718096", textTransform: "uppercase", marginBottom: 6, fontWeight: 700, letterSpacing: 0.5 },
-  boxValue: { fontSize: 20, fontWeight: "bold", color: "#2d3748", marginBottom: 6 },
+  boxValue: { fontSize: 18, fontWeight: "bold", color: "#2d3748", marginBottom: 6 },
   
   comparison: { fontSize: 9, fontWeight: "bold", lineHeight: 1.3 },
   up: { color: "#38a169" },
@@ -56,7 +56,7 @@ function calculateChange(current, previous) {
 
 function MetricBox({ label, current, previous, format }) {
   const change = calculateChange(current, previous);
-  const displayVal = format === "money" ? `Rs ${Number(current || 0).toLocaleString("en-IN")}` : Number(current || 0).toLocaleString("en-IN");
+  const displayVal = format === "money" ? `Rs ${Number(current || 0).toLocaleString("en-IN")}` : format === "percent" ? `${(Number(current || 0) * 100).toFixed(2)}%` : Number(current || 0).toLocaleString("en-IN");
   return (
     <View style={s.box}>
       <Text style={s.boxLabel}>{label}</Text>
@@ -86,13 +86,11 @@ export function ReportPDF({ report }) {
   
   const cleanUrl = (url) => url ? url.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "").replace(/^act_/i, "") : "Unknown";
 
-  // 👈 Group SEO Keywords by Website
   const seoByWebsite = {};
   (d.seoKeywords || []).forEach(kw => {
     const pageNum = parseInt(String(kw.page || "").replace(/[^0-9]/g, ""), 10);
     if (pageNum === 1 || pageNum === 2) {
-      // If website is missing, fall back to "General Keywords" (but ideally the API sends it)
-      const site = kw.website || "General Keywords"; 
+      const site = kw.website || "General Keywords";
       if (!seoByWebsite[site]) seoByWebsite[site] = [];
       seoByWebsite[site].push(kw);
     }
@@ -115,10 +113,12 @@ export function ReportPDF({ report }) {
       {/* GOOGLE PAGE */}
       <Page size="A4" style={s.page} wrap>
         <View style={s.header}><Text style={s.title}>Google Performance</Text><Text style={s.sub}>{c.name}</Text></View>
+        
+        {/* Loop through Search Console Websites */}
         {(d.gsc || []).map((site, index) => {
           if (site.error) return null;
-          const t = site.data.totals || {}; const p = site.data.prevTotals || {};
-          const adsData = d.gads?.[index]?.data; const adsT = adsData?.totals || {}; const adsP = adsData?.prevTotals || {};
+          const t = site.data.totals || {}; 
+          const p = site.data.prevTotals || {};
           return (
             <View key={site.id} style={{ marginBottom: 20 }}>
               <Text style={s.siteHeader}>🌐 {cleanUrl(site.id)}</Text>
@@ -126,21 +126,27 @@ export function ReportPDF({ report }) {
               <View style={s.grid}>
                 <MetricBox label="Clicks" current={t.clicks} previous={p.clicks} />
                 <MetricBox label="Impressions" current={t.impressions} previous={p.impressions} />
+                <MetricBox label="Avg CTR" current={t.ctr} previous={p.ctr} format="percent" />
                 <MetricBox label="Avg Position" current={t.position ? Number(t.position).toFixed(1) : "0"} previous={p.position ? Number(p.position).toFixed(1) : "0"} />
               </View>
               <View style={s.chartBox}><SmoothChart data={site.data.daily?.map(r => r.clicks) || []} color="#3182ce" /></View>
-              {adsData && (<>
-                  <Text style={s.sectionTitle}>Google Ads</Text>
-                  <View style={s.grid}>
-                    <MetricBox label="Clicks" current={adsT.clicks} previous={adsP.clicks} />
-                    <MetricBox label="Cost" current={adsT.cost} previous={adsP.cost} format="money" />
-                    <MetricBox label="Conversions" current={adsT.conversions} previous={adsP.conversions} />
-                  </View>
-                  <View style={s.chartBox}><SmoothChart data={adsData.daily?.map(r => r.clicks) || []} color="#e53e3e" /></View>
-              </>)}
             </View>
           );
         })}
+
+        {/* Show Google Ads only once, after the Search Console sites */}
+        {d.gads && d.gads.length > 0 && !d.gads[0].error && (
+          <View style={{ marginTop: 30 }}>
+            <Text style={s.siteHeader}>🎯 Google Ads</Text>
+            <View style={s.grid}>
+              <MetricBox label="Clicks" current={d.gads[0].data.totals.clicks} previous={d.gads[0].data.prevTotals.clicks} />
+              <MetricBox label="Impressions" current={d.gads[0].data.totals.impressions} previous={d.gads[0].data.prevTotals.impressions} />
+              <MetricBox label="Cost" current={d.gads[0].data.totals.cost} previous={d.gads[0].data.prevTotals.cost} format="money" />
+              <MetricBox label="Conversions" current={d.gads[0].data.totals.conversions} previous={d.gads[0].data.prevTotals.conversions} />
+            </View>
+            <View style={s.chartBox}><SmoothChart data={d.gads[0].data.daily?.map(r => r.clicks) || []} color="#e53e3e" /></View>
+          </View>
+        )}
       </Page>
 
       {/* META PAGE */}
@@ -148,38 +154,39 @@ export function ReportPDF({ report }) {
         <View style={s.header}><Text style={s.title}>Meta Performance</Text><Text style={s.sub}>{c.name}</Text></View>
         
         {(!d.metaAds || d.metaAds.length === 0) && (
-          <Text style={{ fontSize: 12, color: "#e53e3e", marginTop: 20 }}>No Meta Ad Accounts were found for this report.</Text>
+          <Text style={{ fontSize: 12, color: "#e53e3e", marginTop: 20 }}>No Meta Ad Accounts were found.</Text>
         )}
 
         {(d.metaAds || []).map((acc, index) => {
-          if (acc.error) return (
-            <View key={acc.id} style={{ marginBottom: 20 }}>
-              <Text style={s.siteHeader}>📱 {cleanUrl(acc.id)}</Text>
-              <Text style={{ fontSize: 10, color: "#e53e3e" }}>Error loading data: {acc.error}</Text>
-            </View>
-          );
+          if (acc.error) return null;
 
           const t = acc.data?.totals || {}; const p = acc.data?.prevTotals || {};
           const pageData = d.metaPage?.[index]?.data; const pageT = pageData || {}; const pageP = pageData?.prevTotals || {};
           
           return (
-            <View key={acc.id} style={{ marginBottom: 20 }}>
+            <View key={acc.id} style={{ marginBottom: 25 }}>
               <Text style={s.siteHeader}>📱 {cleanUrl(acc.id)}</Text>
+              
               <Text style={s.sectionTitle}>Meta Ads</Text>
               <View style={s.grid}>
                 <MetricBox label="Spend" current={t.spend} previous={p.spend} format="money" />
                 <MetricBox label="Clicks" current={t.clicks} previous={p.clicks} />
                 <MetricBox label="Reach" current={t.reach} previous={p.reach} />
+                <MetricBox label="Impressions" current={t.impressions} previous={p.impressions} />
               </View>
               <View style={s.chartBox}><SmoothChart data={acc.data?.daily?.map(r => r.clicks) || []} color="#805ad5" /></View>
 
-              <Text style={s.sectionTitle}>Facebook Page Insights</Text>
-              <View style={s.grid}>
-                <MetricBox label="Views" current={pageT.views || 0} previous={pageP.views || 0} />
-                <MetricBox label="Interactions" current={pageT.interactions || 0} previous={pageP.interactions || 0} />
-                <MetricBox label="New Followers" current={pageT.followers || 0} previous={pageP.followers || 0} />
-              </View>
-              <View style={s.chartBox}><SmoothChart data={pageData?.daily?.map(r => r.views) || []} color="#38a169" /></View>
+              {pageData && (
+                <>
+                  <Text style={s.sectionTitle}>Facebook Page Insights</Text>
+                  <View style={s.grid}>
+                    <MetricBox label="Views" current={pageT.views || 0} previous={pageP.views || 0} />
+                    <MetricBox label="Interactions" current={pageT.interactions || 0} previous={pageP.interactions || 0} />
+                    <MetricBox label="New Followers" current={pageT.followers || 0} previous={pageP.followers || 0} />
+                  </View>
+                  <View style={s.chartBox}><SmoothChart data={pageData?.daily?.map(r => r.views) || []} color="#38a169" /></View>
+                </>
+              )}
             </View>
           );
         })}
