@@ -1,6 +1,7 @@
 // components/pdf/ProposalPdfTemplate.jsx
 
 "use client";
+
 import {
   Document,
   Page,
@@ -8,8 +9,24 @@ import {
   View,
   Image,
   StyleSheet,
+  Font,
 } from "@react-pdf/renderer";
+
 import { ToWords } from "to-words";
+
+Font.register({
+  family: "Roboto",
+  fonts: [
+    {
+      src: "/fonts/Roboto-Regular.ttf",
+      fontWeight: "normal",
+    },
+    {
+      src: "/fonts/Roboto-Bold.ttf",
+      fontWeight: "bold",
+    },
+  ],
+});
 
 const ProposalPdfTemplate = ({ data }) => {
   if (!data) {
@@ -119,7 +136,7 @@ const ProposalPdfTemplate = ({ data }) => {
           Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi, 110034,
         </Text>
         <Text>CIN: U92112DL2024PTC432424</Text>
-       
+
       </View>
     </View>
   );
