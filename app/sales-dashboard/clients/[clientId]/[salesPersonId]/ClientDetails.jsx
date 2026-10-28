@@ -15,6 +15,7 @@ const ClientDetails = ({ customerId, salesPersonId }) => {
   return (
     <div className="flex w-full flex-col gap-6">
       <Tabs defaultValue="Customer">
+          
         <TabsList>
           <TabsTrigger value="Customer">Customer</TabsTrigger>
           <TabsTrigger value="newproposal">New Proposal</TabsTrigger>
@@ -40,7 +41,7 @@ const ClientDetails = ({ customerId, salesPersonId }) => {
         </TabsContent>
         <TabsContent value="history">
           <HistoryTab customerId={customerId} />
-        </TabsContent>
+        </TabsContent> 
         <TabsContent value="attachment">
           <ExecutiveAttachment clientId={customerId} />
         </TabsContent>

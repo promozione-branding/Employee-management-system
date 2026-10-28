@@ -5,7 +5,7 @@ import { getCallHistoryService } from "@/service/calling";
 import CallPanel from "./CallPanel";
 import CallHistory from "./CallHistory";
 import { Label } from "@/components/ui/label";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -43,25 +43,89 @@ const toLocalISO = (dateStr, timeStr) => {
   )}T${pad(local.getHours())}:${pad(local.getMinutes())}:00${offsetStr}`;
 };
 
+// ---------- Reusable CC picker (search + tick, shows name + email) ----------
+const CcPicker = ({
+  title,
+  employees,
+  selected,
+  onToggle,
+  search,
+  setSearch,
+}) => {
+  const filtered = useMemo(() => {
+    const q = (search || "").trim().toLowerCase();
+    if (!q) return employees;
+    return employees.filter((u) => {
+      const name = (u?.username || u?.name || "").toLowerCase();
+      const email = (u?.email || "").toLowerCase();
+      return name.includes(q) || email.includes(q);
+    });
+  }, [employees, search]);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Label>{title}</Label>
+      <Input
+        placeholder="Search by name or email..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+      <div className="max-h-52 overflow-y-auto border rounded-lg divide-y">
+        {filtered.length === 0 ? (
+          <div className="p-3 text-sm text-gray-500 text-center">
+            No match found
+          </div>
+        ) : (
+          filtered.map((u) => {
+            const isSelected = selected.some((s) => s?._id === u?._id);
+            return (
+              <label
+                key={u?._id}
+                className={`flex items-center gap-3 p-2 cursor-pointer text-sm ${
+                  isSelected ? "bg-blue-50" : "hover:bg-gray-50"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => onToggle(u)}
+                />
+                <div className="flex flex-col">
+                  <span className="font-medium text-gray-800 capitalize">
+                    {u?.username || u?.name || "Unnamed"}
+                    {u?.role ? (
+                      <span className="ml-2 text-xs text-gray-500">
+                        ({u.role})
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="text-xs text-gray-500">{u?.email}</span>
+                </div>
+              </label>
+            );
+          })
+        )}
+      </div>
+      {selected.length > 0 && (
+        <div className="text-xs text-gray-600">
+          {selected.length} recipient{selected.length > 1 ? "s" : ""} selected
+        </div>
+      )}
+    </div>
+  );
+};
+
 const UpdateTab = ({ customerId, salesPersonId }) => {
   const [loading, setLoading] = useState(false);
   const [newMeeting, setNewMeeting] = useState(false);
   const [meetingUpdateId, setMeetingUpdateId] = useState("");
   const [loadingEmailList, setLoadingEmailList] = useState(true);
   const [emailListData, setEmailListData] = useState([]);
-  const [selectEmail, setSelectEmail] = useState([]);
 
   const { employee } = useSalesEmployeeStore();
 
-  const [callForm, setCallForm] = useState({
-    status: "",
-    note: "",
-    reminderTime: "",
-    reminderDate: "",
-    meetingTime: "",
-    meetingDate: "",
-  });
-
+  // ---------- Meeting state ----------
+  const [meetingSearch, setMeetingSearch] = useState("");
   const [meetingForm, setMeetingForm] = useState({
     status: "",
     note: "",
@@ -70,14 +134,33 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     meetingTime: "",
     meetingDate: "",
   });
+  const [meetingRecipients, setMeetingRecipients] = useState([]);
 
-  const [generalForm, setGeneralForm] = useState({
+  // ---------- Call state ----------
+  const [callForm, setCallForm] = useState({
+    status: "",
     note: "",
     reminderTime: "",
     reminderDate: "",
     meetingTime: "",
     meetingDate: "",
   });
+  const [callSendMail, setCallSendMail] = useState(false);
+  const [callSearch, setCallSearch] = useState("");
+  const [callRecipients, setCallRecipients] = useState([]);
+
+  // ---------- General state ----------
+  const [generalForm, setGeneralForm] = useState({
+    subject: "",
+    note: "",
+    reminderTime: "",
+    reminderDate: "",
+    meetingTime: "",
+    meetingDate: "",
+  });
+  const [generalSendMail, setGeneralSendMail] = useState(false);
+  const [generalSearch, setGeneralSearch] = useState("");
+  const [generalRecipients, setGeneralRecipients] = useState([]);
 
   // ------------------------------------------------------------
   // Call history (real API)
@@ -100,6 +183,13 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     }
   };
 
+  const toggleRecipient = (setter) => (user) => {
+    setter((prev) => {
+      const exists = prev.some((s) => s?._id === user?._id);
+      return exists ? prev.filter((s) => s._id !== user?._id) : [...prev, user];
+    });
+  };
+
   // -------------------for Call update --------------------
   const handleCallSubmit = async (e) => {
     e.preventDefault();
@@ -107,22 +197,27 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
 
     if (!employee?.user?._id) {
       toast.error("please provide sale person id");
+      setLoading(false);
       return;
     }
 
     const formData = {
       salesPersonId: employee?.user?._id || "",
-      salesPerson: selectEmail.map((item) => item?._id),
-
+      salesPerson: callSendMail ? callRecipients.map((u) => u?._id) : [],
       clientId: customerId,
       updateType: "call",
       status: callForm?.status,
       note: callForm?.note,
       meetingAt: toLocalISO(callForm.meetingDate, callForm.meetingTime),
       reminderAt: toLocalISO(callForm.reminderDate, callForm.reminderTime),
+      // mail control
+      sendToSelf: callSendMail,
+      ccAdmin: false,
+      mailRecipients: callSendMail ? callRecipients.map((u) => u?._id) : [],
     };
     if (!formData?.salesPersonId || !formData?.clientId) {
       toast.error("client id and salesPersonId not found");
+      setLoading(false);
       return;
     }
 
@@ -131,7 +226,9 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       if (res.success) {
         toast.success(res.message || "Meet has been created");
         setLoading(false);
-        setSelectEmail([]);
+        setCallRecipients([]);
+        setCallSendMail(false);
+        setCallSearch("");
         setCallForm({
           status: "",
           note: "",
@@ -154,18 +251,21 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
 
     const formData = {
       salesPersonId: employee?.user?._id || "",
-      salesPerson: selectEmail.map((item) => item?._id),
-
+      salesPerson: callSendMail ? callRecipients.map((u) => u?._id) : [],
       clientId: customerId,
       updateType: "call",
       status: callForm?.status,
       note: callForm?.note,
       meetingAt: toLocalISO(callForm.meetingDate, callForm.meetingTime),
       reminderAt: toLocalISO(callForm.reminderDate, callForm.reminderTime),
+      sendToSelf: callSendMail,
+      ccAdmin: false,
+      mailRecipients: callSendMail ? callRecipients.map((u) => u?._id) : [],
     };
 
     if (!formData?.salesPersonId || !formData?.clientId) {
       toast.error("client id and salesPersonId not found");
+      setLoading(false);
       return;
     }
     try {
@@ -174,7 +274,9 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
         if (res.success) {
           toast.success(res.message || "Meet has been Updated");
           setLoading(false);
-          setSelectEmail([]);
+          setCallRecipients([]);
+          setCallSendMail(false);
+          setCallSearch("");
           setCallForm({
             status: "",
             note: "",
@@ -191,36 +293,39 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       toast.error(error.message || "Error while Updating meeting");
     }
   };
-
   // -------------------for Call update --------------------
 
   // ------------------Meeting update----------------
-
   const handleMeetingSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     const formData = {
       salesPersonId: employee?.user?._id || "",
-      salesPerson: selectEmail.map((item) => item?._id),
+      salesPerson: meetingRecipients.map((u) => u?._id),
       clientId: customerId,
       updateType: "meeting",
       status: meetingForm?.status,
       note: meetingForm?.note,
       meetingAt: toLocalISO(meetingForm.meetingDate, meetingForm.meetingTime),
       reminderAt: toLocalISO(meetingForm.reminderDate, meetingForm.reminderTime),
+      // Meeting: mail always on, self + admin forced
+      sendToSelf: true,
+      ccAdmin: true,
+      mailRecipients: meetingRecipients.map((u) => u?._id),
     };
     if (!formData?.salesPersonId || !formData?.clientId) {
       toast.error("client id and salesPersonId not found");
+      setLoading(false);
       return;
     }
     try {
       const res = await createMeetingService(formData);
-      console.log(res, "data");
       if (res.success) {
         toast.success(res.message || "Meet has been created");
         setLoading(false);
-        setSelectEmail([]);
+        setMeetingRecipients([]);
+        setMeetingSearch("");
         setMeetingForm({
           status: "",
           note: "",
@@ -243,18 +348,21 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
 
     const formData = {
       salesPersonId: employee?.user?._id || "",
-      salesPerson: selectEmail.map((item) => item?._id),
-
+      salesPerson: meetingRecipients.map((u) => u?._id),
       clientId: customerId,
       updateType: "meeting",
       status: meetingForm?.status,
       note: meetingForm?.note,
       meetingAt: toLocalISO(meetingForm.meetingDate, meetingForm.meetingTime),
       reminderAt: toLocalISO(meetingForm.reminderDate, meetingForm.reminderTime),
+      sendToSelf: true,
+      ccAdmin: true,
+      mailRecipients: meetingRecipients.map((u) => u?._id),
     };
 
     if (!formData?.salesPersonId || !formData?.clientId) {
       toast.error("client id and salesPersonId not found");
+      setLoading(false);
       return;
     }
 
@@ -264,7 +372,8 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
         if (res.success) {
           toast.success(res.message || "Meet has been Updated");
           setLoading(false);
-          setSelectEmail([]);
+          setMeetingRecipients([]);
+          setMeetingSearch("");
           setMeetingForm({
             status: "",
             note: "",
@@ -281,7 +390,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       toast.error(error.message || "Error while Updating meeting");
     }
   };
-
   // ------------------Meeting update----------------
 
   // ------------------General update----------------
@@ -291,16 +399,22 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
 
     const formData = {
       salesPersonId: employee?.user?._id || "",
-      salesPerson: selectEmail.map((item) => item?._id),
-
+      salesPerson: generalSendMail ? generalRecipients.map((u) => u?._id) : [],
       clientId: customerId,
       updateType: "general",
+      subject: generalForm?.subject || "",
       note: generalForm?.note,
       meetingAt: toLocalISO(generalForm.meetingDate, generalForm.meetingTime),
       reminderAt: toLocalISO(generalForm.reminderDate, generalForm.reminderTime),
+      sendToSelf: generalSendMail,
+      ccAdmin: false,
+      mailRecipients: generalSendMail
+        ? generalRecipients.map((u) => u?._id)
+        : [],
     };
     if (!formData?.salesPersonId || !formData?.clientId) {
       toast.error("client id and salesPersonId not found");
+      setLoading(false);
       return;
     }
 
@@ -309,8 +423,11 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       if (res.success) {
         toast.success(res.message || "Meet has been created");
         setLoading(false);
-        setSelectEmail([]);
+        setGeneralRecipients([]);
+        setGeneralSendMail(false);
+        setGeneralSearch("");
         setGeneralForm({
+          subject: "",
           note: "",
           reminderTime: "",
           reminderDate: "",
@@ -331,17 +448,23 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
 
     const formData = {
       salesPersonId: employee?.user?._id || "",
-      salesPerson: selectEmail.map((item) => item?._id),
-
+      salesPerson: generalSendMail ? generalRecipients.map((u) => u?._id) : [],
       clientId: customerId,
       updateType: "general",
+      subject: generalForm?.subject || "",
       note: generalForm?.note,
       meetingAt: toLocalISO(generalForm.meetingDate, generalForm.meetingTime),
       reminderAt: toLocalISO(generalForm.reminderDate, generalForm.reminderTime),
+      sendToSelf: generalSendMail,
+      ccAdmin: false,
+      mailRecipients: generalSendMail
+        ? generalRecipients.map((u) => u?._id)
+        : [],
     };
 
     if (!formData?.salesPersonId || !formData?.clientId) {
       toast.error("client id and salesPersonId not found");
+      setLoading(false);
       return;
     }
     try {
@@ -350,8 +473,11 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
         if (res.success) {
           toast.success(res.message || "Meet has been Updated");
           setLoading(false);
-          setSelectEmail([]);
+          setGeneralRecipients([]);
+          setGeneralSendMail(false);
+          setGeneralSearch("");
           setGeneralForm({
+            subject: "",
             note: "",
             reminderTime: "",
             reminderDate: "",
@@ -366,20 +492,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       toast.error(error.message || "Error while Updating meeting");
     }
   };
-
   // ------------------General update----------------
-
-  const handleSelectEmail = (email) => {
-    setSelectEmail((prevEmail) => {
-      const isSelected = prevEmail.some((s) => s?._id === email?._id);
-
-      if (isSelected) {
-        return prevEmail.filter((s) => s._id !== email?._id);
-      } else {
-        return [...prevEmail, email];
-      }
-    });
-  };
 
   useEffect(() => {
     async function CheckNewMeet() {
@@ -402,14 +515,14 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       try {
         const res = await SalesPeopleMeetingService();
         if (res.success) {
-          setEmailListData(res.data);
+          setEmailListData(res.data || []);
           setLoadingEmailList(false);
         }
       } catch (error) {
         console.log(error);
         setLoadingEmailList(true);
         toast.error(
-          error.response.date.message ||
+          error.response?.data?.message ||
             "Error while fetching the sales person",
         );
       }
@@ -417,9 +530,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     salesPeopleMail();
   }, [customerId]);
 
-  // ------------------------------------------------------------
-  // Fetch call history for this client
-  // ------------------------------------------------------------
   useEffect(() => {
     fetchCallHistory();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -427,32 +537,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
 
   return (
     <div className="flex flex-col-reverse">
-      <div>
-        {loadingEmailList ? (
-          <div className="border-dashed border-2 text-gray-500 text-center p-5 rounded-2xl mt-5">
-            There is no email found
-          </div>
-        ) : (
-          <div className="flex gap-4 my-3 flex-wrap">
-            {emailListData.map((item) => {
-              return (
-                <button
-                  onClick={() => handleSelectEmail(item)}
-                  key={item?._id}
-                  className={`p-2 border rounded-lg shadow-sm text-sm font-medium text-gray-700 duration-300 capitalize ${
-                    selectEmail.some((s) => s?._id === item?._id)
-                      ? "bg-blue-50 border-emerald-500 scale-105"
-                      : "bg-white border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  @{item?.email?.split("@")[0]}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
       {/* --- Call panel (wired) --- */}
       <CallPanel
         customerId={customerId}
@@ -460,7 +544,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
         customerPhone="—"
         virtualNumber={process.env.NEXT_PUBLIC_MYOP_VIRTUAL_NUMBER || "—"}
         onCallStarted={() => {
-          // refresh history a moment later
           setTimeout(fetchCallHistory, 2000);
         }}
       />
@@ -476,7 +559,8 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
         )}
       </div>
 
-      <div className="flex gap-10 ">
+      <div className="flex gap-10">
+        {/* -------------------- CALL -------------------- */}
         <div className="w-1/3">
           <h2 className="font-bold text-2xl text-center mb-5">Call Update</h2>
           <form
@@ -527,7 +611,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-
             <div className="flex flex-col gap-3">
               <Label>Meeting Date</Label>
               <div className="grid gap-2 grid-cols-2">
@@ -545,12 +628,48 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
               </div>
             </div>
 
+            {/* Mail radio */}
+            <div className="flex flex-col gap-2 border rounded-lg p-3 bg-gray-50">
+              <Label>Send mail?</Label>
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="callSendMail"
+                    checked={!callSendMail}
+                    onChange={() => setCallSendMail(false)}
+                  />
+                  No
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="callSendMail"
+                    checked={callSendMail}
+                    onChange={() => setCallSendMail(true)}
+                  />
+                  Yes
+                </label>
+              </div>
+              {callSendMail && (
+                <CcPicker
+                  title="Choose CC recipients (self is always To)"
+                  employees={emailListData}
+                  selected={callRecipients}
+                  onToggle={toggleRecipient(setCallRecipients)}
+                  search={callSearch}
+                  setSearch={setCallSearch}
+                />
+              )}
+            </div>
+
             <Button className={"w-full"} disabled={loading}>
               Call Update
             </Button>
           </form>
         </div>
 
+        {/* -------------------- MEETING -------------------- */}
         <div className="w-1/3">
           <h2 className="font-bold text-2xl text-center mb-5">
             Meeting Update
@@ -608,7 +727,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-
             <div className="flex flex-col gap-3">
               <Label>Meeting Date</Label>
               <div className="grid gap-2 grid-cols-2">
@@ -630,10 +748,28 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
+
+            {/* Meeting CC picker (mail always on) */}
+            <div className="flex flex-col gap-2 border rounded-lg p-3 bg-blue-50/50">
+              <div className="text-xs text-gray-700">
+                Mail will be sent to you + <strong>all admins</strong> (CC).
+                Tick employees below to add them to CC.
+              </div>
+              <CcPicker
+                title="CC employees (optional)"
+                employees={emailListData}
+                selected={meetingRecipients}
+                onToggle={toggleRecipient(setMeetingRecipients)}
+                search={meetingSearch}
+                setSearch={setMeetingSearch}
+              />
+            </div>
+
             <Button className={"w-full"}>Meeting Update</Button>
           </form>
         </div>
 
+        {/* -------------------- GENERAL -------------------- */}
         <div className="w-1/3">
           <h2 className="font-bold text-2xl text-center mb-5">
             General Update
@@ -642,6 +778,16 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
             onSubmit={newMeeting ? handleGeneralSubmit : updateGeneralSubmit}
             className="flex flex-col gap-2"
           >
+            <div className="flex flex-col gap-3">
+              <Label>Subject (optional)</Label>
+              <Input
+                placeholder="Leave blank to use default subject"
+                value={generalForm.subject}
+                onChange={(e) =>
+                  setGeneralForm({ ...generalForm, subject: e.target.value })
+                }
+              />
+            </div>
             <div className="flex flex-col gap-3">
               <Label>Note</Label>
               <Textarea
@@ -673,7 +819,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-
             <div className="flex flex-col gap-3">
               <Label>Meeting Date</Label>
               <div className="grid gap-2 grid-cols-2">
@@ -695,6 +840,42 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
+
+            {/* Mail radio */}
+            <div className="flex flex-col gap-2 border rounded-lg p-3 bg-gray-50">
+              <Label>Send mail?</Label>
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="generalSendMail"
+                    checked={!generalSendMail}
+                    onChange={() => setGeneralSendMail(false)}
+                  />
+                  No
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="generalSendMail"
+                    checked={generalSendMail}
+                    onChange={() => setGeneralSendMail(true)}
+                  />
+                  Yes
+                </label>
+              </div>
+              {generalSendMail && (
+                <CcPicker
+                  title="Choose CC recipients (self is always To)"
+                  employees={emailListData}
+                  selected={generalRecipients}
+                  onToggle={toggleRecipient(setGeneralRecipients)}
+                  search={generalSearch}
+                  setSearch={setGeneralSearch}
+                />
+              )}
+            </div>
+
             <Button className={"w-full"}>generate Update</Button>
           </form>
         </div>

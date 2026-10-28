@@ -7,7 +7,7 @@ export async function createMeetingService(formData) {
   return data;
 }
 
-export async function clientMeetingHistory(id) {
+export async function clientMeetingHistory(id) { 
   const { data } = await axiosInstance.get(
     `/api/customer/meeting/meeting-history/${id}`
   );
@@ -22,9 +22,11 @@ export async function myClientMeetingHistory(customerId, salesPersonId) {
   return data;
 }
 
+
+
 export async function checkNewMeetService(id) {
   const { data } = await axiosInstance.get(
-    `/api/customer/meeting/is-new-meeting-check/${id}`
+    `/api/customer/meeting/is-new-meeting-check/${id}` 
   );
   return data;
 }
@@ -33,3 +35,4 @@ export async function addNewMeetingUpdate(id, formData) {
   const { data } = await axiosInstance.put(`/api/meeting/${id}`, formData);
   return data;
 }
+  

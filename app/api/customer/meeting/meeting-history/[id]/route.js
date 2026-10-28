@@ -1,7 +1,7 @@
 // app/api/customer/meeting/meeting-history/[id]/route.js
 
 import { connectDB } from "@/lib/db";
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server"; 
 import Customer from "@/models/admin/Customer";
 import Meeting from "@/models/admin/meeting/Meeting";
 import User from "@/models/admin/User";

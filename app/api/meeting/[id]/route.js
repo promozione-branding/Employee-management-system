@@ -25,17 +25,17 @@ export async function PUT(req, { params }) {
       note,
       reminderAt,
       meetingAt,
+      subject,
+      sendToSelf,
+      ccAdmin,
+      mailRecipients,
     } = await req.json();
 
     console.log("=== MEETING UPDATE START ===");
     console.log("Meeting ID:", id);
-    console.log("salesPersonId:", salesPersonId);
-    console.log("salesPerson:", salesPerson);
-    console.log("clientId:", clientId);
+    console.log("updateType:", updateType);
+    console.log("sendToSelf:", sendToSelf, "| ccAdmin:", ccAdmin);
 
-    // =========================================================
-    // FIND MEETING
-    // =========================================================
     const meeting = await Meeting.findById(id);
     if (!meeting) {
       return NextResponse.json(
@@ -44,9 +44,6 @@ export async function PUT(req, { params }) {
       );
     }
 
-    // =========================================================
-    // PUSH NEW UPDATE INTO meetingUpdate ARRAY
-    // =========================================================
     meeting.meetingUpdate.push({
       salesPersonId,
       salesPerson,
@@ -60,7 +57,7 @@ export async function PUT(req, { params }) {
 
     await meeting.save();
 
-    // ── NEW: Audit Hook ──
+    // ── Audit Hook (unchanged) ──
     try {
       const authUser = await getAuthUser(req);
       if (authUser) {
@@ -69,7 +66,9 @@ export async function PUT(req, { params }) {
           module: "meeting",
           entityId: meeting._id,
           action: "UPDATE",
-          summary: `Added ${updateType || "general"} update: ${note ? `"${note.substring(0, 40)}..."` : "No note"}`,
+          summary: `Added ${updateType || "general"} update: ${
+            note ? `"${note.substring(0, 40)}..."` : "No note"
+          }`,
           actor: { userId: authUser._id },
           isConfidential: false,
           afterSnapshot: meeting.meetingUpdate[meeting.meetingUpdate.length - 1],
@@ -81,107 +80,111 @@ export async function PUT(req, { params }) {
     }
     // ── END AUDIT HOOK ──
 
-    // =========================================================
-    // FIND CUSTOMER
-    // =========================================================
     const findCustomer = await Customer.findById(clientId);
 
     // =========================================================
-    // CREATOR (To)
+    // MAIL DECISION
     // =========================================================
-    const creator = await User.findById(salesPersonId).select(
-      "email username role",
-    );
-    const creatorEmail = creator?.email?.toLowerCase().trim() || "";
-    const creatorName = creator?.username || "Unknown";
-    const creatorRole = creator?.role || "unknown";
+    const mailEnabled =
+      typeof sendToSelf === "boolean"
+        ? sendToSelf
+        : updateType === "meeting";
 
-    console.log("Creator found:", {
-      name: creatorName,
-      email: creatorEmail,
-      role: creatorRole,
-    });
+    if (mailEnabled) {
+      const creator = await User.findById(salesPersonId).select(
+        "email username role",
+      );
+      const creatorEmail = creator?.email?.toLowerCase().trim() || "";
+      const creatorName = creator?.username || "Unknown";
+      const creatorRole = creator?.role || "unknown";
 
-    // =========================================================
-    // CC LIST (admins + managers + assigned)
-    // =========================================================
-    const admins = await User.find({ role: "admin" }).select("email");
-    const adminEmails = admins
-      .map((a) => a.email?.toLowerCase().trim())
-      .filter(Boolean);
+      let adminEmails = [];
+      const shouldIncludeAdmin =
+        typeof ccAdmin === "boolean" ? ccAdmin : updateType === "meeting";
+      if (shouldIncludeAdmin) {
+        const admins = await User.find({ role: "admin" }).select("email");
+        adminEmails = admins
+          .map((a) => a.email?.toLowerCase().trim())
+          .filter(Boolean);
+      }
 
-    const managers = await User.find({ role: "manager" }).select("email");
-    const managerEmails = managers
-      .map((m) => m.email?.toLowerCase().trim())
-      .filter(Boolean);
+      const extraIds = Array.isArray(mailRecipients)
+        ? mailRecipients
+        : Array.isArray(salesPerson)
+          ? salesPerson
+          : [];
+      const extraUsers = extraIds.length
+        ? await User.find({ _id: { $in: extraIds } }).select("email")
+        : [];
+      const extraEmails = extraUsers
+        .map((u) => u.email?.toLowerCase().trim())
+        .filter(Boolean);
 
-    const assignedIds = Array.isArray(salesPerson) ? salesPerson : [];
-    const assignedUsers = await User.find({
-      _id: { $in: assignedIds },
-    }).select("email");
-    const assignedEmails = assignedUsers
-      .map((u) => u.email?.toLowerCase().trim())
-      .filter(Boolean);
+      const ccCandidates = [...adminEmails, ...extraEmails];
+      const ccEmails = [
+        ...new Set(ccCandidates.filter((e) => e && e !== creatorEmail)),
+      ];
 
-    const ccCandidates = [...adminEmails, ...managerEmails, ...assignedEmails];
-    const ccEmails = [
-      ...new Set(ccCandidates.filter((e) => e && e !== creatorEmail)),
-    ];
+      if (creatorEmail || ccEmails.length > 0) {
+        try {
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: process.env.YOUR_EMAIL_ADDRESS,
+              pass: process.env.YOUR_APP_PASSWORD,
+            },
+          });
 
-    console.log("To (creator):", creatorEmail);
-    console.log("CC (admins + managers + assigned):", ccEmails);
+          const defaultSubject = `${updateType || "Update"} updated by ${creatorName}`;
+          const finalSubject =
+            updateType === "general" && subject && subject.trim()
+              ? subject.trim()
+              : defaultSubject;
 
-    // =========================================================
-    // SEND EMAIL
-    // =========================================================
-    if (creatorEmail || ccEmails.length > 0) {
-      try {
-        const transporter = nodemailer.createTransport({
-          service: "gmail",
-          auth: {
-            user: process.env.YOUR_EMAIL_ADDRESS,
-            pass: process.env.YOUR_APP_PASSWORD,
-          },
-        });
-
-        console.log("Sending email...");
-
-        await transporter.sendMail({
-          from: `"ERP Notifications" <${process.env.YOUR_EMAIL_ADDRESS}>`,
-          to: creatorEmail || process.env.YOUR_EMAIL_ADDRESS,
-          cc: ccEmails,
-          subject: `Meeting Updated by ${creatorName}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 650px; margin: 0 auto; padding: 20px;">
-              <div style="background: #1d4ed8; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
-                <h2 style="margin: 0;">Meeting Updated</h2>
-                <p style="margin: 5px 0 0;">Updated by <strong>${creatorName}</strong></p>
+          await transporter.sendMail({
+            from: `"ERP Notifications" <${process.env.YOUR_EMAIL_ADDRESS}>`,
+            to: creatorEmail || process.env.YOUR_EMAIL_ADDRESS,
+            cc: ccEmails,
+            subject: finalSubject,
+            html: `
+              <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 650px; margin: 0 auto; padding: 20px;">
+                <div style="background: #1d4ed8; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                  <h2 style="margin: 0;">${updateType || "Update"} Updated</h2>
+                  <p style="margin: 5px 0 0;">Updated by <strong>${creatorName}</strong></p>
+                </div>
+                <div style="border: 1px solid #e5e7eb; border-top: none; padding: 25px; border-radius: 0 0 8px 8px;">
+                  <p>An update was added by <strong>${creatorName}</strong>.</p>
+                  <h3 style="color: #1d4ed8;">Update Details</h3>
+                  <table style="width: 100%; border-collapse: collapse;">
+                    ${
+                      updateType === "general" && subject && subject.trim()
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">Subject</td><td style="padding: 8px 0;">${subject.trim()}</td></tr>`
+                        : ""
+                    }
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Updated By</td><td style="padding: 8px 0;">${creatorName}${creatorEmail ? ` (${creatorEmail})` : ""}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Role</td><td style="padding: 8px 0;">${creatorRole}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Client</td><td style="padding: 8px 0;">${findCustomer?.name || "-"}${findCustomer?.company ? ` – ${findCustomer.company}` : ""}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Update Type</td><td style="padding: 8px 0;">${updateType || "-"}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Status</td><td style="padding: 8px 0;">${status || "-"}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Meeting Date</td><td style="padding: 8px 0;">${meetingAt ? new Date(meetingAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "-"}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Note</td><td style="padding: 8px 0;">${note || "-"}</td></tr>
+                  </table>
+                  <hr style="margin: 25px 0; border: none; border-top: 1px solid #e5e7eb;" />
+                  <p>Please check the ERP dashboard for complete details.</p>
+                </div>
               </div>
-              <div style="border: 1px solid #e5e7eb; border-top: none; padding: 25px; border-radius: 0 0 8px 8px;">
-                <p>An update was added to the meeting by <strong>${creatorName}</strong>.</p>
-                <h3 style="color: #1d4ed8;">Update Details</h3>
-                <table style="width: 100%; border-collapse: collapse;">
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Updated By</td><td style="padding: 8px 0;">${creatorName}${creatorEmail ? ` (${creatorEmail})` : ""}</td></tr>
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Role</td><td style="padding: 8px 0;">${creatorRole}</td></tr>
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Client</td><td style="padding: 8px 0;">${findCustomer?.name || "-"}${findCustomer?.company ? ` – ${findCustomer.company}` : ""}</td></tr>
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Update Type</td><td style="padding: 8px 0;">${updateType || "-"}</td></tr>
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Status</td><td style="padding: 8px 0;">${status || "-"}</td></tr>
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Meeting Date</td><td style="padding: 8px 0;">${meetingAt ? new Date(meetingAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "-"}</td></tr>
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Note</td><td style="padding: 8px 0;">${note || "-"}</td></tr>
-                </table>
-                <hr style="margin: 25px 0; border: none; border-top: 1px solid #e5e7eb;" />
-                <p>Please check the ERP dashboard for complete meeting details.</p>
-              </div>
-            </div>
-          `,
-        });
+            `,
+          });
 
-        console.log("✅ EMAIL SENT → To:", creatorEmail, "| CC:", ccEmails);
-      } catch (mailError) {
-        console.error("❌ EMAIL ERROR:", mailError.message);
+          console.log("✅ EMAIL SENT → To:", creatorEmail, "| CC:", ccEmails);
+        } catch (mailError) {
+          console.error("❌ EMAIL ERROR:", mailError.message);
+        }
+      } else {
+        console.log("⚠️ No recipients — email skipped");
       }
     } else {
-      console.log("⚠️ No recipients — email skipped");
+      console.log("📭 Mail disabled for this update — skipped");
     }
 
     console.log("=== MEETING UPDATE END ===");

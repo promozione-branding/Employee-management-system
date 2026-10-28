@@ -22,16 +22,18 @@ export async function POST(req) {
       note,
       reminderAt,
       meetingAt,
+      subject,
+      sendToSelf,
+      ccAdmin,
+      mailRecipients,
     } = await req.json();
 
     console.log("=== MEETING CREATE START ===");
-    console.log("salesPersonId:", salesPersonId);
-    console.log("salesPerson:", salesPerson);
-    console.log("clientId:", clientId);
+    console.log("updateType:", updateType);
+    console.log("sendToSelf:", sendToSelf, "| ccAdmin:", ccAdmin);
 
     const findCustomer = await Customer.findById(clientId);
     if (!findCustomer) {
-      console.log("❌ Customer not found");
       return NextResponse.json(
         { success: false, message: "Customer not found" },
         { status: 404 },
@@ -56,7 +58,7 @@ export async function POST(req) {
     findCustomer.meetingUpdate = createMeeting._id;
     await findCustomer.save();
 
-    // ── NEW: Audit Hook ──
+    // ── Audit Hook (unchanged) ──
     try {
       const authUser = await getAuthUser(req);
       if (authUser) {
@@ -65,7 +67,9 @@ export async function POST(req) {
           module: "meeting",
           entityId: createMeeting._id,
           action: "CREATE",
-          summary: `Added ${updateType || "general"} update${note ? `: "${note.substring(0, 40)}..."` : ""}`,
+          summary: `Added ${updateType || "general"} update${
+            note ? `: "${note.substring(0, 40)}..."` : ""
+          }`,
           actor: { userId: authUser._id },
           isConfidential: false,
           afterSnapshot: createMeeting.meetingUpdate[0],
@@ -77,100 +81,117 @@ export async function POST(req) {
     }
     // ── END AUDIT HOOK ──
 
-    // === CREATOR (To) ===
-    const creator = await User.findById(salesPersonId).select(
-      "email username role",
-    );
-    const creatorEmail = creator?.email?.toLowerCase().trim() || "";
-    const creatorName = creator?.username || "Unknown";
-    const creatorRole = creator?.role || "unknown";
+    // =========================================================
+    // MAIL DECISION
+    // =========================================================
+    // Meeting → always send (sendToSelf defaulted to true by frontend).
+    // Call / General → only if sendToSelf === true.
+    // If sendToSelf is undefined (old client), meeting still sends, others don't.
+    const mailEnabled =
+      typeof sendToSelf === "boolean"
+        ? sendToSelf
+        : updateType === "meeting";
 
-    console.log("Creator found:", {
-      name: creatorName,
-      email: creatorEmail,
-      role: creatorRole,
-    });
+    if (mailEnabled) {
+      const creator = await User.findById(salesPersonId).select(
+        "email username role",
+      );
+      const creatorEmail = creator?.email?.toLowerCase().trim() || "";
+      const creatorName = creator?.username || "Unknown";
+      const creatorRole = creator?.role || "unknown";
 
-    // === CC LIST ===
-    // All admins
-    const admins = await User.find({ role: "admin" }).select("email");
-    const adminEmails = admins
-      .map((a) => a.email?.toLowerCase().trim())
-      .filter(Boolean);
+      // Admin CC (controlled by ccAdmin flag; meeting forces true on frontend)
+      let adminEmails = [];
+      const shouldIncludeAdmin =
+        typeof ccAdmin === "boolean" ? ccAdmin : updateType === "meeting";
+      if (shouldIncludeAdmin) {
+        const admins = await User.find({ role: "admin" }).select("email");
+        adminEmails = admins
+          .map((a) => a.email?.toLowerCase().trim())
+          .filter(Boolean);
+      }
 
-    // All managers
-    const managers = await User.find({ role: "manager" }).select("email");
-    const managerEmails = managers
-      .map((m) => m.email?.toLowerCase().trim())
-      .filter(Boolean);
+      // Extra CC from ticked employees
+      const extraIds = Array.isArray(mailRecipients)
+        ? mailRecipients
+        : Array.isArray(salesPerson)
+          ? salesPerson
+          : [];
+      const extraUsers = extraIds.length
+        ? await User.find({ _id: { $in: extraIds } }).select("email")
+        : [];
+      const extraEmails = extraUsers
+        .map((u) => u.email?.toLowerCase().trim())
+        .filter(Boolean);
 
-    // Assigned salesperson(s) from the meeting
-    const assignedIds = Array.isArray(salesPerson) ? salesPerson : [];
-    const assignedUsers = await User.find({
-      _id: { $in: assignedIds },
-    }).select("email");
-    const assignedEmails = assignedUsers
-      .map((u) => u.email?.toLowerCase().trim())
-      .filter(Boolean);
+      const ccCandidates = [...adminEmails, ...extraEmails];
+      const ccEmails = [
+        ...new Set(ccCandidates.filter((e) => e && e !== creatorEmail)),
+      ];
 
-    // Build final CC (no creator)
-    const ccCandidates = [...adminEmails, ...managerEmails, ...assignedEmails];
-    const ccEmails = [
-      ...new Set(ccCandidates.filter((e) => e && e !== creatorEmail)),
-    ];
+      console.log("To (creator):", creatorEmail);
+      console.log("CC:", ccEmails);
 
-    console.log("To (creator):", creatorEmail);
-    console.log("CC (admins + managers + assigned):", ccEmails);
+      if (creatorEmail || ccEmails.length > 0) {
+        try {
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: process.env.YOUR_EMAIL_ADDRESS,
+              pass: process.env.YOUR_APP_PASSWORD,
+            },
+          });
 
-    // === SEND ===
-    if (creatorEmail || ccEmails.length > 0) {
-      try {
-        const transporter = nodemailer.createTransport({
-          service: "gmail",
-          auth: {
-            user: process.env.YOUR_EMAIL_ADDRESS,
-            pass: process.env.YOUR_APP_PASSWORD,
-          },
-        });
+          const defaultSubject = `New ${updateType || "update"} update by ${creatorName}`;
+          const finalSubject =
+            updateType === "general" && subject && subject.trim()
+              ? subject.trim()
+              : defaultSubject;
 
-        console.log("Sending email...");
-
-        await transporter.sendMail({
-          from: `"ERP Notifications" <${process.env.YOUR_EMAIL_ADDRESS}>`,
-          to: creatorEmail || process.env.YOUR_EMAIL_ADDRESS,
-          cc: ccEmails,
-          subject: `New Meeting Created by ${creatorName}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 650px; margin: 0 auto; padding: 20px;">
-              <div style="background: #1d4ed8; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
-                <h2 style="margin: 0;">New Meeting Created</h2>
-                <p style="margin: 5px 0 0;">Created by <strong>${creatorName}</strong></p>
+          await transporter.sendMail({
+            from: `"ERP Notifications" <${process.env.YOUR_EMAIL_ADDRESS}>`,
+            to: creatorEmail || process.env.YOUR_EMAIL_ADDRESS,
+            cc: ccEmails,
+            subject: finalSubject,
+            html: `
+              <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 650px; margin: 0 auto; padding: 20px;">
+                <div style="background: #1d4ed8; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                  <h2 style="margin: 0;">New ${updateType || "Update"} Update</h2>
+                  <p style="margin: 5px 0 0;">Created by <strong>${creatorName}</strong></p>
+                </div>
+                <div style="border: 1px solid #e5e7eb; border-top: none; padding: 25px; border-radius: 0 0 8px 8px;">
+                  <p>A new ${updateType || "update"} update has been created by <strong>${creatorName}</strong>.</p>
+                  <h3 style="color: #1d4ed8;">Update Details</h3>
+                  <table style="width: 100%; border-collapse: collapse;">
+                    ${
+                      updateType === "general" && subject && subject.trim()
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">Subject</td><td style="padding: 8px 0;">${subject.trim()}</td></tr>`
+                        : ""
+                    }
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Created By</td><td style="padding: 8px 0;">${creatorName}${creatorEmail ? ` (${creatorEmail})` : ""}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Role</td><td style="padding: 8px 0;">${creatorRole}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Client</td><td style="padding: 8px 0;">${findCustomer.name || "-"}${findCustomer.company ? ` – ${findCustomer.company}` : ""}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Update Type</td><td style="padding: 8px 0;">${updateType || "-"}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Status</td><td style="padding: 8px 0;">${status || "-"}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Meeting Date</td><td style="padding: 8px 0;">${meetingAt ? new Date(meetingAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "-"}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Note</td><td style="padding: 8px 0;">${note || "-"}</td></tr>
+                  </table>
+                  <hr style="margin: 25px 0; border: none; border-top: 1px solid #e5e7eb;" />
+                  <p>Please check the ERP dashboard for complete details.</p>
+                </div>
               </div>
-              <div style="border: 1px solid #e5e7eb; border-top: none; padding: 25px; border-radius: 0 0 8px 8px;">
-                <p>A new meeting has been created by <strong>${creatorName}</strong>.</p>
-                <h3 style="color: #1d4ed8;">Meeting Details</h3>
-                <table style="width: 100%; border-collapse: collapse;">
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Created By</td><td style="padding: 8px 0;">${creatorName}${creatorEmail ? ` (${creatorEmail})` : ""}</td></tr>
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Role</td><td style="padding: 8px 0;">${creatorRole}</td></tr>
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Client</td><td style="padding: 8px 0;">${findCustomer.name || "-"}${findCustomer.company ? ` – ${findCustomer.company}` : ""}</td></tr>
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Update Type</td><td style="padding: 8px 0;">${updateType || "-"}</td></tr>
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Status</td><td style="padding: 8px 0;">${status || "-"}</td></tr>
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Meeting Date</td><td style="padding: 8px 0;">${meetingAt ? new Date(meetingAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "-"}</td></tr>
-                  <tr><td style="padding: 8px 0; font-weight: bold;">Note</td><td style="padding: 8px 0;">${note || "-"}</td></tr>
-                </table>
-                <hr style="margin: 25px 0; border: none; border-top: 1px solid #e5e7eb;" />
-                <p>Please check the ERP dashboard for complete meeting details.</p>
-              </div>
-            </div>
-          `,
-        });
+            `,
+          });
 
-        console.log("✅ EMAIL SENT → To:", creatorEmail, "| CC:", ccEmails);
-      } catch (mailError) {
-        console.error("❌ EMAIL ERROR:", mailError.message);
+          console.log("✅ EMAIL SENT → To:", creatorEmail, "| CC:", ccEmails);
+        } catch (mailError) {
+          console.error("❌ EMAIL ERROR:", mailError.message);
+        }
+      } else {
+        console.log("⚠️ No recipients — email skipped");
       }
     } else {
-      console.log("⚠️ No recipients — email skipped");
+      console.log("📭 Mail disabled for this update — skipped");
     }
 
     console.log("=== MEETING CREATE END ===");
