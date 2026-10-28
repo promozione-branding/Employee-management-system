@@ -8,6 +8,15 @@ import User from "@/models/admin/User";
 import nodemailer from "nodemailer";
 import { recordEdit } from "@/lib/auditLog";
 import { getAuthUser } from "@/lib/getAuthUser";
+import Employee from "@/models/employee/Employee";
+
+// Primary admin — the ONLY person auto-CC'd on meetings.
+// Override via env: PRIMARY_ADMIN_EMAIL=someone@yourdomain.com
+const PRIMARY_ADMIN_EMAIL = (
+  process.env.PRIMARY_ADMIN_EMAIL || "sourabh@inquirybazaar.com"
+)
+  .toLowerCase()
+  .trim();
 
 export async function POST(req) {
   try {
@@ -84,9 +93,6 @@ export async function POST(req) {
     // =========================================================
     // MAIL DECISION
     // =========================================================
-    // Meeting → always send (sendToSelf defaulted to true by frontend).
-    // Call / General → only if sendToSelf === true.
-    // If sendToSelf is undefined (old client), meeting still sends, others don't.
     const mailEnabled =
       typeof sendToSelf === "boolean"
         ? sendToSelf
@@ -100,31 +106,36 @@ export async function POST(req) {
       const creatorName = creator?.username || "Unknown";
       const creatorRole = creator?.role || "unknown";
 
-      // Admin CC (controlled by ccAdmin flag; meeting forces true on frontend)
-      let adminEmails = [];
+      // ── PRIMARY ADMIN (only sourabh) ──
+      // NO other "role: admin" users are auto-added.
+      let primaryAdminEmail = "";
       const shouldIncludeAdmin =
         typeof ccAdmin === "boolean" ? ccAdmin : updateType === "meeting";
-      if (shouldIncludeAdmin) {
-        const admins = await User.find({ role: "admin" }).select("email");
-        adminEmails = admins
-          .map((a) => a.email?.toLowerCase().trim())
-          .filter(Boolean);
+      if (shouldIncludeAdmin && PRIMARY_ADMIN_EMAIL) {
+        // Use the configured email directly. Existence in DB not required —
+        // the mail should go out even if the User doc is missing.
+        primaryAdminEmail = PRIMARY_ADMIN_EMAIL;
       }
 
-      // Extra CC from ticked employees
-      const extraIds = Array.isArray(mailRecipients)
-        ? mailRecipients
-        : Array.isArray(salesPerson)
-          ? salesPerson
-          : [];
-      const extraUsers = extraIds.length
-        ? await User.find({ _id: { $in: extraIds } }).select("email")
-        : [];
-      const extraEmails = extraUsers
-        .map((u) => u.email?.toLowerCase().trim())
-        .filter(Boolean);
+      // ── Extra CC from ticked recipients (User OR Employee) ──
+      const extraIds = Array.isArray(mailRecipients) ? mailRecipients : [];
 
-      const ccCandidates = [...adminEmails, ...extraEmails];
+      let extraEmails = [];
+      if (extraIds.length) {
+        const userHits = await User.find({ _id: { $in: extraIds } }).select(
+          "email",
+        );
+        const empHits = await Employee.find({ _id: { $in: extraIds } }).select(
+          "basicDetails.email",
+        );
+
+        extraEmails = [
+          ...userHits.map((u) => u.email?.toLowerCase().trim()),
+          ...empHits.map((e) => e.basicDetails?.email?.toLowerCase().trim()),
+        ].filter(Boolean);
+      }
+
+      const ccCandidates = [primaryAdminEmail, ...extraEmails].filter(Boolean);
       const ccEmails = [
         ...new Set(ccCandidates.filter((e) => e && e !== creatorEmail)),
       ];
@@ -142,7 +153,16 @@ export async function POST(req) {
             },
           });
 
-          const defaultSubject = `New ${updateType || "update"} update by ${creatorName}`;
+          // ── Default subject: "{Client Name} - {Update Type}" ──
+          const clientName =
+            findCustomer?.name || findCustomer?.company || "Client";
+          const typeLabel =
+            updateType === "meeting"
+              ? "Meeting"
+              : updateType === "call"
+                ? "Call"
+                : "General";
+          const defaultSubject = `${clientName} - ${typeLabel}`;
           const finalSubject =
             updateType === "general" && subject && subject.trim()
               ? subject.trim()
@@ -156,7 +176,7 @@ export async function POST(req) {
             html: `
               <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 650px; margin: 0 auto; padding: 20px;">
                 <div style="background: #1d4ed8; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
-                  <h2 style="margin: 0;">New ${updateType || "Update"} Update</h2>
+                  <h2 style="margin: 0;">New ${typeLabel} Update</h2>
                   <p style="margin: 5px 0 0;">Created by <strong>${creatorName}</strong></p>
                 </div>
                 <div style="border: 1px solid #e5e7eb; border-top: none; padding: 25px; border-radius: 0 0 8px 8px;">
@@ -171,7 +191,7 @@ export async function POST(req) {
                     <tr><td style="padding: 8px 0; font-weight: bold;">Created By</td><td style="padding: 8px 0;">${creatorName}${creatorEmail ? ` (${creatorEmail})` : ""}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Role</td><td style="padding: 8px 0;">${creatorRole}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Client</td><td style="padding: 8px 0;">${findCustomer.name || "-"}${findCustomer.company ? ` – ${findCustomer.company}` : ""}</td></tr>
-                    <tr><td style="padding: 8px 0; font-weight: bold;">Update Type</td><td style="padding: 8px 0;">${updateType || "-"}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Update Type</td><td style="padding: 8px 0;">${typeLabel}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Status</td><td style="padding: 8px 0;">${status || "-"}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Meeting Date</td><td style="padding: 8px 0;">${meetingAt ? new Date(meetingAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "-"}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Note</td><td style="padding: 8px 0;">${note || "-"}</td></tr>

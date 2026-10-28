@@ -4,8 +4,8 @@
 import "dotenv/config";
 import { MongoClient } from "mongodb";
 
-const OLD_EMAIL = "janvi@promozionebranding.com";
-const NEW_EMAIL = "janvi@inquirybazaar.com";
+const OLD_EMAIL = "piyush@promozionebranding.com";
+const NEW_EMAIL = "piyush@inquirybazaar.com";
 
 const URI = process.env.MONGODB_URI;
 

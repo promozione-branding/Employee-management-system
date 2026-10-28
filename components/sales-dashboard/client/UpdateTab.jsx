@@ -1,5 +1,3 @@
-// components/sales-dashboard/client/UpdateTab.jsx
-
 "use client";
 import { getCallHistoryService } from "@/service/calling";
 import CallPanel from "./CallPanel";
@@ -22,11 +20,10 @@ import {
   addNewMeetingUpdate,
   checkNewMeetService,
   createMeetingService,
+  getCcRecipientsService,
 } from "@/service/meeting";
-import { SalesPeopleMeetingService } from "@/service/customer";
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 
-// Convert local date + "HH:mm" -> ISO string with browser tz offset.
 const toLocalISO = (dateStr, timeStr) => {
   if (!dateStr || !timeStr) return undefined;
   const [y, mo, d] = dateStr.split("-").map(Number);
@@ -43,7 +40,6 @@ const toLocalISO = (dateStr, timeStr) => {
   )}T${pad(local.getHours())}:${pad(local.getMinutes())}:00${offsetStr}`;
 };
 
-// ---------- Reusable CC picker (search + tick, shows name + email) ----------
 const CcPicker = ({
   title,
   employees,
@@ -56,7 +52,7 @@ const CcPicker = ({
     const q = (search || "").trim().toLowerCase();
     if (!q) return employees;
     return employees.filter((u) => {
-      const name = (u?.username || u?.name || "").toLowerCase();
+      const name = (u?.name || "").toLowerCase();
       const email = (u?.email || "").toLowerCase();
       return name.includes(q) || email.includes(q);
     });
@@ -70,7 +66,7 @@ const CcPicker = ({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <div className="max-h-52 overflow-y-auto border rounded-lg divide-y">
+      <div className="max-h-52 overflow-y-auto border rounded-lg divide-y bg-white">
         {filtered.length === 0 ? (
           <div className="p-3 text-sm text-gray-500 text-center">
             No match found
@@ -90,16 +86,18 @@ const CcPicker = ({
                   checked={isSelected}
                   onChange={() => onToggle(u)}
                 />
-                <div className="flex flex-col">
-                  <span className="font-medium text-gray-800 capitalize">
-                    {u?.username || u?.name || "Unnamed"}
+                <div className="flex flex-col min-w-0">
+                  <span className="font-medium text-gray-800 truncate">
+                    {u?.name || "Unnamed"}
                     {u?.role ? (
-                      <span className="ml-2 text-xs text-gray-500">
+                      <span className="ml-2 text-xs text-gray-500 capitalize">
                         ({u.role})
                       </span>
                     ) : null}
                   </span>
-                  <span className="text-xs text-gray-500">{u?.email}</span>
+                  <span className="text-xs text-gray-500 truncate">
+                    {u?.email}
+                  </span>
                 </div>
               </label>
             );
@@ -124,7 +122,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
 
   const { employee } = useSalesEmployeeStore();
 
-  // ---------- Meeting state ----------
+  // ---------- Meeting ----------
   const [meetingSearch, setMeetingSearch] = useState("");
   const [meetingForm, setMeetingForm] = useState({
     status: "",
@@ -136,7 +134,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
   });
   const [meetingRecipients, setMeetingRecipients] = useState([]);
 
-  // ---------- Call state ----------
+  // ---------- Call ----------
   const [callForm, setCallForm] = useState({
     status: "",
     note: "",
@@ -149,7 +147,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
   const [callSearch, setCallSearch] = useState("");
   const [callRecipients, setCallRecipients] = useState([]);
 
-  // ---------- General state ----------
+  // ---------- General ----------
   const [generalForm, setGeneralForm] = useState({
     subject: "",
     note: "",
@@ -162,9 +160,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
   const [generalSearch, setGeneralSearch] = useState("");
   const [generalRecipients, setGeneralRecipients] = useState([]);
 
-  // ------------------------------------------------------------
-  // Call history (real API)
-  // ------------------------------------------------------------
   const [callHistory, setCallHistory] = useState([]);
   const [callHistoryLoading, setCallHistoryLoading] = useState(false);
 
@@ -190,7 +185,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     });
   };
 
-  // -------------------for Call update --------------------
+  // ---------- CALL submit ----------
   const handleCallSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -210,9 +205,8 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       note: callForm?.note,
       meetingAt: toLocalISO(callForm.meetingDate, callForm.meetingTime),
       reminderAt: toLocalISO(callForm.reminderDate, callForm.reminderTime),
-      // mail control
       sendToSelf: callSendMail,
-      ccAdmin: false,
+      ccAdmin: callSendMail, // 👈 AUTO-CC ADMIN when mail is on
       mailRecipients: callSendMail ? callRecipients.map((u) => u?._id) : [],
     };
     if (!formData?.salesPersonId || !formData?.clientId) {
@@ -259,7 +253,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       meetingAt: toLocalISO(callForm.meetingDate, callForm.meetingTime),
       reminderAt: toLocalISO(callForm.reminderDate, callForm.reminderTime),
       sendToSelf: callSendMail,
-      ccAdmin: false,
+      ccAdmin: callSendMail, // 👈 AUTO-CC ADMIN when mail is on
       mailRecipients: callSendMail ? callRecipients.map((u) => u?._id) : [],
     };
 
@@ -293,9 +287,8 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       toast.error(error.message || "Error while Updating meeting");
     }
   };
-  // -------------------for Call update --------------------
 
-  // ------------------Meeting update----------------
+  // ---------- MEETING submit ----------
   const handleMeetingSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -309,9 +302,8 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       note: meetingForm?.note,
       meetingAt: toLocalISO(meetingForm.meetingDate, meetingForm.meetingTime),
       reminderAt: toLocalISO(meetingForm.reminderDate, meetingForm.reminderTime),
-      // Meeting: mail always on, self + admin forced
       sendToSelf: true,
-      ccAdmin: true,
+      ccAdmin: true, // always on for meeting
       mailRecipients: meetingRecipients.map((u) => u?._id),
     };
     if (!formData?.salesPersonId || !formData?.clientId) {
@@ -356,7 +348,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       meetingAt: toLocalISO(meetingForm.meetingDate, meetingForm.meetingTime),
       reminderAt: toLocalISO(meetingForm.reminderDate, meetingForm.reminderTime),
       sendToSelf: true,
-      ccAdmin: true,
+      ccAdmin: true, // always on for meeting
       mailRecipients: meetingRecipients.map((u) => u?._id),
     };
 
@@ -390,9 +382,8 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       toast.error(error.message || "Error while Updating meeting");
     }
   };
-  // ------------------Meeting update----------------
 
-  // ------------------General update----------------
+  // ---------- GENERAL submit ----------
   const handleGeneralSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -407,7 +398,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       meetingAt: toLocalISO(generalForm.meetingDate, generalForm.meetingTime),
       reminderAt: toLocalISO(generalForm.reminderDate, generalForm.reminderTime),
       sendToSelf: generalSendMail,
-      ccAdmin: false,
+      ccAdmin: generalSendMail, // 👈 AUTO-CC ADMIN when mail is on
       mailRecipients: generalSendMail
         ? generalRecipients.map((u) => u?._id)
         : [],
@@ -456,7 +447,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       meetingAt: toLocalISO(generalForm.meetingDate, generalForm.meetingTime),
       reminderAt: toLocalISO(generalForm.reminderDate, generalForm.reminderTime),
       sendToSelf: generalSendMail,
-      ccAdmin: false,
+      ccAdmin: generalSendMail, // 👈 AUTO-CC ADMIN when mail is on
       mailRecipients: generalSendMail
         ? generalRecipients.map((u) => u?._id)
         : [],
@@ -492,7 +483,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       toast.error(error.message || "Error while Updating meeting");
     }
   };
-  // ------------------General update----------------
 
   useEffect(() => {
     async function CheckNewMeet() {
@@ -511,24 +501,25 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
   }, [customerId]);
 
   useEffect(() => {
-    async function salesPeopleMail() {
+    async function loadCcRecipients() {
       try {
-        const res = await SalesPeopleMeetingService();
+        const res = await getCcRecipientsService();
         if (res.success) {
           setEmailListData(res.data || []);
-          setLoadingEmailList(false);
+        } else {
+          toast.error(res.message || "Failed to load recipients");
         }
       } catch (error) {
         console.log(error);
-        setLoadingEmailList(true);
         toast.error(
-          error.response?.data?.message ||
-            "Error while fetching the sales person",
+          error.response?.data?.message || "Failed to load recipients",
         );
+      } finally {
+        setLoadingEmailList(false);
       }
     }
-    salesPeopleMail();
-  }, [customerId]);
+    loadCcRecipients();
+  }, []);
 
   useEffect(() => {
     fetchCallHistory();
@@ -537,7 +528,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
 
   return (
     <div className="flex flex-col-reverse">
-      {/* --- Call panel (wired) --- */}
       <CallPanel
         customerId={customerId}
         customerName="Customer"
@@ -548,7 +538,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
         }}
       />
 
-      {/* --- Call history (wired) --- */}
       <div className="mb-5">
         {callHistoryLoading ? (
           <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-6 text-center text-sm text-gray-500">
@@ -560,7 +549,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       </div>
 
       <div className="flex gap-10">
-        {/* -------------------- CALL -------------------- */}
+        {/* -------- CALL -------- */}
         <div className="w-1/3">
           <h2 className="font-bold text-2xl text-center mb-5">Call Update</h2>
           <form
@@ -628,7 +617,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
               </div>
             </div>
 
-            {/* Mail radio */}
             <div className="flex flex-col gap-2 border rounded-lg p-3 bg-gray-50">
               <Label>Send mail?</Label>
               <div className="flex items-center gap-6">
@@ -653,7 +641,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
               </div>
               {callSendMail && (
                 <CcPicker
-                  title="Choose CC recipients (self is always To)"
+                  title="Choose CC recipients (self + admin always CC'd)"
                   employees={emailListData}
                   selected={callRecipients}
                   onToggle={toggleRecipient(setCallRecipients)}
@@ -669,7 +657,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
           </form>
         </div>
 
-        {/* -------------------- MEETING -------------------- */}
+        {/* -------- MEETING -------- */}
         <div className="w-1/3">
           <h2 className="font-bold text-2xl text-center mb-5">
             Meeting Update
@@ -749,11 +737,10 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
               </div>
             </div>
 
-            {/* Meeting CC picker (mail always on) */}
             <div className="flex flex-col gap-2 border rounded-lg p-3 bg-blue-50/50">
               <div className="text-xs text-gray-700">
-                Mail will be sent to you + <strong>all admins</strong> (CC).
-                Tick employees below to add them to CC.
+                Mail will be sent to you + <strong>admin</strong> (CC). Tick
+                employees below to add them to CC.
               </div>
               <CcPicker
                 title="CC employees (optional)"
@@ -769,7 +756,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
           </form>
         </div>
 
-        {/* -------------------- GENERAL -------------------- */}
+        {/* -------- GENERAL -------- */}
         <div className="w-1/3">
           <h2 className="font-bold text-2xl text-center mb-5">
             General Update
@@ -841,7 +828,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
               </div>
             </div>
 
-            {/* Mail radio */}
             <div className="flex flex-col gap-2 border rounded-lg p-3 bg-gray-50">
               <Label>Send mail?</Label>
               <div className="flex items-center gap-6">
@@ -866,7 +852,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
               </div>
               {generalSendMail && (
                 <CcPicker
-                  title="Choose CC recipients (self is always To)"
+                  title="Choose CC recipients (self + admin always CC'd)"
                   employees={emailListData}
                   selected={generalRecipients}
                   onToggle={toggleRecipient(setGeneralRecipients)}

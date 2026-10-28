@@ -9,6 +9,13 @@ import nodemailer from "nodemailer";
 import { recordEdit } from "@/lib/auditLog";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { withAudit } from "@/lib/withAudit";
+import Employee from "@/models/employee/Employee";
+
+const PRIMARY_ADMIN_EMAIL = (
+  process.env.PRIMARY_ADMIN_EMAIL || "sourabh@inquirybazaar.com"
+)
+  .toLowerCase()
+  .trim();
 
 export async function PUT(req, { params }) {
   try {
@@ -98,32 +105,39 @@ export async function PUT(req, { params }) {
       const creatorName = creator?.username || "Unknown";
       const creatorRole = creator?.role || "unknown";
 
-      let adminEmails = [];
+      // ── PRIMARY ADMIN (only sourabh) ──
+      let primaryAdminEmail = "";
       const shouldIncludeAdmin =
         typeof ccAdmin === "boolean" ? ccAdmin : updateType === "meeting";
-      if (shouldIncludeAdmin) {
-        const admins = await User.find({ role: "admin" }).select("email");
-        adminEmails = admins
-          .map((a) => a.email?.toLowerCase().trim())
-          .filter(Boolean);
+      if (shouldIncludeAdmin && PRIMARY_ADMIN_EMAIL) {
+        primaryAdminEmail = PRIMARY_ADMIN_EMAIL;
       }
 
-      const extraIds = Array.isArray(mailRecipients)
-        ? mailRecipients
-        : Array.isArray(salesPerson)
-          ? salesPerson
-          : [];
-      const extraUsers = extraIds.length
-        ? await User.find({ _id: { $in: extraIds } }).select("email")
-        : [];
-      const extraEmails = extraUsers
-        .map((u) => u.email?.toLowerCase().trim())
-        .filter(Boolean);
+      // ── Extra CC from ticked recipients (User OR Employee) ──
+      const extraIds = Array.isArray(mailRecipients) ? mailRecipients : [];
 
-      const ccCandidates = [...adminEmails, ...extraEmails];
+      let extraEmails = [];
+      if (extraIds.length) {
+        const userHits = await User.find({ _id: { $in: extraIds } }).select(
+          "email",
+        );
+        const empHits = await Employee.find({ _id: { $in: extraIds } }).select(
+          "basicDetails.email",
+        );
+
+        extraEmails = [
+          ...userHits.map((u) => u.email?.toLowerCase().trim()),
+          ...empHits.map((e) => e.basicDetails?.email?.toLowerCase().trim()),
+        ].filter(Boolean);
+      }
+
+      const ccCandidates = [primaryAdminEmail, ...extraEmails].filter(Boolean);
       const ccEmails = [
         ...new Set(ccCandidates.filter((e) => e && e !== creatorEmail)),
       ];
+
+      console.log("To (creator):", creatorEmail);
+      console.log("CC:", ccEmails);
 
       if (creatorEmail || ccEmails.length > 0) {
         try {
@@ -135,7 +149,16 @@ export async function PUT(req, { params }) {
             },
           });
 
-          const defaultSubject = `${updateType || "Update"} updated by ${creatorName}`;
+          // ── Default subject: "{Client Name} - {Update Type}" ──
+          const clientName =
+            findCustomer?.name || findCustomer?.company || "Client";
+          const typeLabel =
+            updateType === "meeting"
+              ? "Meeting"
+              : updateType === "call"
+                ? "Call"
+                : "General";
+          const defaultSubject = `${clientName} - ${typeLabel}`;
           const finalSubject =
             updateType === "general" && subject && subject.trim()
               ? subject.trim()
@@ -149,7 +172,7 @@ export async function PUT(req, { params }) {
             html: `
               <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 650px; margin: 0 auto; padding: 20px;">
                 <div style="background: #1d4ed8; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
-                  <h2 style="margin: 0;">${updateType || "Update"} Updated</h2>
+                  <h2 style="margin: 0;">${typeLabel} Updated</h2>
                   <p style="margin: 5px 0 0;">Updated by <strong>${creatorName}</strong></p>
                 </div>
                 <div style="border: 1px solid #e5e7eb; border-top: none; padding: 25px; border-radius: 0 0 8px 8px;">
@@ -164,7 +187,7 @@ export async function PUT(req, { params }) {
                     <tr><td style="padding: 8px 0; font-weight: bold;">Updated By</td><td style="padding: 8px 0;">${creatorName}${creatorEmail ? ` (${creatorEmail})` : ""}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Role</td><td style="padding: 8px 0;">${creatorRole}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Client</td><td style="padding: 8px 0;">${findCustomer?.name || "-"}${findCustomer?.company ? ` – ${findCustomer.company}` : ""}</td></tr>
-                    <tr><td style="padding: 8px 0; font-weight: bold;">Update Type</td><td style="padding: 8px 0;">${updateType || "-"}</td></tr>
+                    <tr><td style="padding: 8px 0; font-weight: bold;">Update Type</td><td style="padding: 8px 0;">${typeLabel}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Status</td><td style="padding: 8px 0;">${status || "-"}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Meeting Date</td><td style="padding: 8px 0;">${meetingAt ? new Date(meetingAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "-"}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Note</td><td style="padding: 8px 0;">${note || "-"}</td></tr>
