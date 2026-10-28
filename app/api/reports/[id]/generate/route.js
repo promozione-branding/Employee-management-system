@@ -10,22 +10,14 @@ export const maxDuration = 60;
 
 function resolvePeriod(type, customStart, customEnd) {
   const now = new Date();
-  
-  // 👈 Initialize as let
-  let start;
-  let end;
+  let end = new Date(now);
+  let start = new Date(now);
 
-  if (type === "custom") {
-    start = new Date(customStart);
-    end = new Date(customEnd);
-  } else {
-    end = new Date(now);
-    start = new Date(now);
-    if (type === "weekly") start.setDate(start.getDate() - 7);
-    else if (type === "monthly") start.setMonth(start.getMonth() - 1);
-    else if (type === "3month") start.setMonth(start.getMonth() - 3);
-    else if (type === "6month") start.setMonth(start.getMonth() - 6);
-  }
+  if (type === "weekly") start.setDate(start.getDate() - 7);
+  else if (type === "monthly") start.setMonth(start.getMonth() - 1);
+  else if (type === "3month") start.setMonth(start.getMonth() - 3);
+  else if (type === "6month") start.setMonth(start.getMonth() - 6);
+  else { start = new Date(customStart); end = new Date(customEnd); }
 
   const diffTime = Math.abs(end - start);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
@@ -63,6 +55,7 @@ export async function POST(req, { params }) {
   const { getGA4, getGSC, getGoogleAds } = await import("@/lib/google");
   const { getMetaAds, getMetaPage } = await import("@/lib/meta");
 
+  // 👈 FETCH SEO KEYWORDS AND MATCH PROJECT NAME
   let seoKeywords = [];
   if (client.customerId) {
     try {
@@ -71,24 +64,22 @@ export async function POST(req, { params }) {
       const ProjectCycle = (await import("@/models/admin/ProjectCycle")).default;
       
       const sheet = await SeoSheet.findOne({ clientId: client.customerId }).populate({ path: "keywords", model: Keyword }).lean();
-      const projectCycles = await ProjectCycle.find({ clientId: client.customerId }).lean();
+      const projectCycle = await ProjectCycle.findOne({ clientId: client.customerId }).lean();
       
       if (sheet && sheet.keywords) {
         seoKeywords = sheet.keywords.map(kw => {
-          const sortedRankings = (kw.rankings || []).sort((a, b) => new Date(b.date) - new Date(a.date));
-          const latestRank = sortedRankings.length > 0 ? sortedRankings[0] : null;
-          
-          let websiteName = "General";
-          if (kw.projectId) {
-             const cycle = projectCycles.find(p => p._id.toString() === kw.projectId.toString());
-             if (cycle && cycle.projectDuration?.length > 0) websiteName = cycle.projectDuration[0].projectName;
+          let matchedProject = null;
+
+          // 🔥 MATCH THE PROJECT EXACTLY LIKE THE OLD ERP
+          if (projectCycle?.projectDuration?.length) {
+            matchedProject = projectCycle.projectDuration.find(
+              (project) => project._id.toString() === kw.projectId?.toString()
+            ) || null;
           }
 
           return { 
-            keyword: kw.keyword, 
-            page: latestRank ? latestRank.page : "-", 
-            position: latestRank ? latestRank.position : "-",
-            website: websiteName
+            ...kw,
+            project: matchedProject 
           };
         });
       }

@@ -84,23 +84,19 @@ export function ReportPDF({ report }) {
   const d = report.data || {};
   const c = d.client || {};
   
-  const cleanUrl = (url) => url ? url.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "").replace(/^act_/i, "") : "Unknown";
-
-  // 👈 Group SEO by Website using projectId (matching the old ERP logic)
+  // 👈 Group SEO by Website
   const seoByWebsite = {};
   (d.seoKeywords || []).forEach(kw => {
-    const pageNum = parseInt(String(kw.page || "").replace(/[^0-9]/g, ""), 10);
-    // Only show pages 1 and 2
-    if (pageNum === 1 || pageNum === 2) {
-      const site = kw.website || "General Keywords"; 
-      if (!seoByWebsite[site]) seoByWebsite[site] = [];
-      seoByWebsite[site].push(kw);
-    }
+    // If kw.project exists (from the generate route), use projectName. Otherwise fallback.
+    const siteName = kw.project?.projectName || kw.website || "General Keywords";
+    const cleanSiteName = siteName.replace(/^Website\s*[-:]\s*/i, "").trim();
+    
+    if (!seoByWebsite[cleanSiteName]) seoByWebsite[cleanSiteName] = [];
+    seoByWebsite[cleanSiteName].push(kw);
   });
 
   return (
     <Document>
-      {/* PAGE 1: COVER */}
       <Page size="A4" style={s.coverPage}>
         {logoBuffer && <Image src={{ data: logoBuffer, format: "png" }} style={{ width: 250, marginBottom: 40 }} />}
         <Text style={{ fontSize: 32, fontWeight: "bold", color: "#1a202c", marginBottom: 10, textAlign: "center" }}>PERFORMANCE REPORT</Text>
@@ -113,17 +109,14 @@ export function ReportPDF({ report }) {
         </View>
       </Page>
 
-      {/* PAGE 2: GOOGLE SEO */}
       <Page size="A4" style={s.page} wrap>
         <View style={s.header}><Text style={s.title}>Google Performance</Text><Text style={s.sub}>{c.name}</Text></View>
-        
         {(d.gsc || []).map((site, index) => {
           if (site.error) return null;
-          const t = site.data.totals || {}; 
-          const p = site.data.prevTotals || {};
+          const t = site.data.totals || {}; const p = site.data.prevTotals || {};
           return (
             <View key={site.id} style={{ marginBottom: 20 }}>
-              <Text style={s.siteHeader}>🌐 {cleanUrl(site.id)}</Text>
+              <Text style={s.siteHeader}>🌐 {site.id.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "")}</Text>
               <Text style={s.sectionTitle}>Search Console (SEO)</Text>
               <View style={s.grid}>
                 <MetricBox label="Clicks" current={t.clicks} previous={p.clicks} />
@@ -137,7 +130,6 @@ export function ReportPDF({ report }) {
         })}
       </Page>
 
-      {/* PAGE 3: GOOGLE ADS (FRESH PAGE) */}
       {d.gads && d.gads.length > 0 && !d.gads[0].error && (
         <Page size="A4" style={s.page}>
           <View style={s.header}><Text style={s.title}>Google Ads</Text><Text style={s.sub}>{c.name}</Text></View>
@@ -152,23 +144,17 @@ export function ReportPDF({ report }) {
         </Page>
       )}
 
-      {/* PAGE 4: META */}
       <Page size="A4" style={s.page} wrap>
         <View style={s.header}><Text style={s.title}>Meta Performance</Text><Text style={s.sub}>{c.name}</Text></View>
-        
         {(!d.metaAds || d.metaAds.length === 0) && (
           <Text style={{ fontSize: 12, color: "#e53e3e", marginTop: 20 }}>No Meta Ad Accounts were found.</Text>
         )}
-
         {(d.metaAds || []).map((acc, index) => {
           if (acc.error) return null;
-
           const t = acc.data?.totals || {}; const p = acc.data?.prevTotals || {};
-          
           return (
             <View key={acc.id} style={{ marginBottom: 25 }}>
-              <Text style={s.siteHeader}>📱 {cleanUrl(acc.id)}</Text>
-              
+              <Text style={s.siteHeader}>📱 {acc.id.replace(/^act_/i, "")}</Text>
               <Text style={s.sectionTitle}>Meta Ads</Text>
               <View style={s.grid}>
                 <MetricBox label="Spend" current={t.spend} previous={p.spend} format="money" />
@@ -182,28 +168,38 @@ export function ReportPDF({ report }) {
         })}
       </Page>
 
-      {/* PAGE 5: SEO KEYWORDS */}
       <Page size="A4" style={s.page}>
         <View style={s.header}><Text style={s.title}>SEO Keyword Rankings</Text><Text style={s.sub}>Top Rankings (Page 1 & 2)</Text></View>
         {Object.keys(seoByWebsite).length === 0 ? (
-          <Text style={{ fontSize: 12, color: "#718096", marginTop: 20 }}>No keywords found ranking on Page 1 or 2.</Text>
+          <Text style={{ fontSize: 12, color: "#718096", marginTop: 20 }}>No SEO sheet data found.</Text>
         ) : (
-          Object.entries(seoByWebsite).map(([website, keywords]) => (
-            <View key={website} style={{ marginBottom: 20 }}>
-              {/* 👈 FIXED: Using cleanUrl instead of cleanWebsiteName */}
-              <Text style={s.siteHeader}>🌐 {cleanUrl(website)}</Text>
-              <View style={s.table}>
-                <View style={[s.tableRow, s.tableHeader]}>
-                  <Text style={s.tableCellWide}>Keyword</Text><Text style={s.tableCellCenter}>Page</Text><Text style={s.tableCellCenter}>Position</Text>
-                </View>
-                {keywords.map((kw, i) => (
-                  <View key={i} style={[s.tableRow, i === keywords.length - 1 ? { borderBottomWidth: 0 } : {}]}>
-                    <Text style={s.tableCellWide}>{kw.keyword}</Text><Text style={s.tableCellCenter}>Page {kw.page}</Text><Text style={s.tableCellCenter}>#{kw.position}</Text>
+          Object.entries(seoByWebsite).map(([website, keywords]) => {
+            // Only show keywords that have a ranking on Page 1 or Page 2
+            const page12Keywords = keywords.map(kw => {
+              const validRankings = (kw.rankings || []).filter(r => r.page === 1 || r.page === 2);
+              if (validRankings.length === 0) return null;
+              const latest = validRankings.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+              return { keyword: kw.keyword, page: latest.page, position: latest.position };
+            }).filter(Boolean);
+
+            if (page12Keywords.length === 0) return null;
+
+            return (
+              <View key={website} style={{ marginBottom: 20 }}>
+                <Text style={s.siteHeader}>🌐 {website}</Text>
+                <View style={s.table}>
+                  <View style={[s.tableRow, s.tableHeader]}>
+                    <Text style={s.tableCellWide}>Keyword</Text><Text style={s.tableCellCenter}>Page</Text><Text style={s.tableCellCenter}>Position</Text>
                   </View>
-                ))}
+                  {page12Keywords.map((kw, i) => (
+                    <View key={i} style={[s.tableRow, i === page12Keywords.length - 1 ? { borderBottomWidth: 0 } : {}]}>
+                      <Text style={s.tableCellWide}>{kw.keyword}</Text><Text style={s.tableCellCenter}>Page {kw.page}</Text><Text style={s.tableCellCenter}>#{kw.position}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
-            </View>
-          ))
+            );
+          })
         )}
       </Page>
 
