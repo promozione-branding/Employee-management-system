@@ -1,20 +1,9 @@
-import { Document, Page, Text, View, StyleSheet, Svg, Path, Image } from "@react-pdf/renderer";
-import fs from "fs";
-import path from "path";
-
-let logoBuffer = null;
-let thankyouBuffer = null;
-try {
-  if (fs.existsSync(path.join(process.cwd(), "public/blog/inquiry-bazaar-logo.png"))) logoBuffer = fs.readFileSync(path.join(process.cwd(), "public/blog/inquiry-bazaar-logo.png"));
-  if (fs.existsSync(path.join(process.cwd(), "public/blog/thank-you.png"))) thankyouBuffer = fs.readFileSync(path.join(process.cwd(), "public/blog/thank-you.png"));
-} catch (e) {}
+import { Document, Page, Text, View, StyleSheet, Svg, Path } from "@react-pdf/renderer";
+import { CoverPage } from "./CoverPage";
+import { ThankYouPage } from "./ThankYouPage";
 
 const s = StyleSheet.create({
-  coverPage: { padding: 60, backgroundColor: "#ffffff", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%" },
   page: { padding: 40, fontSize: 10, fontFamily: "Helvetica", backgroundColor: "#ffffff" },
-  thankyouPage: { padding: 0, backgroundColor: "#ffffff", height: "100%" },
-  thankyouImage: { width: "100%", height: "100%", objectFit: "cover" },
-  
   header: { marginBottom: 25, borderBottom: "2 solid #eaebed", paddingBottom: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end" },
   title: { fontSize: 22, fontWeight: 700, color: "#1a202c" },
   sub: { fontSize: 10, color: "#718096", marginTop: 4 },
@@ -84,10 +73,9 @@ export function ReportPDF({ report }) {
   const d = report.data || {};
   const c = d.client || {};
   
-  // 👈 Group SEO by Website
+  // Group SEO by Website
   const seoByWebsite = {};
   (d.seoKeywords || []).forEach(kw => {
-    // If kw.project exists (from the generate route), use projectName. Otherwise fallback.
     const siteName = kw.project?.projectName || kw.website || "General Keywords";
     const cleanSiteName = siteName.replace(/^Website\s*[-:]\s*/i, "").trim();
     
@@ -97,18 +85,10 @@ export function ReportPDF({ report }) {
 
   return (
     <Document>
-      <Page size="A4" style={s.coverPage}>
-        {logoBuffer && <Image src={{ data: logoBuffer, format: "png" }} style={{ width: 250, marginBottom: 40 }} />}
-        <Text style={{ fontSize: 32, fontWeight: "bold", color: "#1a202c", marginBottom: 10, textAlign: "center" }}>PERFORMANCE REPORT</Text>
-        <Text style={{ fontSize: 20, color: "#ed8936", fontWeight: "bold", marginBottom: 40, textAlign: "center" }}>{c.name}</Text>
-        <View style={{ backgroundColor: "#f7fafc", padding: 20, borderRadius: 8, border: "1 solid #e2e8f0", width: "80%", alignItems: "center" }}>
-          <Text style={{ fontSize: 12, color: "#718096", marginBottom: 4 }}>Reporting Period</Text>
-          <Text style={{ fontSize: 14, fontWeight: "bold", color: "#2d3748" }}>
-            {new Date(report.periodStart).toLocaleDateString("en-IN")} - {new Date(report.periodEnd).toLocaleDateString("en-IN")}
-          </Text>
-        </View>
-      </Page>
+      {/* 👈 CUSTOM COVER PAGE */}
+      <CoverPage report={report} />
 
+      {/* GOOGLE SEO PAGE */}
       <Page size="A4" style={s.page} wrap>
         <View style={s.header}><Text style={s.title}>Google Performance</Text><Text style={s.sub}>{c.name}</Text></View>
         {(d.gsc || []).map((site, index) => {
@@ -130,6 +110,7 @@ export function ReportPDF({ report }) {
         })}
       </Page>
 
+      {/* GOOGLE ADS PAGE */}
       {d.gads && d.gads.length > 0 && !d.gads[0].error && (
         <Page size="A4" style={s.page}>
           <View style={s.header}><Text style={s.title}>Google Ads</Text><Text style={s.sub}>{c.name}</Text></View>
@@ -144,6 +125,7 @@ export function ReportPDF({ report }) {
         </Page>
       )}
 
+      {/* META PAGE */}
       <Page size="A4" style={s.page} wrap>
         <View style={s.header}><Text style={s.title}>Meta Performance</Text><Text style={s.sub}>{c.name}</Text></View>
         {(!d.metaAds || d.metaAds.length === 0) && (
@@ -168,13 +150,13 @@ export function ReportPDF({ report }) {
         })}
       </Page>
 
+      {/* SEO PAGE */}
       <Page size="A4" style={s.page}>
         <View style={s.header}><Text style={s.title}>SEO Keyword Rankings</Text><Text style={s.sub}>Top Rankings (Page 1 & 2)</Text></View>
         {Object.keys(seoByWebsite).length === 0 ? (
           <Text style={{ fontSize: 12, color: "#718096", marginTop: 20 }}>No SEO sheet data found.</Text>
         ) : (
           Object.entries(seoByWebsite).map(([website, keywords]) => {
-            // Only show keywords that have a ranking on Page 1 or Page 2
             const page12Keywords = keywords.map(kw => {
               const validRankings = (kw.rankings || []).filter(r => r.page === 1 || r.page === 2);
               if (validRankings.length === 0) return null;
@@ -203,9 +185,8 @@ export function ReportPDF({ report }) {
         )}
       </Page>
 
-      <Page size="A4" style={s.thankyouPage}>
-        {thankyouBuffer && <Image src={{ data: thankyouBuffer, format: "png" }} style={s.thankyouImage} />}
-      </Page>
+      {/* 👈 CUSTOM THANK YOU PAGE */}
+      <ThankYouPage />
     </Document>
   );
 }

@@ -1,3 +1,5 @@
+// app/api/reports/debug-meta/route.js
+
 export const dynamic = "force-dynamic";
 import { connectDB } from "@/lib/db";
 import MetaSetting from "@/models/admin/MetaSetting";
