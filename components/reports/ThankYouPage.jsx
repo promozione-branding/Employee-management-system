@@ -1,3 +1,5 @@
+// components/reports/ThankYouPage.jsx
+
 
 import {
   Page,

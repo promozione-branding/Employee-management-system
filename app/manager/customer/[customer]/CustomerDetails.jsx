@@ -17,7 +17,6 @@ export default function CustomerDetails({ customerId, salesPersonId }) {
   const [callHistory, setCallHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Correct name
   const fetchCallHistory = async () => {
     if (!customerId) return;
     try {
@@ -43,7 +42,6 @@ export default function CustomerDetails({ customerId, salesPersonId }) {
           <TabsTrigger value="Customer">Customer</TabsTrigger>
           <TabsTrigger value="newproposal">New Proposal</TabsTrigger>
           <TabsTrigger value="meeting">Update</TabsTrigger>
-          <TabsTrigger value="calls">Calls</TabsTrigger>
           <TabsTrigger value="meetingHistory">History</TabsTrigger>
           <TabsTrigger value="attachment">Attachment</TabsTrigger>
         </TabsList>
@@ -56,16 +54,16 @@ export default function CustomerDetails({ customerId, salesPersonId }) {
           <ProposalTabNew customerId={customerId} />
         </TabsContent>
 
+        {/* ✅ Update tab: Forms FIRST, then Call section below */}
         <TabsContent value="meeting">
-          <MeetingDashboard
-            customerId={customerId}
-            salesPersonId={salesPersonId}
-          />
-        </TabsContent>
-
-        {/* ✅ NEW: Calls tab */}
-        <TabsContent value="calls">
           <div className="flex flex-col gap-5">
+            {/* 1. Forms (Update section) */}
+            <MeetingDashboard
+              customerId={customerId}
+              salesPersonId={salesPersonId}
+            />
+
+            {/* 2. Call Panel */}
             <CallPanel
               customerId={customerId}
               customerName="Customer"
@@ -78,6 +76,7 @@ export default function CustomerDetails({ customerId, salesPersonId }) {
               }}
             />
 
+            {/* 3. Call History */}
             <div>
               {loading ? (
                 <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-6 text-center text-sm text-gray-500">

@@ -1,3 +1,5 @@
+// components/reports/CoverPage.jsx
+
 
 import { Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
 import fs from "fs";
