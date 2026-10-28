@@ -8,4 +8,4 @@ const page = async ({ params }) => {
   return <SeoReport clientId={id} />;
 };
 
-export default page;
+export default page; 

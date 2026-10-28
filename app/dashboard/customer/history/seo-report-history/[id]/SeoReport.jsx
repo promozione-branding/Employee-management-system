@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { seoReportHistoryService } from "@/service/customer/history";
 import { editRankingService } from "@/service/customer/work";
-import axios from "axios";
+import axios from "axios"; 
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 

@@ -94,7 +94,7 @@ export async function getTeamUpdateAdminService(clientId) {
     return { success: false, message: err.message, data: [] };
   }
 }
-
+ 
 /** SEO report history */
 export async function seoReportHistoryService(id) {
   if (!id) return { success: false, message: "id is required", data: [] };

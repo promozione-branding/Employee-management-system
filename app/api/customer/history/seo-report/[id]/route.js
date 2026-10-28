@@ -16,7 +16,7 @@ export async function GET(req, { params }) {
     const getSeoSheet = await SeoSheet.findOne({ clientId: id })
       .populate({
         path: "keywords",
-        model: Keyword, // 👈 Explicitly telling Mongoose to use the imported modelbjj
+        model: Keyword, 
         populate: {
           path: "rankings.employeeID",
           select: "basicDetails.name",

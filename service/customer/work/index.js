@@ -49,7 +49,7 @@ export async function getSeoSheetService(id) {
   const { data } = await axiosInstance.get(
     `/api/customer/work/seo-sheet/get-sheet/${id}`,
   );
-  return data;
+  return data; 
 }
 
 // edit ranking key word

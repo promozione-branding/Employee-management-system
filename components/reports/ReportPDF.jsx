@@ -86,11 +86,13 @@ export function ReportPDF({ report }) {
   
   const cleanUrl = (url) => url ? url.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "").replace(/^act_/i, "") : "Unknown";
 
+  // 👈 Group SEO by Website using projectId (matching the old ERP logic)
   const seoByWebsite = {};
   (d.seoKeywords || []).forEach(kw => {
     const pageNum = parseInt(String(kw.page || "").replace(/[^0-9]/g, ""), 10);
+    // Only show pages 1 and 2
     if (pageNum === 1 || pageNum === 2) {
-      const site = kw.website || "General Keywords";
+      const site = kw.website || "General Keywords"; 
       if (!seoByWebsite[site]) seoByWebsite[site] = [];
       seoByWebsite[site].push(kw);
     }
@@ -98,6 +100,7 @@ export function ReportPDF({ report }) {
 
   return (
     <Document>
+      {/* PAGE 1: COVER */}
       <Page size="A4" style={s.coverPage}>
         {logoBuffer && <Image src={{ data: logoBuffer, format: "png" }} style={{ width: 250, marginBottom: 40 }} />}
         <Text style={{ fontSize: 32, fontWeight: "bold", color: "#1a202c", marginBottom: 10, textAlign: "center" }}>PERFORMANCE REPORT</Text>
@@ -110,11 +113,10 @@ export function ReportPDF({ report }) {
         </View>
       </Page>
 
-      {/* GOOGLE PAGE */}
+      {/* PAGE 2: GOOGLE SEO */}
       <Page size="A4" style={s.page} wrap>
         <View style={s.header}><Text style={s.title}>Google Performance</Text><Text style={s.sub}>{c.name}</Text></View>
         
-        {/* Loop through Search Console Websites */}
         {(d.gsc || []).map((site, index) => {
           if (site.error) return null;
           const t = site.data.totals || {}; 
@@ -133,23 +135,24 @@ export function ReportPDF({ report }) {
             </View>
           );
         })}
-
-        {/* Show Google Ads only once, after the Search Console sites */}
-        {d.gads && d.gads.length > 0 && !d.gads[0].error && (
-          <View style={{ marginTop: 30 }}>
-            <Text style={s.siteHeader}>🎯 Google Ads</Text>
-            <View style={s.grid}>
-              <MetricBox label="Clicks" current={d.gads[0].data.totals.clicks} previous={d.gads[0].data.prevTotals.clicks} />
-              <MetricBox label="Impressions" current={d.gads[0].data.totals.impressions} previous={d.gads[0].data.prevTotals.impressions} />
-              <MetricBox label="Cost" current={d.gads[0].data.totals.cost} previous={d.gads[0].data.prevTotals.cost} format="money" />
-              <MetricBox label="Conversions" current={d.gads[0].data.totals.conversions} previous={d.gads[0].data.prevTotals.conversions} />
-            </View>
-            <View style={s.chartBox}><SmoothChart data={d.gads[0].data.daily?.map(r => r.clicks) || []} color="#e53e3e" /></View>
-          </View>
-        )}
       </Page>
 
-      {/* META PAGE */}
+      {/* PAGE 3: GOOGLE ADS (FRESH PAGE) */}
+      {d.gads && d.gads.length > 0 && !d.gads[0].error && (
+        <Page size="A4" style={s.page}>
+          <View style={s.header}><Text style={s.title}>Google Ads</Text><Text style={s.sub}>{c.name}</Text></View>
+          <View style={s.siteHeader}>🎯 Google Ads</View>
+          <View style={s.grid}>
+            <MetricBox label="Clicks" current={d.gads[0].data.totals.clicks} previous={d.gads[0].data.prevTotals.clicks} />
+            <MetricBox label="Impressions" current={d.gads[0].data.totals.impressions} previous={d.gads[0].data.prevTotals.impressions} />
+            <MetricBox label="Cost" current={d.gads[0].data.totals.cost} previous={d.gads[0].data.prevTotals.cost} format="money" />
+            <MetricBox label="Conversions" current={d.gads[0].data.totals.conversions} previous={d.gads[0].data.prevTotals.conversions} />
+          </View>
+          <View style={s.chartBox}><SmoothChart data={d.gads[0].data.daily?.map(r => r.clicks) || []} color="#e53e3e" /></View>
+        </Page>
+      )}
+
+      {/* PAGE 4: META */}
       <Page size="A4" style={s.page} wrap>
         <View style={s.header}><Text style={s.title}>Meta Performance</Text><Text style={s.sub}>{c.name}</Text></View>
         
@@ -161,7 +164,6 @@ export function ReportPDF({ report }) {
           if (acc.error) return null;
 
           const t = acc.data?.totals || {}; const p = acc.data?.prevTotals || {};
-          const pageData = d.metaPage?.[index]?.data; const pageT = pageData || {}; const pageP = pageData?.prevTotals || {};
           
           return (
             <View key={acc.id} style={{ marginBottom: 25 }}>
@@ -175,24 +177,12 @@ export function ReportPDF({ report }) {
                 <MetricBox label="Impressions" current={t.impressions} previous={p.impressions} />
               </View>
               <View style={s.chartBox}><SmoothChart data={acc.data?.daily?.map(r => r.clicks) || []} color="#805ad5" /></View>
-
-              {pageData && (
-                <>
-                  <Text style={s.sectionTitle}>Facebook Page Insights</Text>
-                  <View style={s.grid}>
-                    <MetricBox label="Views" current={pageT.views || 0} previous={pageP.views || 0} />
-                    <MetricBox label="Interactions" current={pageT.interactions || 0} previous={pageP.interactions || 0} />
-                    <MetricBox label="New Followers" current={pageT.followers || 0} previous={pageP.followers || 0} />
-                  </View>
-                  <View style={s.chartBox}><SmoothChart data={pageData?.daily?.map(r => r.views) || []} color="#38a169" /></View>
-                </>
-              )}
             </View>
           );
         })}
       </Page>
 
-      {/* SEO PAGE */}
+      {/* PAGE 5: SEO KEYWORDS */}
       <Page size="A4" style={s.page}>
         <View style={s.header}><Text style={s.title}>SEO Keyword Rankings</Text><Text style={s.sub}>Top Rankings (Page 1 & 2)</Text></View>
         {Object.keys(seoByWebsite).length === 0 ? (
@@ -200,6 +190,7 @@ export function ReportPDF({ report }) {
         ) : (
           Object.entries(seoByWebsite).map(([website, keywords]) => (
             <View key={website} style={{ marginBottom: 20 }}>
+              {/* 👈 FIXED: Using cleanUrl instead of cleanWebsiteName */}
               <Text style={s.siteHeader}>🌐 {cleanUrl(website)}</Text>
               <View style={s.table}>
                 <View style={[s.tableRow, s.tableHeader]}>
