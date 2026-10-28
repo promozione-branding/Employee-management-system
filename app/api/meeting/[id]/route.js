@@ -11,8 +11,9 @@ import { getAuthUser } from "@/lib/getAuthUser";
 import { withAudit } from "@/lib/withAudit";
 import Employee from "@/models/employee/Employee";
 
-const PRIMARY_ADMIN_EMAIL = (
-  process.env.PRIMARY_ADMIN_EMAIL || "sourabh@inquirybazaar.com"
+const Admin_for_updateOfCallMeetingGeneral = (
+  process.env.Admin_for_updateOfCallMeetingGeneral ||
+  "sourabh@inquirybazaar.com"
 )
   .toLowerCase()
   .trim();
@@ -78,12 +79,16 @@ export async function PUT(req, { params }) {
           }`,
           actor: { userId: authUser._id },
           isConfidential: false,
-          afterSnapshot: meeting.meetingUpdate[meeting.meetingUpdate.length - 1],
+          afterSnapshot:
+            meeting.meetingUpdate[meeting.meetingUpdate.length - 1],
           req,
         });
       }
     } catch (auditErr) {
-      console.error("[edit-history] failed to record meeting update:", auditErr);
+      console.error(
+        "[edit-history] failed to record meeting update:",
+        auditErr,
+      );
     }
     // ── END AUDIT HOOK ──
 
@@ -93,9 +98,7 @@ export async function PUT(req, { params }) {
     // MAIL DECISION
     // =========================================================
     const mailEnabled =
-      typeof sendToSelf === "boolean"
-        ? sendToSelf
-        : updateType === "meeting";
+      typeof sendToSelf === "boolean" ? sendToSelf : updateType === "meeting";
 
     if (mailEnabled) {
       const creator = await User.findById(salesPersonId).select(
@@ -109,8 +112,8 @@ export async function PUT(req, { params }) {
       let primaryAdminEmail = "";
       const shouldIncludeAdmin =
         typeof ccAdmin === "boolean" ? ccAdmin : updateType === "meeting";
-      if (shouldIncludeAdmin && PRIMARY_ADMIN_EMAIL) {
-        primaryAdminEmail = PRIMARY_ADMIN_EMAIL;
+      if (shouldIncludeAdmin && Admin_for_updateOfCallMeetingGeneral) {
+        primaryAdminEmail = Admin_for_updateOfCallMeetingGeneral;
       }
 
       // ── Extra CC from ticked recipients (User OR Employee) ──

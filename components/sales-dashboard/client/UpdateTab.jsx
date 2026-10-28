@@ -1,3 +1,5 @@
+// components/sales-dashboard/client/UpdateTab.jsx
+
 "use client";
 import { getCallHistoryService } from "@/service/calling";
 import CallPanel from "./CallPanel";

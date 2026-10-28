@@ -11,9 +11,10 @@ import { getAuthUser } from "@/lib/getAuthUser";
 import Employee from "@/models/employee/Employee";
 
 // Primary admin — the ONLY person auto-CC'd on meetings.
-// Override via env: PRIMARY_ADMIN_EMAIL=someone@yourdomain.com
-const PRIMARY_ADMIN_EMAIL = (
-  process.env.PRIMARY_ADMIN_EMAIL || "sourabh@inquirybazaar.com"
+// Override via env: Admin_for_updateOfCallMeetingGeneral=someone@yourdomain.com
+const Admin_for_updateOfCallMeetingGeneral = (
+  process.env.Admin_for_updateOfCallMeetingGeneral ||
+  "sourabh@inquirybazaar.com"
 )
   .toLowerCase()
   .trim();
@@ -94,9 +95,7 @@ export async function POST(req) {
     // MAIL DECISION
     // =========================================================
     const mailEnabled =
-      typeof sendToSelf === "boolean"
-        ? sendToSelf
-        : updateType === "meeting";
+      typeof sendToSelf === "boolean" ? sendToSelf : updateType === "meeting";
 
     if (mailEnabled) {
       const creator = await User.findById(salesPersonId).select(
@@ -111,10 +110,10 @@ export async function POST(req) {
       let primaryAdminEmail = "";
       const shouldIncludeAdmin =
         typeof ccAdmin === "boolean" ? ccAdmin : updateType === "meeting";
-      if (shouldIncludeAdmin && PRIMARY_ADMIN_EMAIL) {
+      if (shouldIncludeAdmin && Admin_for_updateOfCallMeetingGeneral) {
         // Use the configured email directly. Existence in DB not required —
         // the mail should go out even if the User doc is missing.
-        primaryAdminEmail = PRIMARY_ADMIN_EMAIL;
+        primaryAdminEmail = Admin_for_updateOfCallMeetingGeneral;
       }
 
       // ── Extra CC from ticked recipients (User OR Employee) ──
