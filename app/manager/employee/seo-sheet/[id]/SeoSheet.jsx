@@ -30,28 +30,39 @@ const SeoSheet = ({ clientId }) => {
   const [keyLoading, setKeyLoading] = useState(true);
 
   // console.log(keywordList, "res");
-  async function createKeywordHandle(e) {
-    e.preventDefault();
+async function createKeywordHandle(e) {
+  e.preventDefault();
 
-    try {
-      const res = await createKeyService(keywordFormData);
-      if (res.success) {
-        setKeywordFormData({
-          projectId: "",
-          keyword: "",
-          type: "",
-          clientId: clientId || "",
-        });
-        toast.success("Keyword create success");
-        fetchKeyHandler();
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(
-        error?.response?.data?.message || "error while creating the keyword",
-      );
-    }
+  // 🆕 Guards — stop invalid submissions before hitting the API
+  if (!keywordFormData.projectId) {
+    return toast.error("Please select a project");
   }
+  if (!keywordFormData.keyword?.trim()) {
+    return toast.error("Please enter a keyword");
+  }
+  if (!keywordFormData.type) {
+    return toast.error("Please select a type (primary / secondary)");
+  }
+
+  try {
+    const res = await createKeyService(keywordFormData);
+    if (res.success) {
+      setKeywordFormData({
+        projectId: "",
+        keyword: "",
+        type: "",
+        clientId: clientId || "",
+      });
+      toast.success("Keyword create success");
+      fetchKeyHandler();
+    }
+  } catch (error) {
+    console.log(error);
+    toast.error(
+      error?.response?.data?.message || "error while creating the keyword",
+    );
+  }
+}
 
   async function fetchKeyHandler() {
     setKeyLoading(true);

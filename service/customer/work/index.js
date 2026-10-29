@@ -26,7 +26,7 @@ export async function getClientWorkService(id) {
   return data;
 }
 
-// create key word
+// create key word and after creating fire the mailt to admin whenever new keyword is created
 export async function createKeyService(formData) {
   const { data } = await axiosInstance.post(
     `/api/customer/work/seo-sheet/create-keyword`,

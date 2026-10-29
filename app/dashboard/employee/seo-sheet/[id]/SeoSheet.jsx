@@ -34,27 +34,37 @@ const SeoSheet = ({ clientId }) => {
   const [keyLoading, setKeyLoading] = useState(true);
 
   async function createKeywordHandle(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const res = await createKeyService(keywordFormData);
-      if (res.success) {
-        setKeywordFormData({
-          projectId: "",
-          keyword: "",
-          type: "",
-          clientId: clientId || "",
-        });
-        toast.success("Keyword create success");
-        fetchKeyHandler();
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(
-        error?.response?.data?.message || "error while creating the keyword",
-      );
-    }
+  if (!keywordFormData.projectId) {
+    return toast.error("Please select a project");
   }
+  if (!keywordFormData.keyword?.trim()) {
+    return toast.error("Please enter a keyword");
+  }
+  if (!keywordFormData.type) {
+    return toast.error("Please select a type (primary / secondary)");
+  }
+
+  try {
+    const res = await createKeyService(keywordFormData);
+    if (res.success) {
+      setKeywordFormData({
+        projectId: "",
+        keyword: "",
+        type: "",
+        clientId: clientId || "",
+      });
+      toast.success("Keyword create success");
+      fetchKeyHandler();
+    }
+  } catch (error) {
+    console.log(error);
+    toast.error(
+      error?.response?.data?.message || "error while creating the keyword",
+    );
+  }
+}
 
   async function fetchKeyHandler() {
     setKeyLoading(true);
