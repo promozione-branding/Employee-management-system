@@ -173,7 +173,7 @@ export default function LedgerModalNew({ customerId, onClose, onSuccess, isSecre
             <button type="submit" disabled={loading} className="flex-1 bg-blue-900 text-white py-2 rounded-md font-semibold hover:bg-blue-800 disabled:opacity-50">
               {loading ? "Saving..." : (isEditing ? "Update Entry" : "Record Payment")}
             </button>
-          </div>
+          </div>  
         </form>
 
       </div>
