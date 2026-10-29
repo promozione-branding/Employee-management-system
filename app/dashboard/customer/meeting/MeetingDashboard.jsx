@@ -435,6 +435,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 <SelectContent>
                   <SelectItem value="talk">Talk</SelectItem>
                   <SelectItem value="no-talk">No Talk</SelectItem>
+                  <SelectItem value="no-talk">APPOINTMENT</SelectItem>
                 </SelectContent>
               </Select>
             </div>
