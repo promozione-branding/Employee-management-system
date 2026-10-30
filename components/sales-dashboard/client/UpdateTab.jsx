@@ -1,5 +1,3 @@
-// components/sales-dashboard/client/UpdateTab.jsx
-
 "use client";
 import { getCallHistoryService } from "@/service/calling";
 import CallPanel from "./CallPanel";
@@ -124,6 +122,9 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
 
   const { employee } = useSalesEmployeeStore();
 
+  // 👇 fallback to prop when store is empty (manager dashboard)
+  const actingUserId = employee?.user?._id || salesPersonId || "";
+
   // ---------- Meeting ----------
   const [meetingSearch, setMeetingSearch] = useState("");
   const [meetingForm, setMeetingForm] = useState({
@@ -192,14 +193,14 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     e.preventDefault();
     setLoading(true);
 
-    if (!employee?.user?._id) {
+    if (!actingUserId) {
       toast.error("please provide sale person id");
       setLoading(false);
       return;
     }
 
     const formData = {
-      salesPersonId: employee?.user?._id || "",
+      salesPersonId: actingUserId,
       salesPerson: callSendMail ? callRecipients.map((u) => u?._id) : [],
       clientId: customerId,
       updateType: "call",
@@ -208,7 +209,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       meetingAt: toLocalISO(callForm.meetingDate, callForm.meetingTime),
       reminderAt: toLocalISO(callForm.reminderDate, callForm.reminderTime),
       sendToSelf: callSendMail,
-      ccAdmin: callSendMail, // 👈 AUTO-CC ADMIN when mail is on
+      ccAdmin: callSendMail,
       mailRecipients: callSendMail ? callRecipients.map((u) => u?._id) : [],
     };
     if (!formData?.salesPersonId || !formData?.clientId) {
@@ -246,7 +247,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     setLoading(true);
 
     const formData = {
-      salesPersonId: employee?.user?._id || "",
+      salesPersonId: actingUserId,
       salesPerson: callSendMail ? callRecipients.map((u) => u?._id) : [],
       clientId: customerId,
       updateType: "call",
@@ -255,7 +256,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       meetingAt: toLocalISO(callForm.meetingDate, callForm.meetingTime),
       reminderAt: toLocalISO(callForm.reminderDate, callForm.reminderTime),
       sendToSelf: callSendMail,
-      ccAdmin: callSendMail, // 👈 AUTO-CC ADMIN when mail is on
+      ccAdmin: callSendMail,
       mailRecipients: callSendMail ? callRecipients.map((u) => u?._id) : [],
     };
 
@@ -296,7 +297,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     setLoading(true);
 
     const formData = {
-      salesPersonId: employee?.user?._id || "",
+      salesPersonId: actingUserId,
       salesPerson: meetingRecipients.map((u) => u?._id),
       clientId: customerId,
       updateType: "meeting",
@@ -305,7 +306,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       meetingAt: toLocalISO(meetingForm.meetingDate, meetingForm.meetingTime),
       reminderAt: toLocalISO(meetingForm.reminderDate, meetingForm.reminderTime),
       sendToSelf: true,
-      ccAdmin: true, // always on for meeting
+      ccAdmin: true,
       mailRecipients: meetingRecipients.map((u) => u?._id),
     };
     if (!formData?.salesPersonId || !formData?.clientId) {
@@ -341,7 +342,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     setLoading(true);
 
     const formData = {
-      salesPersonId: employee?.user?._id || "",
+      salesPersonId: actingUserId,
       salesPerson: meetingRecipients.map((u) => u?._id),
       clientId: customerId,
       updateType: "meeting",
@@ -350,7 +351,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       meetingAt: toLocalISO(meetingForm.meetingDate, meetingForm.meetingTime),
       reminderAt: toLocalISO(meetingForm.reminderDate, meetingForm.reminderTime),
       sendToSelf: true,
-      ccAdmin: true, // always on for meeting
+      ccAdmin: true,
       mailRecipients: meetingRecipients.map((u) => u?._id),
     };
 
@@ -391,7 +392,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     setLoading(true);
 
     const formData = {
-      salesPersonId: employee?.user?._id || "",
+      salesPersonId: actingUserId,
       salesPerson: generalSendMail ? generalRecipients.map((u) => u?._id) : [],
       clientId: customerId,
       updateType: "general",
@@ -400,7 +401,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       meetingAt: toLocalISO(generalForm.meetingDate, generalForm.meetingTime),
       reminderAt: toLocalISO(generalForm.reminderDate, generalForm.reminderTime),
       sendToSelf: generalSendMail,
-      ccAdmin: generalSendMail, // 👈 AUTO-CC ADMIN when mail is on
+      ccAdmin: generalSendMail,
       mailRecipients: generalSendMail
         ? generalRecipients.map((u) => u?._id)
         : [],
@@ -440,7 +441,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
     setLoading(true);
 
     const formData = {
-      salesPersonId: employee?.user?._id || "",
+      salesPersonId: actingUserId,
       salesPerson: generalSendMail ? generalRecipients.map((u) => u?._id) : [],
       clientId: customerId,
       updateType: "general",
@@ -449,7 +450,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       meetingAt: toLocalISO(generalForm.meetingDate, generalForm.meetingTime),
       reminderAt: toLocalISO(generalForm.reminderDate, generalForm.reminderTime),
       sendToSelf: generalSendMail,
-      ccAdmin: generalSendMail, // 👈 AUTO-CC ADMIN when mail is on
+      ccAdmin: generalSendMail,
       mailRecipients: generalSendMail
         ? generalRecipients.map((u) => u?._id)
         : [],
@@ -572,8 +573,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 <SelectContent>
                   <SelectItem value="talk">Talk</SelectItem>
                   <SelectItem value="no-talk">No Talk</SelectItem>
-                  <SelectItem value="no-talk">APPOINTMENT</SelectItem>
-                  
+                  <SelectItem value="appointment">Appointment</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -24,6 +24,7 @@ const ClientDetails = ({ customerId, salesPersonId }) => {
           <TabsTrigger value="attachment">Attachment</TabsTrigger>
           <TabsTrigger value="proposal">Proposal</TabsTrigger>
         </TabsList>
+        
 
         <TabsContent value="Customer">
           <CustomerTab customerId={customerId} salesPersonId={salesPersonId} />

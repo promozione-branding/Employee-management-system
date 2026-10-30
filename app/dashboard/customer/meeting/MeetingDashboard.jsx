@@ -22,6 +22,7 @@ import {
 } from "@/service/meeting";
 import { SalesPeopleMeetingService } from "@/service/customer";
 
+
 // Convert local date + "HH:mm" -> ISO string with browser tz offset.
 // Keeps DB instant correct (fixes "5:05 shows as 11:56" issues).
 const toLocalISO = (dateStr, timeStr) => {
@@ -434,8 +435,8 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="talk">Talk</SelectItem>
-                  <SelectItem value="no-talk">No Talk</SelectItem>
-                  <SelectItem value="no-talk">APPOINTMENT</SelectItem>
+<SelectItem value="no-talk">No Talk</SelectItem>
+<SelectItem value="appointment">APPOINTMENT</SelectItem>
                 </SelectContent>
               </Select>
             </div>
