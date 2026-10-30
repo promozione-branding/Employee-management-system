@@ -1,4 +1,3 @@
-// app/api/customer/meeting/my-meeting-history/[id]/route.js
 
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
@@ -26,9 +25,13 @@ export async function GET(req, { params }) {
             );
         }
 
-        // Find customer
-        const customer = await Customer.findById(id).select("meetingUpdate")
-            .populate({ path: "meetingUpdate", select: "meetingUpdate", })
+        // Find customer and populate meeting history
+        const customer = await Customer.findById(id)
+            .select("meetingUpdate")
+            .populate({
+                path: "meetingUpdate",
+                select: "meetingUpdate",
+            })
             .lean();
 
         if (!customer) {
@@ -54,26 +57,31 @@ export async function GET(req, { params }) {
             );
         }
 
-        // Filter only this sales person's meetings
-        const filteredMeetings = customer.meetingUpdate.meetingUpdate?.filter((meeting) =>
-            meeting.salesPersonId?.toString() === salesPersonId.toString()) || [];
-
-        console.log(customer.meetingUpdate.meetingUpdate, filteredMeetings)
+        // Filter meetings belonging to this sales person
+        const filteredMeetings =
+            customer.meetingUpdate.meetingUpdate?.filter(
+                (meeting) =>
+                    meeting.salesPersonId?.toString() ===
+                    salesPersonId.toString()
+            ) || [];
 
         // Newest first
         filteredMeetings.reverse();
 
         // Populate sales person details
-        const populatedMeetings = await Promise.all(filteredMeetings.map(async (meeting) => {
-            const salesPerson = await User.findById(meeting.salesPersonId)
-                .select("username email name")
-                .lean();
+        const populatedMeetings = await Promise.all(
+            filteredMeetings.map(async (meeting) => {
+                const salesPerson = await User.findById(
+                    meeting.salesPersonId
+                )
+                    .select("username email name")
+                    .lean();
 
-            return {
-                ...meeting,
-                salesPersonId: salesPerson || meeting.salesPersonId,
-            };
-        })
+                return {
+                    ...meeting,
+                    salesPersonId: salesPerson || meeting.salesPersonId,
+                };
+            })
         );
 
         return NextResponse.json(

@@ -23,7 +23,8 @@ export async function POST(req) {
     }
 
     // --- parse ---
-    const { customerId } = await req.json();
+    // accept optional "phone" override
+    const { customerId, phone } = await req.json();
     if (!customerId) {
       return NextResponse.json(
         { success: false, message: "customerId required" },
@@ -34,7 +35,7 @@ export async function POST(req) {
     // --- load ---
     const [customer, agent] = await Promise.all([
       Customer.findById(customerId).lean(),
-      Employee.findOne({ user: user._id }).lean(), // Employee refs User
+      Employee.findOne({ user: user._id }).lean(),
     ]);
 
     if (!customer) {
@@ -63,9 +64,50 @@ export async function POST(req) {
       );
     }
 
+    // --- phone selection: primary, existing alternate, or auto-save valid new ---
+    const normalizeCmp = (n) => String(n || "").replace(/\D/g, "").slice(-10);
+    const requested = phone ? normalizeCmp(phone) : "";
+    let dialNumber = customer.phone;
+
+    if (requested) {
+      const primaryDigits = normalizeCmp(customer.phone);
+      const alternates = (customer.alternatePhones || []).map(normalizeCmp);
+
+      if (requested === primaryDigits) {
+        dialNumber = customer.phone;
+      } else if (alternates.includes(requested)) {
+        const match = customer.alternatePhones.find(
+          (p) => normalizeCmp(p) === requested,
+        );
+        dialNumber = match;
+      } else if (/^[6-9]\d{9}$/.test(requested)) {
+        // AUTO-SAVE fallback — valid Indian number not yet in list.
+        // Handles race where POST /phones hasn't propagated yet.
+        try {
+          await Customer.updateOne(
+            { _id: customer._id },
+            { $addToSet: { alternatePhones: requested } },
+          );
+          console.log("[initiate] auto-saved alternate:", requested);
+        } catch (e) {
+          console.error("[initiate] auto-save failed:", e);
+        }
+        dialNumber = requested;
+      } else {
+        return NextResponse.json(
+          {
+            success: false,
+            message:
+              "Invalid phone number. Must be a 10-digit Indian mobile starting with 6-9.",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     // --- build call log ---
     const referenceId = `call_${Date.now()}_${randomUUID().slice(0, 8)}`;
-    const customerPhone = normalizePhone(customer.phone);
+    const customerPhone = normalizePhone(dialNumber);
     const agentName = agent?.basicDetails?.name || "";
     const agentEmail = agent?.basicDetails?.email || "";
 

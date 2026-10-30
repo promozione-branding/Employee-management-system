@@ -15,12 +15,15 @@ async function handle(res) {
 
 // ------------------------------------------------------------
 // Initiate an outbound call (click-to-call)
+// now accepts an optional `phone` to override customer.phone
 // ------------------------------------------------------------
-export async function initiateCallService(customerId) {
+export async function initiateCallService(customerId, phone = null) {
+  const body = { customerId };
+  if (phone) body.phone = phone;
   const res = await fetch(`${BASE}/initiate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ customerId }),
+    body: JSON.stringify(body),
     credentials: "include",
   });
   return handle(res);
@@ -105,7 +108,6 @@ export async function getAdminAgentsService() {
 
 // ------------------------------------------------------------
 // Client-specific call history (used on client detail page)
-// scope: "all" (default) | "self"
 // ------------------------------------------------------------
 export async function getClientCallsService(customerId, scope = "all") {
   if (!customerId) throw new Error("customerId is required");

@@ -52,6 +52,12 @@ const CustomerSchema = new mongoose.Schema(
       required: true,
     },
 
+    // 👇 alternate phone numbers for calling
+    alternatePhones: {
+      type: [String],
+      default: [],
+    },
+
     website: {
       type: String,
       trim: true,
