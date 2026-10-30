@@ -27,6 +27,7 @@ const UpdateTab = ({ userId }) => {
       }
     } catch (error) {
       setUpdates([]);
+
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
@@ -51,7 +52,9 @@ const UpdateTab = ({ userId }) => {
 
     const parsedDate = new Date(date);
 
-    if (Number.isNaN(parsedDate.getTime())) return "";
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "";
+    }
 
     return parsedDate.toLocaleString("en-GB", {
       day: "2-digit",
@@ -65,11 +68,24 @@ const UpdateTab = ({ userId }) => {
   const handleClientClick = (item) => {
     const clientId = item?.client?._id || item?.clientId;
 
-    if (clientId) {
-      router.push(`/sales-dashboard/clients/${clientId}`);
-    } else {
+    const salesPersonId =
+      item?.salesPersonId?._id ||
+      item?.salesPersonId ||
+      userId;
+
+    if (!clientId) {
       toast.error("Customer ID not found");
+      return;
     }
+
+    if (!salesPersonId) {
+      toast.error("Salesperson ID not found");
+      return;
+    }
+
+    router.push(
+  `/sales-dashboard/clients/${clientId}/${salesPersonId}?tab=meeting`
+);
   };
 
   const handleCardKeyDown = (event, item) => {
@@ -109,7 +125,7 @@ const UpdateTab = ({ userId }) => {
           key={item._id}
           role="link"
           tabIndex={0}
-          aria-label={`View customer ${item.client?.name || "details"}`}
+          aria-label={`View customer ${item?.client?.name || "details"}`}
           onClick={() => handleClientClick(item)}
           onKeyDown={(event) => handleCardKeyDown(event, item)}
           className="cursor-pointer rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all duration-200 hover:border-blue-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -132,14 +148,16 @@ const UpdateTab = ({ userId }) => {
 
               <div>
                 <h3 className="text-sm font-semibold text-gray-800">
-                  {item.client?.name || "Unknown Client"}
+                  {item?.client?.name || "Unknown Client"}
                 </h3>
 
                 <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span>{item.client?.company || "No Company"}</span>
+                  <span>
+                    {item?.client?.company || "No Company"}
+                  </span>
                   <span>•</span>
                   <span className="capitalize">
-                    {item.updateType || "Update"}
+                    {item?.updateType || "Update"}
                   </span>
                 </div>
               </div>
@@ -157,34 +175,38 @@ const UpdateTab = ({ userId }) => {
                       : "bg-gray-100 text-gray-600"
                 }`}
               >
-                {item.status || "No Status"}
+                {item?.status || "No Status"}
               </span>
 
               <span className="text-[10px] text-gray-400">
-                {formatDate(item.createdAt)}
+                {formatDate(item?.createdAt)}
               </span>
             </div>
           </div>
 
           <div className="mt-3 pl-[52px]">
-            {item.note && (
+            {item?.note && (
               <p className="mb-2 rounded-lg bg-gray-50 p-2.5 text-sm text-gray-600">
                 {item.note}
               </p>
             )}
 
             <div className="mt-2 flex flex-wrap gap-3">
-              {item.meetingAt && (
+              {item?.meetingAt && (
                 <div className="flex items-center gap-1.5 rounded-md bg-purple-50 px-2.5 py-1.5 text-xs font-medium text-purple-600">
                   <Calendar size={14} />
-                  <span>Meeting: {formatDate(item.meetingAt)}</span>
+                  <span>
+                    Meeting: {formatDate(item.meetingAt)}
+                  </span>
                 </div>
               )}
 
-              {item.reminderAt && (
+              {item?.reminderAt && (
                 <div className="flex items-center gap-1.5 rounded-md bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-600">
                   <Clock size={14} />
-                  <span>Reminder: {formatDate(item.reminderAt)}</span>
+                  <span>
+                    Reminder: {formatDate(item.reminderAt)}
+                  </span>
 
                   <span
                     className={`ml-1 ${
