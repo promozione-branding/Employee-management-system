@@ -1,3 +1,4 @@
+
 // app/manager/customer/history/sales-history/[id]/MeetingHistory.jsx
 
 "use client";
@@ -7,105 +8,149 @@ import { clientMeetingHistory } from "@/service/meeting";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+const formatDateTime = (date) => {
+  if (!date) return "N/A";
+
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "N/A";
+  }
+
+  return parsedDate.toLocaleString([], {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+};
+
 const MeetingHistory = ({ customerId }) => {
   const [loading, setLoading] = useState(true);
   const [historyData, setHistoryData] = useState([]);
 
-  console.log(historyData, "historyData");
-
   useEffect(() => {
+    let isMounted = true;
+
     async function handleCustomerHistoryFetch() {
+      setLoading(true);
+
       try {
         const res = await clientMeetingHistory(customerId);
-        if (res.success) {
-          setHistoryData(res.data?.meetingUpdate?.meetingUpdate);
-          setLoading(false);
+
+        if (!isMounted) return;
+
+        if (res?.success) {
+          const meetings = res.data?.meetingUpdate?.meetingUpdate;
+          setHistoryData(Array.isArray(meetings) ? meetings : []);
+        } else {
+          setHistoryData([]);
+          toast.error(
+            res?.message || "Unable to fetch customer meeting history"
+          );
         }
       } catch (error) {
-        console.log(error);
-        setLoading(false);
-        toast.error(error.message || "Error while fetching customer history");
+        if (!isMounted) return;
+
+        setHistoryData([]);
+        toast.error(
+          error?.message || "Error while fetching customer history"
+        );
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
-    handleCustomerHistoryFetch();
+
+    if (customerId) {
+      handleCustomerHistoryFetch();
+    } else {
+      setHistoryData([]);
+      setLoading(false);
+    }
+
+    return () => {
+      isMounted = false;
+    };
   }, [customerId]);
+
+  const columns = [
+    "S.No",
+    "Meeting Type",
+    "Notes",
+    "Status",
+    "Meeting At",
+    "Reminder At",
+    "Sales Person",
+    "Created At",
+  ];
 
   return (
     <div>
       {loading ? (
         <Loading />
       ) : (
-        <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+        <div className="overflow-x-auto rounded-lg bg-white shadow-md">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  S.No
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Meeting Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Notes
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Meeting At
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ReminderAt At
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sales Person
-                </th>
+                {columns.map((column) => (
+                  <th
+                    key={column}
+                    className="whitespace-nowrap px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                  >
+                    {column}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {historyData?.length > 0 ? (
+
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {historyData.length > 0 ? (
                 historyData.map((item, idx) => (
-                  <tr key={item?._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <tr
+                    key={item?._id || idx}
+                    className="transition-colors hover:bg-gray-50"
+                  >
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                       {idx + 1}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize">
+
+                    <td className="whitespace-nowrap px-6 py-4 text-sm font-medium capitalize text-gray-900">
                       {item?.updateType || "Meeting"}
                     </td>
+
                     <td
-                      className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate"
-                      title={item?.note}
+                      className="max-w-xs truncate px-6 py-4 text-sm text-gray-500"
+                      title={item?.note || ""}
                     >
                       {item?.note || "-"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
+
+                    <td className="whitespace-nowrap px-6 py-4 text-sm capitalize text-gray-500">
                       {item?.status || "Pending"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item?.meetingAt
-                        ? new Date(item.meetingAt).toLocaleString([], {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                          })
-                        : "N/A"}
+
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                      {formatDateTime(item?.meetingAt)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item?.reminderAt
-                        ? new Date(item.reminderAt).toLocaleString([], {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                          })
-                        : "N/A"}
+
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                      {formatDateTime(item?.reminderAt)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                       {item?.salesPersonId?.username || "Unknown"}
+                    </td>
+
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                      {formatDateTime(item?.createdAt)}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan={8}
                     className="px-6 py-10 text-center text-sm text-gray-500"
                   >
                     No history available
