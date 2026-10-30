@@ -17,6 +17,8 @@ import CallHistory from "@/components/sales-dashboard/client/CallHistory";
 import { getCallHistoryService } from "@/service/calling";
 import ProposalTabNew from "@/components/proposalNew/ProposalTabNew";
 import LedgerTabNew from "@/components/proposalNew/LedgerTabNew";
+import Createworkflow from "@/components/admin-dashboard/tabs/Createworkflow";
+
 
 function DashboardContent({ customerId, salesPersonId }) {
   const router = useRouter();
@@ -58,6 +60,7 @@ function DashboardContent({ customerId, salesPersonId }) {
           <TabsTrigger value="invoice">Invoice</TabsTrigger>
           
           <TabsTrigger value="newledger">New Ledger</TabsTrigger>
+          <TabsTrigger value="createworkflow">Creat Workflow</TabsTrigger>
           
 
           <TabsTrigger value="meeting">Update</TabsTrigger>
@@ -81,6 +84,9 @@ function DashboardContent({ customerId, salesPersonId }) {
         
         <TabsContent value="newledger">
           <LedgerTabNew customerId={customerId} />
+        </TabsContent>
+        <TabsContent value="createworkflow">
+          <Createworkflow customerId={customerId} />
         </TabsContent>
 
         <TabsContent value="proposal">
