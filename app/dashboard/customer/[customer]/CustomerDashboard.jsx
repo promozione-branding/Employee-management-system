@@ -17,6 +17,7 @@ import CallHistory from "@/components/sales-dashboard/client/CallHistory";
 import { getCallHistoryService } from "@/service/calling";
 import ProposalTabNew from "@/components/proposalNew/ProposalTabNew";
 import LedgerTabNew from "@/components/proposalNew/LedgerTabNew";
+import { createWorkflowService } from "@/service/workflow";
 import Createworkflow from "@/components/admin-dashboard/tabs/Createworkflow";
 
 
@@ -86,8 +87,14 @@ function DashboardContent({ customerId, salesPersonId }) {
           <LedgerTabNew customerId={customerId} />
         </TabsContent>
         <TabsContent value="createworkflow">
-          <Createworkflow customerId={customerId} />
-        </TabsContent>
+  <Createworkflow
+    customerId={customerId}
+    onSave={async (payload) => {
+      const res = await createWorkflowService(payload);
+      return res.data;
+    }}
+  />
+</TabsContent>
 
         <TabsContent value="proposal">
           <CustomerProposal customerId={customerId} />
