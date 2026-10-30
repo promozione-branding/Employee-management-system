@@ -1,6 +1,7 @@
 
 // app/manager/customer/history/my-update/[id]/MyUpdate.jsx
 
+
 "use client";
 
 import Loading from "@/components/layout/Loading";
