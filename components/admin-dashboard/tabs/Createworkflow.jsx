@@ -1,9 +1,17 @@
 
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import toast from "react-hot-toast";
-import { CalendarDays, FileText, Layers, Save } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  CalendarDays,
+  Check,
+  ChevronDown,
+  FileText,
+  LoaderCircle,
+  Save,
+  Workflow,
+} from "lucide-react";
+import { toast } from "react-hot-toast";
 
 import {
   listProposalNewService,
@@ -19,6 +27,7 @@ const DURATION_OPTIONS = [
 
 const getToday = () => {
   const date = new Date();
+
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -26,38 +35,41 @@ const getToday = () => {
   return `${year}-${month}-${day}`;
 };
 
-// Add calendar months without overflowing into the following month.
-// Example: October 31 + 3 months = January 31, where possible.
-const addMonths = (dateString, months) => {
-  if (!dateString || months == null) return "";
+// Add calendar months while safely handling dates such as January 31.
+const addMonthsToDate = (dateString, months) => {
+  if (!dateString || !months) return "";
 
   const [year, month, day] = dateString.split("-").map(Number);
 
-  if (!year || !month || !day) return "";
-
   const targetMonthIndex = month - 1 + months;
   const targetYear = year + Math.floor(targetMonthIndex / 12);
-  const targetMonth = ((targetMonthIndex % 12) + 12) % 12;
+  const normalizedMonth = targetMonthIndex % 12;
 
-  const lastDay = new Date(
+  const lastDayOfTargetMonth = new Date(
     targetYear,
-    targetMonth + 1,
+    normalizedMonth + 1,
     0
   ).getDate();
 
-  const targetDay = Math.min(day, lastDay);
+  const targetDay = Math.min(day, lastDayOfTargetMonth);
 
-  return [
+  const result = new Date(
     targetYear,
-    String(targetMonth + 1).padStart(2, "0"),
-    String(targetDay).padStart(2, "0"),
-  ].join("-");
+    normalizedMonth,
+    targetDay
+  );
+
+  const resultYear = result.getFullYear();
+  const resultMonth = String(result.getMonth() + 1).padStart(2, "0");
+  const resultDay = String(result.getDate()).padStart(2, "0");
+
+  return `${resultYear}-${resultMonth}-${resultDay}`;
 };
 
-const formatDate = (value) => {
-  if (!value) return "—";
+const formatDate = (dateString) => {
+  if (!dateString) return "—";
 
-  const [year, month, day] = value.split("-").map(Number);
+  const [year, month, day] = dateString.split("-").map(Number);
 
   return new Date(year, month - 1, day).toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -66,376 +78,525 @@ const formatDate = (value) => {
   });
 };
 
-const fieldClass =
-  "w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 " +
-  "text-sm text-gray-800 outline-none transition " +
-  "focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100";
+const getProposalId = (proposal) =>
+  proposal?._id || proposal?.id || "";
+
+
+const getProposalLabel = (proposal) => {
+  const number =
+    proposal?.proposalNumber ||
+    proposal?.quotationNumber ||
+    proposal?._id ||
+    proposal?.id ||
+    "";
+
+  const services = [
+    ...new Set(
+      (Array.isArray(proposal?.items) ? proposal.items : [])
+        .map((item) => item.categoryLabel || item.category || item.label)
+        .filter(Boolean)
+    ),
+  ];
+
+  const serviceText = services.length
+    ? services.join(", ")
+    : "Services unavailable";
+
+  const date = proposal?.createdAt
+    ? formatDate(String(proposal.createdAt).slice(0, 10))
+    : "";
+
+  return [
+    number,
+    serviceText,
+    date,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+};
+
+
+const getResponseData = (response) => {
+  if (response?.success === false) {
+    throw new Error(response.message || "Request failed.");
+  }
+
+  return response?.data;
+};
+
+const getProposalItems = (proposal) =>
+  Array.isArray(proposal?.items) ? proposal.items : [];
 
 export default function Createworkflow({ customerId, onSave }) {
   const [proposals, setProposals] = useState([]);
   const [selectedProposalId, setSelectedProposalId] = useState("");
   const [selectedProposal, setSelectedProposal] = useState(null);
-
   const [selectedCategory, setSelectedCategory] = useState("");
+
   const [startDate, setStartDate] = useState(getToday);
   const [duration, setDuration] = useState("3m");
   const [customEndDate, setCustomEndDate] = useState("");
+  const [description, setDescription] = useState("");
 
-  const [loadingProposals, setLoadingProposals] = useState(false);
-  const [loadingProposal, setLoadingProposal] = useState(false);
+  const [loadingProposals, setLoadingProposals] = useState(true);
+  const [loadingProposalDetails, setLoadingProposalDetails] =
+    useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  // Load this customer's proposal history.
-  useEffect(() => {
-    let active = true;
-
-    const fetchProposals = async () => {
-      if (!customerId) {
-        setProposals([]);
-        setSelectedProposalId("");
-        setSelectedProposal(null);
-        return;
-      }
-
-      try {
-        setLoadingProposals(true);
-
-        const res = await listProposalNewService(customerId);
-
-        if (!active) return;
-
-        if (res?.success) {
-          setProposals(Array.isArray(res.data) ? res.data : []);
-        } else {
-          setProposals([]);
-          toast.error(res?.message || "Failed to load proposals");
-        }
-      } catch (error) {
-        if (active) {
-          setProposals([]);
-          toast.error(
-            error?.response?.data?.message || "Failed to load proposals"
-          );
-        }
-      } finally {
-        if (active) setLoadingProposals(false);
-      }
-    };
-
-    fetchProposals();
-
-    return () => {
-      active = false;
-    };
-  }, [customerId]);
-
-  // Load the complete proposal when the user selects one.
-  useEffect(() => {
-    let active = true;
-
-    const fetchSelectedProposal = async () => {
+  // Load the customer's proposal history.
+  const fetchProposals = useCallback(async () => {
+    if (!customerId) {
+      setProposals([]);
+      setSelectedProposalId("");
       setSelectedProposal(null);
       setSelectedCategory("");
+      setLoadingProposals(false);
+      setError("Customer ID is required to create a workflow.");
+      return;
+    }
 
-      if (!selectedProposalId) return;
+    setLoadingProposals(true);
+    setError("");
 
-      try {
-        setLoadingProposal(true);
+    try {
+      const response = await listProposalNewService(customerId);
+      const data = getResponseData(response);
 
-        const res = await getProposalNewByIdService(selectedProposalId);
+      const list = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.proposals)
+          ? data.proposals
+          : [];
 
-        if (!active) return;
+      setProposals(list);
+    } catch (err) {
+      console.error("Failed to load proposal history:", err);
 
-        if (res?.success && res.data) {
-          setSelectedProposal(res.data);
-        } else {
-          toast.error(res?.message || "Failed to load selected proposal");
-        }
-      } catch (error) {
-        if (active) {
-          toast.error(
-            error?.response?.data?.message ||
-              "Failed to load selected proposal"
-          );
-        }
-      } finally {
-        if (active) setLoadingProposal(false);
+      setProposals([]);
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to load proposal history."
+      );
+    } finally {
+      setLoadingProposals(false);
+    }
+  }, [customerId]);
+
+  useEffect(() => {
+    fetchProposals();
+  }, [fetchProposals]);
+
+  // Load full proposal details whenever a proposal is selected.
+  const handleProposalChange = async (proposalId) => {
+    setSelectedProposalId(proposalId);
+    setSelectedProposal(null);
+    setSelectedCategory("");
+    setError("");
+
+    if (!proposalId) return;
+
+    setLoadingProposalDetails(true);
+
+    try {
+      const response = await getProposalNewByIdService(proposalId);
+      const data = getResponseData(response);
+
+      const proposal = data?.proposal || data;
+
+      if (!proposal || !Array.isArray(proposal.items)) {
+        throw new Error(
+          "The selected proposal does not contain valid proposal items."
+        );
       }
-    };
 
-    fetchSelectedProposal();
+      setSelectedProposal(proposal);
+    } catch (err) {
+      console.error("Failed to load proposal details:", err);
 
-    return () => {
-      active = false;
-    };
-  }, [selectedProposalId]);
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to load the selected proposal."
+      );
 
-  // Only show categories that exist in the selected proposal's items.
+      toast.error("Could not load proposal details.");
+    } finally {
+      setLoadingProposalDetails(false);
+    }
+  };
+
+  // Get unique categories/services from the selected proposal.
   const categories = useMemo(() => {
-    const items = selectedProposal?.items || [];
-    const unique = new Map();
+    const items = getProposalItems(selectedProposal);
+    const uniqueCategories = new Map();
 
-    for (const item of items) {
-      if (!item?.category) continue;
+    items.forEach((item) => {
+      if (!item?.category) return;
 
-      if (!unique.has(item.category)) {
-        unique.set(item.category, {
+      if (!uniqueCategories.has(item.category)) {
+        uniqueCategories.set(item.category, {
           value: item.category,
-          label: item.categoryLabel || item.category,
+          label:
+            item.categoryLabel ||
+            item.label ||
+            item.category,
         });
       }
-    }
+    });
 
-    return Array.from(unique.values());
+    return Array.from(uniqueCategories.values());
   }, [selectedProposal]);
 
-  // Keep the category valid if proposal data changes.
-  useEffect(() => {
-    if (
-      selectedCategory &&
-      !categories.some((category) => category.value === selectedCategory)
-    ) {
-      setSelectedCategory("");
-    }
-  }, [categories, selectedCategory]);
-
+  // Calculate the end date from the selected duration.
   const computedEndDate = useMemo(() => {
+    if (!startDate) return "";
+
+    if (duration === "custom") {
+      return customEndDate;
+    }
+
     const selectedDuration = DURATION_OPTIONS.find(
       (option) => option.value === duration
     );
 
-    if (!selectedDuration || selectedDuration.months == null) {
-      return customEndDate;
-    }
+    if (!selectedDuration?.months) return "";
 
-    return addMonths(startDate, selectedDuration.months);
+    return addMonthsToDate(startDate, selectedDuration.months);
   }, [startDate, duration, customEndDate]);
 
-  const handleProposalChange = (event) => {
-    setSelectedProposalId(event.target.value);
-    setDuration("3m");
+  const handleStartDateChange = (value) => {
+    setStartDate(value);
+
+    // Avoid retaining an invalid custom end date after the start changes.
+    if (customEndDate && value && customEndDate < value) {
+      setCustomEndDate("");
+    }
+  };
+
+  const handleDurationChange = (value) => {
+    setDuration(value);
     setCustomEndDate("");
   };
 
-  const handleDurationChange = (event) => {
-    setDuration(event.target.value);
+  const resetForm = () => {
+    setSelectedProposalId("");
+    setSelectedProposal(null);
+    setSelectedCategory("");
+    setStartDate(getToday());
+    setDuration("3m");
     setCustomEndDate("");
+    setDescription("");
+    setError("");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!customerId) {
-      return toast.error("Customer ID is required");
+      toast.error("Customer ID is missing.");
+      return;
     }
 
     if (!selectedProposalId || !selectedProposal) {
-      return toast.error("Please select a proposal");
+      toast.error("Please select a proposal.");
+      return;
     }
 
     if (!selectedCategory) {
-      return toast.error("Please select a service/category");
+      toast.error("Please select a service/category.");
+      return;
     }
 
-    if (!startDate || !computedEndDate) {
-      return toast.error("Please provide valid start and end dates");
+    if (!startDate) {
+      toast.error("Please select a start date.");
+      return;
+    }
+
+    if (!computedEndDate) {
+      toast.error("Please select an end date.");
+      return;
     }
 
     if (computedEndDate < startDate) {
-      return toast.error("End date cannot be before the start date");
+      toast.error("End date cannot be earlier than the start date.");
+      return;
     }
 
     if (typeof onSave !== "function") {
-      return toast.error(
-        "Workflow save API is not connected yet. Connect the onSave handler."
+      toast.error(
+        "Workflow save API is not connected yet. Please connect onSave."
       );
+      return;
     }
 
-    const category = categories.find(
-      (item) => item.value === selectedCategory
+    const selectedCategoryDetails = categories.find(
+      (category) => category.value === selectedCategory
     );
 
     const payload = {
       customerId,
-      proposalId: selectedProposal._id,
-      proposalNumber: selectedProposal.proposalNumber,
+      proposalId: getProposalId(selectedProposal),
+      proposalNumber: selectedProposal.proposalNumber || "",
       category: selectedCategory,
-      categoryLabel: category?.label || selectedCategory,
+      categoryLabel:
+        selectedCategoryDetails?.label || selectedCategory,
+      description: description.trim(),
       startDate,
       duration,
       endDate: computedEndDate,
     };
 
-    try {
-      setSaving(true);
+    setSaving(true);
 
+    try {
       await onSave(payload);
 
-      toast.success("Workflow saved successfully");
+      toast.success("Workflow created successfully.");
+      resetForm();
+    } catch (err) {
+      console.error("Failed to save workflow:", err);
 
-      setSelectedProposalId("");
-      setSelectedProposal(null);
-      setSelectedCategory("");
-      setStartDate(getToday());
-      setDuration("3m");
-      setCustomEndDate("");
-    } catch (error) {
       toast.error(
-        error?.response?.data?.message || "Failed to save workflow"
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to create workflow."
       );
     } finally {
       setSaving(false);
     }
   };
 
+  const inputClassName =
+    "w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:ring-1 focus:ring-gray-400 disabled:cursor-not-allowed disabled:bg-gray-50";
+
+  const labelClassName =
+    "mb-1.5 block text-sm font-medium text-gray-700";
+
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 p-4 sm:p-6">
+    <div className="mb-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50">
-          <CalendarDays className="h-6 w-6 text-indigo-600" />
+      <div className="flex items-center gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3 sm:px-5">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white">
+          <Workflow className="h-4 w-4 text-gray-700" />
         </div>
 
         <div>
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-base font-semibold text-gray-900">
             Create Workflow
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Select a proposal, choose a service, and set its timeline.
+          <p className="mt-0.5 text-xs text-gray-500">
+            Create a workflow from an existing customer proposal.
           </p>
         </div>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
-      >
-        <div className="space-y-6 p-5 sm:p-7">
-          {/* Proposal */}
+      <form onSubmit={handleSubmit} className="space-y-5 p-4 sm:p-5">
+        {/* Proposal selection */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-gray-500" />
+            <h3 className="text-sm font-semibold text-gray-800">
+              Proposal Details
+            </h3>
+          </div>
+
           <div>
-            <label
-              htmlFor="workflow-proposal"
-              className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-800"
-            >
-              <FileText className="h-4 w-4 text-indigo-600" />
-              Select Proposal
+            <label htmlFor="workflow-proposal" className={labelClassName}>
+              Select Proposal <span className="text-red-500">*</span>
             </label>
 
-            <select
-              id="workflow-proposal"
-              value={selectedProposalId}
-              onChange={handleProposalChange}
-              className={fieldClass}
-              disabled={loadingProposals || !customerId}
-              required
-            >
-              <option value="">
-                {loadingProposals
-                  ? "Loading proposals..."
-                  : "Choose a proposal"}
-              </option>
-
-              {proposals.map((proposal) => (
-                <option key={proposal._id} value={proposal._id}>
-                  {proposal.proposalNumber || "Untitled proposal"}
-                  {" — "}
-                  {proposal.status || "draft"}
+            <div className="relative">
+              <select
+                id="workflow-proposal"
+                value={selectedProposalId}
+                onChange={(event) =>
+                  handleProposalChange(event.target.value)
+                }
+                disabled={loadingProposals || saving}
+                className={`${inputClassName} appearance-none pr-9`}
+                required
+              >
+                <option value="">
+                  {loadingProposals
+                    ? "Loading proposal history..."
+                    : "Choose a proposal"}
                 </option>
-              ))}
-            </select>
 
-            {!loadingProposals && proposals.length === 0 && customerId && (
-              <p className="mt-2 text-xs text-amber-600">
-                No proposals found for this customer.
+                {proposals.map((proposal) => {
+                  const id = getProposalId(proposal);
+
+                  if (!id) return null;
+
+                  return (
+                    <option key={id} value={id}>
+                      {getProposalLabel(proposal)}
+                    </option>
+                  );
+                })}
+              </select>
+
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            </div>
+
+            {!loadingProposals && proposals.length === 0 && !error && (
+              <p className="mt-1.5 text-xs text-gray-500">
+                No proposals were found for this customer.
               </p>
             )}
           </div>
 
-          {/* Selected proposal details */}
-          {selectedProposal && (
-            <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-indigo-600">
-                    Selected proposal
-                  </p>
-                  <p className="mt-1 font-semibold text-gray-900">
-                    {selectedProposal.proposalNumber || "Proposal"}
-                  </p>
-                </div>
-
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-medium capitalize text-gray-600">
-                  {selectedProposal.status || "draft"}
-                </span>
-              </div>
-
-              <p className="mt-2 text-sm text-gray-600">
-                {selectedProposal.items?.length || 0} proposal item(s)
-              </p>
+          {loadingProposalDetails && (
+            <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-600">
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+              Loading proposal details...
             </div>
           )}
 
-          {/* Category */}
+          {/* Selected proposal summary */}
+          {selectedProposal && !loadingProposalDetails && (
+            <div className="rounded-lg border border-emerald-400 bg-emerald-50 p-3">
+              <div className="flex items-start gap-2">
+                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
+                  <Check className="h-3 w-3" />
+                </div>
+
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-emerald-900">
+                    {selectedProposal.proposalNumber ||
+                      "Selected proposal"}
+                  </p>
+
+                  <p className="mt-0.5 text-xs text-emerald-800">
+                    {categories.length}{" "}
+                    {categories.length === 1 ? "service" : "services"}{" "}
+                    available in this proposal.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Category selection */}
+        <section className="space-y-3">
           <div>
-            <label
-              htmlFor="workflow-category"
-              className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-800"
-            >
-              <Layers className="h-4 w-4 text-indigo-600" />
-              Heading / Service
-            </label>
-
-            <select
-              id="workflow-category"
-              value={selectedCategory}
-              onChange={(event) => setSelectedCategory(event.target.value)}
-              className={fieldClass}
-              disabled={!selectedProposal || loadingProposal}
-              required
-            >
-              <option value="">
-                {loadingProposal
-                  ? "Loading proposal items..."
-                  : "Choose a service"}
-              </option>
-
-              {categories.map((category) => (
-                <option key={category.value} value={category.value}>
-                  {category.label}
-                </option>
-              ))}
-            </select>
-
-            {selectedProposal && !loadingProposal && categories.length === 0 && (
-              <p className="mt-2 text-xs text-amber-600">
-                This proposal has no categorized items.
-              </p>
-            )}
-
-            {selectedCategory && (
-              <p className="mt-2 text-xs text-gray-500">
-                The workflow will be associated with the selected proposal
-                category.
-              </p>
-            )}
+            <h3 className="text-sm font-semibold text-gray-800">
+              Workflow Category
+            </h3>
+            <p className="mt-1 text-xs text-gray-500">
+              Select the service included in the chosen proposal.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="workflow-category" className={labelClassName}>
+              Service / Category <span className="text-red-500">*</span>
+            </label>
+
+            <div className="relative">
+              <select
+                id="workflow-category"
+                value={selectedCategory}
+                onChange={(event) =>
+                  setSelectedCategory(event.target.value)
+                }
+                disabled={
+                  !selectedProposal ||
+                  loadingProposalDetails ||
+                  saving ||
+                  categories.length === 0
+                }
+                className={`${inputClassName} appearance-none pr-9`}
+                required
+              >
+                <option value="">
+                  {!selectedProposal
+                    ? "Select a proposal first"
+                    : categories.length === 0
+                      ? "No services found in this proposal"
+                      : "Choose a service"}
+                </option>
+
+                {categories.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            </div>
+          </div>
+
+          {selectedCategory && (
+            <div className="flex items-center gap-2 rounded-lg border border-emerald-400 bg-emerald-50 px-3 py-2">
+              <Check className="h-4 w-4 shrink-0 text-emerald-600" />
+              <span className="text-sm font-medium text-emerald-900">
+                {categories.find(
+                  (category) => category.value === selectedCategory
+                )?.label || selectedCategory}
+              </span>
+            </div>
+          )}
+        </section>
+
+        {/* Description */}
+        <section className="space-y-1.5">
+          <label
+            htmlFor="workflow-description"
+            className="block text-sm font-semibold text-gray-800"
+          >
+            Description
+            <span className="ml-1 font-normal text-gray-400">
+              (Optional)
+            </span>
+          </label>
+
+          <textarea
+            id="workflow-description"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder="Describe the work, deliverables, goals, or special instructions..."
+            rows={4}
+            disabled={saving}
+            className={`${inputClassName} resize-y`}
+          />
+
+          <p className="text-xs text-gray-500">
+            Add the details your team needs to complete this workflow.
+          </p>
+        </section>
+
+        {/* Dates and duration */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-gray-500" />
+            <h3 className="text-sm font-semibold text-gray-800">
+              Timeline
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Start date */}
             <div>
               <label
                 htmlFor="workflow-start-date"
-                className="mb-2 block text-sm font-semibold text-gray-800"
+                className={labelClassName}
               >
-                Start Date
+                Start Date <span className="text-red-500">*</span>
               </label>
 
               <input
                 id="workflow-start-date"
                 type="date"
                 value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
-                className={fieldClass}
+                onChange={(event) =>
+                  handleStartDateChange(event.target.value)
+                }
+                disabled={saving}
+                className={inputClassName}
                 required
               />
             </div>
@@ -444,101 +605,151 @@ export default function Createworkflow({ customerId, onSave }) {
             <div>
               <label
                 htmlFor="workflow-duration"
-                className="mb-2 block text-sm font-semibold text-gray-800"
+                className={labelClassName}
               >
-                Duration
+                Duration <span className="text-red-500">*</span>
               </label>
 
-              <select
-                id="workflow-duration"
-                value={duration}
-                onChange={handleDurationChange}
-                className={fieldClass}
-                required
-              >
-                {DURATION_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  id="workflow-duration"
+                  value={duration}
+                  onChange={(event) =>
+                    handleDurationChange(event.target.value)
+                  }
+                  disabled={saving}
+                  className={`${inputClassName} appearance-none pr-9`}
+                >
+                  {DURATION_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+              </div>
             </div>
 
-            {/* End date */}
-            <div className="sm:col-span-2">
+            {/* Custom end date */}
+            {duration === "custom" && (
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor="workflow-custom-end-date"
+                  className={labelClassName}
+                >
+                  Custom End Date{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+
+                <input
+                  id="workflow-custom-end-date"
+                  type="date"
+                  value={customEndDate}
+                  min={startDate || undefined}
+                  onChange={(event) =>
+                    setCustomEndDate(event.target.value)
+                  }
+                  disabled={saving}
+                  className={inputClassName}
+                  required
+                />
+              </div>
+            )}
+
+            {/* Calculated end date */}
+            <div className={duration === "custom" ? "sm:col-span-2" : ""}>
               <label
                 htmlFor="workflow-end-date"
-                className="mb-2 block text-sm font-semibold text-gray-800"
+                className={labelClassName}
               >
                 End Date
               </label>
 
-              {duration === "custom" ? (
-                <input
-                  id="workflow-end-date"
-                  type="date"
-                  value={customEndDate}
-                  min={startDate}
-                  onChange={(event) => setCustomEndDate(event.target.value)}
-                  className={fieldClass}
-                  required
-                />
-              ) : (
-                <div className="flex min-h-11 items-center justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5">
-                  <span className="text-sm font-medium text-gray-800">
-                    {formatDate(computedEndDate)}
-                  </span>
+              <input
+                id="workflow-end-date"
+                type="text"
+                value={formatDate(computedEndDate)}
+                readOnly
+                className={`${inputClassName} bg-gray-50 font-medium text-gray-700`}
+              />
 
-                  <span className="text-xs text-gray-500">
-                    Automatically calculated
-                  </span>
-                </div>
-              )}
-
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-1.5 text-xs text-gray-500">
                 {duration === "custom"
-                  ? "Choose the end date manually."
-                  : "The end date updates when you change the start date or duration."}
+                  ? "Select the end date manually above."
+                  : "Automatically calculated from the start date and duration."}
               </p>
             </div>
           </div>
+        </section>
 
-          {/* Timeline summary */}
-          {startDate && computedEndDate && (
-            <div className="rounded-xl border border-gray-200 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Workflow timeline
-              </p>
+        {/* Timeline summary */}
+        {startDate && computedEndDate && (
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <p className="text-xs font-medium text-gray-500">
+              WORKFLOW TIMELINE
+            </p>
 
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-                <div>
-                  <p className="text-xs text-gray-500">Starts</p>
-                  <p className="mt-1 font-semibold text-gray-800">
-                    {formatDate(startDate)}
-                  </p>
-                </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+              <span className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 font-medium text-gray-800">
+                {formatDate(startDate)}
+              </span>
 
-                <div className="h-px min-w-8 flex-1 bg-gray-300" />
+              <span className="text-gray-400">→</span>
 
-                <div className="text-right">
-                  <p className="text-xs text-gray-500">Ends</p>
-                  <p className="mt-1 font-semibold text-gray-800">
-                    {formatDate(computedEndDate)}
-                  </p>
-                </div>
-              </div>
+              <span className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 font-medium text-gray-800">
+                {formatDate(computedEndDate)}
+              </span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="flex justify-end border-t border-gray-100 bg-gray-50 p-5">
+        {/* Error message */}
+        {error && (
+          <div
+            role="alert"
+            className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
+            {error}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex flex-col-reverse gap-2 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={resetForm}
+            disabled={saving}
+            className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Reset
+          </button>
+
           <button
             type="submit"
-            disabled={saving || loadingProposal || loadingProposals}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={
+              saving ||
+              loadingProposals ||
+              loadingProposalDetails ||
+              !selectedProposal ||
+              !selectedCategory ||
+              !startDate ||
+              !computedEndDate ||
+              computedEndDate < startDate
+            }
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
           >
-            <Save className="h-4 w-4" />
-            {saving ? "Saving..." : "Save Workflow"}
+            {saving ? (
+              <>
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Create Workflow
+              </>
+            )}
           </button>
         </div>
       </form>
