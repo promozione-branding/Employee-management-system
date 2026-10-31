@@ -24,11 +24,12 @@ const SalesDashboard = () => {
   if (loading) return <Shemar />;
   if (!employee) return null;
 
+  
   return (
     <div className="">
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <DailyCall />
-        <CurrentMonthDealValue />
+        <CurrentMonthDealValue /> 
         <CurrentMonthRevenue />
         <TotalClientCount />
       </div>

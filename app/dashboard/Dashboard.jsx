@@ -12,7 +12,7 @@ import TodayMeeting from "@/components/admin-dashboard/dashboard/TodayMeeting";
 import AdminReminder from "@/components/admin-dashboard/dashboard/AdminReminder";
 import AdminCalendar from "@/components/admin-dashboard/dashboard/AdminCalendar";
 
-const Dashboard = () => {
+const Dashboard = () => { 
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -54,5 +54,7 @@ const Dashboard = () => {
     </div>
   );
 };
+
+
 
 export default Dashboard;
