@@ -1,89 +1,80 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import toast from "react-hot-toast";
 import {
   Mail,
   ShieldCheck,
   ArrowLeft,
+  ArrowRight,
   RefreshCw,
 } from "lucide-react";
 
+import AuthBrandPanel from "../components/AuthBrandPanel";
 import { sendOtpService, verifyOTP } from "@/service/auth";
 
 export default function LoginOtpPage() {
   const router = useRouter();
 
-  const [form, setForm] = useState({ email: "" });
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [logoError, setLogoError] = useState(false);
-  const [greeting, setGreeting] = useState("Good afternoon");
+  const [resending, setResending] = useState(false);
 
-  useEffect(() => {
-    const updateGreeting = () => {
-      const hour = new Date().getHours();
+  const handleSendOTP = async (event) => {
+    event.preventDefault();
 
-      if (hour < 12) {
-        setGreeting("Good morning");
-      } else if (hour < 17) {
-        setGreeting("Good afternoon");
-      } else {
-        setGreeting("Good evening");
-      }
-    };
+    const normalizedEmail = email.trim();
 
-    updateGreeting();
-  }, []);
+    if (!normalizedEmail) {
+      toast.error("Please enter your email address.");
+      return;
+    }
 
-  const handleSendOTP = async (e) => {
-    e.preventDefault();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (loading) return;
-
-    const email = form.email.trim();
-
-    if (!email) {
-      toast.error("Please enter your email.");
+    if (!emailPattern.test(normalizedEmail)) {
+      toast.error("Please enter a valid email address.");
       return;
     }
 
     try {
       setLoading(true);
 
-      const res = await sendOtpService({ email });
+      const res = await sendOtpService({
+        email: normalizedEmail,
+      });
 
       if (res?.success) {
-        toast.success(res.message || "OTP sent successfully.");
-        setForm({ email });
+        setEmail(normalizedEmail);
         setOtp("");
         setStep(2);
+        toast.success(res?.message || "OTP sent successfully!");
       } else {
-        toast.error(res?.message || "Failed to send OTP.");
+        toast.error(res?.message || "Unable to send OTP.");
       }
     } catch (error) {
       console.error("Send OTP error:", error);
 
       toast.error(
-        error?.response?.data?.message || "Failed to send OTP."
+        error?.response?.data?.message ||
+          error?.message ||
+          "Unable to send OTP. Please try again."
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerifyOTP = async (e) => {
-    e.preventDefault();
-
-    if (loading) return;
+  const handleVerifyOTP = async (event) => {
+    event.preventDefault();
 
     if (!/^\d{6}$/.test(otp)) {
-      toast.error("Enter a valid 6-digit OTP.");
+      toast.error("Please enter the complete 6-digit OTP.");
       return;
     }
 
@@ -91,255 +82,145 @@ export default function LoginOtpPage() {
       setLoading(true);
 
       const res = await verifyOTP({
-        email: form.email,
+        email: email.trim(),
         otp,
       });
 
       if (res?.success) {
-        toast.success(res.message || "Login successful.");
-
-        if (res.token) {
+        if (res?.token) {
           localStorage.setItem("token", res.token);
         }
 
+        toast.success(res?.message || "Login successful!");
+
         router.push("/dashboard");
+        router.refresh();
       } else {
-        toast.error(res?.message || "OTP verification failed.");
+        toast.error(res?.message || "Invalid OTP. Please try again.");
       }
     } catch (error) {
       console.error("Verify OTP error:", error);
 
       toast.error(
-        error?.response?.data?.message || "OTP verification failed."
+        error?.response?.data?.message ||
+          error?.message ||
+          "OTP verification failed. Please try again."
       );
     } finally {
       setLoading(false);
     }
   };
 
+  const handleResendOTP = async () => {
+    try {
+      setResending(true);
+
+      const res = await sendOtpService({
+        email: email.trim(),
+      });
+
+      if (res?.success) {
+        setOtp("");
+        toast.success(res?.message || "A new OTP has been sent.");
+      } else {
+        toast.error(res?.message || "Unable to resend OTP.");
+      }
+    } catch (error) {
+      console.error("Resend OTP error:", error);
+
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Unable to resend OTP. Please try again."
+      );
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handleChangeEmail = () => {
-    setOtp("");
     setStep(1);
+    setOtp("");
   };
 
   return (
-    <main className="login-page flex h-dvh w-full flex-col overflow-hidden bg-white text-slate-900 lg:grid lg:grid-cols-[46%_54%]">
+    <main className="h-dvh overflow-hidden bg-white">
+      <div className="grid h-full grid-cols-1 overflow-hidden lg:grid-cols-[46%_54%]">
+        {/* Shared branding panel */}
+        <AuthBrandPanel />
 
-      {/* LEFT BRANDING PANEL — SAME AS PASSWORD LOGIN */}
-      <section className="login-brand relative flex min-h-0 h-[150px] shrink-0 flex-col overflow-hidden px-5 pb-3 pt-0 text-white sm:h-[170px] sm:px-8 lg:h-dvh lg:px-[9%] lg:pb-8">
-
-        {/* Decorative storefront awning */}
-        <div className="awning" aria-hidden="true">
-          {Array.from({ length: 18 }).map((_, index) => (
-            <span
-              key={index}
-              className={
-                index % 3 === 0
-                  ? "awning-orange"
-                  : index % 3 === 1
-                    ? "awning-cream"
-                    : "awning-blue"
-              }
-            />
-          ))}
-        </div>
-
-        {/* Background pattern */}
-        <div className="brand-pattern" aria-hidden="true" />
-
-        {/* Logo with IB fallback */}
-        <div className="relative z-10 mt-[54px] flex h-[52px] shrink-0 items-center sm:mt-[62px] sm:h-[58px] lg:mt-[100px] lg:h-[90px]">
-          {!logoError ? (
-            <Image
-              src="/iblogo.png"
-              alt="Inquiry Bazaar"
-              width={250}
-              height={100}
-              priority
-              onError={() => setLogoError(true)}
-              className="block h-[48px] w-auto max-w-[190px] object-contain object-left sm:h-[55px] sm:max-w-[220px] lg:h-[90px] lg:max-w-[250px]"
-            />
-          ) : (
-            <div
-              role="img"
-              aria-label="IB — Inquiry Bazaar"
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white shadow-md sm:h-14 sm:w-14 lg:h-[72px] lg:w-[72px]"
-            >
-              <span className="font-serif text-2xl font-extrabold tracking-tight text-[#10346b] sm:text-3xl lg:text-4xl">
-                I<span className="text-orange-500">B</span>
-              </span>
+        {/* OTP form */}
+        <section className="flex min-h-0 items-center justify-center overflow-y-auto bg-white px-5 py-5 sm:px-8 lg:px-12">
+          <div className="w-full max-w-md">
+            {/* Mobile-only heading */}
+            <div className="mb-5 lg:hidden">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-orange-500">
+                Secure access
+              </p>
             </div>
-          )}
-        </div>
 
-        {/* Brand headline */}
-        <div className="relative z-10 mt-2 lg:mt-[72px]">
-          <h1 className="font-serif text-[25px] font-bold leading-tight tracking-tight sm:text-[30px] lg:text-[54px]">
-            Inquiry se
-            <span className="text-orange-400 lg:block">
-              {" "}INCOME tak!
-            </span>
-          </h1>
+            {/* Heading */}
+            <div className="mb-7">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#10346b]">
+                <ShieldCheck size={24} />
+              </div>
 
-          <p className="mt-3 hidden max-w-md text-base leading-7 text-blue-100 lg:block">
-            Your leads, follow-ups, quotations and deals,
-            all in one place.
-          </p>
-        </div>
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                {step === 1 ? "Login with OTP" : "Verify your email"}
+              </h2>
 
-        {/* Growth illustration — desktop only */}
-        <div className="relative z-10 mt-auto hidden h-[210px] w-full max-w-[500px] shrink-0 lg:block">
-          <div className="absolute inset-x-0 bottom-0 flex h-[165px] items-end justify-between gap-3">
-            {[
-              { label: "Inquiry", height: "32%", color: "bg-orange-400" },
-              { label: "Follow-up", height: "47%", color: "bg-orange-500" },
-              { label: "Quotation", height: "63%", color: "bg-orange-500" },
-              { label: "Deal", height: "80%", color: "bg-blue-700" },
-              { label: "Income", height: "100%", color: "bg-blue-600" },
-            ].map((item) => (
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                {step === 1
+                  ? "Enter your registered email address. We'll send you a one-time verification code."
+                  : "Enter the 6-digit code sent to your email address to securely sign in."}
+              </p>
+            </div>
+
+            {/* Login method tabs */}
+            <div className="mb-7 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
+              <Link
+                href="/login"
+                className="flex items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:text-[#10346b]"
+              >
+                Password
+              </Link>
+
               <div
-                key={item.label}
-                className="flex h-full flex-1 flex-col justify-end"
+                aria-current="page"
+                className="flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2.5 text-sm font-semibold text-[#10346b] shadow-sm"
               >
-                <div
-                  style={{ height: item.height }}
-                  className={`${item.color} flex min-h-[48px] items-start justify-center rounded-t-xl px-1 pt-3 text-center text-[10px] font-bold text-white`}
-                >
-                  {item.label}
-                </div>
+                <ShieldCheck size={16} />
+                One-time code
               </div>
-            ))}
-          </div>
+            </div>
 
-          <svg
-            viewBox="0 0 520 220"
-            className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M35 160 L135 130 L235 96 L335 65 L440 25"
-              stroke="white"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-
-            {[
-              [35, 160],
-              [135, 130],
-              [235, 96],
-              [335, 65],
-              [440, 25],
-            ].map(([cx, cy], index) => (
-              <circle
-                key={index}
-                cx={cx}
-                cy={cy}
-                r="5"
-                fill={index === 4 ? "#fb923c" : "#173968"}
-                stroke="white"
-                strokeWidth="2.5"
-              />
-            ))}
-
-            <path
-              d="M430 17 L440 25 L431 33"
-              stroke="white"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-
-        <p className="relative z-10 mt-auto hidden shrink-0 pb-1 text-xs text-blue-200 lg:block">
-          Leads into relationships. Relationships into revenue.
-        </p>
-      </section>
-
-      {/* RIGHT OTP PANEL */}
-      <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-5 py-3 sm:px-8 sm:py-4 lg:h-dvh lg:px-10 lg:py-5 xl:px-16">
-
-        <div className="mx-auto flex min-h-0 w-full max-w-[405px] flex-1 flex-col justify-center">
-
-          {/* Greeting */}
-          <header className="mb-4 shrink-0 sm:mb-5">
-            <h2 className="font-serif text-[29px] font-bold leading-tight tracking-tight text-[#10346b] sm:text-[34px] lg:text-[38px]">
-              {greeting}
-            </h2>
-
-            <p className="mt-1 text-[13px] text-slate-500 sm:text-sm">
-              Sign in to your Inquiry Bazaar workspace.
-            </p>
-          </header>
-
-          {/* Login method selector */}
-          <div className="mb-4 grid shrink-0 grid-cols-2 rounded-xl border border-[#d5dced] bg-[#f2f4f9] p-1">
-            <Link
-              href="/login"
-              className="flex items-center justify-center rounded-[9px] px-3 py-2 text-sm font-semibold text-slate-500 transition hover:text-[#10346b]"
-            >
-              Password
-            </Link>
-
-            <button
-              type="button"
-              aria-current="page"
-              className="rounded-[9px] border border-[#e0e5ef] bg-white px-3 py-2 text-sm font-semibold text-[#10346b] shadow-sm"
-            >
-              One-time code
-            </button>
-          </div>
-
-          {/* STEP 1: EMAIL */}
-          {step === 1 && (
-            <div className="shrink-0">
-              <div className="mb-5">
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-[#10346b]">
-                  <Mail className="h-6 w-6" />
-                </div>
-
-                <h3 className="text-lg font-bold text-slate-900">
-                  Sign in with a one-time code
-                </h3>
-
-                <p className="mt-1 text-sm leading-6 text-slate-500">
-                  Enter your work email address and we&apos;ll send
-                  you a verification code.
-                </p>
-              </div>
-
-              <form
-                onSubmit={handleSendOTP}
-                className="flex flex-col gap-4"
-              >
+            {step === 1 ? (
+              /* Step 1: Email entry */
+              <form onSubmit={handleSendOTP} className="space-y-5">
                 <div>
                   <label
-                    htmlFor="email"
-                    className="mb-1.5 block text-sm font-semibold text-slate-800"
+                    htmlFor="otp-email"
+                    className="mb-2 block text-sm font-semibold text-slate-700"
                   >
-                    Work email
+                    Email address
                   </label>
 
                   <div className="relative">
                     <Mail
-                      aria-hidden="true"
-                      className="absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400"
+                      size={18}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                     />
 
                     <input
-                      id="email"
+                      id="otp-email"
                       type="email"
                       autoComplete="email"
-                      placeholder="name@company.com"
-                      value={form.email}
-                      onChange={(e) =>
-                        setForm({ email: e.target.value })
-                      }
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
                       required
                       disabled={loading}
-                      className="h-[46px] w-full rounded-xl border border-[#d4dceb] bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#315b96] focus:ring-2 focus:ring-blue-100 sm:h-[48px]"
+                      className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#10346b] focus:ring-4 focus:ring-blue-900/5 disabled:opacity-60"
                     />
                   </div>
                 </div>
@@ -347,56 +228,57 @@ export default function LoginOtpPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border-b-[3px] border-orange-500 bg-[#10346b] px-5 py-3 text-sm font-bold text-white shadow-[0_6px_14px_rgba(16,52,107,0.12)] transition hover:bg-[#17427f] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#10346b] px-4 text-sm font-bold text-white shadow-lg shadow-blue-950/10 transition hover:bg-[#0b2855] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loading ? (
                     <>
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                      Sending code...
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                      Sending OTP...
                     </>
                   ) : (
                     <>
-                      Send one-time code
-                      <Mail className="h-4 w-4" />
+                      Send OTP
+                      <ArrowRight size={17} />
                     </>
                   )}
                 </button>
               </form>
-            </div>
-          )}
+            ) : (
+              /* Step 2: OTP verification */
+              <form onSubmit={handleVerifyOTP} className="space-y-5">
+                <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#10346b] shadow-sm">
+                      <Mail size={17} />
+                    </div>
 
-          {/* STEP 2: VERIFY OTP */}
-          {step === 2 && (
-            <div className="shrink-0">
-              <div className="mb-5">
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-[#10346b]">
-                  <ShieldCheck className="h-6 w-6" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-slate-500">
+                        Verification code sent to
+                      </p>
+
+                      <p className="mt-1 break-all text-sm font-semibold text-slate-800">
+                        {email}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={handleChangeEmail}
+                        disabled={loading || resending}
+                        className="mt-2 text-xs font-semibold text-[#10346b] hover:text-orange-500 disabled:opacity-50"
+                      >
+                        Change email
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                <h3 className="text-lg font-bold text-slate-900">
-                  Check your email
-                </h3>
-
-                <p className="mt-1 text-sm leading-6 text-slate-500">
-                  We sent a verification code to
-                  {" "}
-                  <span className="break-all font-semibold text-slate-700">
-                    {form.email}
-                  </span>
-                  . Enter the six-digit code below to sign in.
-                </p>
-              </div>
-
-              <form
-                onSubmit={handleVerifyOTP}
-                className="flex flex-col gap-4"
-              >
                 <div>
                   <label
                     htmlFor="otp"
-                    className="mb-1.5 block text-sm font-semibold text-slate-800"
+                    className="mb-2 block text-sm font-semibold text-slate-700"
                   >
-                    Verification code
+                    Enter 6-digit OTP
                   </label>
 
                   <input
@@ -406,169 +288,86 @@ export default function LoginOtpPage() {
                     autoComplete="one-time-code"
                     pattern="[0-9]{6}"
                     maxLength={6}
-                    placeholder="Enter 6-digit code"
+                    placeholder="000000"
                     value={otp}
-                    onChange={(e) =>
+                    onChange={(event) =>
                       setOtp(
-                        e.target.value.replace(/\D/g, "").slice(0, 6)
+                        event.target.value
+                          .replace(/\D/g, "")
+                          .slice(0, 6)
                       )
                     }
                     required
                     disabled={loading}
-                    className="h-[52px] w-full rounded-xl border border-[#d4dceb] bg-white px-4 text-center text-xl font-bold tracking-[0.45em] text-[#10346b] outline-none transition placeholder:text-sm placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 focus:border-[#315b96] focus:ring-2 focus:ring-blue-100"
+                    className="h-14 w-full rounded-xl border border-slate-200 bg-white px-4 text-center text-2xl font-bold tracking-[0.5em] text-[#10346b] outline-none transition placeholder:text-slate-300 placeholder:tracking-[0.5em] focus:border-[#10346b] focus:ring-4 focus:ring-blue-900/5 disabled:opacity-60"
                   />
 
-                  <p className="mt-2 text-xs text-slate-500">
-                    Enter the code received in your email.
+                  <p className="mt-2 text-xs text-slate-400">
+                    Enter the code exactly as received in your email.
                   </p>
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading || otp.length !== 6}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border-b-[3px] border-orange-500 bg-[#10346b] px-5 py-3 text-sm font-bold text-white shadow-[0_6px_14px_rgba(16,52,107,0.12)] transition hover:bg-[#17427f] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#10346b] px-4 text-sm font-bold text-white shadow-lg shadow-blue-950/10 transition hover:bg-[#0b2855] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loading ? (
                     <>
-                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                       Verifying...
                     </>
                   ) : (
                     <>
-                      Verify and sign in
-                      <ShieldCheck className="h-4 w-4" />
+                      Verify & Sign in
+                      <ArrowRight size={17} />
                     </>
                   )}
                 </button>
 
+                <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-3 pt-1 text-sm">
+                  <span className="text-slate-500">
+                    Didn&apos;t receive the code?
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={handleResendOTP}
+                    disabled={loading || resending}
+                    className="inline-flex items-center gap-1.5 font-semibold text-[#10346b] transition hover:text-orange-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <RefreshCw
+                      size={14}
+                      className={resending ? "animate-spin" : ""}
+                    />
+                    {resending ? "Resending..." : "Resend OTP"}
+                  </button>
+                </div>
+
                 <button
                   type="button"
                   onClick={handleChangeEmail}
-                  disabled={loading}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#d4dceb] bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#10346b] disabled:opacity-60"
+                  disabled={loading || resending}
+                  className="flex w-full items-center justify-center gap-2 py-2 text-sm font-medium text-slate-500 transition hover:text-[#10346b] disabled:opacity-50"
                 >
-                  <ArrowLeft className="h-4 w-4" />
-                  Change email address
+                  <ArrowLeft size={15} />
+                  Back to email entry
                 </button>
               </form>
+            )}
+
+            {/* Footer */}
+            <div className="mt-8 flex items-center justify-center gap-2 text-xs text-slate-400">
+              <ShieldCheck size={15} />
+              Secure sign-in to your account
             </div>
-          )}
 
-          {/* Back to password login */}
-          <p className="mt-5 shrink-0 text-center text-sm text-slate-500">
-            Prefer using a password?{" "}
-            <Link
-              href="/login"
-              className="font-semibold text-[#28538f] hover:text-orange-600"
-            >
-              Sign in with password
-            </Link>
-          </p>
-        </div>
-
-        {/* Footer */}
-        <footer className="mx-auto mt-2 flex w-full max-w-[405px] shrink-0 flex-col gap-0.5 pb-1 text-[10px] leading-4 text-slate-500 sm:text-xs lg:flex-row lg:items-center lg:justify-between lg:gap-3">
-          <p>Trouble signing in? Contact your team admin.</p>
-
-          <p className="shrink-0">
-            © {new Date().getFullYear()} Inquiry Bazaar
-          </p>
-        </footer>
-      </section>
-
-      {/* Styling shared with password login */}
-      <style jsx>{`
-        .login-brand {
-          background: linear-gradient(145deg, #0a2856 0%, #12396f 100%);
-        }
-
-        .awning {
-          position: absolute;
-          top: 0;
-          left: 0;
-          display: flex;
-          width: 100%;
-          height: 42px;
-          overflow: hidden;
-        }
-
-        .awning span {
-          flex: 1 0 22px;
-          height: 42px;
-          border-radius: 0 0 14px 14px;
-          box-shadow: inset -1px 0 rgba(255, 255, 255, 0.12);
-        }
-
-        .awning-orange {
-          background: #fb923c;
-        }
-
-        .awning-cream {
-          background: #fff7ed;
-        }
-
-        .awning-blue {
-          background: #2c507f;
-        }
-
-        .brand-pattern {
-          position: absolute;
-          inset: 42px 0 0;
-          opacity: 0.12;
-          background-image:
-            radial-gradient(
-              circle at center,
-              #fb923c 0 2px,
-              transparent 3px
-            ),
-            radial-gradient(
-              ellipse at center,
-              transparent 0 10px,
-              #9db9e1 11px 12px,
-              transparent 13px
-            );
-          background-size: 80px 80px;
-          background-position: 0 14px;
-          mask-image: linear-gradient(to bottom, black, transparent 95%);
-          pointer-events: none;
-        }
-
-        @media (min-width: 640px) {
-          .awning {
-            height: 48px;
-          }
-
-          .awning span {
-            height: 48px;
-          }
-
-          .brand-pattern {
-            top: 48px;
-            inset-inline: 0;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .awning {
-            height: 68px;
-          }
-
-          .awning span {
-            height: 68px;
-            border-radius: 0 0 22px 22px;
-          }
-
-          .brand-pattern {
-            top: 68px;
-          }
-        }
-
-        @media (max-height: 650px) {
-          .login-brand > div:nth-of-type(3) {
-            margin-top: 4px;
-          }
-        }
-      `}</style>
+            <p className="mt-5 text-center text-[11px] text-slate-400 lg:hidden">
+              © {new Date().getFullYear()} Inquiry Bazaar. All rights reserved.
+            </p>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
