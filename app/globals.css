@@ -1,13 +1,57 @@
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
+/* =========================================
+   INQUIRY BAZAAR — BRAND THEME
+   Navy + Orange + Soft Blue-Grey
+========================================= */
+
 @theme inline {
+  /* Brand colors */
+  --color-brand-navy: #0A2E66;
+  --color-brand-navy-2: #12397A;
+  --color-brand-navy-3: #061D44;
+  --color-brand-blue: #2B5086;
+  --color-brand-blue-light: #3B69AD;
+  --color-brand-orange: #F27B1E;
+  --color-brand-orange-light: #F7A25C;
+  --color-brand-cream: #FFF5EB;
+
+  /* Surface colors */
+  --color-page: #F2F4F9;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F7F8FC;
+  --color-line: #E3E7F0;
+
+  /* Text colors */
+  --color-ink: #0F1B33;
+  --color-muted-text: #5B6478;
+  --color-faint: #8A92A6;
+
+  /* Status colors */
+  --color-status-green: #17845A;
+  --color-status-red: #CC3B32;
+  --color-status-violet: #6A4FD6;
+  --color-status-amber: #B86A00;
+
+  /* Semantic backgrounds */
+  --color-status-green-bg: #E5F5EC;
+  --color-status-red-bg: #FCEAE8;
+  --color-status-violet-bg: #EFEBFC;
+  --color-status-amber-bg: #FFF4D9;
+  --color-status-blue-bg: #E9EFF9;
+  --color-status-orange-bg: #FFF1E4;
+
+  /* Existing shadcn/Tailwind theme mappings */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -16,15 +60,18 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -37,242 +84,444 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* =========================================
+   LIGHT THEME — DEFAULT
+========================================= */
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  color-scheme: light;
+
+  --radius: 0.875rem;
+
+  --background: #F2F4F9;
+  --foreground: #0F1B33;
+
+  --card: #FFFFFF;
+  --card-foreground: #0F1B33;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #0F1B33;
+
+  --primary: #0A2E66;
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #E9EFF9;
+  --secondary-foreground: #0A2E66;
+
+  --muted: #F7F8FC;
+  --muted-foreground: #5B6478;
+
+  --accent: #FFF1E4;
+  --accent-foreground: #0A2E66;
+
+  --destructive: #CC3B32;
+
+  --border: #E3E7F0;
+  --input: #E3E7F0;
+  --ring: #F27B1E;
+
+  /* Charts */
+  --chart-1: #0A2E66;
+  --chart-2: #F27B1E;
+  --chart-3: #17845A;
+  --chart-4: #6A4FD6;
+  --chart-5: #B86A00;
+
+  /* Sidebar */
+  --sidebar: #0A2E66;
+  --sidebar-foreground: #FFFFFF;
+
+  --sidebar-primary: #F27B1E;
+  --sidebar-primary-foreground: #FFFFFF;
+
+  --sidebar-accent: #12397A;
+  --sidebar-accent-foreground: #FFFFFF;
+
+  --sidebar-border: rgb(255 255 255 / 12%);
+  --sidebar-ring: #F7A25C;
 }
 
+/* =========================================
+   OPTIONAL DARK THEME
+========================================= */
+
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  color-scheme: dark;
+
+  --background: #08172D;
+  --foreground: #F2F4F9;
+
+  --card: #0D2140;
+  --card-foreground: #F2F4F9;
+
+  --popover: #0D2140;
+  --popover-foreground: #F2F4F9;
+
+  --primary: #F7A25C;
+  --primary-foreground: #061D44;
+
+  --secondary: #12315A;
+  --secondary-foreground: #F2F4F9;
+
+  --muted: #122541;
+  --muted-foreground: #AAB5C8;
+
+  --accent: #382B25;
+  --accent-foreground: #F7A25C;
+
+  --destructive: #F87171;
+
+  --border: rgb(226 232 240 / 14%);
+  --input: rgb(226 232 240 / 18%);
+  --ring: #F7A25C;
+
+  --chart-1: #F7A25C;
+  --chart-2: #6F9DE5;
+  --chart-3: #4CC99A;
+  --chart-4: #B2A0FF;
+  --chart-5: #FFD078;
+
+  --sidebar: #061D44;
+  --sidebar-foreground: #F2F4F9;
+
+  --sidebar-primary: #F27B1E;
+  --sidebar-primary-foreground: #FFFFFF;
+
+  --sidebar-accent: #12397A;
+  --sidebar-accent-foreground: #FFFFFF;
+
+  --sidebar-border: rgb(255 255 255 / 12%);
+  --sidebar-ring: #F7A25C;
 }
+
+/* =========================================
+   BASE STYLES
+========================================= */
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    background: #F7A25C;
+    color: #061D44;
+  }
+
+  :focus-visible {
+    outline: 2px solid #F27B1E;
+    outline-offset: 2px;
   }
 }
 
-/* FullCalendar Styling */
-/* .calendar-wrapper {
-  @apply text-slate-900 ;
+/* =========================================
+   SHARED SURFACE POLISH
+   Use these classes where appropriate.
+========================================= */
+
+@layer components {
+  .brand-card {
+    @apply rounded-[20px] border border-[#E3E7F0] bg-white;
+    box-shadow: 0 3px 12px rgb(10 46 102 / 4%);
+    transition:
+      box-shadow 200ms ease,
+      border-color 200ms ease,
+      transform 200ms ease;
+  }
+
+  .brand-card:hover {
+    border-color: #D2DCEC;
+    box-shadow: 0 8px 24px rgb(10 46 102 / 8%);
+  }
+
+  .brand-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl
+      bg-[#0A2E66] px-4 py-2.5 text-sm font-semibold text-white;
+    transition:
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .brand-button:hover {
+    background-color: #12397A;
+    box-shadow: 0 4px 12px rgb(10 46 102 / 16%);
+  }
+
+  .brand-button-accent {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl
+      bg-[#F27B1E] px-4 py-2.5 text-sm font-semibold text-white;
+    transition:
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .brand-button-accent:hover {
+    background-color: #D96512;
+    box-shadow: 0 4px 12px rgb(242 123 30 / 20%);
+  }
+}
+
+/* =========================================
+   FULLCALENDAR — NAVY + ORANGE
+========================================= */
+
+.calendar-wrapper {
+  width: 100%;
+  min-width: 0;
+  color: #0F1B33;
+  font-family: var(--font-geist-sans), Arial, sans-serif;
 }
 
 .calendar-wrapper :where(.fc) {
-  @apply font-sans md:text-sm ;
+  width: 100%;
+  font-size: 12px;
+  color: #0F1B33;
 }
 
-.calendar-wrapper :where(.fc .fc-button-primary) {
-  @apply bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700 transition-colors ;
+.calendar-wrapper :where(.fc .fc-toolbar) {
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.calendar-wrapper :where(.fc .fc-toolbar-title) {
+  color: #0A2E66;
+  font-size: clamp(15px, 2vw, 20px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.calendar-wrapper :where(.fc .fc-button) {
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 1px solid #0A2E66;
+  border-radius: 8px;
+  background-color: #0A2E66;
+  color: #FFFFFF;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 600;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.calendar-wrapper :where(.fc .fc-button:hover) {
+  border-color: #12397A;
+  background-color: #12397A;
+}
+
+.calendar-wrapper :where(.fc .fc-button:focus) {
+  box-shadow: 0 0 0 3px rgb(242 123 30 / 20%);
 }
 
 .calendar-wrapper
-  :where(.fc .fc-button-primary:not(:disabled).fc-button-active) {
-  @apply bg-blue-700 border-blue-700;
+  :where(.fc .fc-button-primary:not(:disabled).fc-button-active),
+.calendar-wrapper
+  :where(.fc .fc-button-primary:not(:disabled):active) {
+  border-color: #F27B1E;
+  background-color: #F27B1E;
+  color: #FFFFFF;
 }
 
 .calendar-wrapper :where(.fc .fc-button-primary:disabled) {
-  @apply opacity-50 cursor-not-allowed;
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.calendar-wrapper :where(.fc .fc-scrollgrid) {
+  overflow: hidden;
+  border: 1px solid #E3E7F0;
+  border-radius: 12px;
+}
+
+.calendar-wrapper :where(.fc th) {
+  border-color: #E3E7F0;
+  background-color: #F7F8FC;
+}
+
+.calendar-wrapper :where(.fc .fc-col-header-cell-cushion) {
+  display: inline-block;
+  padding: 10px 4px;
+  color: #5B6478;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .calendar-wrapper :where(.fc .fc-daygrid-day) {
-  @apply hover:bg-slate-50 transition-colors;
+  background-color: #FFFFFF;
+  transition: background-color 160ms ease;
 }
 
-.calendar-wrapper :where(.fc .fc-daygrid-day.fc-day-other) {
-  @apply opacity-50;
+.calendar-wrapper :where(.fc .fc-daygrid-day:hover) {
+  background-color: #F7F8FC;
 }
 
-.calendar-wrapper :where(.fc .fc-daygrid-day.fc-day-today) {
-  @apply bg-blue-50;
+.calendar-wrapper :where(.fc .fc-daygrid-day-frame) {
+  min-height: 65px;
 }
 
-.calendar-wrapper :where(.fc .fc-event) {
-  @apply rounded-md overflow-hidden;
+.calendar-wrapper :where(.fc .fc-daygrid-day-number) {
+  padding: 7px;
+  color: #5B6478;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.calendar-wrapper :where(.fc .fc-day-other .fc-daygrid-day-number) {
+  color: #AAB1C0;
+}
+
+.calendar-wrapper :where(.fc .fc-day-today) {
+  background-color: #FFF5EB !important;
+}
+
+.calendar-wrapper :where(.fc .fc-day-today .fc-daygrid-day-number) {
+  color: #0A2E66;
+  font-weight: 800;
+}
+
+.calendar-wrapper :where(.fc .fc-daygrid-event) {
+  margin: 2px 3px;
+  overflow: hidden;
+  border-radius: 5px;
+  font-size: 10px;
 }
 
 .calendar-wrapper :where(.fc .fc-event-title) {
-  @apply font-semibold text-xs px-2 py-1;
+  overflow: hidden;
+  padding: 2px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-overflow: ellipsis;
 }
 
-.calendar-wrapper :where(.fc-col-header-cell) {
-  @apply bg-slate-100 py-3 text-slate-800 font-semibold border-slate-200;
+.calendar-wrapper :where(.fc .fc-event-time) {
+  padding-left: 4px;
+  font-size: 10px;
+  font-weight: 600;
 }
 
-.calendar-wrapper :where(.fc .fc-daygrid-day-number) {
-  @apply text-slate-700 font-semibold;
-} */
-
-/* 1. MAIN WRAPPER - Controls overall calendar size */
-.calendar-wrapper {
-  @apply text-slate-900 w-96 h-[80vh] lg:h-[60vh]; /* w-64=256px wide, h-72=288px tall - CHANGE THESE for size */
-  /* Options: w-48 h-56 (very small), w-72 h-80 (medium), w-96 h-96 (large) */
+.calendar-wrapper :where(.fc .fc-list-day-cushion) {
+  background-color: #F7F8FC;
 }
 
-/* 2. BASE CALENDAR - Controls font and global spacing */
-.calendar-wrapper :where(.fc) {
-  @apply font-sans text-[10px] leading-tight; /* text-xs=12px font, leading-tight=compact line height */
-  /* For even smaller: text-[10px], for larger: text-sm */
+.calendar-wrapper :where(.fc .fc-list-event:hover td) {
+  background-color: #FFF5EB;
 }
 
-/* 3. NAVIGATION BUTTONS (prev/next/today) */
-.calendar-wrapper :where(.fc .fc-button-primary) {
-  @apply bg-red-600 hover:bg-red-700 border-red-600 hover:border-red-700 
-         transition-colors px-1.5 py-0.5 text-xs rounded-md font-medium;
-  /* px-1.5 py-0.5 = very compact buttons, text-xs=small text */
+/* Calendar height is controlled by the component's FullCalendar options.
+   Avoid fixed width utilities such as w-96 here. */
+
+/* =========================================
+   SCROLLBARS
+========================================= */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #C7D0DF transparent;
 }
 
-.calendar-wrapper
-  :where(.fc .fc-button-primary:not(:disabled).fc-button-active) {
-  @apply bg-blue-700 border-blue-700 shadow-sm; /* Active/pressed state */
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
 }
 
-.calendar-wrapper :where(.fc .fc-button-primary:disabled) {
-  @apply opacity-50 cursor-not-allowed;
+*::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* 4. HEADER ROW (Sun Mon Tue etc.) */
-.calendar-wrapper :where(.fc-col-header-cell) {
-  @apply bg-slate-100 py-1 px-2 text-slate-800 font-semibold border-blue-200 
-         text-xs border-b; /* py-1=4px top/bottom padding = SHORT header */
-  /* Make taller: py-2, Shorter: py-0.5 */
+*::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #C7D0DF;
 }
 
-/* 5. DAY CELLS - Most important for compact look */
-.calendar-wrapper :where(.fc .fc-daygrid-day) {
-  @apply hover:bg-slate-50 transition-colors h-5 border-r border-b border-slate-100;
-  /* h-12=48px tall rows (CHANGE THIS for row height), border-r/b=grid lines */
-  /* Options: h-10=40px (very compact), h-14=56px (spacious) */
+*::-webkit-scrollbar-thumb:hover {
+  background: #8A9AB3;
 }
 
-.calendar-wrapper :where(.fc .fc-daygrid-day.fc-day-other) {
-  @apply opacity-40 bg-slate-50; /* Previous/next month days - more faded */
+/* =========================================
+   REDUCED MOTION
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-.calendar-wrapper :where(.fc .fc-daygrid-day.fc-day-today) {
-  @apply bg-blue-50 border-2 border-blue-200 ring-2 ring-blue-100;
-  /* Today highlight - customize colors here */
-}
+/* =========================================
+   MOBILE CALENDAR
+========================================= */
 
-/* 6. DAY NUMBERS (1, 2, 3 etc.) */
-.calendar-wrapper :where(.fc .fc-daygrid-day-number) {
-  @apply text-slate-700 font-semibold text-xs mt-0.5; /* mt-0.5=slight top spacing */
-  /* Larger numbers: text-sm, Smaller: text-[10px] */
-}
-
-/* 7. EVENTS/STACKED EVENTS */
-.calendar-wrapper :where(.fc .fc-daygrid-event) {
-  @apply rounded text-xs leading-3 mb-0.5 px-1 py-0.5 max-h-5; 
-  /* Shorter events: max-h-4 (16px), Taller: max-h-6 (24px) */
-}
-
-.calendar-wrapper :where(.fc .fc-daygrid-event-harness) {
-  @apply max-h-10 p-0.5; /* Harness = event container, max-h-10=40px total events space */
-}
-
-/* 8. EVENT TITLES */
-.calendar-wrapper :where(.fc-event-title) {
-  @apply font-semibold text-[10px] px-1 py-0.5 truncate; /* truncate=ellipsis if too long */
-}
-
-/* 9. MONTH TITLE */
-.calendar-wrapper :where(.fc-toolbar-title) {
-  @apply text-sm font-bold text-slate-900 tracking-tight;
-  /* Smaller title: text-xs, Larger: text-base */
-}
-
-/* 10. SCROLLBAR (if events overflow) */
-.calendar-wrapper :where(.fc-scroller-harness) {
-  @apply max-h-92 md:max-h-80 md:w-[78vw] lg:max-h-72 lg:w-92; /* Limits scrollable area height */
-}
-
-/* 11. VERTICAL BORDERS between days */
-.calendar-wrapper :where(.fc .fc-daygrid-day-frame) {
-  @apply border-r border-slate-100 last:border-r-0; /* Clean vertical lines */
-}
-
-/* 12. RESPONSIVE - Mobile adjustments */
 @media (max-width: 640px) {
-  .calendar-wrapper {
-    @apply w-full h-64; /* Full width on mobile */
+  .calendar-wrapper :where(.fc) {
+    font-size: 10px;
   }
 
-  .calendar-wrapper :where(.fc .fc-daygrid-day) {
-    @apply h-10; /* Even shorter rows on mobile */
+  .calendar-wrapper :where(.fc .fc-toolbar) {
+    gap: 8px;
+  }
+
+  .calendar-wrapper :where(.fc .fc-toolbar-title) {
+    font-size: 15px;
+  }
+
+  .calendar-wrapper :where(.fc .fc-button) {
+    min-height: 29px;
+    padding: 5px 7px;
+    font-size: 10px;
+  }
+
+  .calendar-wrapper :where(.fc .fc-daygrid-day-frame) {
+    min-height: 42px;
+  }
+
+  .calendar-wrapper :where(.fc .fc-col-header-cell-cushion) {
+    padding: 7px 2px;
+    font-size: 10px;
+  }
+
+  .calendar-wrapper :where(.fc .fc-daygrid-day-number) {
+    padding: 4px;
+    font-size: 10px;
   }
 }

@@ -1,8 +1,21 @@
-// components/admin-dashboard/dashboard/TodayMeeting.jsx
+
 "use client";
 
+// components/admin-dashboard/dashboard/TodayMeeting.jsx
+
 import { getTodayMeetingService } from "@/service/admin-dashboard/dashboard-api";
-import { Calendar, Phone, Users, Video, CalendarDays, X } from "lucide-react";
+import {
+  Calendar,
+  Phone,
+  Users,
+  Video,
+  CalendarDays,
+  X,
+  Clock,
+  Building2,
+  UserRound,
+  CalendarCheck,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -18,20 +31,81 @@ const PRESETS = [
 ];
 
 const SCROLLBAR_CSS = `
-  .meeting-scroll-admin::-webkit-scrollbar { width: 6px; }
-  .meeting-scroll-admin::-webkit-scrollbar-track { background: transparent; }
+  .meeting-scroll-admin::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .meeting-scroll-admin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
   .meeting-scroll-admin::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.15);
-    border-radius: 3px;
+    background-color: #cbd5e1;
+    border-radius: 999px;
   }
+
   .meeting-scroll-admin::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: #94a3b8;
   }
+
   .meeting-scroll-admin {
     scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+    scrollbar-color: #cbd5e1 transparent;
   }
 `;
+
+const formatMeetingTime = (date) => {
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "Time unavailable";
+  }
+
+  return parsedDate.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+const formatMeetingDate = (date) => {
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "Date unavailable";
+  }
+
+  return parsedDate.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const getMeetingTypeStyle = (type) => {
+  switch (type?.toLowerCase()) {
+    case "call":
+      return {
+        icon: <Phone className="h-4 w-4" />,
+        badge: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+        iconStyle: "bg-emerald-50 text-emerald-600",
+      };
+
+    case "meeting":
+      return {
+        icon: <Video className="h-4 w-4" />,
+        badge: "bg-blue-50 text-blue-700 ring-blue-100",
+        iconStyle: "bg-blue-50 text-blue-600",
+      };
+
+    default:
+      return {
+        icon: <Users className="h-4 w-4" />,
+        badge: "bg-violet-50 text-violet-700 ring-violet-100",
+        iconStyle: "bg-violet-50 text-violet-600",
+      };
+  }
+};
 
 const TodayMeeting = () => {
   const pathname = usePathname();
@@ -46,16 +120,22 @@ const TodayMeeting = () => {
 
   const fetchMeetings = useCallback(async () => {
     setLoading(true);
+
     try {
       const params = { preset };
+
       if (preset === "custom") {
         if (from) params.from = from;
         if (to) params.to = to;
       }
+
       const res = await getTodayMeetingService(params);
-      if (res.success) setMeetings(res.data || []);
+
+      if (res.success) {
+        setMeetings(res.data || []);
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Failed to fetch meetings:", error);
     } finally {
       setLoading(false);
     }
@@ -65,171 +145,253 @@ const TodayMeeting = () => {
     fetchMeetings();
   }, [fetchMeetings]);
 
-  const getIcon = (type) => {
-    switch (type?.toLowerCase()) {
-      case "call":
-        return <Phone size={16} className="text-green-600" />;
-      case "meeting":
-        return <Video size={16} className="text-blue-600" />;
-      default:
-        return <Users size={16} className="text-purple-600" />;
-    }
-  };
-
   const clientBase = isManager ? "/manager/customer" : "/dashboard/customer";
 
   return (
-    <div className="bg-[#f3eaea] rounded-lg shadow-md p-6 border h-full lg:w-full flex flex-col">
+    <section className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
       <style>{SCROLLBAR_CSS}</style>
 
-      <div className="flex items-center gap-2 mb-4 shrink-0">
-        <div className="bg-purple-50 p-2 rounded-lg">
-          <Calendar className="w-5 h-5 text-purple-600" />
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0A2E66]/[0.07] text-[#0A2E66]">
+            <CalendarCheck className="h-5 w-5" />
+          </div>
+
+          <div className="min-w-0">
+            <h2 className="text-base font-bold tracking-tight text-[#0A2E66] sm:text-lg">
+              Meetings
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Scheduled calls and client meetings
+            </p>
+          </div>
         </div>
-        <h2 className="text-xl font-bold text-slate-900">Meetings</h2>
+
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-orange-50 px-2.5 py-1.5 text-xs font-semibold text-[#F27B1E]">
+          <Calendar className="h-3.5 w-3.5" />
+          Schedule
+        </span>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 mb-3 shrink-0">
-        {PRESETS.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            onClick={() => setPreset(p.id)}
-            className={`px-2.5 py-1 text-[11px] font-medium rounded border transition ${
-              preset === p.id
-                ? "bg-purple-600 text-white border-purple-600"
-                : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
-            }`}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
+      {/* Filters */}
+      <div className="shrink-0 border-b border-slate-100 px-5 py-4 sm:px-6">
+        <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          Filter by date
+        </p>
 
-      {preset === "custom" && (
-        <div className="flex flex-wrap items-center gap-1.5 mb-3 shrink-0">
-          <div className="relative">
-            <CalendarDays className="h-3.5 w-3.5 absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            <input
-              type="date"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              className="border border-gray-200 rounded pl-6 pr-1 py-1 text-[11px] bg-white"
-            />
-          </div>
-          <span className="text-[11px] text-gray-500">to</span>
-          <div className="relative">
-            <CalendarDays className="h-3.5 w-3.5 absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            <input
-              type="date"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              className="border border-gray-200 rounded pl-6 pr-1 py-1 text-[11px] bg-white"
-            />
-          </div>
-          {(from || to) && (
+        <div className="flex flex-wrap gap-1.5">
+          {PRESETS.map((item) => (
             <button
+              key={item.id}
               type="button"
-              onClick={() => {
-                setFrom("");
-                setTo("");
-              }}
-              className="p-1 rounded hover:bg-gray-100"
-              title="Clear dates"
+              onClick={() => setPreset(item.id)}
+              aria-pressed={preset === item.id}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E66] focus-visible:ring-offset-1 ${
+                preset === item.id
+                  ? "border-[#0A2E66] bg-[#0A2E66] text-white shadow-sm"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+              }`}
             >
-              <X className="h-3.5 w-3.5 text-gray-500" />
+              {item.label}
             </button>
-          )}
+          ))}
         </div>
-      )}
 
-      <div className="flex-1 min-h-0 overflow-y-auto meeting-scroll-admin -mx-2 px-2">
+        {preset === "custom" && (
+          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="text-[11px] font-medium text-slate-500">
+                  From
+                </span>
+
+                <div className="relative">
+                  <CalendarDays className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                  <input
+                    type="date"
+                    value={from}
+                    onChange={(event) => setFrom(event.target.value)}
+                    className="w-full min-w-0 rounded-lg border border-slate-200 bg-white py-2 pl-8 pr-2 text-xs text-slate-700 outline-none transition focus:border-[#0A2E66] focus:ring-2 focus:ring-[#0A2E66]/10"
+                  />
+                </div>
+              </label>
+
+              <label className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="text-[11px] font-medium text-slate-500">
+                  To
+                </span>
+
+                <div className="relative">
+                  <CalendarDays className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                  <input
+                    type="date"
+                    value={to}
+                    min={from || undefined}
+                    onChange={(event) => setTo(event.target.value)}
+                    className="w-full min-w-0 rounded-lg border border-slate-200 bg-white py-2 pl-8 pr-2 text-xs text-slate-700 outline-none transition focus:border-[#0A2E66] focus:ring-2 focus:ring-[#0A2E66]/10"
+                  />
+                </div>
+              </label>
+
+              {(from || to) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFrom("");
+                    setTo("");
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-500 transition hover:bg-white hover:text-[#F27B1E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E66]"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Meeting list */}
+      <div className="meeting-scroll-admin min-h-[220px] flex-1 overflow-y-auto overflow-x-hidden px-4 py-3 sm:px-5">
         {loading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex gap-4 border-b pb-4 last:border-0">
-                <Skeleton width={60} height={60} className="rounded-lg" />
-                <div className="flex-1">
-                  <Skeleton width="60%" height={16} />
-                  <Skeleton width="40%" height={12} className="mt-2" />
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex gap-3 rounded-xl border border-slate-100 p-3"
+              >
+                <Skeleton
+                  width={64}
+                  height={64}
+                  borderRadius={12}
+                />
+
+                <div className="min-w-0 flex-1 pt-1">
+                  <Skeleton height={15} width="62%" />
+                  <div className="mt-2">
+                    <Skeleton height={12} width="40%" />
+                  </div>
+                  <div className="mt-2">
+                    <Skeleton height={11} width="55%" />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         ) : meetings.length > 0 ? (
           <div className="space-y-3">
-            {meetings.map((meeting) => (
-              <Link
-                key={meeting._id}
-                href={`${clientBase}/${meeting.clientId}`}
-                className="block text-left"
-              >
-                <div className="flex items-start gap-3 p-3 rounded-lg border border-slate-100 hover:bg-white hover:border-purple-200 hover:shadow-sm transition-all cursor-pointer">
-                  <div className="flex flex-col items-center justify-center bg-slate-100 min-w-[60px] h-[60px] rounded-lg p-2 text-center shrink-0">
-                    <span className="text-xs font-bold text-slate-600">
-                      {new Date(meeting.meetingAt).toLocaleTimeString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
-                    </span>
-                  </div>
+            {meetings.map((meeting) => {
+              const typeStyle = getMeetingTypeStyle(meeting.updateType);
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start gap-2">
-                      <h3 className="font-semibold text-slate-900 truncate">
-                        {meeting.clientName || "Unknown"}
-                      </h3>
-                      <span className="bg-slate-100 p-1.5 rounded-full shrink-0">
-                        {getIcon(meeting.updateType)}
+              return (
+                <Link
+                  key={meeting._id}
+                  href={`${clientBase}/${meeting.clientId}`}
+                  className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E66] focus-visible:ring-offset-2"
+                >
+                  <article className="flex min-w-0 items-start gap-3 rounded-xl border border-slate-200/80 bg-white p-3 transition-all duration-200 group-hover:border-[#0A2E66]/20 group-hover:bg-slate-50/70 group-hover:shadow-sm sm:p-4">
+                    {/* Date and time */}
+                    <div className="flex w-[68px] shrink-0 flex-col items-center justify-center self-stretch rounded-xl border border-slate-100 bg-slate-50 px-1.5 py-3 text-center transition-colors group-hover:border-orange-100 group-hover:bg-orange-50/50">
+                      <Clock className="mb-2 h-4 w-4 text-[#F27B1E]" />
+
+                      <span className="text-[11px] font-bold leading-4 text-[#0A2E66] sm:text-xs">
+                        {formatMeetingTime(meeting.meetingAt)}
+                      </span>
+
+                      <span className="mt-1 text-[9px] font-medium leading-3 text-slate-400">
+                        {formatMeetingDate(meeting.meetingAt)}
                       </span>
                     </div>
 
-                    {/* NEW: company name */}
-                    <p className="text-xs text-slate-500 truncate">
-                      {meeting.company || ""}
-                    </p>
+                    {/* Meeting details */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex min-w-0 items-start justify-between gap-2">
+                        <h3 className="min-w-0 break-words text-sm font-semibold leading-5 text-slate-800 transition-colors group-hover:text-[#0A2E66]">
+                          {meeting.clientName || "Unknown client"}
+                        </h3>
 
-                    <p className="text-[11px] text-slate-600 truncate mt-1">
-                      <span className="text-slate-400">by</span>{" "}
-                      <b>{meeting.salesPersonName || "Unknown"}</b>
-                    </p>
-
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      <span
-                        className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize ${
-                          meeting.updateType === "call"
-                            ? "bg-green-100 text-green-700"
-                            : meeting.updateType === "meeting"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-purple-100 text-purple-700"
-                        }`}
-                      >
-                        {meeting.updateType}
-                      </span>
-                      {meeting.status && (
-                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize bg-gray-100 text-gray-600 border border-gray-200">
-                          {String(meeting.status).replace(/-/g, " ")}
+                        <span
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${typeStyle.iconStyle}`}
+                        >
+                          {typeStyle.icon}
                         </span>
+                      </div>
+
+                      {meeting.company && (
+                        <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
+                          <Building2 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                          <span className="truncate">{meeting.company}</span>
+                        </p>
+                      )}
+
+                      <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
+                        <UserRound className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                        <span className="shrink-0">Assigned to</span>
+                        <span className="truncate font-medium text-slate-700">
+                          {meeting.salesPersonName || "Unknown"}
+                        </span>
+                      </p>
+
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold capitalize ring-1 ring-inset ${typeStyle.badge}`}
+                        >
+                          {meeting.updateType || "Other"}
+                        </span>
+
+                        {meeting.status && (
+                          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium capitalize text-slate-600 ring-1 ring-inset ring-slate-200">
+                            {String(meeting.status).replace(/-/g, " ")}
+                          </span>
+                        )}
+                      </div>
+
+                      {meeting.note && (
+                        <p className="mt-3 line-clamp-2 break-words rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-600">
+                          {meeting.note}
+                        </p>
                       )}
                     </div>
-                    {meeting.note && (
-                      <p className="text-xs text-slate-500 mt-2 bg-slate-50 p-2 rounded border border-slate-100 line-clamp-2">
-                        {meeting.note}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            ))}
+                  </article>
+                </Link>
+              );
+            })}
           </div>
         ) : (
-          <div className="text-center py-8 text-slate-500 text-sm">
-            No meetings in this range.
+          <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
+              <CalendarDays className="h-6 w-6" />
+            </div>
+
+            <p className="text-sm font-semibold text-slate-700">
+              No meetings found
+            </p>
+
+            <p className="mt-1 max-w-[240px] text-xs leading-5 text-slate-500">
+              There are no scheduled meetings for the selected date range.
+            </p>
           </div>
         )}
       </div>
-    </div>
+
+      {/* Footer */}
+      {!loading && meetings.length > 0 && (
+        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-3 sm:px-6">
+          <p className="text-xs text-slate-500">
+            {meetings.length}{" "}
+            {meetings.length === 1 ? "appointment" : "appointments"}
+          </p>
+
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#0A2E66]">
+            <CalendarCheck className="h-3.5 w-3.5" />
+            Scheduled
+          </span>
+        </div>
+      )}
+    </section>
   );
 };
 
