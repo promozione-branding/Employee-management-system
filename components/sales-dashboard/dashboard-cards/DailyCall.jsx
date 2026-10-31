@@ -22,6 +22,9 @@ import {
   PhoneIncoming,
   MessageCircle,
 } from "lucide-react";
+import CurrentMonthDealValue from "@/components/sales-dashboard/dashboard-cards/CurrentMonthDealValue";
+import CurrentMonthRevenue from "@/components/sales-dashboard/dashboard-cards/CurrentMonthRevenue";
+import TotalClientCount from "@/components/sales-dashboard/dashboard-cards/TotalClientCount";
 
 // ========================================
 // KPI CARD COMPONENT
@@ -236,11 +239,19 @@ const DailyCall = () => {
       </div>
 
       {/* KPI GRID */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-3.5">
+      <div className="flex gap-5">
+      <div className="grid grid-cols-2 w-[50%] gap-3 sm:gap-3.5">
         <StatCard title="Connected" value={connectedCalls} icon={PhoneCall} color="#16865D" background="#E5F5EC" />
         <StatCard title="Missed" value={missedCalls} icon={PhoneMissed} color="#E23B35" background="#FCEAE8" />
         <StatCard title="Clients" value={uniqueCustomerCount} icon={Users} color="#376BB5" background="#E9EFF9" />
         <StatCard title="Talk time" value={totalTalkMinutes} suffix="m" icon={Clock} color="#7050E8" background="#EFEBFC" />
+      </div>
+      <div className="grid grid-cols-2 w-[50%] gap-3 sm:gap-3.5">
+        <CurrentMonthDealValue />
+        <CurrentMonthRevenue />
+        <TotalClientCount />
+      </div>
+
       </div>
 
       {/* CONNECT RATE INSIGHT */}

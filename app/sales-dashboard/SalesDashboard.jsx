@@ -27,11 +27,11 @@ const SalesDashboard = () => {
   
   return (
     <div className="">
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 ">
         <DailyCall />
-        <CurrentMonthDealValue /> 
+        {/* <CurrentMonthDealValue /> 
         <CurrentMonthRevenue />
-        <TotalClientCount />
+        <TotalClientCount /> */}
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 my-5">
