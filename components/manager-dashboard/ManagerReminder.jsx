@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
@@ -29,6 +28,13 @@ const DATE_PRESETS = [
   { id: "custom", label: "Custom" },
 ];
 
+const PERSONAL_DATE_PRESETS = [
+  { id: "today", label: "Today" },
+  { id: "yesterday", label: "Yesterday" },
+  { id: "tomorrow", label: "Tomorrow" },
+  { id: "custom", label: "Custom Range" },
+];
+
 export default function ManagerReminder() {
   const [activeTab, setActiveTab] = useState("mine");
 
@@ -43,6 +49,11 @@ export default function ManagerReminder() {
   // Personal reminders
   const [myReminders, setMyReminders] = useState([]);
   const [personalLoading, setPersonalLoading] = useState(false);
+  const [personalPreset, setPersonalPreset] = useState("today");
+  const [personalFrom, setPersonalFrom] = useState("");
+  const [personalTo, setPersonalTo] = useState("");
+
+  // Create personal reminder
   const [creating, setCreating] = useState(false);
   const [description, setDescription] = useState("");
   const [reminderAt, setReminderAt] = useState("");
@@ -66,12 +77,37 @@ export default function ManagerReminder() {
     });
   };
 
-  // Fetch the logged-in manager's personal reminders.
+  // Fetch personal reminders for the selected date range.
   const fetchPersonalReminders = useCallback(async () => {
+    // Do not send an incomplete custom date range.
+    if (personalPreset === "custom") {
+      if (!personalFrom) {
+        setMyReminders([]);
+        return;
+      }
+
+      if (personalTo && personalTo < personalFrom) {
+        setMyReminders([]);
+        return;
+      }
+    }
+
     try {
       setPersonalLoading(true);
 
-      const res = await getManagerReminderService();
+      const params = {
+        preset: personalPreset,
+      };
+
+      if (personalPreset === "custom") {
+        params.from = personalFrom;
+
+        if (personalTo) {
+          params.to = personalTo;
+        }
+      }
+
+      const res = await getManagerReminderService(params);
 
       if (res?.success) {
         setMyReminders(res?.data?.reminder || []);
@@ -90,7 +126,7 @@ export default function ManagerReminder() {
     } finally {
       setPersonalLoading(false);
     }
-  }, []);
+  }, [personalPreset, personalFrom, personalTo]);
 
   // Create a personal reminder for the authenticated manager.
   const handleCreate = async (event) => {
@@ -117,19 +153,19 @@ export default function ManagerReminder() {
       setCreating(true);
 
       const res = await createManagerReminderService({
-        reminder: [
-          {
-            description: description.trim(),
-            reminderAt: parsedDate.toISOString(),
-            cc_email: [],
-          },
-        ],
-      });
-
+  reminder: [
+    {
+      description: description.trim(),
+      reminderAt: parsedDate.toISOString(),
+      cc_email: [],
+    },
+  ],
+});
       if (res?.success) {
         toast.success("Reminder created successfully");
         setDescription("");
         setReminderAt("");
+
         await fetchPersonalReminders();
       } else {
         toast.error(res?.message || "Unable to create reminder");
@@ -162,7 +198,9 @@ export default function ManagerReminder() {
         setReminders(res.data || []);
       } else {
         setReminders([]);
-        toast.error(res?.message || "Unable to load client reminders");
+        toast.error(
+          res?.message || "Unable to load client reminders",
+        );
       }
     } catch (error) {
       setReminders([]);
@@ -175,7 +213,7 @@ export default function ManagerReminder() {
     }
   }, [preset, type, from, to]);
 
-  // Fetch data for the active tab.
+  // Fetch data when the active tab or its filters change.
   useEffect(() => {
     if (activeTab === "mine") {
       fetchPersonalReminders();
@@ -183,6 +221,15 @@ export default function ManagerReminder() {
       fetchReminders();
     }
   }, [activeTab, fetchPersonalReminders, fetchReminders]);
+
+  const handlePersonalPresetChange = (nextPreset) => {
+    setPersonalPreset(nextPreset);
+
+    if (nextPreset !== "custom") {
+      setPersonalFrom("");
+      setPersonalTo("");
+    }
+  };
 
   const typeStyle = {
     call: "bg-blue-100 text-blue-700",
@@ -266,7 +313,9 @@ export default function ManagerReminder() {
 
             <textarea
               value={description}
-              onChange={(event) => setDescription(event.target.value)}
+              onChange={(event) =>
+                setDescription(event.target.value)
+              }
               placeholder="What do you need to remember?"
               required
               rows={2}
@@ -277,7 +326,9 @@ export default function ManagerReminder() {
               <input
                 type="datetime-local"
                 value={reminderAt}
-                onChange={(event) => setReminderAt(event.target.value)}
+                onChange={(event) =>
+                  setReminderAt(event.target.value)
+                }
                 required
                 className="min-w-0 flex-1 rounded-md border border-gray-200 p-2 text-sm outline-none focus:border-blue-500"
                 aria-label="Reminder date and time"
@@ -293,60 +344,155 @@ export default function ManagerReminder() {
             </div>
           </form>
 
-          {/* Personal reminder list */}
-          {personalLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((item) => (
-                <Skeleton
-                  key={item}
-                  height={76}
-                  borderRadius={8}
-                />
+          {/* Personal reminder date filters */}
+          <div className="mb-3 shrink-0">
+            <div className="mb-2 flex flex-wrap gap-2">
+              {PERSONAL_DATE_PRESETS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() =>
+                    handlePersonalPresetChange(item.id)
+                  }
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                    personalPreset === item.id
+                      ? "border-blue-600 bg-blue-600 text-white"
+                      : "border-gray-200 bg-white text-gray-600 hover:border-gray-400"
+                  }`}
+                >
+                  {item.label}
+                </button>
               ))}
             </div>
-          ) : myReminders.length === 0 ? (
-            <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
-              <Bell size={30} className="mb-2 text-gray-400" />
 
-              <p className="text-sm font-medium text-gray-700">
-                No personal reminders found
-              </p>
-
-              <p className="mt-1 text-xs text-gray-500">
-                Create a reminder above to get started.
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3 pb-1">
-              {myReminders.map((item, index) => (
-                <div
-                  key={
-                    item._id ||
-                    `${item.description}-${item.reminderAt}-${index}`
-                  }
-                  className="rounded-lg border border-gray-200 bg-white p-3"
-                >
-                  <div className="flex items-start gap-2">
-                    <Bell
-                      size={16}
-                      className="mt-0.5 shrink-0 text-blue-600"
+            {/* Custom personal reminder date range */}
+            {personalPreset === "custom" && (
+              <div className="rounded-lg border border-gray-200 bg-white p-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-1 rounded border border-gray-200 px-2">
+                    <CalendarDays
+                      size={14}
+                      className="shrink-0 text-gray-400"
                     />
 
-                    <div className="min-w-0 flex-1">
-                      <p className="break-words text-sm font-medium text-gray-800">
-                        {item.description}
-                      </p>
+                    <input
+                      type="date"
+                      value={personalFrom}
+                      onChange={(event) =>
+                        setPersonalFrom(event.target.value)
+                      }
+                      max={personalTo || undefined}
+                      className="min-w-0 bg-transparent py-1.5 text-xs outline-none"
+                      aria-label="Personal reminders start date"
+                    />
+                  </div>
 
-                      <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-500">
-                        <Clock size={13} className="shrink-0" />
-                        <span>{formatDate(item.reminderAt)}</span>
+                  <span className="text-xs text-gray-500">to</span>
+
+                  <div className="flex items-center gap-1 rounded border border-gray-200 px-2">
+                    <CalendarDays
+                      size={14}
+                      className="shrink-0 text-gray-400"
+                    />
+
+                    <input
+                      type="date"
+                      value={personalTo}
+                      onChange={(event) =>
+                        setPersonalTo(event.target.value)
+                      }
+                      min={personalFrom || undefined}
+                      className="min-w-0 bg-transparent py-1.5 text-xs outline-none"
+                      aria-label="Personal reminders end date"
+                    />
+                  </div>
+                </div>
+
+                {!personalFrom && (
+                  <p className="mt-2 text-xs text-gray-500">
+                    Select a start date to view reminders.
+                  </p>
+                )}
+
+                {personalFrom &&
+                  personalTo &&
+                  personalTo < personalFrom && (
+                    <p className="mt-2 text-xs text-red-600">
+                      End date cannot be earlier than start date.
+                    </p>
+                  )}
+              </div>
+            )}
+          </div>
+
+          {/* Personal reminder list */}
+          <div className="min-h-0 flex-1">
+            {personalLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((item) => (
+                  <Skeleton
+                    key={item}
+                    height={76}
+                    borderRadius={8}
+                  />
+                ))}
+              </div>
+            ) : personalPreset === "custom" &&
+              (!personalFrom ||
+                (personalTo && personalTo < personalFrom)) ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <CalendarDays
+                  size={30}
+                  className="mb-2 text-gray-400"
+                />
+                <p className="text-sm text-gray-600">
+                  Select a valid date range to view reminders.
+                </p>
+              </div>
+            ) : myReminders.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <Bell size={30} className="mb-2 text-gray-400" />
+
+                <p className="text-sm font-medium text-gray-700">
+                  No personal reminders found
+                </p>
+
+                <p className="mt-1 text-xs text-gray-500">
+                  No reminders for the selected date range.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 pb-1">
+                {myReminders.map((item, index) => (
+                  <div
+                    key={
+                      item._id ||
+                      `${item.description}-${item.reminderAt}-${index}`
+                    }
+                    className="rounded-lg border border-gray-200 bg-white p-3"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Bell
+                        size={16}
+                        className="mt-0.5 shrink-0 text-blue-600"
+                      />
+
+                      <div className="min-w-0 flex-1">
+                        <p className="break-words text-sm font-medium text-gray-800">
+                          {item.description}
+                        </p>
+
+                        <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-500">
+                          <Clock size={13} className="shrink-0" />
+                          <span>{formatDate(item.reminderAt)}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <>
@@ -386,16 +532,20 @@ export default function ManagerReminder() {
             ))}
           </div>
 
-          {/* Custom date range */}
+          {/* Client custom date range */}
           {preset === "custom" && (
             <div className="mb-3 flex shrink-0 flex-wrap items-center gap-2">
               <div className="flex items-center gap-1 rounded border bg-white px-2">
-                <CalendarDays size={14} className="text-gray-400" />
+                <CalendarDays
+                  size={14}
+                  className="text-gray-400"
+                />
 
                 <input
                   type="date"
                   value={from}
                   onChange={(event) => setFrom(event.target.value)}
+                  max={to || undefined}
                   className="min-w-0 bg-transparent py-1.5 text-xs outline-none"
                   aria-label="Start date"
                 />
@@ -404,7 +554,10 @@ export default function ManagerReminder() {
               <span className="text-xs text-gray-500">to</span>
 
               <div className="flex items-center gap-1 rounded border bg-white px-2">
-                <CalendarDays size={14} className="text-gray-400" />
+                <CalendarDays
+                  size={14}
+                  className="text-gray-400"
+                />
 
                 <input
                   type="date"
