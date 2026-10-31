@@ -79,6 +79,27 @@ export async function getAdminCalenderService(id) {
   return data;
 }
 
+
+//manager dashboard to get and create remainder
+
+export async function getManagerReminderService() {
+  const { data } = await axiosInstance.get(
+    "/api/manager-dashboard-api/reminder"
+  );
+
+  return data;
+}
+
+export async function createManagerReminderService(formData) {
+  const { data } = await axiosInstance.post(
+    "/api/manager-dashboard-api/reminder",
+    formData
+  );
+
+  return data;
+}
+
+
 // ------------------------------------------------------------
 // Admin: fetch client reminders (meeting updates with reminderAt)
 // ------------------------------------------------------------

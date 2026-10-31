@@ -4,11 +4,12 @@
 import React from "react";
 
 import AdminCalendar from "@/components/admin-dashboard/dashboard/AdminCalendar";
-import AdminReminder from "@/components/admin-dashboard/dashboard/AdminReminder";
+// import AdminReminder from "@/components/admin-dashboard/dashboard/AdminReminder";
 import RecentActivity from "@/components/admin-dashboard/dashboard/RecentActivity";
 import TodayMeeting from "@/components/admin-dashboard/dashboard/TodayMeeting";
 import Announcement from "@/components/admin-dashboard/dashboard/Announcement";
 import Employees from "@/components/admin-dashboard/dashboard/Employees";
+import ManagerReminder from "@/components/manager-dashboard/ManagerReminder";
 
 export default function Dashboard() {
   return (
@@ -35,7 +36,7 @@ export default function Dashboard() {
       </div>
 
       <div className="my-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <AdminReminder />
+        <ManagerReminder />
         <RecentActivity />
       </div>
 
