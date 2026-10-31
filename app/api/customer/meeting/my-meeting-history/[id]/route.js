@@ -1,3 +1,5 @@
+// app/api/customer/meeting/my-meeting-history/[id]/route.js
+
 
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";

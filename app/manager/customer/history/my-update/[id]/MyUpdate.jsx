@@ -1,3 +1,5 @@
+// app/manager/customer/history/my-update/[id]/MyUpdate.jsx
+
 
 // app/manager/customer/history/my-update/[id]/MyUpdate.jsx
 

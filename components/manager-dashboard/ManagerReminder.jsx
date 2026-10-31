@@ -1,3 +1,5 @@
+// components/manager-dashboard/ManagerReminder.jsx
+
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";

@@ -1,3 +1,5 @@
+// app/manager/customer/[customer]/CustomerDetails.jsx
+
 
 "use client";
 
