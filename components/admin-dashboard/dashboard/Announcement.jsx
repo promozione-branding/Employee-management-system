@@ -1,21 +1,26 @@
 
 "use client";
 
-// components/admin-dashboard/dashboard/Announcement.jsx
-
 import { getAnnouncementService } from "@/service/admin-dashboard/dashboard-api";
+
 import {
   Megaphone,
-  Calendar,
-  User,
+  CalendarDays,
+  UserRound,
   X,
-  ArrowUpRight,
   Building2,
   BellRing,
+  ArrowUpRight,
+  Clock3,
 } from "lucide-react";
+
 import { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+
+// ========================================
+// DATE FORMATTER
+// ========================================
 
 const formatDate = (date, options) => {
   const parsedDate = new Date(date);
@@ -27,17 +32,25 @@ const formatDate = (date, options) => {
   return parsedDate.toLocaleDateString("en-IN", options);
 };
 
+// ========================================
+// ANNOUNCEMENT COMPONENT
+// ========================================
+
 const Announcement = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+
+  // ========================================
+  // FETCH ANNOUNCEMENTS
+  // ========================================
 
   async function fetchAnnouncement() {
     try {
       const res = await getAnnouncementService();
 
       if (res.success) {
-        setAnnouncements(res.data);
+        setAnnouncements(res.data || []);
       }
     } catch (error) {
       console.error("Failed to fetch announcements:", error);
@@ -50,7 +63,10 @@ const Announcement = () => {
     fetchAnnouncement();
   }, []);
 
-  // Allow closing the announcement modal with Escape.
+  // ========================================
+  // ESCAPE KEY MODAL CLOSE
+  // ========================================
+
   useEffect(() => {
     if (!selectedAnnouncement) return;
 
@@ -67,228 +83,776 @@ const Announcement = () => {
     };
   }, [selectedAnnouncement]);
 
+  // ========================================
+  // MAIN UI
+  // ========================================
+
   return (
     <>
-      <section className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
+      <section
+        className="
+          flex
+          h-[410px]
+          min-h-0
+          w-full
+          min-w-0
+          flex-col
+          overflow-hidden
+          rounded-[22px]
+          border
+          border-[#E1E7F0]
+          bg-white
+          p-5
+          shadow-[0_3px_12px_rgba(10,46,102,0.05)]
+          transition-shadow
+          duration-300
+          hover:shadow-[0_8px_24px_rgba(10,46,102,0.07)]
+          sm:p-[22px]
+        "
+      >
+
+        {/* ================================== */}
+        {/* HEADER */}
+        {/* ================================== */}
+
+        <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
+
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0A2E66]/[0.07] text-[#0A2E66]">
-              <Megaphone className="h-5 w-5" />
+
+            {/* Icon */}
+
+            <div
+              className="
+                flex
+                h-10 w-10
+                shrink-0
+                items-center
+                justify-center
+                rounded-xl
+                bg-[#E9EFF9]
+                text-[#376BB5]
+              "
+            >
+              <Megaphone size={20} strokeWidth={1.9} />
             </div>
+
+            {/* Heading */}
 
             <div className="min-w-0">
-              <h2 className="text-base font-bold tracking-tight text-[#0A2E66] sm:text-lg">
+
+              <h2
+                className="
+                  font-serif
+                  text-[21px]
+                  font-bold
+                  leading-tight
+                  tracking-tight
+                  text-[#0A2E66]
+                "
+              >
                 Announcements
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500">
+
+              <p className="mt-1 text-[13px] leading-5 text-[#56647D]">
                 Updates and important messages
               </p>
+
             </div>
+
           </div>
 
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-orange-50 px-2.5 py-1.5 text-xs font-semibold text-[#F27B1E]">
-            <BellRing className="h-3.5 w-3.5" />
-            Updates
+          {/* Announcement count */}
+
+          <span
+            className="
+              inline-flex
+              h-[29px]
+              shrink-0
+              items-center
+              gap-1.5
+              rounded-full
+              bg-[#FFF3D9]
+              px-3
+              text-[11px]
+              font-bold
+              text-[#B86A00]
+            "
+          >
+            <BellRing size={13} />
+
+            {announcements.length} Updates
           </span>
+
         </div>
 
-        {/* Announcement list */}
-        <div className="max-h-[360px] min-h-[220px] flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-5">
+        {/* ================================== */}
+        {/* ANNOUNCEMENT LIST */}
+        {/* ================================== */}
+
+        <div
+          className="
+            min-h-0
+            flex-1
+            space-y-2.5
+            overflow-x-hidden
+            overflow-y-auto
+            pr-1
+
+            [&::-webkit-scrollbar]:w-[5px]
+            [&::-webkit-scrollbar-track]:bg-transparent
+            [&::-webkit-scrollbar-thumb]:rounded-full
+            [&::-webkit-scrollbar-thumb]:bg-[#DDE4EF]
+            hover:[&::-webkit-scrollbar-thumb]:bg-[#AEBBD0]
+
+            [scrollbar-width:thin]
+            [scrollbar-color:#DDE4EF_transparent]
+          "
+        >
+
+          {/* ================================== */}
+          {/* LOADING */}
+          {/* ================================== */}
+
           {loading ? (
-            Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                className="border-b border-slate-100 py-4 last:border-b-0"
-              >
-                <Skeleton height={16} width="68%" />
 
-                <div className="mt-2">
-                  <Skeleton height={12} width="92%" />
+            <div className="space-y-2.5" aria-label="Loading announcements">
+
+              {[1, 2, 3].map((item) => (
+
+                <div
+                  key={item}
+                  className="
+                    rounded-[16px]
+                    border
+                    border-[#E1E7F0]
+                    p-3.5
+                  "
+                >
+
+                  <div className="flex items-center gap-3">
+
+                    <Skeleton
+                      width={40}
+                      height={40}
+                      borderRadius={12}
+                    />
+
+                    <div className="flex-1 space-y-2">
+
+                      <Skeleton height={14} width="65%" />
+
+                      <Skeleton height={11} width="42%" />
+
+                    </div>
+
+                  </div>
+
+                  <div className="mt-3">
+                    <Skeleton height={11} width="85%" />
+                  </div>
+
                 </div>
 
-                <div className="mt-3 flex gap-3">
-                  <Skeleton height={12} width={85} />
-                  <Skeleton height={12} width={75} />
-                </div>
-              </div>
-            ))
+              ))}
+
+            </div>
+
           ) : announcements.length > 0 ? (
+
+            /* ================================== */
+            /* ANNOUNCEMENT CARDS */
+            /* ================================== */
+
             announcements.map((item) => (
+
               <button
                 type="button"
                 key={item._id}
                 onClick={() => setSelectedAnnouncement(item)}
-                className="group -mx-1 flex w-[calc(100%+0.5rem)] items-start gap-3 rounded-xl border-b border-slate-100 px-2 py-4 text-left transition-colors last:border-b-0 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0A2E66]"
+                className="
+                  group
+                  flex
+                  w-full
+                  min-w-0
+                  items-center
+                  gap-3
+                  rounded-[16px]
+                  border
+                  border-[#E1E7F0]
+                  bg-white
+                  p-3.5
+                  text-left
+                  transition-all
+                  duration-200
+                  hover:border-[#C8D6EA]
+                  hover:bg-[#F9FAFD]
+                  hover:shadow-[0_4px_12px_rgba(10,46,102,0.05)]
+                  focus-visible:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-[#F27B1E]
+                "
               >
+
                 {/* Announcement icon */}
-                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-[#F27B1E] transition-colors group-hover:bg-orange-100">
-                  <Megaphone className="h-4 w-4" />
+
+                <div
+                  className="
+                    flex
+                    h-10 w-10
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-xl
+                    bg-[#E9EFF9]
+                    text-[#376BB5]
+                    transition-colors
+                    duration-200
+                    group-hover:bg-[#DCE7F7]
+                  "
+                >
+                  <Megaphone size={19} strokeWidth={1.8} />
                 </div>
 
                 {/* Announcement details */}
+
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <h3 className="min-w-0 flex-1 break-words text-sm font-semibold leading-5 text-slate-800 transition-colors group-hover:text-[#0A2E66]">
-                      {item.title}
+
+                  {/* Title */}
+
+                  <div className="flex min-w-0 items-center gap-2">
+
+                    <h3
+                      className="
+                        min-w-0
+                        flex-1
+                        truncate
+                        text-[14px]
+                        font-semibold
+                        leading-5
+                        text-[#0F1B33]
+                        transition-colors
+                        group-hover:text-[#0A2E66]
+                      "
+                    >
+                      {item.title || "Announcement"}
                     </h3>
 
                     {item.targetDepartment && (
-                      <span className="max-w-full shrink-0 rounded-full bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
+                      <span
+                        className="
+                          max-w-[100px]
+                          shrink-0
+                          truncate
+                          rounded-full
+                          bg-[#FFF3D9]
+                          px-2.5
+                          py-1
+                          text-[10px]
+                          font-bold
+                          text-[#B86A00]
+                        "
+                      >
                         {item.targetDepartment}
                       </span>
                     )}
+
                   </div>
 
-                  <p className="mt-1.5 line-clamp-2 break-words text-xs leading-5 text-slate-500">
+                  {/* Description */}
+
+                  <p
+                    className="
+                      mt-1
+                      line-clamp-1
+                      break-words
+                      text-[12px]
+                      leading-4
+                      text-[#56647D]
+                    "
+                  >
                     {item.content}
                   </p>
 
-                  <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-500">
+                  {/* Date */}
+
+                  <div
+                    className="
+                      mt-2
+                      flex
+                      flex-wrap
+                      items-center
+                      gap-x-3
+                      gap-y-1
+                      text-[11px]
+                      text-[#8793AA]
+                    "
+                  >
+
                     <span className="inline-flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+
+                      <CalendarDays size={12} />
+
                       {formatDate(item.createdAt, {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
                       })}
+
                     </span>
 
                     <span className="inline-flex min-w-0 items-center gap-1.5">
-                      <User className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                      <span className="max-w-[130px] truncate">
+
+                      <UserRound size={12} />
+
+                      <span className="max-w-[120px] truncate">
                         {item.author?.username || "Admin"}
                       </span>
+
                     </span>
+
                   </div>
+
                 </div>
 
-                <ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-slate-300 transition-colors group-hover:text-[#F27B1E]" />
+                {/* Open icon */}
+
+                <div
+                  className="
+                    flex
+                    h-8 w-8
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-lg
+                    text-[#8793AA]
+                    transition-all
+                    duration-200
+                    group-hover:bg-[#E9EFF9]
+                    group-hover:text-[#0A2E66]
+                  "
+                >
+                  <ArrowUpRight
+                    size={17}
+                    className="
+                      transition-transform
+                      duration-200
+                      group-hover:-translate-y-0.5
+                      group-hover:translate-x-0.5
+                    "
+                  />
+                </div>
+
               </button>
+
             ))
+
           ) : (
-            <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
-                <Megaphone className="h-6 w-6" />
+
+            /* ================================== */
+            /* EMPTY STATE */
+            /* ================================== */
+
+            <div
+              className="
+                flex
+                min-h-[180px]
+                flex-col
+                items-center
+                justify-center
+                rounded-[16px]
+                border
+                border-dashed
+                border-[#E1E7F0]
+                bg-[#F7F8FC]
+                px-4
+                py-8
+                text-center
+              "
+            >
+
+              <div
+                className="
+                  mb-3
+                  flex
+                  h-11 w-11
+                  items-center
+                  justify-center
+                  rounded-xl
+                  bg-[#E9EFF9]
+                  text-[#376BB5]
+                "
+              >
+                <Megaphone size={22} />
               </div>
 
-              <p className="text-sm font-semibold text-slate-700">
+              <h3 className="text-[14px] font-semibold text-[#0A2E66]">
                 No announcements yet
-              </p>
-              <p className="mt-1 max-w-[220px] text-xs leading-5 text-slate-500">
+              </h3>
+
+              <p
+                className="
+                  mt-1
+                  max-w-[220px]
+                  text-[12px]
+                  leading-5
+                  text-[#8491A8]
+                "
+              >
                 Important updates will appear here when they are available.
               </p>
+
             </div>
+
           )}
+
         </div>
 
-        {/* Footer */}
+        {/* ================================== */}
+        {/* FOOTER */}
+        {/* ================================== */}
+
         {!loading && announcements.length > 0 && (
-          <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-3">
-            <p className="text-xs text-slate-500">
+
+          <div
+            className="
+              mt-3
+              flex
+              shrink-0
+              items-center
+              justify-between
+              gap-2
+              border-t
+              border-[#E1E7F0]
+              pt-3
+            "
+          >
+
+            <p className="text-[11px] text-[#8793AA]">
               {announcements.length}{" "}
               {announcements.length === 1
                 ? "announcement"
                 : "announcements"}
             </p>
 
-            <span className="text-xs font-medium text-[#0A2E66]">
+            <span
+              className="
+                inline-flex
+                items-center
+                gap-1
+                text-[11px]
+                font-semibold
+                text-[#0A2E66]
+              "
+            >
               Select to read
+              <ArrowUpRight size={13} />
             </span>
+
           </div>
+
         )}
+
       </section>
 
-      {/* Announcement modal */}
+      {/* ================================== */}
+      {/* ANNOUNCEMENT DETAIL MODAL */}
+      {/* ================================== */}
+
       {selectedAnnouncement && (
+
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/50 p-3 backdrop-blur-sm sm:p-6"
+          className="
+            fixed
+            inset-0
+            z-50
+            flex
+            items-center
+            justify-center
+            overflow-y-auto
+            bg-[#0A1933]/50
+            p-3
+            backdrop-blur-sm
+            sm:p-6
+          "
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
               setSelectedAnnouncement(null);
             }
           }}
         >
+
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="announcement-modal-title"
-            className="my-auto flex max-h-[90dvh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-white/20 bg-white shadow-2xl"
+            className="
+              my-auto
+              flex
+              max-h-[90dvh]
+              w-full
+              max-w-2xl
+              flex-col
+              overflow-hidden
+              rounded-[22px]
+              border
+              border-[#E1E7F0]
+              bg-white
+              shadow-[0_20px_70px_rgba(10,46,102,0.20)]
+            "
           >
+
             {/* Modal header */}
-            <div className="relative overflow-hidden border-b border-slate-100 bg-slate-50/80 px-5 py-5 sm:px-7 sm:py-6">
-              <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#F27B1E]/[0.07]" />
+
+            <div
+              className="
+                relative
+                overflow-hidden
+                border-b
+                border-[#E1E7F0]
+                bg-[#F7F8FC]
+                px-5
+                py-5
+                sm:px-7
+                sm:py-6
+              "
+            >
+
+              <div
+                className="
+                  pointer-events-none
+                  absolute
+                  -right-10
+                  -top-12
+                  h-40
+                  w-40
+                  rounded-full
+                  bg-[#E9EFF9]
+                "
+              />
 
               <div className="relative flex items-start justify-between gap-4">
+
                 <div className="min-w-0 flex-1">
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1.5 text-xs font-semibold text-[#F27B1E]">
-                    <Megaphone className="h-3.5 w-3.5" />
+
+                  {/* Modal icon */}
+
+                  <div
+                    className="
+                      mb-3
+                      inline-flex
+                      items-center
+                      gap-2
+                      rounded-full
+                      bg-[#E9EFF9]
+                      px-3
+                      py-1.5
+                      text-[11px]
+                      font-bold
+                      text-[#376BB5]
+                    "
+                  >
+                    <Megaphone size={14} />
                     Announcement
                   </div>
 
+                  {/* Modal title */}
+
                   <h2
                     id="announcement-modal-title"
-                    className="break-words text-xl font-bold leading-tight tracking-tight text-[#0A2E66] sm:text-2xl"
+                    className="
+                      break-words
+                      font-serif
+                      text-xl
+                      font-bold
+                      leading-tight
+                      tracking-tight
+                      text-[#0A2E66]
+                      sm:text-2xl
+                    "
                   >
                     {selectedAnnouncement.title}
                   </h2>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500 sm:text-sm">
+                  {/* Modal information */}
+
+                  <div
+                    className="
+                      mt-4
+                      flex
+                      flex-wrap
+                      items-center
+                      gap-x-4
+                      gap-y-2
+                      text-[12px]
+                      text-[#56647D]
+                    "
+                  >
+
                     <span className="inline-flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4 shrink-0 text-[#F27B1E]" />
+
+                      <CalendarDays
+                        size={14}
+                        className="shrink-0 text-[#376BB5]"
+                      />
+
                       {formatDate(selectedAnnouncement.createdAt, {
                         weekday: "short",
                         day: "numeric",
                         month: "short",
                         year: "numeric",
                       })}
+
                     </span>
 
                     <span className="inline-flex items-center gap-1.5">
-                      <User className="h-4 w-4 shrink-0 text-[#0A2E66]" />
+
+                      <UserRound
+                        size={14}
+                        className="shrink-0 text-[#376BB5]"
+                      />
+
                       {selectedAnnouncement.author?.username || "Admin"}
+
                     </span>
 
                     {selectedAnnouncement.targetDepartment && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0A2E66]/[0.07] px-2.5 py-1 text-xs font-medium text-[#0A2E66]">
-                        <Building2 className="h-3.5 w-3.5" />
+
+                      <span
+                        className="
+                          inline-flex
+                          items-center
+                          gap-1.5
+                          rounded-full
+                          bg-[#E9EFF9]
+                          px-2.5
+                          py-1
+                          text-[11px]
+                          font-semibold
+                          text-[#0A2E66]
+                        "
+                      >
+                        <Building2 size={13} />
+
                         {selectedAnnouncement.targetDepartment}
+
                       </span>
+
                     )}
+
                   </div>
+
                 </div>
+
+                {/* Close button */}
 
                 <button
                   type="button"
                   onClick={() => setSelectedAnnouncement(null)}
                   aria-label="Close announcement"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E66]"
+                  className="
+                    flex
+                    h-9 w-9
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-xl
+                    border
+                    border-[#E1E7F0]
+                    bg-white
+                    text-[#56647D]
+                    transition-colors
+                    hover:bg-[#FFF3D9]
+                    hover:text-[#B86A00]
+                    focus-visible:outline-none
+                    focus-visible:ring-2
+                    focus-visible:ring-[#F27B1E]
+                  "
                 >
-                  <X className="h-5 w-5" />
+                  <X size={18} />
                 </button>
+
               </div>
+
             </div>
 
             {/* Modal content */}
-            <div className="overflow-y-auto px-5 py-6 sm:px-7 sm:py-7">
-              <div className="whitespace-pre-wrap break-words text-sm leading-7 text-slate-700 sm:text-[15px]">
+
+            <div
+              className="
+                min-h-[150px]
+                overflow-y-auto
+                px-5
+                py-6
+                sm:px-7
+                sm:py-7
+              "
+            >
+
+              <div
+                className="
+                  whitespace-pre-wrap
+                  break-words
+                  text-[14px]
+                  leading-7
+                  text-[#34445F]
+                  sm:text-[15px]
+                "
+              >
                 {selectedAnnouncement.content || "No content available."}
               </div>
+
             </div>
 
             {/* Modal footer */}
-            <div className="flex justify-end border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-7">
+
+            <div
+              className="
+                flex
+                justify-end
+                border-t
+                border-[#E1E7F0]
+                bg-[#F7F8FC]
+                px-5
+                py-4
+                sm:px-7
+              "
+            >
+
               <button
                 type="button"
                 onClick={() => setSelectedAnnouncement(null)}
-                className="inline-flex items-center justify-center rounded-xl bg-[#0A2E66] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#082653] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E66] focus-visible:ring-offset-2"
+                className="
+                  inline-flex
+                  items-center
+                  justify-center
+                  rounded-xl
+                  border-b-[3px]
+                  border-[#F27B1E]
+                  bg-[#0A2E66]
+                  px-5
+                  py-2.5
+                  text-[13px]
+                  font-bold
+                  text-white
+                  transition-colors
+                  hover:bg-[#12397A]
+                  focus-visible:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-[#F27B1E]
+                  focus-visible:ring-offset-2
+                "
               >
                 Close announcement
               </button>
+
             </div>
+
           </div>
+
         </div>
+
       )}
+
     </>
   );
 };

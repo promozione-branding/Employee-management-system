@@ -4,6 +4,7 @@
 // components/admin-dashboard/dashboard/TodayMeeting.jsx
 
 import { getTodayMeetingService } from "@/service/admin-dashboard/dashboard-api";
+
 import {
   Calendar,
   Phone,
@@ -15,12 +16,18 @@ import {
   Building2,
   UserRound,
   CalendarCheck,
+  ChevronRight,
 } from "lucide-react";
+
 import { useCallback, useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+// ========================================
+// DATE FILTERS
+// ========================================
 
 const PRESETS = [
   { id: "today", label: "Today" },
@@ -29,6 +36,32 @@ const PRESETS = [
   { id: "next3", label: "Next 3 Days" },
   { id: "custom", label: "Custom" },
 ];
+
+// ========================================
+// COLORS
+// ========================================
+
+const COLORS = {
+  navy: "#0A2E66",
+  navyLight: "#12397A",
+  blue: "#376BB5",
+  blueBg: "#E9EFF9",
+  orange: "#F27B1E",
+  orangeBg: "#FFF3D9",
+  green: "#16865D",
+  greenBg: "#E5F5EC",
+  purple: "#7050E8",
+  purpleBg: "#EDE9FC",
+  text: "#0F1B33",
+  muted: "#56647D",
+  subtle: "#8793AA",
+  border: "#E1E7F0",
+  background: "#F7F8FC",
+};
+
+// ========================================
+// SCROLLBAR
+// ========================================
 
 const SCROLLBAR_CSS = `
   .meeting-scroll-admin::-webkit-scrollbar {
@@ -40,19 +73,23 @@ const SCROLLBAR_CSS = `
   }
 
   .meeting-scroll-admin::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
+    background-color: #DDE4EF;
     border-radius: 999px;
   }
 
   .meeting-scroll-admin::-webkit-scrollbar-thumb:hover {
-    background-color: #94a3b8;
+    background-color: #AEBBD0;
   }
 
   .meeting-scroll-admin {
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
+    scrollbar-color: #DDE4EF transparent;
   }
 `;
+
+// ========================================
+// DATE FORMATTERS
+// ========================================
 
 const formatMeetingTime = (date) => {
   const parsedDate = new Date(date);
@@ -82,34 +119,53 @@ const formatMeetingDate = (date) => {
   });
 };
 
+// ========================================
+// MEETING TYPE STYLES
+// ========================================
+
 const getMeetingTypeStyle = (type) => {
   switch (type?.toLowerCase()) {
     case "call":
       return {
-        icon: <Phone className="h-4 w-4" />,
-        badge: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-        iconStyle: "bg-emerald-50 text-emerald-600",
+        icon: Phone,
+        label: "Call",
+        color: COLORS.green,
+        background: COLORS.greenBg,
+        border: "#C6EAD6",
       };
 
     case "meeting":
       return {
-        icon: <Video className="h-4 w-4" />,
-        badge: "bg-blue-50 text-blue-700 ring-blue-100",
-        iconStyle: "bg-blue-50 text-blue-600",
+        icon: Video,
+        label: "Meeting",
+        color: COLORS.blue,
+        background: COLORS.blueBg,
+        border: "#D5E1F4",
       };
 
     default:
       return {
-        icon: <Users className="h-4 w-4" />,
-        badge: "bg-violet-50 text-violet-700 ring-violet-100",
-        iconStyle: "bg-violet-50 text-violet-600",
+        icon: Users,
+        label: type || "Other",
+        color: COLORS.purple,
+        background: COLORS.purpleBg,
+        border: "#E1DAFA",
       };
   }
 };
 
+// ========================================
+// MAIN COMPONENT
+// ========================================
+
 const TodayMeeting = () => {
   const pathname = usePathname();
+
   const isManager = pathname?.startsWith("/manager");
+
+  const clientBase = isManager
+    ? "/manager/customer"
+    : "/dashboard/customer";
 
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -117,6 +173,10 @@ const TodayMeeting = () => {
   const [preset, setPreset] = useState("today");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+
+  // ========================================
+  // FETCH MEETINGS
+  // ========================================
 
   const fetchMeetings = useCallback(async () => {
     setLoading(true);
@@ -145,252 +205,836 @@ const TodayMeeting = () => {
     fetchMeetings();
   }, [fetchMeetings]);
 
-  const clientBase = isManager ? "/manager/customer" : "/dashboard/customer";
+  // ========================================
+  // RENDER
+  // ========================================
 
   return (
-    <section className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+    <section
+      className="
+        flex
+        h-[410px]
+        min-h-0
+        w-full
+        min-w-0
+        flex-col
+        overflow-hidden
+        rounded-[22px]
+        border
+        border-[#E1E7F0]
+        bg-white
+        p-5
+        shadow-[0_3px_12px_rgba(10,46,102,0.05)]
+        transition-shadow
+        duration-300
+        hover:shadow-[0_8px_24px_rgba(10,46,102,0.07)]
+        sm:p-[22px]
+      "
+    >
       <style>{SCROLLBAR_CSS}</style>
 
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
+      {/* ================================== */}
+      {/* HEADER */}
+      {/* ================================== */}
+
+      <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
+
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0A2E66]/[0.07] text-[#0A2E66]">
-            <CalendarCheck className="h-5 w-5" />
+
+          {/* Header icon */}
+
+          <div
+            className="
+              flex
+              h-10 w-10
+              shrink-0
+              items-center
+              justify-center
+              rounded-xl
+              bg-[#E9EFF9]
+              text-[#376BB5]
+            "
+          >
+            <CalendarCheck size={20} strokeWidth={1.9} />
           </div>
+
+          {/* Heading */}
 
           <div className="min-w-0">
-            <h2 className="text-base font-bold tracking-tight text-[#0A2E66] sm:text-lg">
+
+            <h2
+              className="
+                font-serif
+                text-[21px]
+                font-bold
+                leading-tight
+                tracking-tight
+                text-[#0A2E66]
+              "
+            >
               Meetings
             </h2>
-            <p className="mt-0.5 text-xs text-slate-500">
+
+            <p className="mt-1 text-[13px] leading-5 text-[#56647D]">
               Scheduled calls and client meetings
             </p>
+
           </div>
+
         </div>
 
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-orange-50 px-2.5 py-1.5 text-xs font-semibold text-[#F27B1E]">
-          <Calendar className="h-3.5 w-3.5" />
-          Schedule
+        {/* Meeting count */}
+
+        <span
+          className="
+            inline-flex
+            h-[29px]
+            shrink-0
+            items-center
+            gap-1.5
+            rounded-full
+            bg-[#E9EFF9]
+            px-3
+            text-[11px]
+            font-bold
+            text-[#376BB5]
+          "
+        >
+          <Calendar size={13} />
+
+          {meetings.length} Meetings
         </span>
+
       </div>
 
-      {/* Filters */}
-      <div className="shrink-0 border-b border-slate-100 px-5 py-4 sm:px-6">
-        <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-          Filter by date
-        </p>
+      {/* ================================== */}
+      {/* DATE FILTERS */}
+      {/* ================================== */}
 
-        <div className="flex flex-wrap gap-1.5">
-          {PRESETS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setPreset(item.id)}
-              aria-pressed={preset === item.id}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E66] focus-visible:ring-offset-1 ${
-                preset === item.id
-                  ? "border-[#0A2E66] bg-[#0A2E66] text-white shadow-sm"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+      <div
+        className="
+          mb-3
+          shrink-0
+          border-b
+          border-[#E1E7F0]
+          pb-3
+        "
+      >
+
+        <div className="mb-2 flex items-center justify-between gap-2">
+
+          <p
+            className="
+              text-[10px]
+              font-bold
+              uppercase
+              tracking-[0.12em]
+              text-[#8793AA]
+            "
+          >
+            Filter by date
+          </p>
+
+          <span className="text-[10px] font-medium text-[#8793AA]">
+            {PRESETS.find((item) => item.id === preset)?.label}
+          </span>
+
         </div>
 
+        {/* Filter buttons */}
+
+        <div className="flex flex-wrap items-center gap-1.5">
+
+          {PRESETS.map((item) => {
+
+            const isActive = preset === item.id;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setPreset(item.id)}
+                aria-pressed={isActive}
+                className={`
+                  inline-flex
+                  h-[30px]
+                  items-center
+                  justify-center
+                  rounded-full
+                  border
+                  px-3
+                  text-[11px]
+                  font-semibold
+                  transition-all
+                  duration-200
+                  active:scale-95
+                  focus-visible:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-[#F27B1E]
+
+                  ${
+                    isActive
+                      ? "border-[#0A2E66] bg-[#0A2E66] text-white shadow-sm"
+                      : "border-[#E1E7F0] bg-white text-[#64748B] hover:border-[#C8D6EA] hover:bg-[#F7F8FC]"
+                  }
+                `}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+
+        </div>
+
+        {/* Custom date range */}
+
         {preset === "custom" && (
-          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3">
-            <div className="flex flex-wrap items-end gap-3">
-              <label className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="text-[11px] font-medium text-slate-500">
-                  From
+
+          <div
+            className="
+              mt-3
+              rounded-xl
+              border
+              border-[#E1E7F0]
+              bg-[#F7F8FC]
+              p-3
+            "
+          >
+
+            <div className="grid grid-cols-2 gap-2">
+
+              {/* From */}
+
+              <label className="min-w-0">
+
+                <span
+                  className="
+                    mb-1.5
+                    block
+                    text-[11px]
+                    font-semibold
+                    text-[#56647D]
+                  "
+                >
+                  From date
                 </span>
 
                 <div className="relative">
-                  <CalendarDays className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                  <CalendarDays
+                    size={14}
+                    className="
+                      pointer-events-none
+                      absolute
+                      left-2.5
+                      top-1/2
+                      -translate-y-1/2
+                      text-[#8793AA]
+                    "
+                  />
 
                   <input
                     type="date"
                     value={from}
                     onChange={(event) => setFrom(event.target.value)}
-                    className="w-full min-w-0 rounded-lg border border-slate-200 bg-white py-2 pl-8 pr-2 text-xs text-slate-700 outline-none transition focus:border-[#0A2E66] focus:ring-2 focus:ring-[#0A2E66]/10"
+                    className="
+                      h-[36px]
+                      w-full
+                      min-w-0
+                      rounded-lg
+                      border
+                      border-[#E1E7F0]
+                      bg-white
+                      pl-8
+                      pr-1
+                      text-[11px]
+                      text-[#34445F]
+                      outline-none
+                      transition
+                      focus:border-[#0A2E66]
+                      focus:ring-2
+                      focus:ring-[#0A2E66]/10
+                    "
                   />
+
                 </div>
+
               </label>
 
-              <label className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="text-[11px] font-medium text-slate-500">
-                  To
+              {/* To */}
+
+              <label className="min-w-0">
+
+                <span
+                  className="
+                    mb-1.5
+                    block
+                    text-[11px]
+                    font-semibold
+                    text-[#56647D]
+                  "
+                >
+                  To date
                 </span>
 
                 <div className="relative">
-                  <CalendarDays className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                  <CalendarDays
+                    size={14}
+                    className="
+                      pointer-events-none
+                      absolute
+                      left-2.5
+                      top-1/2
+                      -translate-y-1/2
+                      text-[#8793AA]
+                    "
+                  />
 
                   <input
                     type="date"
                     value={to}
                     min={from || undefined}
                     onChange={(event) => setTo(event.target.value)}
-                    className="w-full min-w-0 rounded-lg border border-slate-200 bg-white py-2 pl-8 pr-2 text-xs text-slate-700 outline-none transition focus:border-[#0A2E66] focus:ring-2 focus:ring-[#0A2E66]/10"
+                    className="
+                      h-[36px]
+                      w-full
+                      min-w-0
+                      rounded-lg
+                      border
+                      border-[#E1E7F0]
+                      bg-white
+                      pl-8
+                      pr-1
+                      text-[11px]
+                      text-[#34445F]
+                      outline-none
+                      transition
+                      focus:border-[#0A2E66]
+                      focus:ring-2
+                      focus:ring-[#0A2E66]/10
+                    "
                   />
+
                 </div>
+
               </label>
 
-              {(from || to) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFrom("");
-                    setTo("");
-                  }}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-500 transition hover:bg-white hover:text-[#F27B1E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E66]"
-                >
-                  <X className="h-3.5 w-3.5" />
-                  Clear
-                </button>
-              )}
             </div>
+
+            {(from || to) && (
+
+              <button
+                type="button"
+                onClick={() => {
+                  setFrom("");
+                  setTo("");
+                }}
+                className="
+                  mt-2
+                  inline-flex
+                  items-center
+                  gap-1
+                  text-[11px]
+                  font-semibold
+                  text-[#64748B]
+                  transition-colors
+                  hover:text-[#F27B1E]
+                "
+              >
+                <X size={13} />
+                Clear dates
+              </button>
+
+            )}
+
           </div>
+
         )}
+
       </div>
 
-      {/* Meeting list */}
-      <div className="meeting-scroll-admin min-h-[220px] flex-1 overflow-y-auto overflow-x-hidden px-4 py-3 sm:px-5">
+      {/* ================================== */}
+      {/* MEETING LIST */}
+      {/* ================================== */}
+
+      <div
+        className="
+          meeting-scroll-admin
+          min-h-0
+          flex-1
+          overflow-x-hidden
+          overflow-y-auto
+          pr-1
+        "
+      >
+
+        {/* LOADING */}
+
         {loading ? (
-          <div className="space-y-3">
+
+          <div className="space-y-2.5">
+
             {Array.from({ length: 3 }).map((_, index) => (
+
               <div
                 key={index}
-                className="flex gap-3 rounded-xl border border-slate-100 p-3"
+                className="
+                  flex
+                  gap-3
+                  rounded-[15px]
+                  border
+                  border-[#E1E7F0]
+                  p-3
+                "
               >
+
                 <Skeleton
-                  width={64}
-                  height={64}
+                  width={62}
+                  height={65}
                   borderRadius={12}
                 />
 
-                <div className="min-w-0 flex-1 pt-1">
-                  <Skeleton height={15} width="62%" />
-                  <div className="mt-2">
-                    <Skeleton height={12} width="40%" />
-                  </div>
-                  <div className="mt-2">
-                    <Skeleton height={11} width="55%" />
-                  </div>
+                <div className="min-w-0 flex-1 space-y-2 pt-1">
+
+                  <Skeleton height={14} width="65%" />
+
+                  <Skeleton height={11} width="45%" />
+
+                  <Skeleton height={11} width="55%" />
+
                 </div>
+
               </div>
+
             ))}
+
           </div>
+
         ) : meetings.length > 0 ? (
-          <div className="space-y-3">
+
+          /* MEETING CARDS */
+
+          <div className="space-y-2.5">
+
             {meetings.map((meeting) => {
+
               const typeStyle = getMeetingTypeStyle(meeting.updateType);
+              const TypeIcon = typeStyle.icon;
 
               return (
+
                 <Link
                   key={meeting._id}
                   href={`${clientBase}/${meeting.clientId}`}
-                  className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E66] focus-visible:ring-offset-2"
+                  className="
+                    group
+                    block
+                    rounded-[16px]
+                    focus-visible:outline-none
+                    focus-visible:ring-2
+                    focus-visible:ring-[#F27B1E]
+                    focus-visible:ring-offset-2
+                  "
                 >
-                  <article className="flex min-w-0 items-start gap-3 rounded-xl border border-slate-200/80 bg-white p-3 transition-all duration-200 group-hover:border-[#0A2E66]/20 group-hover:bg-slate-50/70 group-hover:shadow-sm sm:p-4">
-                    {/* Date and time */}
-                    <div className="flex w-[68px] shrink-0 flex-col items-center justify-center self-stretch rounded-xl border border-slate-100 bg-slate-50 px-1.5 py-3 text-center transition-colors group-hover:border-orange-100 group-hover:bg-orange-50/50">
-                      <Clock className="mb-2 h-4 w-4 text-[#F27B1E]" />
 
-                      <span className="text-[11px] font-bold leading-4 text-[#0A2E66] sm:text-xs">
+                  <article
+                    className="
+                      flex
+                      min-w-0
+                      items-center
+                      gap-3
+                      rounded-[16px]
+                      border
+                      border-[#E1E7F0]
+                      bg-white
+                      p-3
+                      transition-all
+                      duration-200
+                      group-hover:border-[#C8D6EA]
+                      group-hover:bg-[#F9FAFD]
+                      group-hover:shadow-[0_4px_12px_rgba(10,46,102,0.05)]
+                      sm:p-3.5
+                    "
+                  >
+
+                    {/* DATE AND TIME */}
+
+                    <div
+                      className="
+                        flex
+                        w-[65px]
+                        min-h-[76px]
+                        shrink-0
+                        flex-col
+                        items-center
+                        justify-center
+                        rounded-xl
+                        border
+                        border-[#E1E7F0]
+                        bg-[#F7F8FC]
+                        px-1
+                        py-2
+                        transition-colors
+                        duration-200
+                        group-hover:border-[#F5D4B9]
+                        group-hover:bg-[#FFF8F0]
+                      "
+                    >
+
+                      <Clock
+                        size={15}
+                        className="mb-1.5 text-[#F27B1E]"
+                      />
+
+                      <span
+                        className="
+                          text-[11px]
+                          font-bold
+                          leading-4
+                          text-[#0A2E66]
+                          sm:text-xs
+                        "
+                      >
                         {formatMeetingTime(meeting.meetingAt)}
                       </span>
 
-                      <span className="mt-1 text-[9px] font-medium leading-3 text-slate-400">
+                      <span
+                        className="
+                          mt-1
+                          text-[9px]
+                          font-medium
+                          leading-3
+                          text-[#8793AA]
+                        "
+                      >
                         {formatMeetingDate(meeting.meetingAt)}
                       </span>
+
                     </div>
 
-                    {/* Meeting details */}
+                    {/* MEETING DETAILS */}
+
                     <div className="min-w-0 flex-1">
-                      <div className="flex min-w-0 items-start justify-between gap-2">
-                        <h3 className="min-w-0 break-words text-sm font-semibold leading-5 text-slate-800 transition-colors group-hover:text-[#0A2E66]">
+
+                      {/* Client name and type icon */}
+
+                      <div className="flex min-w-0 items-center justify-between gap-2">
+
+                        <h3
+                          className="
+                            min-w-0
+                            truncate
+                            text-[14px]
+                            font-semibold
+                            leading-5
+                            text-[#0F1B33]
+                            transition-colors
+                            group-hover:text-[#0A2E66]
+                          "
+                        >
                           {meeting.clientName || "Unknown client"}
                         </h3>
 
-                        <span
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${typeStyle.iconStyle}`}
+                        <div
+                          className="
+                            flex
+                            h-8 w-8
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+                          "
+                          style={{
+                            background: typeStyle.background,
+                            color: typeStyle.color,
+                          }}
                         >
-                          {typeStyle.icon}
-                        </span>
+                          <TypeIcon size={16} strokeWidth={1.9} />
+                        </div>
+
                       </div>
 
+                      {/* Company */}
+
                       {meeting.company && (
-                        <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
-                          <Building2 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                          <span className="truncate">{meeting.company}</span>
+
+                        <p
+                          className="
+                            mt-1
+                            flex
+                            min-w-0
+                            items-center
+                            gap-1.5
+                            text-[11px]
+                            leading-4
+                            text-[#56647D]
+                          "
+                        >
+
+                          <Building2
+                            size={12}
+                            className="shrink-0 text-[#8793AA]"
+                          />
+
+                          <span className="truncate">
+                            {meeting.company}
+                          </span>
+
                         </p>
+
                       )}
 
-                      <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
-                        <UserRound className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                        <span className="shrink-0">Assigned to</span>
-                        <span className="truncate font-medium text-slate-700">
+                      {/* Salesperson */}
+
+                      <p
+                        className="
+                          mt-1
+                          flex
+                          min-w-0
+                          items-center
+                          gap-1.5
+                          text-[11px]
+                          leading-4
+                          text-[#8793AA]
+                        "
+                      >
+
+                        <UserRound
+                          size={12}
+                          className="shrink-0"
+                        />
+
+                        <span className="shrink-0">
+                          Assigned to
+                        </span>
+
+                        <span className="truncate font-semibold text-[#56647D]">
                           {meeting.salesPersonName || "Unknown"}
                         </span>
+
                       </p>
 
-                      <div className="mt-3 flex flex-wrap gap-1.5">
+                      {/* Badges */}
+
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold capitalize ring-1 ring-inset ${typeStyle.badge}`}
+                          className="
+                            inline-flex
+                            h-[22px]
+                            items-center
+                            rounded-full
+                            px-2.5
+                            text-[10px]
+                            font-bold
+                            capitalize
+                          "
+                          style={{
+                            background: typeStyle.background,
+                            color: typeStyle.color,
+                          }}
                         >
-                          {meeting.updateType || "Other"}
+                          {typeStyle.label}
                         </span>
 
                         {meeting.status && (
-                          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium capitalize text-slate-600 ring-1 ring-inset ring-slate-200">
+
+                          <span
+                            className="
+                              inline-flex
+                              h-[22px]
+                              items-center
+                              rounded-full
+                              border
+                              border-[#E1E7F0]
+                              bg-[#F7F8FC]
+                              px-2.5
+                              text-[10px]
+                              font-semibold
+                              capitalize
+                              text-[#64748B]
+                            "
+                          >
                             {String(meeting.status).replace(/-/g, " ")}
                           </span>
+
                         )}
+
                       </div>
 
+                      {/* Meeting note */}
+
                       {meeting.note && (
-                        <p className="mt-3 line-clamp-2 break-words rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-600">
+
+                        <p
+                          className="
+                            mt-2
+                            line-clamp-2
+                            break-words
+                            rounded-lg
+                            border
+                            border-[#E1E7F0]
+                            bg-[#F7F8FC]
+                            px-2.5
+                            py-1.5
+                            text-[11px]
+                            leading-5
+                            text-[#56647D]
+                          "
+                        >
                           {meeting.note}
                         </p>
+
                       )}
+
                     </div>
+
+                    {/* NAVIGATION INDICATOR */}
+
+                    <div
+                      className="
+                        flex
+                        h-7 w-7
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-lg
+                        text-[#A0AABD]
+                        transition-all
+                        duration-200
+                        group-hover:bg-[#E9EFF9]
+                        group-hover:text-[#0A2E66]
+                      "
+                    >
+                      <ChevronRight
+                        size={17}
+                        className="
+                          transition-transform
+                          duration-200
+                          group-hover:translate-x-0.5
+                        "
+                      />
+                    </div>
+
                   </article>
+
                 </Link>
+
               );
+
             })}
+
           </div>
+
         ) : (
-          <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
-              <CalendarDays className="h-6 w-6" />
+
+          /* EMPTY STATE */
+
+          <div
+            className="
+              flex
+              min-h-[170px]
+              flex-col
+              items-center
+              justify-center
+              rounded-[16px]
+              border
+              border-dashed
+              border-[#E1E7F0]
+              bg-[#F7F8FC]
+              px-4
+              py-7
+              text-center
+            "
+          >
+
+            <div
+              className="
+                mb-3
+                flex
+                h-11 w-11
+                items-center
+                justify-center
+                rounded-xl
+                bg-[#E9EFF9]
+                text-[#376BB5]
+              "
+            >
+              <CalendarDays size={22} />
             </div>
 
-            <p className="text-sm font-semibold text-slate-700">
+            <p
+              className="
+                text-[14px]
+                font-semibold
+                text-[#0A2E66]
+              "
+            >
               No meetings found
             </p>
 
-            <p className="mt-1 max-w-[240px] text-xs leading-5 text-slate-500">
+            <p
+              className="
+                mt-1
+                max-w-[240px]
+                text-[12px]
+                leading-5
+                text-[#8793AA]
+              "
+            >
               There are no scheduled meetings for the selected date range.
             </p>
+
           </div>
+
         )}
+
       </div>
 
-      {/* Footer */}
+      {/* ================================== */}
+      {/* FOOTER */}
+      {/* ================================== */}
+
       {!loading && meetings.length > 0 && (
-        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-3 sm:px-6">
-          <p className="text-xs text-slate-500">
+
+        <div
+          className="
+            mt-3
+            flex
+            shrink-0
+            items-center
+            justify-between
+            gap-3
+            border-t
+            border-[#E1E7F0]
+            pt-3
+          "
+        >
+
+          <p className="text-[11px] text-[#8793AA]">
             {meetings.length}{" "}
             {meetings.length === 1 ? "appointment" : "appointments"}
           </p>
 
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#0A2E66]">
-            <CalendarCheck className="h-3.5 w-3.5" />
+          <span
+            className="
+              inline-flex
+              items-center
+              gap-1.5
+              text-[11px]
+              font-semibold
+              text-[#0A2E66]
+            "
+          >
+            <CalendarCheck size={13} />
             Scheduled
           </span>
+
         </div>
+
       )}
+
     </section>
   );
 };
