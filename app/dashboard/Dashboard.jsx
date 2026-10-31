@@ -46,55 +46,81 @@ const Dashboard = () => {
   return (
     <div className="mx-auto w-full max-w-[1560px] min-w-0 space-y-6 sm:space-y-7 lg:space-y-8">
       {/* Page heading and personalized greeting */}
-      <section className="relative overflow-hidden rounded-2xl border border-[#E3E7F0] bg-white p-5 shadow-[0_3px_12px_rgba(10,46,102,0.04)] sm:p-6 lg:p-7">
-        {/* Decorative brand accent */}
-        <div className="absolute inset-y-0 left-0 w-1.5 bg-[#F27B1E]" />
+        <section className="relative isolate overflow-hidden rounded-[30px] bg-[#0A2E66] px-6 pb-7 pt-[82px] shadow-[0_8px_24px_rgba(10,46,102,0.12)] sm:px-8 sm:pb-8 lg:px-[38px]">
 
-        <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full bg-[#E9EFF9]/80 sm:h-56 sm:w-56" />
+    {/* Top decorative striped awning */}
+    <div className="absolute inset-x-0 top-0 z-10 flex h-[50px] overflow-hidden">
+      {Array.from({ length: 42 }).map((_, index) => (
+        <div
+          key={index}
+          className={`relative h-[50px] min-w-[33px] flex-1 ${
+            index % 2 === 0
+              ? "bg-[#F5A052]"
+              : index % 4 === 1
+                ? "bg-[#FFF2E5]"
+                : "bg-[#3769A9]"
+          }`}
+          style={{
+            borderRadius: "0 0 20px 20px",
+            marginRight: "-1px",
+          }}
+        />
+      ))}
+    </div>
 
-        <div className="pointer-events-none absolute -right-5 -top-10 h-28 w-28 rounded-full border border-[#E3E7F0] sm:h-36 sm:w-36" />
+    {/* Subtle background glow */}
+    <div className="pointer-events-none absolute -right-20 -top-20 h-[350px] w-[350px] rounded-full bg-[#315A91]/25 blur-[80px]" />
 
-        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            {/* Section label */}
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#E9EFF9] px-3 py-1.5 text-xs font-semibold text-[#0A2E66]">
-              <ChartNoAxesCombined
-                size={15}
-                className="text-[#F27B1E]"
-              />
-              Business overview
-            </div>
+    <div className="relative z-20">
 
-            {/* Personalized greeting */}
-            <h1 className="break-words text-2xl font-bold tracking-tight text-[#0A2E66] sm:text-3xl lg:text-4xl">
-              {greeting}, {userName}!
-            </h1>
+      {/* Main greeting and actions */}
+      <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5B6478] sm:text-[15px]">
-              Welcome back to your workspace. Here&apos;s your business
-              performance overview. Monitor team activity, manage clients,
-              and stay on top of today&apos;s priorities.
+        {/* Left content */}
+        <div className="min-w-0 flex-1">
+
+          {/* Date */}
+          <p className="mb-1 text-[16px] font-semibold tracking-tight text-[#F58220]">
+            {new Date().toLocaleDateString("en-IN", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+            })}
+          </p>
+
+          {/* Greeting */}
+          <h1 className="font-serif text-[34px] font-bold leading-[1.15] tracking-tight text-white sm:text-[40px] lg:text-[46px]">
+            {greeting}, {userName}
+          </h1>
+
+          {/* Description */}
+          <p className="mt-3 max-w-[570px] text-[16px] font-medium leading-[1.7] text-[#C6D3E8] sm:text-[17px]">
+            Welcome back to your workspace. Here's your business performance
+            overview. Monitor team activity, manage clients, and stay on top
+            of today's priorities.
+          </p>
+        </div>
+
+        {/* Right workspace information */}
+        <div className="flex shrink-0 items-center self-start rounded-2xl border border-white/15 bg-[#315487] px-4 py-3.5 shadow-sm lg:self-center">
+
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white">
+            <CalendarDays size={22} />
+          </div>
+
+          <div className="ml-3">
+            <p className="text-xs font-medium text-[#C6D3E8]">
+              Your workspace
+            </p>
+
+            <p className="mt-1 text-[15px] font-bold text-white">
+              Admin overview
             </p>
           </div>
-
-          {/* Workspace information */}
-          <div className="flex shrink-0 items-center gap-3 self-start rounded-xl border border-[#E3E7F0] bg-[#F2F4F9] px-3.5 py-3 sm:self-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#F27B1E] shadow-sm">
-              <CalendarDays size={20} />
-            </div>
-
-            <div>
-              <p className="text-xs font-medium text-[#5B6478]">
-                Your workspace
-              </p>
-
-              <p className="mt-0.5 text-sm font-semibold text-[#0A2E66]">
-                Admin overview
-              </p>
-            </div>
-          </div>
         </div>
-      </section>
+      </div>
+    </div>
+        </section>
 
       {/* KPI cards */}
       <section

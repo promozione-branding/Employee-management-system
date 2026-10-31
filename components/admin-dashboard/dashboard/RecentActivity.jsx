@@ -7,18 +7,23 @@ import { recentActivityService } from "@/service/admin-dashboard/dashboard-api";
 import React, { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+
 import {
-  Activity,
-  FileText,
+  TrendingUp,
   UserPlus,
+  FileText,
   Briefcase,
   Clock,
-  ArrowUpRight,
+  Activity,
 } from "lucide-react";
 
 function RecentActivity() {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // ========================================
+  // FETCH RECENT ACTIVITY
+  // ========================================
 
   async function fetchRecentActivity() {
     try {
@@ -38,24 +43,32 @@ function RecentActivity() {
     fetchRecentActivity();
   }, []);
 
+  // ========================================
+  // ACTIVITY ICON STYLES
+  // ========================================
+
   const activityStyles = {
     customer: {
-      icon: <UserPlus className="h-4 w-4" />,
-      color: "bg-blue-50 text-blue-600 ring-blue-100",
+      icon: <UserPlus size={19} strokeWidth={1.8} />,
+      color: "bg-[#E5F5EC] text-[#16865D]",
     },
     proposal: {
-      icon: <FileText className="h-4 w-4" />,
-      color: "bg-emerald-50 text-emerald-600 ring-emerald-100",
+      icon: <FileText size={19} strokeWidth={1.8} />,
+      color: "bg-[#E5F5EC] text-[#16865D]",
     },
     employee: {
-      icon: <Briefcase className="h-4 w-4" />,
-      color: "bg-violet-50 text-violet-600 ring-violet-100",
+      icon: <Briefcase size={19} strokeWidth={1.8} />,
+      color: "bg-[#E5F5EC] text-[#16865D]",
     },
     saleWork: {
-      icon: <Briefcase className="h-4 w-4" />,
-      color: "bg-orange-50 text-[#F27B1E] ring-orange-100",
+      icon: <Briefcase size={19} strokeWidth={1.8} />,
+      color: "bg-[#E5F5EC] text-[#16865D]",
     },
   };
+
+  // ========================================
+  // DATE FORMAT
+  // ========================================
 
   const formatActivityDate = (date) => {
     const parsedDate = new Date(date);
@@ -73,115 +86,361 @@ function RecentActivity() {
     });
   };
 
-  return (
-    <section className="w-full min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0A2E66]/[0.07] text-[#0A2E66]">
-            <Activity className="h-5 w-5" />
-          </div>
+  // ========================================
+  // RENDER
+  // ========================================
 
-          <div className="min-w-0">
-            <h2 className="text-base font-bold tracking-tight text-[#0A2E66] sm:text-lg">
-              Recent Activity
-            </h2>
-            <p className="mt-0.5 text-xs text-slate-500">
-              Latest updates across your workspace
-            </p>
-          </div>
+  return (
+    <section
+      className="
+        relative
+        flex
+        h-[410px]
+        min-h-0
+        w-full
+        min-w-0
+        flex-col
+        overflow-hidden
+        rounded-[22px]
+        border border-[#E1E7F0]
+        bg-white
+        p-5
+        shadow-[0_3px_12px_rgba(10,46,102,0.05)]
+        transition-shadow duration-300
+        hover:shadow-[0_8px_24px_rgba(10,46,102,0.07)]
+        sm:h-[410px]
+        sm:p-[22px]
+      "
+    >
+
+      {/* ================================== */}
+      {/* HEADER */}
+      {/* ================================== */}
+
+      <div className="mb-4 flex shrink-0 items-center gap-3">
+
+        <div
+          className="
+            flex h-10 w-10
+            shrink-0
+            items-center justify-center
+            rounded-xl
+            bg-[#E5F5EC]
+            text-[#16865D]
+          "
+        >
+          <TrendingUp size={21} strokeWidth={2} />
         </div>
 
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-orange-50 px-2.5 py-1.5 text-xs font-semibold text-[#F27B1E]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#F27B1E]" />
-          Recent
-        </span>
-      </div>
+        <div className="min-w-0">
 
-      {/* Activity list */}
-      <div className="max-h-[360px] space-y-0 overflow-y-auto px-5 sm:px-6">
-        {loading ? (
-          Array.from({ length: 5 }).map((_, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-3 border-b border-slate-100 py-4 last:border-b-0"
-            >
-              <Skeleton circle height={40} width={40} />
+          <h2
+            className="
+              font-serif
+              text-[20px]
+              font-bold
+              leading-tight
+              tracking-tight
+              text-[#0A2E66]
+              sm:text-[21px]
+            "
+          >
+            Recent activity
+          </h2>
 
-              <div className="min-w-0 flex-1">
-                <Skeleton height={14} width="78%" />
-                <div className="mt-2">
-                  <Skeleton height={11} width="42%" />
-                </div>
-              </div>
-            </div>
-          ))
-        ) : activities.length > 0 ? (
-          activities.slice(0, 10).map((activity, index) => {
-            const style = activityStyles[activity.type] || {
-              icon: <Briefcase className="h-4 w-4" />,
-              color: "bg-slate-100 text-slate-500 ring-slate-200",
-            };
-
-            return (
-              <div
-                key={activity.refId ?? `${activity.type}-${activity.createdAt}-${index}`}
-                className="group flex items-start gap-3 border-b border-slate-100 py-4 last:border-b-0"
-              >
-                {/* Activity icon */}
-                <div
-                  className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset transition-transform duration-200 group-hover:scale-105 ${style.color}`}
-                >
-                  {style.icon}
-                </div>
-
-                {/* Activity details */}
-                <div className="min-w-0 flex-1">
-                  <p className="break-words text-sm font-medium leading-5 text-slate-800 transition-colors group-hover:text-[#0A2E66]">
-                    {activity.title}
-                  </p>
-
-                  <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
-                      <Clock className="h-3.5 w-3.5 shrink-0" />
-                      {formatActivityDate(activity.createdAt)}
-                    </span>
-                  </div>
-                </div>
-
-                <ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-slate-300 transition-colors group-hover:text-[#F27B1E]" />
-              </div>
-            );
-          })
-        ) : (
-          <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
-              <Activity className="h-6 w-6" />
-            </div>
-
-            <p className="text-sm font-semibold text-slate-700">
-              No recent activity
-            </p>
-            <p className="mt-1 max-w-[220px] text-xs leading-5 text-slate-500">
-              New workspace updates will appear here when available.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      {!loading && activities.length > 0 && (
-        <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 px-5 py-3 sm:px-6">
-          <p className="text-xs text-slate-500">
-            Showing {Math.min(activities.length, 10)} of {activities.length}{" "}
-            activities
+          <p
+            className="
+              mt-1
+              text-[13px]
+              leading-5
+              text-[#56647D]
+              sm:text-[14px]
+            "
+          >
+            What&apos;s happening across the team
           </p>
 
-          <span className="text-xs font-medium text-[#0A2E66]">
-            Latest updates
-          </span>
         </div>
-      )}
+
+      </div>
+
+      {/* ================================== */}
+      {/* SCROLLABLE ACTIVITY LIST */}
+      {/* ================================== */}
+
+      <div
+        className="
+          relative
+          min-h-0
+          flex-1
+          overflow-x-hidden
+          overflow-y-auto
+          pr-2
+
+          [&::-webkit-scrollbar]:w-[5px]
+          [&::-webkit-scrollbar-track]:bg-transparent
+          [&::-webkit-scrollbar-thumb]:rounded-full
+          [&::-webkit-scrollbar-thumb]:bg-[#DDE4EF]
+          hover:[&::-webkit-scrollbar-thumb]:bg-[#AEBBD0]
+
+          [scrollbar-width:thin]
+          [scrollbar-color:#DDE4EF_transparent]
+        "
+      >
+
+        {/* LOADING STATE */}
+
+        {loading ? (
+
+          <div className="space-y-3 pt-1">
+
+            {Array.from({ length: 5 }).map((_, index) => (
+
+              <div
+                key={index}
+                className="flex items-start gap-3 py-2"
+              >
+
+                <Skeleton
+                  circle
+                  height={40}
+                  width={40}
+                />
+
+                <div className="min-w-0 flex-1 pt-1">
+
+                  <Skeleton
+                    height={14}
+                    width="85%"
+                  />
+
+                  <div className="mt-2">
+                    <Skeleton
+                      height={12}
+                      width="45%"
+                    />
+                  </div>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        ) : activities.length > 0 ? (
+
+          <div className="flex flex-col">
+
+            {activities.slice(0, 10).map((activity, index) => {
+
+              const style = activityStyles[activity.type] || {
+                icon: <Activity size={19} strokeWidth={1.8} />,
+                color: "bg-[#E5F5EC] text-[#16865D]",
+              };
+
+              const isLast =
+                index === Math.min(activities.length, 10) - 1;
+
+              return (
+
+                <div
+                  key={
+                    activity.refId ??
+                    `${activity.type}-${activity.createdAt}-${index}`
+                  }
+                  className="
+                    relative
+                    flex
+                    min-w-0
+                    items-start
+                    gap-3
+                    py-[9px]
+                  "
+                >
+
+                  {/* TIMELINE ICON */}
+
+                  <div
+                    className="
+                      relative
+                      z-10
+                      flex
+                      shrink-0
+                      flex-col
+                      items-center
+                    "
+                  >
+
+                    <div
+                      className={`
+                        flex
+                        h-10 w-10
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-full
+                        transition-transform
+                        duration-200
+                        hover:scale-105
+                        ${style.color}
+                      `}
+                    >
+                      {style.icon}
+                    </div>
+
+                    {/* Connecting line */}
+
+                    {!isLast && (
+                      <div
+                        className="
+                          absolute
+                          left-1/2
+                          top-[41px]
+                          h-[20px]
+                          w-[2px]
+                          -translate-x-1/2
+                          bg-[#DDE4EF]
+                        "
+                      />
+                    )}
+
+                  </div>
+
+                  {/* ACTIVITY DETAILS */}
+
+                  <div className="min-w-0 flex-1 pt-[2px]">
+
+                    <div
+                      className="
+                        flex
+                        flex-wrap
+                        items-center
+                        gap-x-2
+                        gap-y-1
+                      "
+                    >
+
+                      <p
+                        className="
+                          break-words
+                          text-[13px]
+                          font-medium
+                          leading-[19px]
+                          text-[#0F1B33]
+                          sm:text-[14px]
+                        "
+                      >
+                        {activity.title}
+                      </p>
+
+                      {/* New badge */}
+
+                      {index === 0 && (
+                        <span
+                          className="
+                            inline-flex
+                            shrink-0
+                            items-center
+                            rounded-full
+                            bg-[#F27B1E]
+                            px-[9px]
+                            py-[2px]
+                            text-[10px]
+                            font-bold
+                            leading-[14px]
+                            text-white
+                          "
+                        >
+                          New
+                        </span>
+                      )}
+
+                    </div>
+
+                    {/* TIMESTAMP */}
+
+                    <div className="mt-[3px] flex items-center gap-1.5">
+
+                      <Clock
+                        size={12}
+                        strokeWidth={1.8}
+                        className="shrink-0 text-[#64748B]"
+                      />
+
+                      <span
+                        className="
+                          text-[12px]
+                          font-normal
+                          leading-4
+                          text-[#64748B]
+                        "
+                      >
+                        {formatActivityDate(activity.createdAt)}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              );
+
+            })}
+
+          </div>
+
+        ) : (
+
+          /* EMPTY STATE */
+
+          <div
+            className="
+              flex
+              min-h-[230px]
+              flex-col
+              items-center
+              justify-center
+              px-4
+              text-center
+            "
+          >
+
+            <div
+              className="
+                mb-3
+                flex h-12 w-12
+                items-center justify-center
+                rounded-full
+                bg-[#E5F5EC]
+                text-[#16865D]
+              "
+            >
+              <TrendingUp size={23} />
+            </div>
+
+            <h3 className="text-[14px] font-semibold text-[#0A2E66]">
+              No recent activity
+            </h3>
+
+            <p className="
+              mt-1
+              max-w-[220px]
+              text-[12px]
+              leading-5
+              text-[#64748B]
+            ">
+              New workspace updates will appear here when available.
+            </p>
+
+          </div>
+
+        )}
+
+      </div>
+
     </section>
   );
 }

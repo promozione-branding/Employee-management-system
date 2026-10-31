@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+
 import {
   Phone,
   PhoneCall,
@@ -12,59 +13,103 @@ import {
   Clock3,
   TrendingUp,
   ArrowUpRight,
-  Activity,
+  RefreshCw,
   Headphones,
 } from "lucide-react";
+
 import toast from "react-hot-toast";
 import { getAdminDailyCallStatsService } from "@/service/calling";
 import Link from "next/link";
 
+// ========================================
+// MAIN COMPONENT
+// ========================================
+
 const Callinfo = () => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState({ agents: [], totals: null });
+  const [refreshing, setRefreshing] = useState(false);
 
-  async function fetchStats() {
+  const [data, setData] = useState({
+    agents: [],
+    totals: null,
+  });
+
+  // ========================================
+  // FETCH CALL STATISTICS
+  // ========================================
+
+  async function fetchStats(isManual = false) {
+    if (isManual) setRefreshing(true);
+
     try {
       const res = await getAdminDailyCallStatsService();
 
       if (res?.success) {
-        setData(res.data || { agents: [], totals: null });
+        setData(res.data || {
+          agents: [],
+          totals: null,
+        });
       }
     } catch (err) {
       console.error("Failed to load call statistics:", err);
-      toast.error(err?.message || "Failed to load call info");
+
+      toast.error(
+        err?.message || "Failed to load call info"
+      );
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }
+
+  // ========================================
+  // AUTO REFRESH
+  // ========================================
 
   useEffect(() => {
     fetchStats();
 
-    const intervalId = setInterval(fetchStats, 60000);
+    const intervalId = setInterval(() => {
+      fetchStats();
+    }, 60000);
 
     return () => clearInterval(intervalId);
   }, []);
 
+  // ========================================
+  // LOADING UI
+  // ========================================
+
   if (loading) {
     return (
-      <section className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <div className="mb-6 flex items-center gap-3">
-          <Skeleton height={44} width={44} borderRadius={12} />
+      <section className="min-w-0 rounded-[25px] border border-[#E1E7F0] bg-white p-5 shadow-[0_3px_12px_rgba(10,46,102,0.04)] sm:p-7">
+
+        <div className="mb-7 flex items-center gap-3">
+          <Skeleton
+            height={50}
+            width={50}
+            borderRadius={15}
+          />
+
           <div>
-            <Skeleton height={20} width={210} />
-            <Skeleton height={14} width={250} />
+            <Skeleton height={24} width={220} />
+            <Skeleton height={17} width={280} />
           </div>
         </div>
 
-        <div className="mb-6 grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <div className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} height={88} borderRadius={14} />
+            <Skeleton
+              key={index}
+              height={104}
+              borderRadius={20}
+            />
           ))}
         </div>
 
-        <Skeleton height={42} className="mb-2" />
-        <Skeleton height={52} count={3} className="mb-1" />
+        <Skeleton height={35} className="mb-3" />
+        <Skeleton height={75} count={3} className="mb-2" />
+
       </section>
     );
   }
@@ -72,44 +117,144 @@ const Callinfo = () => {
   const { agents = [], totals } = data;
 
   return (
-    <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition-shadow duration-300 hover:shadow-md sm:p-5 lg:p-6">
-      {/* Section heading */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#0A2E66]">
-            <Phone size={21} strokeWidth={1.9} />
+    <section
+      aria-label="Team call activity"
+      className="
+        min-w-0 overflow-hidden
+        rounded-[25px]
+        border border-[#E1E7F0]
+        bg-white
+        p-5
+        shadow-[0_3px_12px_rgba(10,46,102,0.04)]
+        transition-shadow duration-300
+        hover:shadow-[0_8px_24px_rgba(10,46,102,0.07)]
+        sm:p-6
+        lg:p-7
+      "
+    >
+
+      {/* ================================== */}
+      {/* HEADER */}
+      {/* ================================== */}
+
+      <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+
+        {/* Left heading */}
+        <div className="flex min-w-0 items-center gap-3.5">
+
+          <div className="
+            flex h-[50px] w-[50px] shrink-0
+            items-center justify-center
+            rounded-[15px]
+            bg-[#E9EFF9]
+            text-[#376BB5]
+          ">
+            <Phone size={25} strokeWidth={1.9} />
           </div>
 
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-bold tracking-tight text-[#0A2E66] sm:text-xl">
-                Team Call Activity
-              </h2>
 
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                Today
-              </span>
-            </div>
+            <h2 className="
+              font-serif
+              text-[23px]
+              font-bold
+              leading-tight
+              tracking-tight
+              text-[#0A2E66]
+              sm:text-[25px]
+            ">
+              Team call activity
+            </h2>
 
-            <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">
-              Overview of every agent&apos;s calls for today
+            <p className="
+              mt-1
+              text-[15px]
+              font-normal
+              leading-5
+              text-[#56647D]
+              sm:text-[16px]
+            ">
+              Live overview of every agent&apos;s calls today
             </p>
+
           </div>
         </div>
 
-        <Link
-          href="/dashboard/calling"
-          className="inline-flex w-fit shrink-0 items-center gap-2 rounded-xl border border-blue-100 px-3.5 py-2.5 text-sm font-semibold text-[#0A2E66] transition-colors hover:border-blue-200 hover:bg-blue-50"
-        >
-          View all logs
-          <ArrowUpRight size={16} className="text-[#F27B1E]" />
-        </Link>
+        {/* Right actions */}
+        <div className="flex shrink-0 items-center gap-3">
+
+          {/* Refresh */}
+          <button
+            type="button"
+            onClick={() => fetchStats(true)}
+            disabled={refreshing}
+            aria-label="Refresh call statistics"
+            className="
+              flex h-[52px] w-[52px]
+              items-center justify-center
+              rounded-[16px]
+              border border-[#E1E7F0]
+              bg-white
+              text-[#0A2E66]
+              transition-all duration-200
+              hover:border-[#C8D6EA]
+              hover:bg-[#F2F4F9]
+              active:scale-95
+              disabled:cursor-not-allowed
+              disabled:opacity-60
+            "
+          >
+            <RefreshCw
+              size={23}
+              className={refreshing ? "animate-spin" : ""}
+            />
+          </button>
+
+          {/* View all logs */}
+          <Link
+            href="/dashboard/calling"
+            className="
+              inline-flex h-[44px]
+              items-center justify-center
+              gap-2
+              rounded-[13px]
+              border border-[#E1E7F0]
+              bg-[#F7F8FC]
+              px-4
+              text-[14px]
+              font-bold
+              whitespace-nowrap
+              text-[#0A2E66]
+              transition-all duration-200
+              hover:border-[#D3DCEC]
+              hover:bg-[#E9EFF9]
+              active:scale-[0.98]
+            "
+          >
+            View all logs
+            <ArrowUpRight
+              size={16}
+              className="text-[#F27B1E]"
+            />
+          </Link>
+
+        </div>
       </div>
 
-      {/* Summary tiles */}
+      {/* ================================== */}
+      {/* SUMMARY CARDS */}
+      {/* ================================== */}
+
       {totals && (
-        <div className="mb-6 grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <div className="
+          mb-7
+          grid
+          grid-cols-2
+          gap-3
+          sm:gap-4
+          lg:grid-cols-4
+        ">
+
           <SummaryTile
             icon={PhoneCall}
             label="Connected"
@@ -137,202 +282,426 @@ const Callinfo = () => {
             value={`${totals.connectRate || 0}%`}
             tone="blue"
           />
+
         </div>
       )}
 
-      {/* Table heading */}
-      <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <h3 className="text-sm font-bold text-slate-800">
-          Agent performance
-        </h3>
+      {/* ================================== */}
+      {/* AGENT TABLE */}
+      {/* ================================== */}
 
-        <p className="text-xs text-slate-500">
-          {agents.length} {agents.length === 1 ? "agent" : "agents"}
-        </p>
-      </div>
+      <div className="min-w-0">
 
-      {/* Responsive table */}
-      <div className="min-w-0 overflow-x-auto rounded-xl border border-slate-200">
-        <table className="w-full min-w-[760px] divide-y divide-slate-100 text-sm">
-          <thead className="bg-[#F2F4F9]">
-            <tr>
-              <th scope="col" className="px-4 py-3.5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Agent
-              </th>
+        <div className="overflow-x-auto">
 
-              <th scope="col" className="px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Total
-              </th>
+          <table className="
+            w-full
+            min-w-[850px]
+            border-collapse
+            text-sm
+          ">
 
-              <th scope="col" className="px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Connected
-              </th>
+            {/* Table header */}
+            <thead>
+              <tr className="
+                border-b
+                border-[#DDE4EF]
+                text-[#52627E]
+              ">
 
-              <th scope="col" className="px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Missed
-              </th>
+                <th className="
+                  w-[34%]
+                  px-2
+                  pb-4
+                  pt-1
+                  text-left
+                  text-[14px]
+                  font-bold
+                ">
+                  Agent
+                </th>
 
-              <th scope="col" className="px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Clients
-              </th>
+                <th className="px-3 pb-4 pt-1 text-center text-[14px] font-bold">
+                  Calls
+                </th>
 
-              <th scope="col" className="px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Talk time
-              </th>
+                <th className="px-3 pb-4 pt-1 text-center text-[14px] font-bold">
+                  Connected
+                </th>
 
-              <th scope="col" className="px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Rate
-              </th>
-            </tr>
-          </thead>
+                <th className="px-3 pb-4 pt-1 text-center text-[14px] font-bold">
+                  Missed
+                </th>
 
-          <tbody className="divide-y divide-slate-100 bg-white">
-            {agents.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-12 text-center">
-                  <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-[#0A2E66]">
-                    <Headphones size={21} />
-                  </div>
+                <th className="px-3 pb-4 pt-1 text-center text-[14px] font-bold">
+                  Clients
+                </th>
 
-                  <p className="mt-3 text-sm font-semibold text-slate-700">
-                    No calls recorded today
-                  </p>
+                <th className="px-3 pb-4 pt-1 text-center text-[14px] font-bold">
+                  Talk
+                </th>
 
-                  <p className="mt-1 text-xs text-slate-500">
-                    Agent call activity will appear here when available.
-                  </p>
-                </td>
+                <th className="px-3 pb-4 pt-1 text-center text-[14px] font-bold">
+                  <span className="inline-flex items-center gap-1">
+                    Rate
+                    <span className="text-[#F58220] text-[13px]">
+                      ▼
+                    </span>
+                  </span>
+                </th>
+
               </tr>
-            ) : (
-              agents.map((agent) => {
-                const rate = Number(agent.connectRate) || 0;
+            </thead>
 
-                return (
-                  <tr
-                    key={agent.agentErpUserId}
-                    className="transition-colors hover:bg-blue-50/40"
-                  >
-                    {/* Agent */}
-                    <td className="px-4 py-3.5">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#0A2E66]">
-                          <Users size={17} strokeWidth={1.8} />
+            {/* Table body */}
+            <tbody>
+
+              {agents.length === 0 ? (
+
+                <tr>
+                  <td colSpan={7} className="px-4 py-14 text-center">
+
+                    <div className="
+                      mx-auto flex h-12 w-12
+                      items-center justify-center
+                      rounded-2xl bg-[#E9EFF9]
+                      text-[#376BB5]
+                    ">
+                      <Headphones size={24} />
+                    </div>
+
+                    <p className="mt-3 text-[15px] font-semibold text-[#0A2E66]">
+                      No calls recorded today
+                    </p>
+
+                    <p className="mt-1 text-[13px] text-[#8491A8]">
+                      Agent call activity will appear here when available.
+                    </p>
+
+                  </td>
+                </tr>
+
+              ) : (
+
+                agents.map((agent, index) => {
+
+                  const rate = Number(agent.connectRate) || 0;
+
+                  const agentName = agent.agentName || "Unknown";
+
+                  const initials = agentName
+                    .split(" ")
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((part) => part[0])
+                    .join("")
+                    .toUpperCase();
+
+                  const avatarColors = [
+                    "bg-[#2C528B]",
+                    "bg-[#0F7894]",
+                    "bg-[#7050A8]",
+                    "bg-[#16865D]",
+                  ];
+
+                  return (
+
+                    <tr
+                      key={agent.agentErpUserId}
+                      className="
+                        border-b
+                        border-[#DDE4EF]
+                        transition-colors duration-200
+                        hover:bg-[#F7F9FD]
+                        last:border-b-0
+                      "
+                    >
+
+                      {/* Agent profile */}
+                      <td className="px-2 py-[19px]">
+
+                        <div className="flex min-w-0 items-center gap-3.5">
+
+                          {/* Avatar */}
+                          <div className={`
+                            flex h-[48px] w-[48px]
+                            shrink-0 items-center
+                            justify-center
+                            rounded-full
+                            text-[16px]
+                            font-bold
+                            text-white
+                            ${avatarColors[index % avatarColors.length]}
+                          `}>
+                            {initials || <Users size={20} />}
+                          </div>
+
+                          {/* Agent details */}
+                          <div className="min-w-0">
+
+                            <p className="
+                              max-w-[220px]
+                              truncate
+                              text-[16px]
+                              font-semibold
+                              text-[#0F1B33]
+                            ">
+                              {agentName}
+                            </p>
+
+                            <p className="
+                              mt-1
+                              max-w-[220px]
+                              truncate
+                              text-[14px]
+                              font-normal
+                              text-[#64748B]
+                            ">
+                              {agent.agentEmail || "—"}
+                            </p>
+
+                          </div>
+
                         </div>
 
-                        <div className="min-w-0">
-                          <p className="max-w-[200px] truncate text-sm font-semibold text-slate-800">
-                            {agent.agentName || "Unknown"}
-                          </p>
+                      </td>
 
-                          <p className="mt-0.5 max-w-[200px] truncate text-xs text-slate-500">
-                            {agent.agentEmail || "—"}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
+                      {/* Total calls */}
+                      <td className="
+                        px-3 py-5
+                        text-center
+                        text-[16px]
+                        font-semibold
+                        tabular-nums
+                        text-[#0F1B33]
+                      ">
+                        {agent.totalCalls ?? 0}
+                      </td>
 
-                    <td className="px-4 py-3.5 text-center font-semibold tabular-nums text-slate-800">
-                      {agent.totalCalls ?? 0}
-                    </td>
+                      {/* Connected */}
+                      <td className="
+                        px-3 py-5
+                        text-center
+                        text-[16px]
+                        font-bold
+                        tabular-nums
+                        text-[#16865D]
+                      ">
+                        {agent.connectedCalls ?? 0}
+                      </td>
 
-                    <td className="px-4 py-3.5 text-center font-semibold tabular-nums text-emerald-700">
-                      {agent.connectedCalls ?? 0}
-                    </td>
+                      {/* Missed */}
+                      <td className="
+                        px-3 py-5
+                        text-center
+                        text-[16px]
+                        font-semibold
+                        tabular-nums
+                        text-[#E53935]
+                      ">
+                        {agent.missedCalls ?? 0}
+                      </td>
 
-                    <td className="px-4 py-3.5 text-center font-semibold tabular-nums text-red-600">
-                      {agent.missedCalls ?? 0}
-                    </td>
+                      {/* Clients */}
+                      <td className="
+                        px-3 py-5
+                        text-center
+                        text-[16px]
+                        font-medium
+                        tabular-nums
+                        text-[#0F1B33]
+                      ">
+                        {agent.uniqueCustomerCount ?? 0}
+                      </td>
 
-                    <td className="px-4 py-3.5 text-center tabular-nums text-slate-700">
-                      {agent.uniqueCustomerCount ?? 0}
-                    </td>
+                      {/* Talk time */}
+                      <td className="
+                        px-3 py-5
+                        text-center
+                        text-[16px]
+                        font-medium
+                        tabular-nums
+                        text-[#0F1B33]
+                      ">
+                        {agent.totalTalkMinutes ?? 0}m
+                      </td>
 
-                    <td className="px-4 py-3.5 text-center tabular-nums text-slate-700">
-                      {agent.totalTalkMinutes ?? 0}m
-                    </td>
+                      {/* Rate progress */}
+                      <td className="px-3 py-5">
 
-                    <td className="px-4 py-3.5 text-center">
-                      <RateBadge rate={rate} />
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                        <RateBadge rate={rate} />
+
+                      </td>
+
+                    </tr>
+
+                  );
+                })
+
+              )}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        {/* Mobile scrolling hint */}
+        {agents.length > 0 && (
+          <p className="mt-3 text-[11px] text-[#8491A8] sm:hidden">
+            Swipe horizontally to view all call statistics.
+          </p>
+        )}
+
       </div>
 
-      {/* Mobile scrolling hint */}
-      {agents.length > 0 && (
-        <p className="mt-2 text-[11px] text-slate-400 sm:hidden">
-          Swipe horizontally to view all call statistics.
-        </p>
-      )}
     </section>
   );
 };
 
-function SummaryTile({ icon: Icon, label, value, tone = "blue" }) {
+
+// ========================================
+// SUMMARY TILE
+// ========================================
+
+function SummaryTile({
+  icon: Icon,
+  label,
+  value,
+  tone = "blue",
+}) {
+
   const tones = {
     emerald: {
-      wrapper: "border-emerald-100 bg-emerald-50/70",
-      icon: "bg-white text-emerald-700",
-      label: "text-emerald-800",
-      value: "text-emerald-950",
+      bg: "bg-[#E5F5EC]",
+      color: "text-[#16865D]",
     },
+
     red: {
-      wrapper: "border-red-100 bg-red-50/70",
-      icon: "bg-white text-red-600",
-      label: "text-red-700",
-      value: "text-red-950",
+      bg: "bg-[#FCEAE9]",
+      color: "text-[#E53935]",
     },
+
     purple: {
-      wrapper: "border-violet-100 bg-violet-50/70",
-      icon: "bg-white text-violet-700",
-      label: "text-violet-700",
-      value: "text-violet-950",
+      bg: "bg-[#F0EBFC]",
+      color: "text-[#7050E8]",
     },
+
     blue: {
-      wrapper: "border-blue-100 bg-blue-50/70",
-      icon: "bg-white text-[#0A2E66]",
-      label: "text-blue-800",
-      value: "text-[#0A2E66]",
+      bg: "bg-[#E9EFF9]",
+      color: "text-[#376BB5]",
     },
   };
 
   const style = tones[tone] || tones.blue;
 
   return (
-    <div className={`min-w-0 rounded-xl border p-3 transition-colors sm:p-4 ${style.wrapper}`}>
-      <div className="flex items-center gap-2">
-        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-sm ${style.icon}`}>
-          <Icon size={16} strokeWidth={2} />
-        </span>
 
-        <span className={`truncate text-[10px] font-bold uppercase tracking-wide sm:text-xs ${style.label}`}>
+    <div className={`
+      flex min-w-0
+      min-h-[104px]
+      flex-col justify-between
+      rounded-[21px]
+      p-4
+      transition-transform duration-200
+      hover:-translate-y-0.5
+      sm:p-5
+      ${style.bg}
+    `}>
+
+      {/* Label and icon */}
+      <div className={`
+        flex items-center gap-2
+        ${style.color}
+      `}>
+
+        <Icon
+          size={19}
+          strokeWidth={2}
+          className="shrink-0"
+        />
+
+        <span className="
+          truncate
+          text-[14px]
+          font-semibold
+          sm:text-[15px]
+        ">
           {label}
         </span>
+
       </div>
 
-      <p className={`mt-3 text-xl font-bold tracking-tight tabular-nums sm:text-2xl ${style.value}`}>
+      {/* Value */}
+      <p className={`
+        mt-2
+        text-[29px]
+        font-bold
+        leading-none
+        tracking-tight
+        tabular-nums
+        sm:text-[34px]
+        ${style.color}
+      `}>
         {value}
       </p>
+
     </div>
   );
 }
 
+
+// ========================================
+// RATE PROGRESS BAR
+// ========================================
+
 function RateBadge({ rate }) {
-  const style =
-    rate >= 60
-      ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-      : rate >= 30
-        ? "border-amber-100 bg-amber-50 text-amber-700"
-        : "border-red-100 bg-red-50 text-red-700";
 
   return (
-    <span className={`inline-flex min-w-[58px] items-center justify-center rounded-lg border px-2.5 py-1.5 text-xs font-bold tabular-nums ${style}`}>
-      {rate}%
-    </span>
+
+    <div className="
+      flex min-w-[145px]
+      items-center gap-3
+      px-1
+    ">
+
+      {/* Progress track */}
+      <div className="
+        h-[10px]
+        min-w-[60px]
+        flex-1
+        overflow-hidden
+        rounded-full
+        bg-[#FCEAE9]
+      ">
+
+        <div
+          className="
+            h-full
+            rounded-full
+            bg-[#16865D]
+            transition-all duration-500
+          "
+          style={{
+            width: `${Math.min(100, Math.max(0, rate))}%`,
+          }}
+        />
+
+      </div>
+
+      {/* Percentage */}
+      <span className="
+        min-w-[40px]
+        text-right
+        text-[15px]
+        font-bold
+        tabular-nums
+        text-[#0F1B33]
+      ">
+        {rate}%
+      </span>
+
+    </div>
   );
 }
 

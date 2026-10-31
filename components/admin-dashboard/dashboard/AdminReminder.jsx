@@ -1,10 +1,10 @@
 
-// components/admin-dashboard/dashboard/AdminReminder.jsx
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+// components/admin-dashboard/dashboard/AdminReminder.jsx
+
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+
 import {
   AtSign,
   Bell,
@@ -12,28 +12,35 @@ import {
   X,
   Clock,
   CheckCircle2,
-  UserRound,
   UsersRound,
   Phone,
   Video,
   FileText,
 } from "lucide-react";
+
 import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+
 import { getAllEmailService } from "@/service/team-update";
+
 import {
   createAdminReminderService,
   getAdminReminderService,
   getAdminClientRemindersService,
 } from "@/service/admin-dashboard/dashboard-api";
+
 import { useAdminStore } from "@/lib/store/AdminStore";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// ========================================
+// CONFIGURATION
+// ========================================
+
 const TABS = [
-  { id: "mine", label: "My Reminders", icon: Bell },
-  { id: "clients", label: "Client Reminders", icon: UsersRound },
+  { id: "mine", label: "My reminders" },
+  { id: "clients", label: "Client reminders" },
 ];
 
 const DATE_PRESETS = [
@@ -57,19 +64,23 @@ const COLORS = {
   navy2: "#12397A",
   orange: "#F27B1E",
   orangeLight: "#F7A25C",
-  cream: "#FFF5EB",
+  cream: "#FFF3D9",
   bg: "#F2F4F9",
   card: "#FFFFFF",
   card2: "#F7F8FC",
   ink: "#0F1B33",
-  muted: "#5B6478",
-  faint: "#8A92A6",
-  line: "#E3E7F0",
-  green: "#17845A",
-  red: "#CC3B32",
-  violet: "#6A4FD6",
+  muted: "#56647D",
+  faint: "#8793AA",
+  line: "#E1E7F0",
+  green: "#16865D",
+  red: "#DC2626",
+  violet: "#7050E8",
   amber: "#B86A00",
 };
+
+// ========================================
+// SCROLLBAR
+// ========================================
 
 const SCROLLBAR_CSS = `
   .reminder-scroll::-webkit-scrollbar {
@@ -81,64 +92,23 @@ const SCROLLBAR_CSS = `
   }
 
   .reminder-scroll::-webkit-scrollbar-thumb {
-    background: #cbd2df;
+    background: #DDE4EF;
     border-radius: 999px;
   }
 
   .reminder-scroll::-webkit-scrollbar-thumb:hover {
-    background: #8A92A6;
+    background: #AEBBD0;
   }
 
   .reminder-scroll {
     scrollbar-width: thin;
-    scrollbar-color: #cbd2df transparent;
-  }
-
-  .reminder-chip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 30px;
-    padding: 5px 11px;
-    border: 1px solid #E3E7F0;
-    border-radius: 999px;
-    background: #FFFFFF;
-    color: #5B6478;
-    font-size: 12px;
-    font-weight: 700;
-    white-space: nowrap;
-    transition: all .15s ease;
-  }
-
-  .reminder-chip:hover {
-    border-color: #8A92A6;
-    color: #0F1B33;
-  }
-
-  .reminder-chip[aria-pressed="true"] {
-    border-color: #0A2E66;
-    background: #0A2E66;
-    color: #FFFFFF;
-  }
-
-  .reminder-date-input {
-    width: 100%;
-    min-width: 0;
-    height: 38px;
-    border: 1.5px solid #E3E7F0;
-    border-radius: 10px;
-    background: #FFFFFF;
-    color: #0F1B33;
-    padding: 0 9px;
-    font-size: 12px;
-    outline: none;
-  }
-
-  .reminder-date-input:focus {
-    border-color: #0A2E66;
-    box-shadow: 0 0 0 3px rgba(242, 123, 30, .16);
+    scrollbar-color: #DDE4EF transparent;
   }
 `;
+
+// ========================================
+// DATE HELPERS
+// ========================================
 
 const formatReminderDate = (date) => {
   const parsedDate = new Date(date);
@@ -151,11 +121,24 @@ const formatReminderDate = (date) => {
     day: "numeric",
     month: "short",
     year: "numeric",
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
     hour12: true,
   });
 };
+
+const isOverdue = (date) => {
+  const parsedDate = new Date(date);
+
+  return (
+    !Number.isNaN(parsedDate.getTime()) &&
+    parsedDate.getTime() < Date.now()
+  );
+};
+
+// ========================================
+// CLIENT REMINDER TYPE STYLE
+// ========================================
 
 const getTypeStyle = (type) => {
   switch (type?.toLowerCase()) {
@@ -163,9 +146,9 @@ const getTypeStyle = (type) => {
       return {
         icon: Phone,
         label: "Call",
-        color: "#17845A",
+        color: "#16865D",
         background: "#E5F5EC",
-        border: "#c6ead6",
+        border: "#C6EAD6",
       };
 
     case "meeting":
@@ -174,29 +157,36 @@ const getTypeStyle = (type) => {
         label: "Meeting",
         color: "#2B5086",
         background: "#E9EFF9",
-        border: "#d5e1f4",
+        border: "#D5E1F4",
       };
 
     default:
       return {
         icon: FileText,
         label: type || "General",
-        color: "#6A4FD6",
-        background: "#EFEBFC",
-        border: "#e1dafa",
+        color: "#7050E8",
+        background: "#EDE9FC",
+        border: "#E1DAFA",
       };
   }
 };
 
+// ========================================
+// MAIN COMPONENT
+// ========================================
+
 const AdminReminder = () => {
   const pathname = usePathname();
+
   const isManager = pathname?.startsWith("/manager");
+
   const clientBase = isManager
     ? "/manager/customer"
     : "/dashboard/customer";
 
   const { adminDetail } = useAdminStore();
 
+  // Main tabs
   const [activeTab, setActiveTab] = useState("mine");
 
   // My reminders
@@ -218,10 +208,24 @@ const AdminReminder = () => {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
+  // ========================================
+  // OPEN REMINDER COUNT
+  // ========================================
+
+  const openCount = useMemo(() => {
+    return reminders.filter((item) => !item.reminderSend).length;
+  }, [reminders]);
+
+  // ========================================
+  // FETCH PERSONAL REMINDERS
+  // ========================================
+
   const fetchReminders = useCallback(async () => {
     try {
       setLoading(true);
+
       const res = await getAdminReminderService(adminDetail?._id);
+
       setReminders(res?.data?.reminder || []);
     } catch (err) {
       console.error("Failed to fetch reminders:", err);
@@ -230,9 +234,14 @@ const AdminReminder = () => {
     }
   }, [adminDetail?._id]);
 
+  // ========================================
+  // FETCH EMAIL LIST
+  // ========================================
+
   const fetchEmail = useCallback(async () => {
     try {
       setEmailListLoading(true);
+
       const res = await getAllEmailService();
 
       if (res.success) {
@@ -244,6 +253,10 @@ const AdminReminder = () => {
       setEmailListLoading(false);
     }
   }, []);
+
+  // ========================================
+  // CREATE REMINDER
+  // ========================================
 
   const handleCreate = async () => {
     if (!description.trim() || !reminderAt) {
@@ -274,9 +287,11 @@ const AdminReminder = () => {
 
       if (res?.success) {
         toast.success(res.message || "Reminder created");
+
         setDescription("");
         setReminderAt("");
         setSelectEmail([]);
+
         await fetchReminders();
       }
     } catch (error) {
@@ -289,6 +304,10 @@ const AdminReminder = () => {
     }
   };
 
+  // ========================================
+  // SELECT EMAIL
+  // ========================================
+
   const handleSelectEmail = (email) => {
     setSelectEmail((prev) =>
       prev.some((item) => item?._id === email?._id)
@@ -297,12 +316,20 @@ const AdminReminder = () => {
     );
   };
 
+  // ========================================
+  // INITIAL FETCH
+  // ========================================
+
   useEffect(() => {
     if (!adminDetail?._id) return;
 
     fetchReminders();
     fetchEmail();
   }, [adminDetail?._id, fetchReminders, fetchEmail]);
+
+  // ========================================
+  // FETCH CLIENT REMINDERS
+  // ========================================
 
   const fetchClientReminders = useCallback(async () => {
     try {
@@ -322,6 +349,7 @@ const AdminReminder = () => {
       }
     } catch (err) {
       console.error(err);
+
       toast.error(
         err?.message || "Error fetching client reminders"
       );
@@ -336,40 +364,90 @@ const AdminReminder = () => {
     }
   }, [activeTab, fetchClientReminders]);
 
+  // ========================================
+  // RENDER
+  // ========================================
+
   return (
     <section
-      className="flex h-[70vh] min-h-[420px] flex-col overflow-hidden rounded-[20px] border bg-white shadow-sm lg:h-[68vh]"
+      className="
+        flex
+        h-[595px]
+        min-h-0
+        w-full
+        min-w-0
+        flex-col
+        overflow-hidden
+        rounded-[22px]
+        border
+        border-[#E1E7F0]
+        bg-white
+        p-5
+        shadow-[0_3px_12px_rgba(10,46,102,0.05)]
+        transition-shadow
+        duration-300
+        hover:shadow-[0_8px_24px_rgba(10,46,102,0.07)]
+        sm:p-[22px]
+      "
       style={{
         borderColor: COLORS.line,
-        boxShadow: "0 1px 2px rgba(10,46,102,.05), 0 8px 24px -12px rgba(10,46,102,.18)",
       }}
     >
       <style>{SCROLLBAR_CSS}</style>
 
-      {/* Header */}
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b px-5 py-4 sm:px-6"
-        style={{ borderColor: COLORS.line }}
-      >
+      {/* ================================== */}
+      {/* HEADER */}
+      {/* ================================== */}
+
+      <div className="mb-5 flex shrink-0 items-center justify-between gap-3">
+
         <div className="flex min-w-0 items-center gap-3">
+
+          {/* Bell icon */}
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-            style={{ background: COLORS.cream, color: COLORS.orange }}
+            className="
+              flex
+              h-10 w-10
+              shrink-0
+              items-center justify-center
+              rounded-xl
+            "
+            style={{
+              background: COLORS.cream,
+              color: COLORS.amber,
+            }}
           >
-            <Bell className="h-5 w-5" />
+            <Bell size={21} strokeWidth={1.8} />
           </div>
 
+          {/* Title */}
           <div className="min-w-0">
+
             <h2
-              className="text-lg font-black tracking-tight"
-              style={{ color: COLORS.ink }}
+              className="
+                font-serif
+                text-[21px]
+                font-bold
+                leading-tight
+                tracking-tight
+              "
+              style={{ color: COLORS.navy }}
             >
               Reminders
             </h2>
-            <p className="mt-0.5 text-xs" style={{ color: COLORS.muted }}>
-              Keep track of tasks and client follow-ups
+
+            <p
+              className="mt-1 text-[13px]"
+              style={{ color: COLORS.muted }}
+            >
+              {openCount} open
             </p>
+
           </div>
+
         </div>
+
+        {/* CC EMAIL CONTROL - EXISTING FUNCTIONALITY */}
 
         {activeTab === "mine" && (
           <button
@@ -378,17 +456,38 @@ const AdminReminder = () => {
             aria-label="Toggle CC email recipients"
             aria-pressed={ccMailShow}
             title="CC email recipients"
-            className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-2"
+            className="
+              relative
+              flex h-9 w-9
+              shrink-0
+              items-center justify-center
+              rounded-xl
+              border
+              transition-colors
+              hover:bg-[#FFF3D9]
+            "
             style={{
               borderColor: ccMailShow ? COLORS.orange : COLORS.line,
-              background: ccMailShow ? COLORS.cream : COLORS.card2,
+              background: ccMailShow ? COLORS.cream : COLORS.white,
               color: ccMailShow ? COLORS.orange : COLORS.muted,
             }}
           >
-            <AtSign className="h-4 w-4" />
+            <AtSign size={17} />
+
             {selectEmail.length > 0 && (
               <span
-                className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-black text-white"
+                className="
+                  absolute
+                  -right-1
+                  -top-1
+                  flex h-5 min-w-5
+                  items-center justify-center
+                  rounded-full
+                  px-1
+                  text-[10px]
+                  font-bold
+                  text-white
+                "
                 style={{ background: COLORS.orange }}
               >
                 {selectEmail.length}
@@ -396,15 +495,30 @@ const AdminReminder = () => {
             )}
           </button>
         )}
+
       </div>
 
-      {/* Main tabs */}
+      {/* ================================== */}
+      {/* MAIN SEGMENTED TABS */}
+      {/* ================================== */}
+
       <div
-        className="flex shrink-0 gap-5 border-b px-5 sm:px-6"
-        style={{ borderColor: COLORS.line }}
+        className="
+          mb-3
+          grid
+          shrink-0
+          grid-cols-2
+          gap-1
+          rounded-[13px]
+          border
+          p-1
+        "
+        style={{
+          borderColor: COLORS.line,
+          background: COLORS.card2,
+        }}
       >
         {TABS.map((tab) => {
-          const Icon = tab.icon;
           const active = activeTab === tab.id;
 
           return (
@@ -413,112 +527,213 @@ const AdminReminder = () => {
               type="button"
               onClick={() => setActiveTab(tab.id)}
               aria-pressed={active}
-              className="relative -mb-px inline-flex items-center gap-2 border-b-2 py-3 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2"
+              className="
+                flex h-[35px]
+                items-center
+                justify-center
+                rounded-[10px]
+                text-[13px]
+                font-semibold
+                transition-all
+                duration-200
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-[#F27B1E]
+              "
               style={{
-                borderColor: active ? COLORS.orange : "transparent",
-                color: active ? COLORS.navy : COLORS.muted,
+                background: active ? COLORS.white : "transparent",
+                color: active ? COLORS.ink : COLORS.muted,
+                boxShadow: active
+                  ? "0 1px 3px rgba(10,46,102,.08)"
+                  : "none",
+                border: active
+                  ? `1px solid ${COLORS.line}`
+                  : "1px solid transparent",
               }}
             >
-              <Icon
-                className="h-4 w-4"
-                style={{ color: active ? COLORS.orange : COLORS.faint }}
-              />
               {tab.label}
             </button>
           );
         })}
       </div>
 
-      {/* My Reminders */}
+      {/* ================================== */}
+      {/* MY REMINDERS */}
+      {/* ================================== */}
+
       {activeTab === "mine" && (
         <>
-          <div className="shrink-0 px-5 pt-4 sm:px-6">
-            <div className="mb-3 flex items-center gap-2">
-              <span
-                className="h-4 w-1 rounded-full"
-                style={{ background: COLORS.orange }}
-              />
-              <h3
-                className="text-sm font-black"
-                style={{ color: COLORS.ink }}
-              >
-                Create a reminder
-              </h3>
-            </div>
+          {/* CREATE REMINDER FORM */}
 
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-[minmax(0,1fr)_minmax(190px,0.8fr)_auto]">
-              <Input
-                placeholder="Reminder description"
+          <div className="shrink-0">
+
+            <div className="flex flex-col gap-2">
+
+              {/* Description */}
+              <input
+                type="text"
+                placeholder="What should you remember?"
                 value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                className="h-[42px] min-w-0 rounded-[11px] border-[1.5px] bg-white text-sm shadow-none placeholder:text-slate-400 focus-visible:ring-2"
+                onChange={(event) =>
+                  setDescription(event.target.value)
+                }
+                className="
+                  h-[42px]
+                  w-full
+                  min-w-0
+                  rounded-[12px]
+                  border-[1.5px]
+                  bg-white
+                  px-3
+                  text-[14px]
+                  outline-none
+                  transition-all
+                  placeholder:text-[#8793AA]
+                  focus:border-[#0A2E66]
+                  focus:ring-2
+                  focus:ring-[#F27B1E]/10
+                "
                 style={{
                   borderColor: COLORS.line,
                   color: COLORS.ink,
-                  "--tw-ring-color": "rgba(242,123,30,.18)",
                 }}
               />
 
-              <Input
-                type="datetime-local"
-                value={reminderAt}
-                onChange={(event) => setReminderAt(event.target.value)}
-                className="h-[42px] min-w-0 rounded-[11px] border-[1.5px] bg-white text-xs shadow-none focus-visible:ring-2"
-                style={{
-                  borderColor: COLORS.line,
-                  color: COLORS.ink,
-                }}
-              />
+              {/* Date + Add */}
+              <div className="grid grid-cols-[minmax(0,1fr)_60px] gap-2">
 
-              <Button
-                type="button"
-                onClick={handleCreate}
-                disabled={creating}
-                className="h-[42px] rounded-xl px-5 font-black text-white transition-colors hover:brightness-110 disabled:opacity-60"
-                style={{
-                  background: COLORS.navy,
-                  boxShadow: `inset 0 -3px 0 ${COLORS.orange}`,
-                }}
-              >
-                {creating ? "Adding..." : "Add reminder"}
-              </Button>
+                <input
+                  type="datetime-local"
+                  value={reminderAt}
+                  onChange={(event) =>
+                    setReminderAt(event.target.value)
+                  }
+                  className="
+                    h-[42px]
+                    w-full
+                    min-w-0
+                    rounded-[12px]
+                    border-[1.5px]
+                    bg-white
+                    px-3
+                    text-[13px]
+                    outline-none
+                    transition-all
+                    focus:border-[#0A2E66]
+                    focus:ring-2
+                    focus:ring-[#F27B1E]/10
+                  "
+                  style={{
+                    borderColor: COLORS.line,
+                    color: COLORS.ink,
+                  }}
+                />
+
+                <button
+                  type="button"
+                  onClick={handleCreate}
+                  disabled={creating}
+                  className="
+                    flex
+                    h-[42px]
+                    items-center
+                    justify-center
+                    rounded-[12px]
+                    border-b-[3px]
+                    border-[#F27B1E]
+                    bg-[#0A2E66]
+                    px-3
+                    text-[14px]
+                    font-bold
+                    text-white
+                    transition-all
+                    duration-200
+                    hover:bg-[#12397A]
+                    active:scale-[0.97]
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
+                  "
+                >
+                  {creating ? "..." : "Add"}
+                </button>
+
+              </div>
+
             </div>
+
           </div>
 
-          {/* CC email selector */}
+          {/* ================================== */}
+          {/* CC EMAIL SELECTOR */}
+          {/* ================================== */}
+
           {ccMailShow && (
-            <div className="mx-5 mt-3 shrink-0 rounded-xl border p-3 sm:mx-6"
+            <div
+              className="
+                mt-3
+                shrink-0
+                rounded-xl
+                border
+                p-3
+              "
               style={{
                 borderColor: COLORS.line,
                 background: COLORS.card2,
               }}
             >
+
               <div className="mb-2 flex items-center justify-between gap-2">
+
                 <div>
-                  <p className="text-xs font-black" style={{ color: COLORS.ink }}>
+                  <p
+                    className="text-xs font-bold"
+                    style={{ color: COLORS.ink }}
+                  >
                     CC recipients
                   </p>
-                  <p className="mt-0.5 text-[11px]" style={{ color: COLORS.muted }}>
+
+                  <p
+                    className="mt-0.5 text-[11px]"
+                    style={{ color: COLORS.muted }}
+                  >
                     Select email addresses to include
                   </p>
                 </div>
 
                 <span
-                  className="rounded-full px-2 py-1 text-[10px] font-bold"
-                  style={{ background: COLORS.cream, color: COLORS.orange }}
+                  className="
+                    rounded-full
+                    px-2 py-1
+                    text-[10px]
+                    font-bold
+                  "
+                  style={{
+                    background: COLORS.cream,
+                    color: COLORS.orange,
+                  }}
                 >
                   {selectEmail.length} selected
                 </span>
+
               </div>
 
               {emailListLoading ? (
+
                 <div className="flex flex-wrap gap-2">
                   {Array.from({ length: 3 }).map((_, index) => (
-                    <Skeleton key={index} width={110} height={30} borderRadius={999} />
+                    <Skeleton
+                      key={index}
+                      width={110}
+                      height={30}
+                      borderRadius={999}
+                    />
                   ))}
                 </div>
+
               ) : emailList.length > 0 ? (
+
                 <div className="flex max-h-24 flex-wrap gap-2 overflow-y-auto">
+
                   {emailList.map((item) => {
                     const selected = selectEmail.some(
                       (email) => email?._id === item?._id
@@ -531,202 +746,504 @@ const AdminReminder = () => {
                         onClick={() => handleSelectEmail(item)}
                         aria-pressed={selected}
                         title={item?.email}
-                        className="inline-flex max-w-full items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition-colors"
+                        className="
+                          inline-flex
+                          max-w-full
+                          items-center
+                          gap-1.5
+                          rounded-full
+                          border
+                          px-3 py-1.5
+                          text-xs
+                          font-bold
+                          transition-colors
+                        "
                         style={{
-                          borderColor: selected ? COLORS.orange : COLORS.line,
-                          background: selected ? COLORS.cream : COLORS.card,
-                          color: selected ? COLORS.navy : COLORS.muted,
+                          borderColor: selected
+                            ? COLORS.orange
+                            : COLORS.line,
+                          background: selected
+                            ? COLORS.cream
+                            : COLORS.white,
+                          color: selected
+                            ? COLORS.navy
+                            : COLORS.muted,
                         }}
                       >
                         {selected && (
                           <CheckCircle2
-                            className="h-3.5 w-3.5 shrink-0"
+                            size={14}
+                            className="shrink-0"
                             style={{ color: COLORS.orange }}
                           />
                         )}
+
                         <span className="truncate">
                           {item?.email?.split("@")?.[0]}
                         </span>
                       </button>
                     );
                   })}
+
                 </div>
+
               ) : (
-                <p className="text-xs" style={{ color: COLORS.muted }}>
+                <p
+                  className="text-xs"
+                  style={{ color: COLORS.muted }}
+                >
                   No email recipients available.
                 </p>
               )}
+
             </div>
           )}
 
-          {/* My reminders list */}
-          <div className="reminder-scroll min-h-0 flex-1 overflow-y-auto px-5 pb-4 pt-4 sm:px-6">
+          {/* ================================== */}
+          {/* PERSONAL REMINDER LIST */}
+          {/* ================================== */}
+
+          <div
+            className="
+              reminder-scroll
+              min-h-0
+              flex-1
+              overflow-x-hidden
+              overflow-y-auto
+              pt-3
+              pr-1
+            "
+          >
+
             {loading ? (
-              <div className="space-y-3">
+
+              <div className="space-y-2.5">
+
                 {Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={index}
-                    className="rounded-xl border p-4"
-                    style={{ borderColor: COLORS.line, background: COLORS.card }}
+                    className="
+                      rounded-[15px]
+                      border
+                      p-3
+                    "
+                    style={{ borderColor: COLORS.line }}
                   >
-                    <Skeleton height={16} width="70%" />
+                    <Skeleton height={15} width="70%" />
+
                     <div className="mt-2">
                       <Skeleton height={12} width="45%" />
                     </div>
                   </div>
                 ))}
+
               </div>
+
             ) : reminders.length === 0 ? (
+
               <div
-                className="flex flex-col items-center justify-center rounded-2xl border border-dashed px-4 py-8 text-center"
-                style={{ borderColor: COLORS.line, background: COLORS.card2 }}
+                className="
+                  flex
+                  min-h-[150px]
+                  flex-col
+                  items-center
+                  justify-center
+                  rounded-[15px]
+                  border
+                  border-dashed
+                  px-4
+                  py-6
+                  text-center
+                "
+                style={{
+                  borderColor: COLORS.line,
+                  background: COLORS.card2,
+                }}
               >
+
                 <div
-                  className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl"
-                  style={{ background: COLORS.cream, color: COLORS.orange }}
+                  className="
+                    mb-3
+                    flex h-11 w-11
+                    items-center justify-center
+                    rounded-full
+                  "
+                  style={{
+                    background: COLORS.cream,
+                    color: COLORS.amber,
+                  }}
                 >
-                  <Bell className="h-5 w-5" />
+                  <Bell size={21} />
                 </div>
-                <p className="text-sm font-black" style={{ color: COLORS.ink }}>
+
+                <p
+                  className="text-sm font-bold"
+                  style={{ color: COLORS.ink }}
+                >
                   No reminders yet
                 </p>
-                <p className="mt-1 max-w-[240px] text-xs leading-5" style={{ color: COLORS.muted }}>
+
+                <p
+                  className="
+                    mt-1
+                    max-w-[240px]
+                    text-xs
+                    leading-5
+                  "
+                  style={{ color: COLORS.muted }}
+                >
                   Add a reminder above to keep an important task on your radar.
                 </p>
+
               </div>
+
             ) : (
+
               <ul className="space-y-2.5">
-                {reminders.map((item) => (
-                  <li
-                    key={item._id}
-                    className="group flex items-start gap-3 rounded-xl border p-3.5 transition-colors hover:bg-slate-50/50 sm:p-4"
-                    style={{
-                      borderColor: COLORS.line,
-                      background: COLORS.card,
-                    }}
-                  >
-                    <div
-                      className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                      style={{ background: COLORS.cream, color: COLORS.orange }}
+
+                {reminders.map((item) => {
+                  const overdue =
+                    isOverdue(item.reminderAt) &&
+                    !item.reminderSend;
+
+                  return (
+                    <li
+                      key={item._id}
+                      className="
+                        group
+                        flex
+                        min-w-0
+                        items-start
+                        gap-3
+                        rounded-[15px]
+                        border
+                        px-3
+                        py-3.5
+                        transition-colors
+                        duration-200
+                        hover:bg-[#F7F8FC]
+                        sm:px-3.5
+                      "
+                      style={{
+                        borderColor: COLORS.line,
+                        background: COLORS.white,
+                      }}
                     >
-                      <Clock className="h-4 w-4" />
-                    </div>
 
-                    <div className="min-w-0 flex-1">
-                      <p
-                        className="break-words text-sm font-bold leading-5"
-                        style={{ color: COLORS.ink }}
-                      >
-                        {item.description}
-                      </p>
+                      {/* Visual checkbox */}
+                      <div
+                        className="
+                          mt-[3px]
+                          flex
+                          h-[24px]
+                          w-[24px]
+                          shrink-0
+                          items-center
+                          justify-center
+                          rounded-[8px]
+                          border-2
+                          bg-white
+                        "
+                        style={{
+                          borderColor: COLORS.faint,
+                        }}
+                        aria-hidden="true"
+                      />
 
-                      <p
-                        className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs"
-                        style={{ color: COLORS.muted }}
-                      >
-                        <CalendarDays className="h-3.5 w-3.5 shrink-0" />
-                        {formatReminderDate(item.reminderAt)}
-                      </p>
+                      {/* Reminder content */}
+                      <div className="min-w-0 flex-1">
 
-                      {item.reminderSend && (
-                        <span
-                          className="mt-2 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold"
+                        <p
+                          className="
+                            break-words
+                            text-[14px]
+                            font-semibold
+                            leading-5
+                          "
+                          style={{ color: COLORS.ink }}
+                        >
+                          {item.description}
+                        </p>
+
+                        <p
+                          className="
+                            mt-1
+                            flex
+                            flex-wrap
+                            items-center
+                            gap-1
+                            text-[12px]
+                            leading-4
+                          "
                           style={{
-                            color: COLORS.green,
-                            background: "#E5F5EC",
+                            color: overdue
+                              ? COLORS.red
+                              : COLORS.muted,
                           }}
                         >
-                          <CheckCircle2 className="h-3 w-3" />
-                          Sent
-                        </span>
-                      )}
-                    </div>
-                  </li>
-                ))}
+                          {overdue ? (
+                            <>
+                              <span className="font-medium">
+                                Overdue,
+                              </span>
+                              <span>
+                                {formatReminderDate(item.reminderAt)}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <Clock
+                                size={12}
+                                className="shrink-0"
+                              />
+                              {formatReminderDate(item.reminderAt)}
+                            </>
+                          )}
+                        </p>
+
+                        {item.reminderSend && (
+                          <span
+                            className="
+                              mt-2
+                              inline-flex
+                              items-center
+                              gap-1
+                              rounded-full
+                              px-2
+                              py-1
+                              text-[10px]
+                              font-bold
+                            "
+                            style={{
+                              color: COLORS.green,
+                              background: "#E5F5EC",
+                            }}
+                          >
+                            <CheckCircle2 size={12} />
+                            Sent
+                          </span>
+                        )}
+
+                      </div>
+
+                    </li>
+                  );
+                })}
+
               </ul>
+
             )}
+
           </div>
         </>
       )}
 
-      {/* Client Reminders */}
+      {/* ================================== */}
+      {/* CLIENT REMINDERS */}
+      {/* ================================== */}
+
       {activeTab === "clients" && (
         <>
-          <div className="shrink-0 space-y-3 border-b px-5 py-4 sm:px-6"
-            style={{ borderColor: COLORS.line, background: COLORS.card }}
+
+          {/* CLIENT FILTERS */}
+
+          <div
+            className="
+              shrink-0
+              space-y-3
+              border-b
+              py-3
+            "
+            style={{ borderColor: COLORS.line }}
           >
+
+            {/* Activity type */}
             <div>
-              <p className="mb-2 text-[10px] font-black uppercase tracking-wider"
+
+              <p
+                className="
+                  mb-2
+                  text-[10px]
+                  font-bold
+                  uppercase
+                  tracking-wider
+                "
                 style={{ color: COLORS.faint }}
               >
                 Activity type
               </p>
 
               <div className="flex flex-wrap gap-1.5">
+
                 {TYPE_TABS.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => setType(item.id)}
                     aria-pressed={type === item.id}
-                    className="reminder-chip"
+                    className="
+                      rounded-full
+                      border
+                      px-3
+                      py-1.5
+                      text-[11px]
+                      font-bold
+                      transition-all
+                    "
+                    style={{
+                      borderColor:
+                        type === item.id
+                          ? COLORS.navy
+                          : COLORS.line,
+                      background:
+                        type === item.id
+                          ? COLORS.navy
+                          : COLORS.white,
+                      color:
+                        type === item.id
+                          ? COLORS.white
+                          : COLORS.muted,
+                    }}
                   >
                     {item.label}
                   </button>
                 ))}
+
               </div>
+
             </div>
 
+            {/* Date presets */}
             <div>
-              <p className="mb-2 text-[10px] font-black uppercase tracking-wider"
+
+              <p
+                className="
+                  mb-2
+                  text-[10px]
+                  font-bold
+                  uppercase
+                  tracking-wider
+                "
                 style={{ color: COLORS.faint }}
               >
                 Date range
               </p>
 
               <div className="flex flex-wrap gap-1.5">
+
                 {DATE_PRESETS.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => setPreset(item.id)}
                     aria-pressed={preset === item.id}
-                    className="reminder-chip"
+                    className="
+                      rounded-full
+                      border
+                      px-3
+                      py-1.5
+                      text-[11px]
+                      font-bold
+                      transition-all
+                    "
+                    style={{
+                      borderColor:
+                        preset === item.id
+                          ? COLORS.navy
+                          : COLORS.line,
+                      background:
+                        preset === item.id
+                          ? COLORS.navy
+                          : COLORS.white,
+                      color:
+                        preset === item.id
+                          ? COLORS.white
+                          : COLORS.muted,
+                    }}
                   >
                     {item.label}
                   </button>
                 ))}
+
               </div>
+
             </div>
 
+            {/* Custom dates */}
             {preset === "custom" && (
               <div
-                className="grid grid-cols-1 gap-2 rounded-xl border p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
-                style={{ borderColor: COLORS.line, background: COLORS.card2 }}
+                className="
+                  grid
+                  grid-cols-1
+                  gap-2
+                  rounded-xl
+                  border
+                  p-3
+                  sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]
+                "
+                style={{
+                  borderColor: COLORS.line,
+                  background: COLORS.card2,
+                }}
               >
+
                 <label className="min-w-0">
-                  <span className="mb-1 block text-[11px] font-bold" style={{ color: COLORS.muted }}>
+
+                  <span
+                    className="mb-1 block text-[11px] font-bold"
+                    style={{ color: COLORS.muted }}
+                  >
                     From
                   </span>
+
                   <input
                     type="date"
                     value={from}
                     onChange={(event) => setFrom(event.target.value)}
-                    className="reminder-date-input"
+                    className="
+                      h-[38px]
+                      w-full
+                      min-w-0
+                      rounded-[10px]
+                      border
+                      bg-white
+                      px-2
+                      text-xs
+                      outline-none
+                    "
+                    style={{ borderColor: COLORS.line }}
                   />
+
                 </label>
 
                 <label className="min-w-0">
-                  <span className="mb-1 block text-[11px] font-bold" style={{ color: COLORS.muted }}>
+
+                  <span
+                    className="mb-1 block text-[11px] font-bold"
+                    style={{ color: COLORS.muted }}
+                  >
                     To
                   </span>
+
                   <input
                     type="date"
                     value={to}
                     min={from || undefined}
                     onChange={(event) => setTo(event.target.value)}
-                    className="reminder-date-input"
+                    className="
+                      h-[38px]
+                      w-full
+                      min-w-0
+                      rounded-[10px]
+                      border
+                      bg-white
+                      px-2
+                      text-xs
+                      outline-none
+                    "
+                    style={{ borderColor: COLORS.line }}
                   />
+
                 </label>
 
                 {(from || to) && (
@@ -736,21 +1253,51 @@ const AdminReminder = () => {
                       setFrom("");
                       setTo("");
                     }}
-                    className="inline-flex items-center justify-center gap-1.5 self-end rounded-lg px-3 py-2 text-xs font-bold transition-colors hover:bg-white"
+                    className="
+                      inline-flex
+                      items-center
+                      justify-center
+                      gap-1.5
+                      self-end
+                      rounded-lg
+                      px-3
+                      py-2
+                      text-xs
+                      font-bold
+                      hover:bg-white
+                    "
                     style={{ color: COLORS.muted }}
                   >
-                    <X className="h-3.5 w-3.5" />
+                    <X size={14} />
                     Clear
                   </button>
                 )}
+
               </div>
             )}
+
           </div>
 
-          {/* Client reminder results */}
-          <div className="reminder-scroll min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">
+          {/* ================================== */}
+          {/* CLIENT REMINDER RESULTS */}
+          {/* ================================== */}
+
+          <div
+            className="
+              reminder-scroll
+              min-h-0
+              flex-1
+              overflow-x-hidden
+              overflow-y-auto
+              py-3
+              pr-1
+            "
+          >
+
             {clientLoading ? (
+
               <div className="space-y-3">
+
                 {Array.from({ length: 3 }).map((_, index) => (
                   <Skeleton
                     key={index}
@@ -758,27 +1305,72 @@ const AdminReminder = () => {
                     borderRadius={14}
                   />
                 ))}
+
               </div>
+
             ) : clientReminders.length === 0 ? (
+
               <div
-                className="flex flex-col items-center justify-center rounded-2xl border border-dashed px-4 py-8 text-center"
-                style={{ borderColor: COLORS.line, background: COLORS.card2 }}
+                className="
+                  flex
+                  min-h-[180px]
+                  flex-col
+                  items-center
+                  justify-center
+                  rounded-[15px]
+                  border
+                  border-dashed
+                  px-4
+                  py-8
+                  text-center
+                "
+                style={{
+                  borderColor: COLORS.line,
+                  background: COLORS.card2,
+                }}
               >
+
                 <div
-                  className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl"
-                  style={{ background: "#E9EFF9", color: COLORS.blue || "#2B5086" }}
+                  className="
+                    mb-3
+                    flex h-11 w-11
+                    items-center
+                    justify-center
+                    rounded-xl
+                  "
+                  style={{
+                    background: "#E9EFF9",
+                    color: "#2B5086",
+                  }}
                 >
-                  <UsersRound className="h-5 w-5" />
+                  <UsersRound size={21} />
                 </div>
-                <p className="text-sm font-black" style={{ color: COLORS.ink }}>
+
+                <p
+                  className="text-sm font-bold"
+                  style={{ color: COLORS.ink }}
+                >
                   No client reminders found
                 </p>
-                <p className="mt-1 max-w-[240px] text-xs leading-5" style={{ color: COLORS.muted }}>
+
+                <p
+                  className="
+                    mt-1
+                    max-w-[240px]
+                    text-xs
+                    leading-5
+                  "
+                  style={{ color: COLORS.muted }}
+                >
                   Try another activity type or date range.
                 </p>
+
               </div>
+
             ) : (
+
               <div className="space-y-2.5">
+
                 {clientReminders.map((activity) => {
                   const typeStyle = getTypeStyle(activity.updateType);
                   const TypeIcon = typeStyle.icon;
@@ -787,54 +1379,108 @@ const AdminReminder = () => {
                     <Link
                       key={activity._id}
                       href={`${clientBase}/${activity.clientId}`}
-                      className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                      className="
+                        group
+                        block
+                        rounded-xl
+                        focus-visible:outline-none
+                        focus-visible:ring-2
+                        focus-visible:ring-offset-2
+                      "
                       style={{ "--tw-ring-color": COLORS.orange }}
                     >
+
                       <article
-                        className="rounded-xl border p-3.5 transition-all duration-150 group-hover:shadow-sm sm:p-4"
+                        className="
+                          rounded-[15px]
+                          border
+                          p-3.5
+                          transition-all
+                          duration-200
+                          group-hover:shadow-sm
+                          sm:p-4
+                        "
                         style={{
                           borderColor: COLORS.line,
-                          background: COLORS.card,
+                          background: COLORS.white,
                         }}
                         onMouseEnter={(event) => {
-                          event.currentTarget.style.borderColor = COLORS.orangeLight;
-                          event.currentTarget.style.background = COLORS.card2;
+                          event.currentTarget.style.borderColor =
+                            COLORS.orangeLight;
+                          event.currentTarget.style.background =
+                            COLORS.card2;
                         }}
                         onMouseLeave={(event) => {
-                          event.currentTarget.style.borderColor = COLORS.line;
-                          event.currentTarget.style.background = COLORS.card;
+                          event.currentTarget.style.borderColor =
+                            COLORS.line;
+                          event.currentTarget.style.background =
+                            COLORS.white;
                         }}
                       >
+
                         <div className="flex min-w-0 items-start gap-3">
+
                           <div
-                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                            className="
+                              flex h-10 w-10
+                              shrink-0
+                              items-center
+                              justify-center
+                              rounded-xl
+                            "
                             style={{
                               background: typeStyle.background,
                               color: typeStyle.color,
                             }}
                           >
-                            <TypeIcon className="h-4 w-4" />
+                            <TypeIcon size={17} />
                           </div>
 
                           <div className="min-w-0 flex-1">
-                            <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
+
+                            <div className="
+                              flex
+                              min-w-0
+                              flex-wrap
+                              items-start
+                              justify-between
+                              gap-2
+                            ">
+
                               <div className="min-w-0 flex-1">
+
                                 <h3
-                                  className="break-words text-sm font-black"
+                                  className="
+                                    break-words
+                                    text-sm
+                                    font-bold
+                                  "
                                   style={{ color: COLORS.ink }}
                                 >
                                   {activity.clientName || "Unknown Client"}
                                 </h3>
 
                                 {activity.company && (
-                                  <p className="mt-0.5 truncate text-xs" style={{ color: COLORS.muted }}>
+                                  <p
+                                    className="mt-0.5 truncate text-xs"
+                                    style={{ color: COLORS.muted }}
+                                  >
                                     {activity.company}
                                   </p>
                                 )}
+
                               </div>
 
                               <span
-                                className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold capitalize"
+                                className="
+                                  shrink-0
+                                  rounded-full
+                                  px-2.5
+                                  py-1
+                                  text-[10px]
+                                  font-bold
+                                  capitalize
+                                "
                                 style={{
                                   background: typeStyle.background,
                                   color: typeStyle.color,
@@ -842,43 +1488,77 @@ const AdminReminder = () => {
                               >
                                 {typeStyle.label}
                               </span>
+
                             </div>
 
                             <p
-                              className="mt-2 flex flex-wrap items-center gap-1.5 text-xs"
+                              className="
+                                mt-2
+                                flex
+                                flex-wrap
+                                items-center
+                                gap-1.5
+                                text-xs
+                              "
                               style={{ color: COLORS.muted }}
                             >
-                              <CalendarDays className="h-3.5 w-3.5 shrink-0" />
+                              <CalendarDays size={14} className="shrink-0" />
                               {formatReminderDate(activity.reminderAt)}
                             </p>
 
                             {activity.status && (
                               <span
-                                className="mt-2 inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold capitalize"
+                                className="
+                                  mt-2
+                                  inline-flex
+                                  rounded-full
+                                  border
+                                  px-2.5
+                                  py-1
+                                  text-[10px]
+                                  font-bold
+                                  capitalize
+                                "
                                 style={{
-                                  background:
-                                    String(activity.status).toLowerCase().includes("complete")
-                                      ? "#E5F5EC"
-                                      : "#FFF4D9",
-                                  color:
-                                    String(activity.status).toLowerCase().includes("complete")
-                                      ? COLORS.green
-                                      : COLORS.amber,
-                                  borderColor:
-                                    String(activity.status).toLowerCase().includes("complete")
-                                      ? "#c6ead6"
-                                      : "#f1dfaa",
+                                  background: String(activity.status)
+                                    .toLowerCase()
+                                    .includes("complete")
+                                    ? "#E5F5EC"
+                                    : "#FFF4D9",
+                                  color: String(activity.status)
+                                    .toLowerCase()
+                                    .includes("complete")
+                                    ? COLORS.green
+                                    : COLORS.amber,
+                                  borderColor: String(activity.status)
+                                    .toLowerCase()
+                                    .includes("complete")
+                                    ? "#C6EAD6"
+                                    : "#F1DFAA",
                                 }}
                               >
                                 {String(activity.status).replace(/-/g, " ")}
                               </span>
                             )}
+
                           </div>
+
                         </div>
 
                         {activity.note && (
                           <p
-                            className="mt-3 line-clamp-2 whitespace-pre-wrap break-words rounded-lg border px-3 py-2 text-xs leading-5"
+                            className="
+                              mt-3
+                              line-clamp-2
+                              whitespace-pre-wrap
+                              break-words
+                              rounded-lg
+                              border
+                              px-3
+                              py-2
+                              text-xs
+                              leading-5
+                            "
                             style={{
                               background: COLORS.card2,
                               borderColor: COLORS.line,
@@ -888,15 +1568,22 @@ const AdminReminder = () => {
                             {activity.note}
                           </p>
                         )}
+
                       </article>
+
                     </Link>
                   );
                 })}
+
               </div>
+
             )}
+
           </div>
+
         </>
       )}
+
     </section>
   );
 };
