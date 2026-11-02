@@ -25,7 +25,6 @@ import {
   Paperclip,
   Files,
   Wallet,
-  ChevronRight,
 } from "lucide-react";
 
 import Customer from "../Customer";
@@ -80,7 +79,7 @@ function DashboardContent({
       : "Customer"
   );
 
-  // Fetch the actual customer details for the dashboard header.
+  // Fetch customer information.
   useEffect(() => {
     let cancelled = false;
 
@@ -116,7 +115,7 @@ function DashboardContent({
     };
   }, [customerId, customerName, companyName]);
 
-  // Keep the active tab synchronized with the URL.
+  // Keep the selected tab synchronized with the URL.
   useEffect(() => {
     const nextTab = CUSTOMER_TABS.some(
       (tab) => tab.value === requestedTab
@@ -145,95 +144,68 @@ function DashboardContent({
     customerDetails?.company || companyName || "";
 
   return (
-    <div className="min-h-screen w-full bg-[#F2F4F9] p-3 sm:p-5 lg:p-6">
-      <div className="mx-auto w-full max-w-[1800px] space-y-5">
-        {/* Page heading */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <div className="mb-2 flex items-center gap-2 text-xs font-medium text-[#8A92A6]">
-              <span>Dashboard</span>
-              <ChevronRight size={14} />
-              <span className="text-[#2B5086]">
-                Customer Management
-              </span>
-            </div>
-
-            <h1 className="text-2xl font-bold tracking-tight text-[#0A2E66] sm:text-3xl">
-              Customer Dashboard
-            </h1>
-
-            <p className="mt-1 text-sm text-[#5B6478]">
-              Manage customer information, proposals, invoices, work,
-              and account history.
-            </p>
-          </div>
-
-          {/* Customer and company details */}
-          <div className="flex min-w-0 max-w-full items-center gap-3 rounded-xl border border-[#E3E7F0] bg-white px-3 py-2.5 shadow-sm sm:max-w-[340px]">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#FFF1E4] text-[#F27B1E]">
-              <UserRound size={18} />
-            </span>
-
-            <div className="min-w-0 flex-1">
-              <p
-                title={displayedCustomerName}
-                className="truncate text-sm font-semibold text-[#0A2E66]"
-              >
-                {displayedCustomerName ||
-                  (customerLoading
-                    ? "Loading customer..."
-                    : "Customer")}
-              </p>
-
-              <p
-                title={displayedCompanyName}
-                className="truncate text-xs text-[#5B6478]"
-              >
-                {displayedCompanyName ||
-                  (customerLoading
-                    ? "Loading company..."
-                    : "Company not available")}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Customer workspace */}
-        <section className="w-full min-w-0 overflow-hidden rounded-2xl border border-[#E3E7F0] bg-white shadow-sm">
+    <div className="min-h-screen w-full bg-[#F2F4F9] p-2.5 sm:p-4 lg:p-5">
+      <div className="mx-auto w-full max-w-[1800px]">
+        <section className="w-full min-w-0 rounded-xl border border-[#E3E7F0] bg-white shadow-sm">
           <Tabs
             value={activeTab}
             onValueChange={handleTabChange}
             className="w-full min-w-0"
           >
-            {/* Compact, responsive tab navigation */}
-            <div className="border-b border-[#E3E7F0] px-3 pt-3 sm:px-5 sm:pt-4">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-sm font-bold text-[#0F1B33] sm:text-base">
-                    Workspace
-                  </h2>
+            {/* Compact header and sticky navigation */}
+            <div
+              className="
+                relative z-30 rounded-t-xl border-b border-[#E3E7F0]
+                bg-white px-3 py-2.5 sm:px-4
+                lg:sticky lg:top-0
+              "
+            >
+              {/* Single-line information header */}
+              <div className="mb-2 flex min-w-0 items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="hidden h-6 w-1 shrink-0 rounded-full bg-[#F27B1E] sm:block" />
 
-                  <p className="mt-0.5 text-xs text-[#8A92A6]">
-                    Select a section to manage its details.
-                  </p>
+                  <h1 className="truncate text-sm font-bold text-[#0A2E66] sm:text-base">
+                    Customer Dashboard
+                  </h1>
                 </div>
 
-                <span className="hidden shrink-0 rounded-lg bg-[#E9EFF9] px-3 py-1.5 text-xs font-semibold text-[#0A2E66] sm:inline-flex">
-                  {
-                    CUSTOMER_TABS.find(
-                      (tab) => tab.value === activeTab
-                    )?.label
-                  }
-                </span>
+                {/* Customer and company details */}
+                <div className="flex min-w-0 max-w-[65%] items-center gap-1.5 sm:gap-2">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#FFF1E4] text-[#F27B1E]">
+                    <UserRound size={14} />
+                  </span>
+
+                  <div className="min-w-0">
+                    <p
+                      title={displayedCustomerName}
+                      className="truncate text-xs font-semibold text-[#0A2E66] sm:text-sm"
+                    >
+                      {displayedCustomerName ||
+                        (customerLoading ? "Loading..." : "Customer")}
+                    </p>
+
+                    <p
+                      title={displayedCompanyName}
+                      className="truncate text-[10px] text-[#697386] sm:text-xs"
+                    >
+                      {displayedCompanyName ||
+                        (customerLoading
+                          ? "Loading company..."
+                          : "Company unavailable")}
+                    </p>
+                  </div>
+                </div>
               </div>
 
+              {/* All 10 tabs in one horizontal line */}
               <TabsList
                 className="
-                  grid h-auto w-full grid-cols-2
-                  gap-1.5 rounded-xl border border-[#E3E7F0]
-                  bg-[#F2F4F9] p-1.5
-                  sm:grid-cols-3
-                  lg:grid-cols-5
+                  flex h-auto w-full flex-nowrap items-stretch
+                  justify-start gap-1 overflow-x-auto overflow-y-hidden
+                  rounded-lg border border-[#E3E7F0]
+                  bg-[#F2F4F9] p-1 whitespace-nowrap
+                  [scrollbar-width:thin]
                 "
               >
                 {CUSTOMER_TABS.map(
@@ -242,28 +214,25 @@ function DashboardContent({
                       key={value}
                       value={value}
                       className="
-                        relative flex min-h-9 min-w-0 w-full
+                        relative flex min-h-9 flex-none
                         items-center justify-center gap-1.5
-                        whitespace-normal break-words
-                        rounded-lg border border-transparent
-                        px-1.5 py-1.5 text-center
-                        text-[11px] font-semibold leading-tight
+                        whitespace-nowrap rounded-md
+                        border border-transparent px-2.5 py-2
+                        text-xs font-semibold
                         text-[#5B6478] transition-colors
                         hover:bg-white hover:text-[#0A2E66]
                         data-[state=active]:border-[#DCE5F5]
                         data-[state=active]:bg-white
                         data-[state=active]:text-[#0A2E66]
                         data-[state=active]:shadow-sm
-                        sm:gap-2 sm:px-2 sm:py-2 sm:text-xs
-                        xl:text-sm
                       "
                     >
                       <Icon size={14} className="shrink-0" />
 
-                      <span className="min-w-0">{label}</span>
+                      <span>{label}</span>
 
                       {activeTab === value && (
-                        <span className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full bg-[#F27B1E]" />
+                        <span className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full bg-[#F27B1E]" />
                       )}
                     </TabsTrigger>
                   )
@@ -272,7 +241,7 @@ function DashboardContent({
             </div>
 
             {/* Tab content */}
-            <div className="w-full min-w-0 p-3 sm:p-5 lg:p-6">
+            <div className="w-full min-w-0 p-3 sm:p-4 lg:p-5">
               <TabsContent
                 value="Customer"
                 className="mt-0 min-w-0 outline-none"
@@ -368,7 +337,7 @@ export default function CustomerDashboard({
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[40vh] items-center justify-center bg-[#F2F4F9] p-6">
+        <div className="flex min-h-[30vh] items-center justify-center bg-[#F2F4F9] p-6">
           <div className="flex items-center gap-3 rounded-xl border border-[#E3E7F0] bg-white px-5 py-4 shadow-sm">
             <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#DCE5F5] border-t-[#F27B1E]" />
 
