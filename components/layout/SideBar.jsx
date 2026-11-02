@@ -270,6 +270,7 @@ const SideBar = ({ children }) => {
             );
           })}
         </nav>
+        
 
         {/* Bottom section */}
         <div className="shrink-0 border-t border-white/10 p-3">
@@ -499,7 +500,8 @@ const SideBar = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <main className="min-w-0 flex-1 bg-[#F2F4F9] ">
+        <main className="min-w-0 flex-1 bg-[#F2F4F9] p-1.5
+          sm:p-1.5 lg:p-1.5">
           {children}
         </main>
       </div>
