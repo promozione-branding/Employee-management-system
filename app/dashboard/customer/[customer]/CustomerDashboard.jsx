@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { Suspense, useEffect, useState } from "react";
@@ -6,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getCustomerServices } from "@/service/customer";
 import { createWorkflowService } from "@/service/workflow";
+import { useActiveCustomerStore } from "@/lib/store/ActiveCustomerStore";
 
 import {
   Tabs,
@@ -62,6 +62,7 @@ function DashboardContent({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setActiveCustomer } = useActiveCustomerStore();
 
   const requestedTab = searchParams.get("tab");
 
@@ -94,11 +95,13 @@ function DashboardContent({
         const response = await getCustomerServices(customerId);
 
         if (!cancelled && response?.success && response?.data) {
-          setCustomerDetails({
+          const fetchedData = {
             ...response.data,
             name: response.data.name || customerName || "",
             company: response.data.company || companyName || "",
-          });
+          };
+          setCustomerDetails(fetchedData);
+          setActiveCustomer(fetchedData);
         }
       } catch (error) {
         console.error("Failed to fetch customer details:", error);
@@ -114,7 +117,14 @@ function DashboardContent({
     return () => {
       cancelled = true;
     };
-  }, [customerId, customerName, companyName]);
+  }, [customerId, customerName, companyName, setActiveCustomer]);
+
+  // Set initial fallback to store if props exist
+  useEffect(() => {
+    if (customerName || companyName) {
+      setActiveCustomer({ name: customerName, company: companyName });
+    }
+  }, [customerName, companyName, setActiveCustomer]);
 
   // Keep the selected tab synchronized with the URL.
   useEffect(() => {

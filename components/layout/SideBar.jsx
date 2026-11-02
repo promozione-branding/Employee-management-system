@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import axiosInstance from "@/service/axiosInstance";
 import { useAdminStore } from "@/lib/store/AdminStore";
+import { useActiveCustomerStore } from "@/lib/store/ActiveCustomerStore";
 
 const NAVY = "#0A2E66";
 const ORANGE = "#F27B1E";
@@ -62,6 +63,7 @@ const SideBar = ({ children }) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const { adminDetail } = useAdminStore();
+  const { activeCustomer, clearActiveCustomer } = useActiveCustomerStore();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -72,7 +74,12 @@ const SideBar = ({ children }) => {
   useEffect(() => {
     setMobileOpen(false);
     setUserMenuOpen(false);
-  }, [pathname]);
+    
+    // Clear active customer if we navigate away from customer detail pages
+    if (!pathname.includes("/dashboard/customer/")) {
+      clearActiveCustomer();
+    }
+  }, [pathname, clearActiveCustomer]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -370,9 +377,20 @@ const SideBar = ({ children }) => {
                     "Workspace"}
                 </p>
               </div>
-              <p className="mt-0.5 text-xs text-slate-500">
-                Welcome to your dashboard
-              </p>
+              
+              {/* Dynamic replacement: Customer Name & Company Name if available */}
+              {activeCustomer ? (
+                <p className="mt-0.5 truncate text-xs font-medium text-[#0A2E66]">
+                  <span className="font-semibold">{activeCustomer.name}</span>
+                  {activeCustomer.company && (
+                    <span className="text-slate-500"> ({activeCustomer.company})</span>
+                  )}
+                </p>
+              ) : (
+                <p className="mt-0.5 text-xs text-slate-500">
+                  Welcome to your dashboard
+                </p>
+              )}
             </div>
 
             {/* Mobile brand/title */}
@@ -391,9 +409,15 @@ const SideBar = ({ children }) => {
                   Inquiry Bazaar
                 </p>
               </div>
-              <p className="truncate text-[11px] text-slate-500">
-                Admin workspace
-              </p>
+              {activeCustomer ? (
+                <p className="truncate text-[11px] font-medium text-slate-600">
+                  {activeCustomer.name} {activeCustomer.company ? `- ${activeCustomer.company}` : ""}
+                </p>
+              ) : (
+                <p className="truncate text-[11px] text-slate-500">
+                  Admin workspace
+                </p>
+              )}
             </div>
           </div>
 
