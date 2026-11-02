@@ -1,3 +1,5 @@
+// app/dashboard/customer/[customer]/CustomerDashboard.jsx
+
 "use client";
 
 import React, { Suspense, useEffect, useState } from "react";

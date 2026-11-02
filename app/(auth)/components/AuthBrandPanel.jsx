@@ -1,3 +1,5 @@
+// app/(auth)/components/AuthBrandPanel.jsx
+
 
 "use client";
 

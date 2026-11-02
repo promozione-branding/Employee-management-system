@@ -1,3 +1,5 @@
+// app/dashboard/customer/Customer.jsx
+
 
 "use client";
 

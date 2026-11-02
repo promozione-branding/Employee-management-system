@@ -1,3 +1,5 @@
+// components/sales-dashboard/dashboard-cards/RecentActivitySales.jsx
+
 
 "use client";
 

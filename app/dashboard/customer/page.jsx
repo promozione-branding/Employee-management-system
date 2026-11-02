@@ -1,3 +1,5 @@
+// app/dashboard/customer/page.jsx
+
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
