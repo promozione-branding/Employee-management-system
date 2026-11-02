@@ -1,74 +1,102 @@
-// components/sales-dashboard/dashboard-cards/CurrentMonthRevenue.jsx
 
 "use client";
 
-import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
-import { currentMonthRevenueService } from "@/service/sales-dashboard/dashboard-api";
-import { BanknoteArrowUp, HandCoins } from "lucide-react";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { BanknoteArrowUp, Wallet } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import toast from "react-hot-toast";
 
-const CurrentMonthRevenue = () => {
+import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
+import { currentMonthRevenueService } from "@/service/sales-dashboard/dashboard-api";
+
+const ORANGE = "#F27B1E";
+
+const formatCurrency = (value) =>
+  `₹${(Number(value) || 0).toLocaleString("en-IN", {
+    maximumFractionDigits: 0,
+  })}`;
+
+export default function CurrentMonthRevenue() {
   const { employee } = useSalesEmployeeStore();
   const [loading, setLoading] = useState(true);
-  const [callData, setCallData] = useState(null);
-
-  async function fetchCurrentMonthRevenue() {
-    try {
-      const res = await currentMonthRevenueService(employee?._id);
-      console.log(res);
-      if (res.success) {
-        setCallData(res.revenue);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error("Error fetching daily call count");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [revenue, setRevenue] = useState(0);
 
   useEffect(() => {
-    if (employee?._id) {
-      fetchCurrentMonthRevenue();
+    if (!employee?._id) {
+      setLoading(false);
+      return;
     }
-  }, []);
 
-  if (loading) {
-    return (
-      <div className="mb-5 bg-white p-4 rounded-lg shadow-sm border border-gray-200 w-full">
-        <div className="flex justify-between items-center">
-          <div>
-            <Skeleton height={16} width={100} className="mb-2" />
-            <Skeleton height={32} width={60} />
-          </div>
-          <Skeleton circle height={40} width={40} />
-        </div>
-      </div>
-    );
-  }
+    let active = true;
+
+    const fetchRevenue = async () => {
+      setLoading(true);
+
+      try {
+        const res = await currentMonthRevenueService(employee._id);
+
+        if (active && res?.success) {
+          setRevenue(Number(res.revenue) || 0);
+        }
+      } catch (error) {
+        if (active) {
+          toast.error(
+            error?.response?.data?.message ||
+              "Unable to load monthly revenue"
+          );
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    fetchRevenue();
+
+    return () => {
+      active = false;
+    };
+  }, [employee?._id]);
 
   return (
-    <div className="bg-[#f3eaea] p-4 rounded-lg shadow-sm border border-gray-200 w-full h-full hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-            Current Month Revenue
+    <article className="group relative flex h-full min-h-[190px] min-w-0 flex-col overflow-hidden rounded-2xl border border-[#E5EAF2] bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D4DDEC] hover:shadow-lg sm:p-6">
+      <div
+        className="absolute inset-x-0 top-0 h-1"
+        style={{ background: "#0A2E66" }}
+      />
+
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#77839A]">
+            Monthly revenue
           </p>
-          <div className="mt-1 flex items-baseline">
-            <span className="text-3xl font-bold text-gray-900">
-              ₹ {(callData || 0).toLocaleString("en-IN")}
-            </span>
-          </div>
+
+          {loading ? (
+            <Skeleton height={34} width={145} className="mt-3" />
+          ) : (
+            <h2 className="mt-3 break-words text-2xl font-bold tracking-tight text-[#172B4D] sm:text-3xl">
+              {formatCurrency(revenue)}
+            </h2>
+          )}
+
+          <p className="mt-2 text-xs text-[#8792A5]">
+            Revenue recorded this month
+          </p>
         </div>
-        <div className="p-3 bg-orange-50 rounded-full">
-          <BanknoteArrowUp className="text-orange-600" />
+
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAF0FA] text-[#0A2E66]">
+          <BanknoteArrowUp size={23} strokeWidth={1.8} />
         </div>
       </div>
-    </div>
-  );
-};
 
-export default CurrentMonthRevenue;
+      <div className="mt-auto flex items-center gap-2 border-t border-[#EDF0F5] pt-4">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#FFF1E5] text-[#F27B1E]">
+          <Wallet size={15} />
+        </span>
+        <span className="text-xs font-medium text-[#64748B]">
+          Current month collection
+        </span>
+      </div>
+    </article>
+  );
+}

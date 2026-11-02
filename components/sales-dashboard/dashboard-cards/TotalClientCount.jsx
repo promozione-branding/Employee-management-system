@@ -21,7 +21,7 @@ const TotalClientCount = () => {
       const res = await totalClientCount(employee?._id);
       console.log(res);
       if (res.success) {
-        setCallData(res.client);
+        setCallData(res.client); 
       }
     } catch (error) {
       console.log(error);

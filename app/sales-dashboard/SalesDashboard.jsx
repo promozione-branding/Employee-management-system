@@ -7,6 +7,7 @@ import { CalendarDays, Clock3 } from "lucide-react";
 
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 
+
 import EmployeeCalendar from "@/components/employee-dashboard/common/EmployeeCalendar";
 import EmployeeTodo from "@/components/employee-dashboard/common/EmployeeTodo";
 import EmployeeReminder from "@/components/employee-dashboard/common/EmployeeReminder";
@@ -15,7 +16,8 @@ import AllEmployeeContact from "@/components/employee-dashboard/common/AllEmploy
 
 import CurrentMonthDealValue from "@/components/sales-dashboard/dashboard-cards/CurrentMonthDealValue";
 import CurrentMonthRevenue from "@/components/sales-dashboard/dashboard-cards/CurrentMonthRevenue";
-import TotalClientCount from "@/components/sales-dashboard/dashboard-cards/TotalClientCount";
+// import TotalClientCount from "@/components/sales-dashboard/dashboard-cards/TotalClientCount";
+import ClientAcquisition from "@/components/sales-dashboard/dashboard-cards/ClientAcquisition";
 
 import TodayMeeting from "@/components/sales-dashboard/dashboard-cards/TodayMeeting";
 import RecentActivitySales from "@/components/sales-dashboard/dashboard-cards/RecentActivitySales";
@@ -119,13 +121,36 @@ const SalesDashboard = () => {
         </div>
       </section>
 
+   
+
       {/* Daily calls: the two-column layout lives inside DailyCall */}
       <section
         aria-label="Daily call activity"
         className="min-w-0"
       >
         <DailyCall />
+
+
       </section>
+         
+
+         {/* Monthly Sales Performance */}
+<section
+  aria-label="Monthly sales performance"
+  className="grid min-w-0 grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-5"
+>
+  <div className="min-w-0">
+    <CurrentMonthDealValue />
+  </div>
+
+  <div className="min-w-0">
+    <CurrentMonthRevenue />
+  </div>
+
+  <div className="min-w-0">
+    <ClientAcquisition />
+  </div>
+</section>
       
 
       {/* Meetings, Recent Activity and Proposals */}

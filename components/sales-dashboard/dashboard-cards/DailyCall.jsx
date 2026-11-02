@@ -25,9 +25,7 @@ import {
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 import { dailyCallStatsService } from "@/service/sales-dashboard/dashboard-api";
 
-import CurrentMonthDealValue from "@/components/sales-dashboard/dashboard-cards/CurrentMonthDealValue";
-import CurrentMonthRevenue from "@/components/sales-dashboard/dashboard-cards/CurrentMonthRevenue";
-import TotalClientCount from "@/components/sales-dashboard/dashboard-cards/TotalClientCount";
+
 
 const NAVY = "#0A2E66";
 const ORANGE = "#F27B1E";
@@ -500,23 +498,7 @@ const DailyCall = () => {
         </aside>
       </section>
 
-      {/* Existing monthly financial/client widgets retained */}
-      <section
-        aria-label="Monthly sales summary"
-        className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"
-      >
-        <div className="min-w-0">
-          <CurrentMonthDealValue />
-        </div>
-
-        <div className="min-w-0">
-          <CurrentMonthRevenue />
-        </div>
-
-        <div className="min-w-0">
-          <TotalClientCount />
-        </div>
-      </section>
+      
     </div>
   );
 };

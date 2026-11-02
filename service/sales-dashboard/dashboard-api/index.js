@@ -77,3 +77,16 @@ export async function dailyCallStatsService(id) {
   );
   return data;
 }
+
+
+
+// ------------------------------------------------------------
+// Client acquisition stats (monthly and weekly)
+// ------------------------------------------------------------
+export async function clientAcquisitionStatsService(id) {
+  const { data } = await axiosInstance.get(
+    `/api/sales-dashboard/dashboard-api/client-acquisition/${id}`,
+  );
+
+  return data;
+}
