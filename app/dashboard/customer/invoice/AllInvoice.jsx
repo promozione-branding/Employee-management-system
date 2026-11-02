@@ -137,42 +137,122 @@ const AllInvoice = ({ customerId }) => {
     }
   }
 
-  const downloadInvoicePdf = async (invoiceId) => {
-    try {
-      const toastId = toast.loading("Generating PDF...");
+  
+const downloadInvoicePdf = async (invoiceId) => {
+  const toastId = toast.loading("Preparing invoice download...");
+  let objectUrl = null;
 
-      // ✅ Fetch proposal data
-      const res = await pdfDownloaderById(invoiceId);
+  try {
+    console.log("[Invoice PDF] 1. Starting download", {
+      invoiceId,
+      time: new Date().toISOString(),
+    });
 
-      if (!res?.success) {
-        throw new Error("Failed to fetch proposal data");
-      }
+    // Step 1: Fetch invoice data
+    toast.loading("Fetching invoice data...", { id: toastId });
 
-      const pdfData = res.data;
-      console.log(pdfData)
-      // ✅ Generate PDF Blob
-      const blob = await pdf(<InvoicePdfTemplate data={pdfData} />).toBlob();
+    const res = await pdfDownloaderById(invoiceId);
 
-      // ✅ Create download link
-      const url = URL.createObjectURL(blob);
+    console.log("[Invoice PDF] 2. API response:", res);
+    console.log("[Invoice PDF] API success:", res?.success);
+    console.log("[Invoice PDF] Response data:", res?.data);
 
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${pdfData?.clientCompany}-Invoice.pdf`;
-
-      document.body.appendChild(link);
-      link.click();
-
-      // Cleanup
-      link.remove();
-      URL.revokeObjectURL(url);
-
-      toast.success("PDF downloaded!", { id: toastId });
-    } catch (error) {
-      console.error(error);
-      toast.error("Download failed");
+    if (!res?.success || !res?.data) {
+      throw new Error(
+        res?.message || "Invoice data was not returned by the API."
+      );
     }
-  };
+
+    const pdfData = res.data;
+
+    console.log("[Invoice PDF] 3. Invoice data validation:", {
+      invoiceId: pdfData?._id,
+      clientCompany: pdfData?.clientCompany,
+      invoiceNo: pdfData?.invoiceNo,
+      dataType: typeof pdfData,
+      keys:
+        pdfData && typeof pdfData === "object"
+          ? Object.keys(pdfData)
+          : [],
+    });
+
+    // Step 2: Generate the PDF
+    toast.loading("Generating PDF...", { id: toastId });
+
+    console.time("[Invoice PDF] PDF generation");
+
+    let blob;
+
+    try {
+      blob = await pdf(
+        <InvoicePdfTemplate data={pdfData} />
+      ).toBlob();
+    } finally {
+      console.timeEnd("[Invoice PDF] PDF generation");
+    }
+
+    console.log("[Invoice PDF] 4. PDF blob generated:", {
+      isBlob: blob instanceof Blob,
+      size: blob?.size,
+      type: blob?.type,
+    });
+
+    if (!(blob instanceof Blob) || blob.size === 0) {
+      throw new Error("PDF generation returned an empty file.");
+    }
+
+    // Step 3: Prepare the download
+    toast.loading("Preparing file...", { id: toastId });
+
+    objectUrl = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    const invoiceNumber = pdfData?.invoiceNo || invoiceId;
+
+    link.href = objectUrl;
+    link.download = `${invoiceNumber}-Invoice.pdf`;
+    link.style.display = "none";
+
+    document.body.appendChild(link);
+
+    console.log("[Invoice PDF] 5. Triggering browser download", {
+      filename: link.download,
+      blobSize: blob.size,
+    });
+
+    link.click();
+    link.remove();
+
+    // Do not revoke the object URL immediately after link.click().
+    const urlToRevoke = objectUrl;
+    objectUrl = null;
+
+    window.setTimeout(() => {
+      URL.revokeObjectURL(urlToRevoke);
+      console.log("[Invoice PDF] 6. Download URL cleaned up");
+    }, 5000);
+
+    toast.success("PDF download initiated.", { id: toastId });
+  } catch (error) {
+    console.error("[Invoice PDF] DOWNLOAD FAILED:", error);
+    console.error("[Invoice PDF] Error details:", {
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack,
+      invoiceId,
+    });
+
+    if (objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+    }
+
+    toast.error(
+      error?.message || "Invoice download failed. Check the console.",
+      { id: toastId }
+    );
+  }
+};
+
 
   useEffect(() => {
     fetchingInvoices();
