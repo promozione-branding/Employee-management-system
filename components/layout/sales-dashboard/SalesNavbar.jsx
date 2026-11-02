@@ -2,24 +2,32 @@
 
 "use client";
 
-import React, { useState } from "react";
-import { Bell, Search, LogOut, Settings, User, Sun, Moon, UserCircle, ChevronDown, UserRound } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Bell, Search, LogOut, Settings, User, Sun, Moon, UserCircle, ChevronDown, UserRound, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import axiosInstance from "@/service/axiosInstance";
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 import { useActiveCustomerStore } from "@/lib/store/ActiveCustomerStore";
 
 const SalesNavbar = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [openEmployeeDetails, setOpenEmployeeDetails] = useState(false);
 
   const { employee, clearEmployee } = useSalesEmployeeStore();
-  const { activeCustomer } = useActiveCustomerStore();
+  const { activeCustomer, clearActiveCustomer } = useActiveCustomerStore();
   const [lightMode, setLightMode] = useState(true);
+
+  // Clear active customer when not on a client detail page
+  useEffect(() => {
+    if (!pathname.includes("/sales-dashboard/clients/")) {
+      clearActiveCustomer();
+    }
+  }, [pathname, clearActiveCustomer]);
 
   const username =
     employee?.basicDetails?.name ||
@@ -45,9 +53,28 @@ const SalesNavbar = () => {
     }
   };
 
+  // Only show the back button if we are deeper than the root sales dashboard
+  const showBackButton = pathname !== "/sales-dashboard";
+
   return (
     <header className="sticky top-0 z-30 flex h-[68px] shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 px-3 shadow-sm backdrop-blur-xl sm:px-5 lg:px-8">
       <div className="flex min-w-0 items-center gap-3">
+        {/* Conditional Back Button */}
+        {showBackButton && (
+          <>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              aria-label="Go back"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-[#0A2E66]"
+              title="Go back"
+            >
+              <ArrowLeft size={18} strokeWidth={2.2} />
+            </button>
+            <span className="hidden h-5 w-px bg-slate-200 sm:block" />
+          </>
+        )}
+
         <h2 className="text-base font-bold tracking-tight text-[#0A2E66] sm:text-lg shrink-0">
           Sales Workspace
         </h2>
