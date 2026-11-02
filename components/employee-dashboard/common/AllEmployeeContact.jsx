@@ -1,11 +1,18 @@
-// components/employee-dashboard/common/AllEmployeeContact.jsx
 
 "use client";
 
 import { useEffect, useState } from "react";
 import { allEmployeeContactService } from "@/service/employee-dashboard/dashboard";
-import { Mail, Phone, User } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  UserRound,
+  UsersRound,
+  ArrowUpRight,
+  ContactRound,
+} from "lucide-react";
 import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 import Image from "next/image";
 
 const AllEmployeeContact = () => {
@@ -13,108 +20,197 @@ const AllEmployeeContact = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchContacts() {
       try {
         const res = await allEmployeeContactService();
-        if (res.success) {
+
+        if (!cancelled && res?.success) {
           setContacts(res?.data || []);
         }
       } catch (error) {
-        console.error("Failed to fetch employee contacts", error);
+        console.error("Failed to fetch employee contacts:", error);
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     fetchContacts();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="space-y-4 bg-white px-5 py-5  rounded-xl lg:h-[68vh] shadow-lg">
-        <Skeleton height={24} width={200} className="mb-4" />
+  return (
+    <div className="flex h-full min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-[#E3E7F0] bg-white shadow-[0_4px_20px_rgba(15,27,51,0.04)] transition-shadow duration-300 hover:shadow-[0_8px_28px_rgba(15,27,51,0.07)] lg:h-[68vh]">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3 border-b border-[#EDF0F5] px-4 py-4 sm:px-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0A2E66] text-white shadow-sm">
+            <UsersRound size={20} />
+          </div>
 
-        <div className="flex flex-col gap-3 h-[50vh] overflow-y-hidden ">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="rounded-lg border p-4">
-              <div className="flex items-start gap-3">
-                <Skeleton circle height={50} width={50} />
-                <div className="flex-1">
-                  <Skeleton height={20} width="60%" />
-                  <Skeleton height={14} width="40%" className="mt-1" />
-                  <div className="mt-2 flex items-center gap-2">
-                    <Skeleton circle width={16} height={16} />
-                    <Skeleton height={16} width="80%" />
+          <div className="min-w-0">
+            <h2 className="text-base font-bold tracking-tight text-[#0F1B33]">
+              Employee Contacts
+            </h2>
+            <p className="mt-0.5 text-xs text-[#8A92A6]">
+              Connect with your team
+            </p>
+          </div>
+        </div>
+
+        {!loading && (
+          <span className="shrink-0 rounded-full bg-[#F0F3F8] px-2.5 py-1 text-[11px] font-semibold tabular-nums text-[#0A2E66]">
+            {contacts.length} {contacts.length === 1 ? "Member" : "Members"}
+          </span>
+        )}
+      </div>
+
+      {/* Contacts */}
+      <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:px-5">
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3, 4].map((item) => (
+              <div
+                key={item}
+                className="rounded-xl border border-[#E9EDF4] p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <Skeleton circle height={44} width={44} />
+
+                  <div className="min-w-0 flex-1">
+                    <Skeleton height={16} width="65%" />
+                    <Skeleton height={12} width="42%" className="mt-2" />
+                    <Skeleton height={12} width="85%" className="mt-3" />
+                    <Skeleton height={12} width="60%" className="mt-2" />
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (!contacts.length) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        No employee contacts found
-      </p>
-    );
-  }
-
-  return (
-    <div className="space-y-4 bg-[#f3eaea] px-5 py-5  rounded-xl lg:h-[68vh] shadow-lg">
-      <h3 className="text-lg font-semibold">Employee Contacts</h3>
-
-      <div className="flex flex-col gap-3 h-[50vh] overflow-y-scroll ">
-        {contacts.map((employee) => (
-          <div
-            key={employee._id}
-            className="rounded-lg border p-4 hover:shadow-sm transition"
-          >
-            <div className="flex items-start gap-3">
-              {employee?.basicDetails?.profileImage ? (
-                <Image
-                  src={employee?.basicDetails?.profileImage}
-                  height={50}
-                  width={50}
-                  alt={employee.basicDetails?.name || "Profile image"}
-                  className="rounded-full"
-                />
-              ) : (
-                <User className="h-5 w-5 text-muted-foreground mt-1" />
-              )}
-
-              <div className="flex-1">
-                <p className="font-medium">{employee.basicDetails?.name}</p>
-
-                <p className="text-xs text-muted-foreground">
-                  {employee.basicDetails?.designation}
-                </p>
-
-                <div className="mt-2 flex items-center gap-2 text-sm">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <a
-                    href={`mailto:${employee.basicDetails?.email}`}
-                    className="text-blue-600 hover:underline"
-                  >
-                    {employee.basicDetails?.email}
-                  </a>
-                </div>
-                <div className="mt-2 flex items-center gap-2 text-sm">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <a
-                    href={`tel:${employee.basicDetails?.phone}`}
-                    className="text-black hover:underline"
-                  >
-                    {employee.basicDetails?.phone}
-                  </a>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
-        ))}
+        ) : contacts.length === 0 ? (
+          <div className="flex min-h-48 flex-col items-center justify-center rounded-xl border border-dashed border-[#DDE3ED] bg-[#FAFBFD] px-4 text-center">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#F0F3F8] text-[#0A2E66]">
+              <ContactRound size={22} />
+            </div>
+
+            <h3 className="text-sm font-semibold text-[#26344D]">
+              No contacts found
+            </h3>
+
+            <p className="mt-1 max-w-52 text-xs leading-5 text-[#929BAD]">
+              Employee contact information will appear here when available.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {contacts.map((employee) => {
+              const details = employee?.basicDetails || {};
+              const name = details.name || "Unnamed employee";
+              const email = details.email;
+              const phone = details.phone;
+              const imageUrl = details.profileImage;
+
+              return (
+                <article
+                  key={employee._id}
+                  className="group rounded-xl border border-[#E9EDF4] bg-white p-3.5 transition-all duration-200 hover:border-[#D5DEEF] hover:bg-[#FAFBFD] hover:shadow-[0_4px_14px_rgba(15,27,51,0.04)] sm:p-4"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    {/* Avatar */}
+                    <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F0F3F8] text-[#0A2E66] ring-1 ring-[#E3E7F0]">
+                      {imageUrl ? (
+                        <Image
+                          src={imageUrl}
+                          height={44}
+                          width={44}
+                          alt={`${name}'s profile`}
+                          className="h-11 w-11 object-cover"
+                        />
+                      ) : (
+                        <UserRound size={21} />
+                      )}
+                    </div>
+
+                    {/* Employee details */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex min-w-0 items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="truncate text-sm font-bold text-[#26344D] transition-colors group-hover:text-[#0A2E66]">
+                            {name}
+                          </h3>
+
+                          <p className="mt-0.5 truncate text-xs text-[#929BAD]">
+                            {details.designation || "Team member"}
+                          </p>
+                        </div>
+
+                        <ArrowUpRight
+                          size={15}
+                          className="mt-0.5 shrink-0 text-[#B0B8C7] transition-colors group-hover:text-[#F27B1E]"
+                        />
+                      </div>
+
+                      <div className="mt-3 space-y-2">
+                        {email ? (
+                          <a
+                            href={`mailto:${email}`}
+                            title={email}
+                            className="flex min-w-0 items-center gap-2 text-xs text-[#526078] transition-colors hover:text-[#0A2E66]"
+                          >
+                            <Mail
+                              size={14}
+                              className="shrink-0 text-[#F27B1E]"
+                            />
+                            <span className="truncate">{email}</span>
+                          </a>
+                        ) : (
+                          <div className="flex items-center gap-2 text-xs text-[#A0A8B8]">
+                            <Mail size={14} className="shrink-0" />
+                            <span>Email not available</span>
+                          </div>
+                        )}
+
+                        {phone ? (
+                          <a
+                            href={`tel:${phone}`}
+                            title={String(phone)}
+                            className="flex items-center gap-2 text-xs text-[#526078] transition-colors hover:text-[#0A2E66]"
+                          >
+                            <Phone
+                              size={14}
+                              className="shrink-0 text-[#0A2E66]"
+                            />
+                            <span className="truncate">{phone}</span>
+                          </a>
+                        ) : (
+                          <div className="flex items-center gap-2 text-xs text-[#A0A8B8]">
+                            <Phone size={14} className="shrink-0" />
+                            <span>Phone not available</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center gap-2 border-t border-[#EDF0F5] px-4 py-3 text-[11px] text-[#929BAD] sm:px-5">
+        <UsersRound size={13} />
+        <span>Team directory</span>
+        <span className="ml-auto font-medium text-[#0A2E66]">
+          {loading ? "Loading..." : "Contact details"}
+        </span>
       </div>
     </div>
   );
