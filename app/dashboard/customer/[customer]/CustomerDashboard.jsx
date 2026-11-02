@@ -3,7 +3,7 @@
 
 import React, { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import Link from "next/link";
 import { getCustomerServices } from "@/service/customer";
 import { createWorkflowService } from "@/service/workflow";
 
@@ -25,6 +25,7 @@ import {
   Paperclip,
   Files,
   Wallet,
+  ArrowLeft,
 } from "lucide-react";
 
 import Customer from "../Customer";
@@ -144,7 +145,7 @@ function DashboardContent({
     customerDetails?.company || companyName || "";
 
   return (
-    <div className="min-h-screen w-full bg-[#F2F4F9] p-2.5 sm:p-4 lg:p-5">
+    <div className="min-h-screen w-full bg-[#F2F4F9] p-1 sm:p-1 lg:p-1">
       <div className="mx-auto w-full max-w-[1800px]">
         <section className="w-full min-w-0 rounded-xl border border-[#E3E7F0] bg-white shadow-sm">
           <Tabs
@@ -160,9 +161,19 @@ function DashboardContent({
                 lg:sticky lg:top-0
               "
             >
-              {/* Single-line information header */}
+              {/* Information header */}
               <div className="mb-2 flex min-w-0 items-center justify-between gap-3">
+                {/* Back arrow and dashboard title */}
                 <div className="flex min-w-0 items-center gap-2">
+                  <Link
+                    href="/dashboard/customer"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#0A2E66] transition-colors hover:bg-[#EAF0FA] hover:text-[#F27B1E]"
+                    title="Back to Customer Dashboard"
+                    aria-label="Back to Customer Dashboard"
+                  >
+                    <ArrowLeft size={18} strokeWidth={2.2} />
+                  </Link>
+
                   <span className="hidden h-6 w-1 shrink-0 rounded-full bg-[#F27B1E] sm:block" />
 
                   <h1 className="truncate text-sm font-bold text-[#0A2E66] sm:text-base">

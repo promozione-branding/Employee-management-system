@@ -499,8 +499,7 @@ const SideBar = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <main className="min-w-0 flex-1 bg-[#F2F4F9] p-3
-          sm:p-5 lg:p-7">
+        <main className="min-w-0 flex-1 bg-[#F2F4F9] ">
           {children}
         </main>
       </div>
