@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -20,6 +19,7 @@ import {
   ChevronDown,
   Building2,
   PanelLeftClose,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
@@ -153,7 +153,7 @@ const SideBar = ({ children }) => {
       >
         {/* Brand */}
         <div
-          className={`flex h-[76px] shrink-0 items-center border-b
+          className={`flex h-[66px] shrink-0 items-center border-b
             border-white/10 ${
               showLabels
                 ? "justify-between px-5"
@@ -355,10 +355,21 @@ const SideBar = ({ children }) => {
             </Button>
 
             <div className="hidden min-w-0 sm:block">
-              <p className="truncate text-sm font-semibold text-slate-800">
-                {navLinks.find((link) => isActive(link.href))?.label ||
-                  "Workspace"}
-              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  aria-label="Go back"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-[#0A2E66]"
+                  title="Go back"
+                >
+                  <ArrowLeft size={22} />
+                </button>
+                <p className="truncate text-sm font-semibold text-slate-800">
+                  {navLinks.find((link) => isActive(link.href))?.label ||
+                    "Workspace"}
+                </p>
+              </div>
               <p className="mt-0.5 text-xs text-slate-500">
                 Welcome to your dashboard
               </p>
@@ -366,9 +377,20 @@ const SideBar = ({ children }) => {
 
             {/* Mobile brand/title */}
             <div className="min-w-0 sm:hidden">
-              <p className="truncate text-sm font-bold text-[#0A2E66]">
-                Inquiry Bazaar
-              </p>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  aria-label="Go back"
+                  className="flex h-6 w-6 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-[#0A2E66]"
+                  title="Go back"
+                >
+                  <ArrowLeft size={15} />
+                </button>
+                <p className="truncate text-sm font-bold text-[#0A2E66]">
+                  Inquiry Bazaar
+                </p>
+              </div>
               <p className="truncate text-[11px] text-slate-500">
                 Admin workspace
               </p>
