@@ -28,6 +28,7 @@ const MeetingSchema = new mongoose.Schema(
           reminderAt: { type: Date },
           meetingAt: { type: Date },
           reminderSent: { type: Boolean, default: false },
+          reminderSentAt: { type: Date },
         },
         { timestamps: true, strictPopulate: false },
       ),

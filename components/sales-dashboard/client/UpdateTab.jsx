@@ -742,6 +742,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
+            
 
             <div className="flex flex-col gap-2 border rounded-lg p-3 bg-blue-50/50">
               <div className="text-xs text-gray-700">

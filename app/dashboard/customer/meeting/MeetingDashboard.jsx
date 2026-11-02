@@ -440,6 +440,7 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 </SelectContent>
               </Select>
             </div>
+             
             <div className="flex flex-col gap-3">
               <Label>Note</Label>
               <Textarea
