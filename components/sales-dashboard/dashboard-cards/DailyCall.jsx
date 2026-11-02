@@ -2,11 +2,8 @@
 
 "use client";
 
-import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
-import { dailyCallStatsService } from "@/service/sales-dashboard/dashboard-api";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-
-import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -16,128 +13,222 @@ import {
   PhoneCall,
   PhoneMissed,
   Users,
-  Clock,
+  Clock3,
   TrendingUp,
   ArrowDown,
   ArrowUp,
   MessageCircle,
+  Activity,
+  PhoneOutgoing,
 } from "lucide-react";
+
+import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
+import { dailyCallStatsService } from "@/service/sales-dashboard/dashboard-api";
+
 import CurrentMonthDealValue from "@/components/sales-dashboard/dashboard-cards/CurrentMonthDealValue";
 import CurrentMonthRevenue from "@/components/sales-dashboard/dashboard-cards/CurrentMonthRevenue";
 import TotalClientCount from "@/components/sales-dashboard/dashboard-cards/TotalClientCount";
 
-// ========================================
-// KPI CARD COMPONENT
-// ========================================
-const StatCard = ({ title, value, icon: Icon, color, background, className = "", suffix = "" }) => {
+const NAVY = "#0A2E66";
+const ORANGE = "#F27B1E";
+
+const formatNumber = (value) => Number(value || 0).toLocaleString("en-IN");
+
+const formatCurrency = (value) =>
+  `₹${Number(value || 0).toLocaleString("en-IN")}`;
+
+const getInitials = (name = "Unknown Client") =>
+  name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+
+const getCallStatus = (call) => {
+  const status = String(call?.status || "").toLowerCase();
+
+  if (
+    ["missed", "failed", "busy", "cancelled", "canceled"].includes(status)
+  ) {
+    return "missed";
+  }
+
+  if (call?.connected) return "connected";
+
+  return "pending";
+};
+
+function PanelHeader({ icon: Icon, title, subtitle, iconColor = NAVY }) {
+  return (
+    <div className="flex min-w-0 items-center gap-3">
+      <div
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
+        style={{
+          backgroundColor: `${iconColor}14`,
+          color: iconColor,
+        }}
+      >
+        <Icon size={22} strokeWidth={2.2} />
+      </div>
+
+      <div className="min-w-0">
+        <h2 className="font-serif text-lg font-bold leading-tight text-[#14213D] sm:text-xl">
+          {title}
+        </h2>
+
+        {subtitle && (
+          <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MetricCard({
+  title,
+  value,
+  icon: Icon,
+  color,
+  background,
+  suffix = "",
+}) {
   return (
     <div
-      className={`group/stat relative flex min-h-[110px] flex-col justify-between overflow-hidden rounded-[22px] border border-slate-100 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_28px_rgba(10,46,102,0.08)] sm:p-5 ${className}`}
+      className="flex min-h-[104px] min-w-0 flex-col justify-between rounded-[20px] p-3.5 sm:p-4"
       style={{ backgroundColor: background }}
     >
-      <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full opacity-20 blur-xl transition-all duration-300 group-hover/stat:scale-125" style={{ backgroundColor: color }} />
-      
-      <div className="relative z-10 flex items-center justify-between">
-        <p className="text-[12px] font-semibold tracking-wider uppercase" style={{ color: "#475569" }}>
+      <div className="flex items-center justify-between gap-2">
+        <span
+          className="text-xs font-semibold sm:text-sm"
+          style={{ color }}
+        >
           {title}
-        </p>
-        <div className="flex h-9 w-9 shrink-0 items-center.flex items-center justify-center rounded-xl shadow-sm transition-transform duration-300 group-hover/stat:scale-110" style={{ color, backgroundColor: "rgba(255, 255, 255, 0.7)" }}>
-          <Icon size={18} strokeWidth={2.2} />
-        </div>
+        </span>
+
+        <Icon className="shrink-0" size={18} style={{ color }} />
       </div>
-      
-      <p className="relative z-15 text-[28px] font-bold leading-none tracking-tight sm:text-[32px]" style={{ color: "#0A2E66" }}>
+
+      <p
+        className="mt-3 text-2xl font-bold leading-none tracking-tight sm:text-[30px]"
+        style={{ color }}
+      >
         {value}
-        {suffix && <span className="ml-1 text-base font-medium text-slate-500">{suffix}</span>}
+        {suffix && (
+          <span className="ml-1 text-sm font-semibold">{suffix}</span>
+        )}
       </p>
     </div>
   );
-};
+}
 
-// ========================================
-// RECENT CALL ITEM COMPONENT
-// ========================================
-const RecentCallItem = ({ call }) => {
-  const name = call.customerName || "Unknown Client";
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .substring(0, 2)
-    .toUpperCase();
+function RecentCallItem({ call }) {
+  const name = call?.customerName || "Unknown Client";
+  const company = call?.customerCompany;
+  const status = getCallStatus(call);
 
-  const isMissed = ["missed", "failed", "busy", "cancelled"].includes(call.status);
-  const isConnected = call.connected;
+  const phoneNumber = call?.customerPhone || call?.toNumber || "";
+
+  const statusStyles = {
+    missed: {
+      label: "Missed call",
+      icon: PhoneMissed,
+      className: "bg-[#FDEAE7] text-[#D63C30]",
+    },
+    connected: {
+      label: "Connected",
+      icon: PhoneCall,
+      className: "bg-[#E4F5ED] text-[#16845B]",
+    },
+    pending: {
+      label: "Pending",
+      icon: Clock3,
+      className: "bg-[#FFF0E3] text-[#D96A12]",
+    },
+  };
+
+  const badge = statusStyles[status];
+  const StatusIcon = badge.icon;
 
   return (
-    <div className="group/item flex items-center justify-between border-b border-slate-100 py-3.5 px-3 transition-all duration-200 last:border-0 hover:bg-slate-50/80 hover:rounded-2xl">
-      {/* Left Side: Avatar & Details */}
-      <div className="flex items-center gap-3.5">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0A2E66] to-[#1c4b94] text-xs font-bold text-white shadow-sm shadow-blue-900/10">
-          {initials}
+    <article className="group flex min-w-0 items-center gap-3 rounded-2xl border border-[#E1E7F1] bg-white p-3 transition-all duration-200 hover:border-[#9AAAC4] hover:shadow-[0_5px_18px_rgba(10,46,102,0.06)] sm:gap-4 sm:p-4">
+      <div
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white sm:h-12 sm:w-12"
+        style={{
+          backgroundColor:
+            status === "missed"
+              ? "#B9580A"
+              : status === "connected"
+                ? "#31568C"
+                : "#7150D8",
+        }}
+      >
+        {getInitials(name)}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-1.5">
+          <h3 className="max-w-full truncate text-sm font-bold text-[#14213D] sm:text-base">
+            {name}
+          </h3>
+
+          {company && (
+            <span className="max-w-full truncate text-xs text-slate-500 sm:text-sm">
+              · {company}
+            </span>
+          )}
         </div>
 
-        <div>
-          <div className="flex items-center gap-2">
-            <h4 className="text-[14px] font-semibold text-slate-900 group-hover/item:text-[#0A2E66] transition-colors">{name}</h4>
-            {call.customerCompany && (
-              <span className="text-xs font-medium text-slate-400">· {call.customerCompany}</span>
-            )}
-          </div>
-          
-          <div className="mt-0.5 flex items-center gap-2 text-xs font-medium text-slate-500">
-            <span>{call.customerPhone || call.toNumber}</span>
-            <span>•</span>
-            <span>{isConnected ? "Connected" : call.status || "Follow-up"}</span>
-          </div>
+        <p className="mt-1 break-words text-xs leading-relaxed text-slate-500 sm:text-sm">
+          {phoneNumber || "No phone number"}
+          <span className="mx-1">·</span>
+          {call?.status || (call?.connected ? "Connected" : "Call activity")}
+          {call?.amount != null && ` · ${formatCurrency(call.amount)}`}
+        </p>
 
-          {/* Status Badge */}
-          <div className="mt-2">
-            {isMissed ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold text-rose-600 border border-rose-100/50">
-                <PhoneMissed size={11} />
-                Missed call
-              </span>
-            ) : isConnected ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600 border border-emerald-100/50">
-                <PhoneCall size={11} />
-                Connected
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-600 border border-amber-100/50">
-                <Clock size={11} />
-                Pending
-              </span>
-            )}
-          </div>
+        <div className="mt-2">
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${badge.className}`}
+          >
+            <StatusIcon size={12} />
+            {badge.label}
+          </span>
         </div>
       </div>
 
-      {/* Right Side: Action Buttons */}
-      <div className="flex items-center gap-2 opacity-90 transition-opacity group-hover/item:opacity-100">
-        <button 
-          title="Call client" 
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+      <div className="hidden shrink-0 items-center gap-2 sm:flex">
+        <a
+          href={phoneNumber ? `tel:${phoneNumber}` : undefined}
+          aria-label={`Call ${name}`}
+          title="Call client"
+          onClick={(event) => {
+            if (!phoneNumber) event.preventDefault();
+          }}
+          className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+            phoneNumber
+              ? "bg-[#E4F5ED] text-[#16845B] hover:bg-[#16845B] hover:text-white"
+              : "cursor-not-allowed bg-slate-100 text-slate-300"
+          }`}
         >
-          <Phone size={16} />
-        </button>
-        <button 
-          title="Send message" 
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-[#0A2E66] hover:bg-[#0A2E66] hover:text-white transition-all shadow-sm"
+          <Phone size={17} />
+        </a>
+
+        <button
+          type="button"
+          title="Message action not configured"
+          aria-label={`Message ${name}`}
+          disabled
+          className="flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-full bg-[#E4F5ED] text-[#16845B] opacity-70"
         >
-          <MessageCircle size={16} />
-        </button>
-        <button className="hidden sm:inline-flex items-center justify-center rounded-xl bg-[#0A2E66] px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#153f80] transition-all shadow-sm">
-          Log call
+          <MessageCircle size={17} />
         </button>
       </div>
-    </div>
+    </article>
   );
-};
+}
 
-// ========================================
-// MAIN COMPONENT
-// ========================================
 const DailyCall = () => {
   const { employee } = useSalesEmployeeStore();
 
@@ -145,164 +236,288 @@ const DailyCall = () => {
   const [stats, setStats] = useState(null);
   const [recentCalls, setRecentCalls] = useState([]);
 
-  async function fetchData() {
+  const employeeId = employee?.user?._id;
+
+  const fetchData = useCallback(async () => {
+    if (!employeeId) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      setLoading(true);
-      
-      const statsRes = await dailyCallStatsService(employee?.user?._id);
-      if (statsRes.success) {
-        setStats(statsRes.data);
+      const [statsResult, historyResult] = await Promise.allSettled([
+        dailyCallStatsService(employeeId),
+        axios.get("/api/calling/history?scope=self&limit=5"),
+      ]);
+
+      if (statsResult.status === "fulfilled" && statsResult.value?.success) {
+        setStats(statsResult.value.data || {});
+      } else if (statsResult.status === "rejected") {
+        console.error("Failed to fetch daily call statistics:", statsResult.reason);
+        toast.error("Unable to load daily call statistics");
       }
 
-      const historyRes = await axios.get(`/api/calling/history?scope=self&limit=5`);
-      if (historyRes.data.success) {
-        setRecentCalls(historyRes.data.data);
+      if (
+        historyResult.status === "fulfilled" &&
+        historyResult.value?.data?.success
+      ) {
+        setRecentCalls(historyResult.value.data.data || []);
+      } else if (historyResult.status === "rejected") {
+        console.error("Failed to fetch call history:", historyResult.reason);
+        toast.error("Unable to load recent calls");
       }
-    } catch (error) {
-      console.error(error);
-      toast.error("Error fetching daily call data");
     } finally {
       setLoading(false);
     }
-  }
+  }, [employeeId]);
 
   useEffect(() => {
-    if (employee?.user?._id) {
-      fetchData();
-    }
-  }, [employee?.user?._id]);
+    fetchData();
+  }, [fetchData]);
 
   if (loading) {
     return (
-      <section className="w-full rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-[0_10px_30px_rgba(10,46,102,0.04)] sm:p-8">
-        <div className="mb-7 flex items-center gap-4">
-          <Skeleton width={52} height={52} borderRadius={18} />
-          <div className="flex-1">
-            <Skeleton width={180} height={26} />
-            <div className="mt-2"><Skeleton width={120} height={16} /></div>
+      <section className="grid min-w-0 grid-cols-1 items-stretch gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)]">
+        <div className="rounded-[26px] border border-[#E1E7F1] bg-white p-5 shadow-sm sm:p-6">
+          <Skeleton width={210} height={28} />
+          <Skeleton width={170} height={18} className="mt-2" />
+
+          <div className="mt-6 space-y-3">
+            {[1, 2, 3, 4].map((item) => (
+              <Skeleton key={item} height={100} borderRadius={18} />
+            ))}
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map((item) => (
-            <Skeleton key={item} height={110} borderRadius={22} />
-          ))}
+
+        <div className="rounded-[26px] border border-[#E1E7F1] bg-white p-5 shadow-sm sm:p-6">
+          <Skeleton width={190} height={28} />
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map((item) => (
+              <Skeleton key={item} height={105} borderRadius={18} />
+            ))}
+          </div>
         </div>
-        <div className="mt-6"><Skeleton height={75} borderRadius={20} /></div>
       </section>
     );
   }
 
   const s = stats || {};
-  const totalCalls = s.totalCalls || 0;
-  const connectedCalls = s.connectedCalls || 0;
-  const missedCalls = s.missedCalls || 0;
-  const uniqueCustomerCount = s.uniqueCustomerCount || 0;
-  const totalTalkMinutes = s.totalTalkMinutes || 0;
-  const connectRate = s.connectRate || 0;
-  const inboundCalls = s.inboundCalls || 0;
-  const outboundCalls = s.outboundCalls || 0;
+
+  const totalCalls = Number(s.totalCalls || 0);
+  const connectedCalls = Number(s.connectedCalls || 0);
+  const missedCalls = Number(s.missedCalls || 0);
+  const uniqueCustomerCount = Number(s.uniqueCustomerCount || 0);
+  const totalTalkMinutes = Number(s.totalTalkMinutes || 0);
+  const connectRate = Number(s.connectRate || 0);
+  const inboundCalls = Number(s.inboundCalls || 0);
+  const outboundCalls = Number(s.outboundCalls || 0);
 
   const getCallInsight = () => {
-    if (totalCalls === 0) return "You haven't logged any calls today. Start connecting with your active client pipeline to drive conversions.";
-    if (connectRate >= 70) return <>Your connect rate is <strong className="font-bold text-[#0A2E66]">{connectRate}%</strong>. Exceptional performance! Keep up the momentum.</>;
-    if (connectRate >= 40) return <>Your connect rate is <strong className="font-bold text-[#0A2E66]">{connectRate}%</strong>. Consistent follow-ups will help boost your performance further.</>;
-    return <>Your connect rate is <strong className="font-bold text-[#0A2E66]">{connectRate}%</strong>. Consider optimizing your call timings for better engagement.</>;
+    if (totalCalls === 0) {
+      return "No calls have been recorded today. Start connecting with your clients to build momentum.";
+    }
+
+    if (connectRate >= 70) {
+      return `Your connect rate is ${connectRate}%. Excellent work—keep the momentum going.`;
+    }
+
+    if (connectRate >= 40) {
+      return `Your connect rate is ${connectRate}%. Consistent follow-ups can help improve engagement.`;
+    }
+
+    return `Your connect rate is ${connectRate}%. Consider reviewing your follow-up timing to improve engagement.`;
   };
 
   return (
-    <section className="group/card w-full min-w-0 overflow-hidden rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-[0_10px_30px_rgba(10,46,102,0.04)] transition-all duration-300 hover:shadow-[0_16px_40px_rgba(10,46,102,0.08)] sm:p-8">
-      
-      {/* HEADER */}
-      <div className="mb-7 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[18px] bg-gradient-to-br from-blue-50 to-orange-50 text-[#0A2E66] shadow-sm transition-transform duration-300 group-hover/card:scale-105">
-            <TrendingUp size={26} strokeWidth={2.2} />
+    <div className="space-y-5">
+      {/* Main calls section: wide activity list + narrow statistics panel */}
+      <section
+        aria-label="Daily call activity"
+        className="grid min-w-0 grid-cols-1 items-stretch gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)]"
+      >
+        {/* LEFT: Recent call list */}
+        <div className="flex min-w-0 flex-col rounded-[26px] border border-[#E1E7F1] bg-white p-4 shadow-[0_6px_24px_rgba(10,46,102,0.04)] sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <PanelHeader
+              icon={Phone}
+              title="Call activity"
+              subtitle={`${recentCalls.length} recent ${
+                recentCalls.length === 1 ? "call" : "calls"
+              }`}
+              iconColor="#16845B"
+            />
+
+            <span className="inline-flex items-center gap-2 rounded-full bg-[#E4F5ED] px-3 py-1.5 text-xs font-semibold text-[#16845B]">
+              <span className="h-2 w-2 rounded-full bg-[#16845B]" />
+              Today&apos;s activity
+            </span>
           </div>
-          <div>
-            <h2 className="font-serif text-[22px] font-bold leading-tight tracking-tight text-slate-900 sm:text-[26px]">
-              My Calls Today
-            </h2>
-            <p className="mt-0.5 text-sm font-medium text-slate-500">
-              {totalCalls} total calls logged today
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <span className="rounded-full bg-[#0A2E66] px-4 py-2 text-xs font-semibold text-white">
+              All <span className="ml-1 opacity-80">{recentCalls.length}</span>
+            </span>
+
+            <span className="rounded-full border border-[#E1E7F1] bg-white px-4 py-2 text-xs font-medium text-slate-600">
+              Missed{" "}
+              <span className="ml-1 font-semibold text-[#D63C30]">
+                {recentCalls.filter((call) => getCallStatus(call) === "missed").length}
+              </span>
+            </span>
+
+            <span className="rounded-full border border-[#E1E7F1] bg-white px-4 py-2 text-xs font-medium text-slate-600">
+              Connected{" "}
+              <span className="ml-1 font-semibold text-[#16845B]">
+                {recentCalls.filter((call) => getCallStatus(call) === "connected").length}
+              </span>
+            </span>
+          </div>
+
+          <div className="mt-4 flex-1 space-y-3">
+            {recentCalls.length > 0 ? (
+              recentCalls.map((call) => (
+                <RecentCallItem key={call._id} call={call} />
+              ))
+            ) : (
+              <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#D8E0ED] bg-[#F8FAFD] px-5 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF0FA] text-[#0A2E66]">
+                  <PhoneCall size={22} />
+                </div>
+
+                <p className="mt-3 font-semibold text-[#14213D]">
+                  No recent calls
+                </p>
+
+                <p className="mt-1 max-w-xs text-sm leading-relaxed text-slate-500">
+                  Recent call activity will appear here when available.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-5 flex items-start gap-3 rounded-2xl bg-[#F5F7FB] p-4">
+            <div className="mt-0.5 text-[#F27B1E]">
+              <Activity size={18} />
+            </div>
+
+            <p className="text-sm leading-relaxed text-slate-600">
+              Review recent activity and follow up with clients who need a
+              response.
             </p>
           </div>
         </div>
 
-        {/* Live Indicator Badge */}
-        <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3.5 py-1.5 border border-emerald-100">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-xs font-semibold text-emerald-700">Pipeline Active</span>
-        </div>
-      </div>
+        {/* RIGHT: Daily call statistics */}
+        <aside className="flex min-w-0 flex-col rounded-[26px] border border-[#E1E7F1] bg-white p-4 shadow-[0_6px_24px_rgba(10,46,102,0.04)] sm:p-6">
+          <PanelHeader
+            icon={TrendingUp}
+            title="My calls today"
+            subtitle={`${formatNumber(totalCalls)} calls so far`}
+            iconColor="#3767A6"
+          />
 
-      {/* KPI GRID SECTION */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Left Side: Call Metrics */}
-        <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
-          <StatCard title="Connected" value={connectedCalls} icon={PhoneCall} color="#10B981" background="#F0FDF4" />
-          <StatCard title="Missed" value={missedCalls} icon={PhoneMissed} color="#EF4444" background="#FEF2F2" />
-          <StatCard title="Clients" value={uniqueCustomerCount} icon={Users} color="#0A2E66" background="#F8FAFC" />
-          <StatCard title="Talk Time" value={totalTalkMinutes} suffix="m" icon={Clock} color="#8B5CF6" background="#F5F3FF" />
-        </div>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <MetricCard
+              title="Connected"
+              value={formatNumber(connectedCalls)}
+              icon={PhoneCall}
+              color="#16845B"
+              background="#E4F5ED"
+            />
 
-        {/* Right Side: Financial & Deal Widgets */}
-        <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
+            <MetricCard
+              title="Missed"
+              value={formatNumber(missedCalls)}
+              icon={PhoneMissed}
+              color="#D63C30"
+              background="#FDEAE7"
+            />
+
+            <MetricCard
+              title="Talk time"
+              value={formatNumber(totalTalkMinutes)}
+              suffix="m"
+              icon={Clock3}
+              color="#7050D8"
+              background="#F0EBFF"
+            />
+
+            <MetricCard
+              title="Connect rate"
+              value={formatNumber(connectRate)}
+              suffix="%"
+              icon={TrendingUp}
+              color="#3767A6"
+              background="#EAF0FA"
+            />
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-[#E8EDF5] bg-[#F7F8FC] p-4">
+            <div className="flex items-center gap-2">
+              <Users size={17} className="text-[#3767A6]" />
+
+              <span className="text-sm font-semibold text-[#14213D]">
+                Unique clients reached
+              </span>
+
+              <span className="ml-auto text-lg font-bold text-[#0A2E66]">
+                {formatNumber(uniqueCustomerCount)}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-2xl bg-[#F7F8FC] p-4">
+            <p className="text-sm leading-relaxed text-slate-600">
+              {getCallInsight()}
+            </p>
+          </div>
+
+          <div className="mt-auto grid grid-cols-2 gap-3 pt-5">
+            <div className="rounded-2xl border border-[#DCEFE5] bg-[#F6FBF8] p-3">
+              <div className="flex items-center gap-2 text-[#16845B]">
+                <ArrowDown size={16} />
+                <span className="text-xs font-semibold">Inbound</span>
+              </div>
+
+              <p className="mt-2 text-xl font-bold text-[#14213D]">
+                {formatNumber(inboundCalls)}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-[#F8E4D4] bg-[#FFFAF5] p-3">
+              <div className="flex items-center gap-2 text-[#D96A12]">
+                <PhoneOutgoing size={16} />
+                <span className="text-xs font-semibold">Outbound</span>
+              </div>
+
+              <p className="mt-2 text-xl font-bold text-[#14213D]">
+                {formatNumber(outboundCalls)}
+              </p>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      {/* Existing monthly financial/client widgets retained */}
+      <section
+        aria-label="Monthly sales summary"
+        className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"
+      >
+        <div className="min-w-0">
           <CurrentMonthDealValue />
+        </div>
+
+        <div className="min-w-0">
           <CurrentMonthRevenue />
-          <div className="col-span-2">
-            <TotalClientCount />
-          </div>
-        </div>
-      </div>
-
-      {/* INSIGHT BANNER */}
-      <div className="mt-5 flex min-h-[70px] items-center rounded-[20px] bg-slate-50/80 px-5 py-4 border border-slate-100">
-        <p className="text-[13px] leading-relaxed text-slate-600 sm:text-[14px]">
-          {getCallInsight()}
-        </p>
-      </div>
-
-      {/* RECENT CALLS LIST */}
-      {recentCalls.length > 0 && (
-        <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-[16px] font-bold text-slate-900">Recent Calls Activity</h3>
-            <span className="text-xs font-semibold text-[#F27B1E]">Latest 5 updates</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            {recentCalls.map((call) => (
-              <RecentCallItem key={call._id} call={call} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* INBOUND / OUTBOUND SUMMARY FOOTER */}
-      <div className="mt-6 flex items-center justify-between gap-4 border-t border-slate-100 pt-5">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100/50 shadow-sm">
-            <ArrowDown size={20} strokeWidth={2.5} />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Inbound Calls</p>
-            <p className="text-lg font-bold text-slate-900 sm:text-xl">{inboundCalls}</p>
-          </div>
         </div>
 
-        <div className="h-8 w-px bg-slate-200" />
-
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 border border-rose-100/50 shadow-sm">
-            <ArrowUp size={20} strokeWidth={2.5} />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Outbound Calls</p>
-            <p className="text-lg font-bold text-slate-900 sm:text-xl">{outboundCalls}</p>
-          </div>
+        <div className="min-w-0">
+          <TotalClientCount />
         </div>
-      </div>
-
-    </section>
+      </section>
+    </div>
   );
 };
 
