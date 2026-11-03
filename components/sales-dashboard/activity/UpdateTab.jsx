@@ -1,6 +1,5 @@
 // components/sales-dashboard/activity/UpdateTab.jsx
 
-//
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -8,7 +7,7 @@ import { callUpdatesService } from "@/service/sales-dashboard/activity";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Skeleton from "@/components/layout/Skeleton";
-import { Calendar, Clock, Phone, Users } from "lucide-react";
+import { Calendar, Clock, Phone, Users, ArrowUpRight } from "lucide-react";
 
 const UpdateTab = ({ userId }) => {
   const [updates, setUpdates] = useState([]);
@@ -33,7 +32,7 @@ const UpdateTab = ({ userId }) => {
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          "Error while fetching the updates",
+          "Error while fetching the updates"
       );
     } finally {
       setLoading(false);
@@ -84,7 +83,7 @@ const UpdateTab = ({ userId }) => {
     }
 
     router.push(
-      `/sales-dashboard/clients/${clientId}/${salesPersonId}?tab=meeting`,
+      `/sales-dashboard/clients/${clientId}/${salesPersonId}?tab=meeting`
     );
   };
 
@@ -99,7 +98,7 @@ const UpdateTab = ({ userId }) => {
     return (
       <div className="mt-4 space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="rounded-lg border bg-white p-4 shadow-sm">
+          <div key={i} className="rounded-2xl border border-slate-200/80 bg-white dark:bg-slate-900 dark:border-slate-800 p-5 shadow-sm">
             <Skeleton count={3} />
           </div>
         ))}
@@ -109,108 +108,124 @@ const UpdateTab = ({ userId }) => {
 
   if (!updates.length) {
     return (
-      <div className="flex h-40 items-center justify-center text-gray-500">
+      <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-medium text-sm">
         No updates found
       </div>
     );
   }
 
   return (
-    <div className="mt-4 grid h-[calc(100vh-220px)] grid-cols-1 gap-4 overflow-y-auto pb-4 pr-2 md:grid-cols-2 lg:grid-cols-3">
-      {updates.map((item) => (
-        <div
-          key={item._id}
-          role="link"
-          tabIndex={0}
-          aria-label={`View customer ${item?.client?.name || "details"}`}
-          onClick={() => handleClientClick(item)}
-          onKeyDown={(event) => handleCardKeyDown(event, item)}
-          className="cursor-pointer rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all duration-200 hover:border-blue-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div
-                className={`rounded-full p-2.5 ${
-                  item.updateType === "meeting"
-                    ? "bg-purple-100 text-purple-600"
-                    : "bg-blue-100 text-blue-600"
-                }`}
-              >
-                {item.updateType === "meeting" ? (
-                  <Users size={18} />
-                ) : (
-                  <Phone size={18} />
-                )}
-              </div>
+    <div className="mt-4 grid h-[calc(100vh-220px)] grid-cols-1 gap-4 overflow-y-auto pb-4 pr-2 md:grid-cols-2 lg:grid-cols-3 [scrollbar-width:thin]">
+      {updates.map((item) => {
+        const isMeeting = item.updateType === "meeting";
+        const isPositiveStatus = ["talk", "interested"].includes(item.status);
+        const isNegativeStatus = ["not-interested", "no-talk"].includes(item.status);
 
-              <div>
-                <h3 className="text-sm font-semibold text-gray-800">
-                  {item?.client?.name || "Unknown Client"}
-                </h3>
-
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span>{item?.client?.company || "No Company"}</span>
-                  <span>•</span>
-                  <span className="capitalize">
-                    {item?.updateType || "Update"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-end gap-1">
-              <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
-                  item.status === "talk" || item.status === "interested"
-                    ? "bg-green-100 text-green-700"
-                    : item.status === "not-interested" ||
-                        item.status === "no-talk"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-gray-100 text-gray-600"
-                }`}
-              >
-                {item?.status || "No Status"}
-              </span>
-
-              <span className="text-[10px] text-gray-400">
-                {formatDate(item?.createdAt)}
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-3 pl-[52px]">
-            {item?.note && (
-              <p className="mb-2 rounded-lg bg-gray-50 p-2.5 text-sm text-gray-600">
-                {item.note}
-              </p>
-            )}
-
-            <div className="mt-2 flex flex-wrap gap-3">
-              {item?.meetingAt && (
-                <div className="flex items-center gap-1.5 rounded-md bg-purple-50 px-2.5 py-1.5 text-xs font-medium text-purple-600">
-                  <Calendar size={14} />
-                  <span>Meeting: {formatDate(item.meetingAt)}</span>
-                </div>
-              )}
-
-              {item?.reminderAt && (
-                <div className="flex items-center gap-1.5 rounded-md bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-600">
-                  <Clock size={14} />
-                  <span>Reminder: {formatDate(item.reminderAt)}</span>
-
-                  <span
-                    className={`ml-1 ${
-                      item.reminderSent ? "text-green-600" : "text-gray-500"
+        return (
+          <div
+            key={item._id}
+            role="link"
+            tabIndex={0}
+            aria-label={`View customer ${item?.client?.name || "details"}`}
+            onClick={() => handleClientClick(item)}
+            onKeyDown={(event) => handleCardKeyDown(event, item)}
+            className="group/card relative flex flex-col justify-between cursor-pointer rounded-2xl border border-slate-200/80 bg-white dark:bg-slate-900 dark:border-slate-800 p-5 shadow-[0_4px_20px_rgba(10,46,102,0.03)] transition-all duration-300 hover:-translate-y-1 hover:border-[#0A2E66]/30 dark:hover:border-blue-500/30 hover:shadow-[0_10px_30px_rgba(10,46,102,0.08)] focus:outline-none focus:ring-2 focus:ring-[#0A2E66]"
+          >
+            <div>
+              {/* Header section */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover/card:scale-105 ${
+                      isMeeting
+                        ? "bg-purple-50 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400"
+                        : "bg-blue-50 text-[#0A2E66] dark:bg-blue-950/50 dark:text-blue-400"
                     }`}
                   >
-                    {item.reminderSent ? "(Sent)" : "(Pending)"}
-                  </span>
+                    {isMeeting ? <Users size={20} strokeWidth={2} /> : <Phone size={20} strokeWidth={2} />}
+                  </div>
+
+                  <div className="min-w-0">
+                    <h3 className="truncate text-base font-bold text-slate-900 dark:text-white group-hover/card:text-[#0A2E66] dark:group-hover/card:text-blue-400 transition-colors">
+                      {item?.client?.name || "Unknown Client"}
+                    </h3>
+
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                      <span className="truncate">{item?.client?.company || "No Company"}</span>
+                      <span>•</span>
+                      <span className="capitalize font-semibold text-slate-600 dark:text-slate-300">
+                        {item?.updateType || "Update"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 items-center justify-center h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-400 group-hover/card:bg-[#0A2E66] group-hover:text-white dark:group-hover/card:bg-blue-600 transition-all">
+                  <ArrowUpRight size={16} />
+                </div>
+              </div>
+
+              {/* Status & Timestamp */}
+              <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800/80 pt-3">
+                <span
+                  className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ${
+                    isPositiveStatus
+                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50"
+                      : isNegativeStatus
+                      ? "bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-100 dark:border-rose-900/50"
+                      : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  }`}
+                >
+                  {item?.status || "No Status"}
+                </span>
+
+                <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
+                  {formatDate(item?.createdAt)}
+                </span>
+              </div>
+
+              {/* Note section */}
+              {item?.note && (
+                <div className="mt-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 p-3.5 border border-slate-100 dark:border-slate-800">
+                  <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300 line-clamp-3">
+                    {item.note}
+                  </p>
                 </div>
               )}
             </div>
+
+            {/* Footer tags (Meeting & Reminder metadata) */}
+            {(item?.meetingAt || item?.reminderAt) && (
+              <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 dark:border-slate-800/80 pt-3.5">
+                {item?.meetingAt && (
+                  <div className="flex items-center gap-2 rounded-xl bg-purple-50/70 dark:bg-purple-950/30 px-3 py-2 text-xs font-semibold text-purple-700 dark:text-purple-300 border border-purple-100/60 dark:border-purple-900/40">
+                    <Calendar size={15} className="shrink-0 text-purple-500" />
+                    <span className="truncate">Meeting: {formatDate(item.meetingAt)}</span>
+                  </div>
+                )}
+
+                {item?.reminderAt && (
+                  <div className="flex items-center justify-between gap-2 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 px-3 py-2 text-xs font-semibold text-amber-700 dark:text-amber-300 border border-amber-100/60 dark:border-amber-900/40">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Clock size={15} className="shrink-0 text-amber-500" />
+                      <span className="truncate">Reminder: {formatDate(item.reminderAt)}</span>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                        item.reminderSent
+                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200"
+                          : "bg-amber-200/60 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200"
+                      }`}
+                    >
+                      {item.reminderSent ? "Sent" : "Pending"}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
