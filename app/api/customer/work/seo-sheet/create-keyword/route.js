@@ -7,13 +7,51 @@ import SeoSheet from "@/models/employee/seoEmployee/SeoSheet";
 import Customer from "@/models/admin/Customer";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { sendKeywordMail } from "@/lib/mail/keywordMailer";
+import { findDuplicateKeyword, normalizeKeywordText } from "@/lib/seo/keyword";
 
 export async function POST(req) {
   try {
     await connectDB();
     const { projectId, clientId, keyword, type } = await req.json();
 
-    const newKeyword = await Keyword.create({ keyword, type, projectId });
+    const cleanKeyword = normalizeKeywordText(keyword);
+    if (!cleanKeyword) {
+      return NextResponse.json(
+        { success: false, message: "Please enter a keyword" },
+        { status: 400 },
+      );
+    }
+
+    // Duplicate check (case/spacing-insensitive): a keyword already added
+    // for this client must not be added again, whoever adds it.
+    const sheet = clientId
+      ? await SeoSheet.findOne({ clientId }).select("keywords").lean()
+      : null;
+
+    const existingKeywords = sheet?.keywords?.length
+      ? await Keyword.find({ _id: { $in: sheet.keywords } })
+          .select("keyword")
+          .lean()
+      : projectId
+        ? await Keyword.find({ projectId }).select("keyword").lean()
+        : [];
+
+    const duplicate = findDuplicateKeyword(existingKeywords, cleanKeyword);
+    if (duplicate) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Keyword "${duplicate.keyword}" already exists for this client`,
+        },
+        { status: 409 },
+      );
+    }
+
+    const newKeyword = await Keyword.create({
+      keyword: cleanKeyword,
+      type,
+      projectId,
+    });
 
     await SeoSheet.findOneAndUpdate(
       { clientId },
