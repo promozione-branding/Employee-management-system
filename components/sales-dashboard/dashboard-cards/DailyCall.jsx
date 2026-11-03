@@ -107,24 +107,24 @@ const getCallDateKey = (call) => {
 
 function PanelHeader({ icon: Icon, title, subtitle, iconColor = NAVY }) {
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className="flex min-w-0 items-center gap-2.5">
       <div
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
         style={{
           backgroundColor: `${iconColor}14`,
           color: iconColor,
         }}
       >
-        <Icon size={20} strokeWidth={2.2} />
+        <Icon size={17} strokeWidth={2.2} />
       </div>
 
       <div className="min-w-0">
-        <h2 className="text-lg font-bold leading-tight text-[#14213D] sm:text-xl">
+        <h2 className="text-base font-bold leading-tight text-[#14213D] sm:text-lg">
           {title}
         </h2>
 
         {subtitle && (
-          <p className="mt-1 text-xs text-slate-500 sm:text-sm">{subtitle}</p>
+          <p className="text-[11px] text-slate-500 sm:text-xs">{subtitle}</p>
         )}
       </div>
     </div>
@@ -141,19 +141,22 @@ function MetricCard({
 }) {
   return (
     <div
-      className="flex min-h-[96px] min-w-0 flex-col justify-between rounded-2xl p-3 sm:p-4"
+      className="flex min-h-[64px] min-w-0 flex-col justify-between rounded-xl p-2.5 sm:p-3"
       style={{ backgroundColor: background }}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-semibold sm:text-sm" style={{ color }}>
+        <span
+          className="text-[11px] font-semibold sm:text-xs"
+          style={{ color }}
+        >
           {title}
         </span>
 
-        <Icon size={17} className="shrink-0" style={{ color }} />
+        <Icon size={15} className="shrink-0" style={{ color }} />
       </div>
 
       <p
-        className="mt-3 text-2xl font-bold leading-none tracking-tight sm:text-[28px]"
+        className="mt-1.5 text-xl font-bold leading-none tracking-tight sm:text-2xl"
         style={{ color }}
       >
         {value}
@@ -166,7 +169,8 @@ function MetricCard({
 
 function RecentCallItem({ call }) {
   const name = call?.customerName || "Unknown Client";
-  const company = call?.customerCompany;
+  const company =
+    call?.customerCompany || call?.company || call?.customer?.company || "";
   const status = getCallStatus(call);
 
   const phoneNumber =
@@ -197,10 +201,10 @@ function RecentCallItem({ call }) {
   const StatusIcon = badge.icon;
 
   return (
-    <article className="flex min-w-0 items-center gap-2.5 rounded-2xl border border-[#E1E7F1] bg-white px-3 py-3 transition-colors hover:border-[#A8B7CE] hover:bg-[#FCFDFF] sm:gap-3 sm:px-4">
+    <article className="flex min-w-0 items-center gap-2 rounded-xl border border-[#E1E7F1] bg-white px-2.5 py-2 transition-colors hover:border-[#A8B7CE] hover:bg-[#FCFDFF] sm:gap-2.5 sm:px-3">
       {/* Avatar */}
       <div
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white sm:h-11 sm:w-11 sm:text-sm"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white sm:text-xs"
         style={{ backgroundColor: badge.avatar }}
       >
         {getInitials(name)}
@@ -211,7 +215,7 @@ function RecentCallItem({ call }) {
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
           <h3
             title={name}
-            className="max-w-full truncate text-sm font-bold leading-tight text-[#14213D] sm:max-w-[190px] sm:text-base"
+            className="max-w-full truncate text-[13px] font-bold leading-tight text-[#14213D] sm:max-w-[170px] sm:text-sm"
           >
             {name}
           </h3>
@@ -219,23 +223,23 @@ function RecentCallItem({ call }) {
           {company && (
             <span
               title={company}
-              className="max-w-[130px] truncate text-xs text-slate-500"
+              className="max-w-[140px] truncate text-[11px] font-medium text-[#3767A6] sm:text-xs"
             >
-              {company}
+              · {company}
             </span>
           )}
         </div>
 
-        <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+        <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
           <span
             title={phoneNumber || "No phone number"}
-            className="max-w-full truncate text-xs text-slate-500 sm:text-sm"
+            className="max-w-full truncate text-[11px] text-slate-500 sm:text-xs"
           >
             {phoneNumber || "No phone number"}
           </span>
 
           <span
-            className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold sm:text-[11px] ${badge.className}`}
+            className={`inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${badge.className}`}
           >
             <StatusIcon size={11} />
             {badge.label}
@@ -250,7 +254,7 @@ function RecentCallItem({ call }) {
       </div>
 
       {/* Actions stay on the same row */}
-      <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
         <a
           href={phoneNumber ? `tel:${phoneNumber}` : undefined}
           aria-label={`Call ${name}`}
@@ -258,13 +262,13 @@ function RecentCallItem({ call }) {
           onClick={(event) => {
             if (!phoneNumber) event.preventDefault();
           }}
-          className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors sm:h-10 sm:w-10 ${
+          className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
             phoneNumber
               ? "bg-[#E4F5ED] text-[#16845B] hover:bg-[#16845B] hover:text-white"
               : "cursor-not-allowed bg-slate-100 text-slate-300"
           }`}
         >
-          <Phone size={16} />
+          <Phone size={14} />
         </a>
 
         <button
@@ -272,9 +276,9 @@ function RecentCallItem({ call }) {
           title="Message action not configured"
           aria-label={`Message ${name}`}
           disabled
-          className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-full bg-[#E4F5ED] text-[#16845B] opacity-70 sm:h-10 sm:w-10"
+          className="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-full bg-[#E4F5ED] text-[#16845B] opacity-70"
         >
-          <MessageCircle size={16} />
+          <MessageCircle size={14} />
         </button>
       </div>
     </article>
@@ -287,7 +291,7 @@ function CallFilterButton({ active, onClick, children }) {
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors sm:px-4 ${
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[11px] font-semibold transition-colors sm:px-3 sm:text-xs ${
         active
           ? "border-[#0A2E66] bg-[#0A2E66] text-white shadow-sm"
           : "border-[#E1E7F1] bg-white text-slate-600 hover:border-[#9AAAC4] hover:bg-slate-50"
@@ -485,25 +489,25 @@ const DailyCall = () => {
     return (
       <section
         aria-label="Loading daily call activity"
-        className="grid min-w-0 grid-cols-1 items-stretch gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)]"
+        className="grid min-w-0 grid-cols-1 items-stretch gap-4 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)]"
       >
-        <div className="rounded-[26px] border border-[#E1E7F1] bg-white p-5 shadow-sm sm:p-6">
-          <Skeleton width={210} height={28} />
-          <Skeleton width={170} height={18} className="mt-2" />
+        <div className="rounded-2xl border border-[#E1E7F1] bg-white p-4 shadow-sm">
+          <Skeleton width={210} height={24} />
+          <Skeleton width={170} height={16} className="mt-1" />
 
-          <div className="mt-6 space-y-3">
+          <div className="mt-4 grid gap-2 md:grid-cols-2">
             {[1, 2, 3, 4].map((item) => (
-              <Skeleton key={item} height={68} borderRadius={16} />
+              <Skeleton key={item} height={52} borderRadius={12} />
             ))}
           </div>
         </div>
 
-        <div className="rounded-[26px] border border-[#E1E7F1] bg-white p-5 shadow-sm sm:p-6">
-          <Skeleton width={190} height={28} />
+        <div className="rounded-2xl border border-[#E1E7F1] bg-white p-4 shadow-sm">
+          <Skeleton width={190} height={24} />
 
-          <div className="mt-6 grid grid-cols-2 gap-3">
+          <div className="mt-4 grid grid-cols-2 gap-2">
             {[1, 2, 3, 4].map((item) => (
-              <Skeleton key={item} height={96} borderRadius={18} />
+              <Skeleton key={item} height={64} borderRadius={12} />
             ))}
           </div>
         </div>
@@ -541,327 +545,326 @@ const DailyCall = () => {
   const hasDateFilter = Boolean(fromDate || toDate);
 
   return (
-    <div className="space-y-5">
-      <section
-        aria-label="Daily call activity"
-        className="grid min-w-0 grid-cols-1 items-stretch gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)]"
-      >
-        {/* LEFT: Compact call list */}
-        <div className="flex min-w-0 flex-col rounded-[26px] border border-[#E1E7F1] bg-white p-4 shadow-[0_6px_24px_rgba(10,46,102,0.04)] sm:p-5 lg:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <PanelHeader
-              icon={Phone}
-              title="Call activity"
-              subtitle={`${formatNumber(filteredCalls.length)} ${
-                filteredCalls.length === 1 ? "call" : "calls"
-              } found`}
-              iconColor="#16845B"
-            />
+    <section
+      aria-label="Daily call activity"
+      className="grid min-w-0 grid-cols-1 items-stretch gap-4 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)]"
+    >
+      {/* LEFT: Compact call list */}
+      <div className="flex min-w-0 flex-col rounded-2xl border border-[#E1E7F1] bg-white p-3 shadow-[0_6px_24px_rgba(10,46,102,0.04)] sm:p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <PanelHeader
+            icon={Phone}
+            title="Call activity"
+            subtitle={`${formatNumber(filteredCalls.length)} ${
+              filteredCalls.length === 1 ? "call" : "calls"
+            } found`}
+            iconColor="#16845B"
+          />
 
-            <button
-              type="button"
-              onClick={fetchData}
-              title="Refresh call activity"
-              className="inline-flex items-center gap-2 rounded-xl border border-[#E1E7F1] px-3 py-2 text-xs font-semibold text-[#0A2E66] transition hover:bg-[#F5F7FB]"
-            >
-              <RefreshCw size={14} />
-              Refresh
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={fetchData}
+            title="Refresh call activity"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E1E7F1] px-2.5 py-1.5 text-xs font-semibold text-[#0A2E66] transition hover:bg-[#F5F7FB]"
+          >
+            <RefreshCw size={14} />
+            Refresh
+          </button>
+        </div>
 
-          {/* Status filters */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <CallFilterButton
-              active={callFilter === "all"}
-              onClick={() => changeFilter("all")}
-            >
-              All
-              <span className="opacity-75">{dateFilteredCalls.length}</span>
-            </CallFilterButton>
+        {/* Status filters + date range share one toolbar row */}
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#E8EDF5] bg-[#F8FAFD] p-2">
+          <CallFilterButton
+            active={callFilter === "all"}
+            onClick={() => changeFilter("all")}
+          >
+            All
+            <span className="opacity-75">{dateFilteredCalls.length}</span>
+          </CallFilterButton>
 
-            <CallFilterButton
-              active={callFilter === "missed"}
-              onClick={() => changeFilter("missed")}
+          <CallFilterButton
+            active={callFilter === "missed"}
+            onClick={() => changeFilter("missed")}
+          >
+            <PhoneMissed size={13} />
+            Missed
+            <span
+              className={
+                callFilter === "missed" ? "opacity-75" : "text-[#D63C30]"
+              }
             >
-              <PhoneMissed size={13} />
-              Missed
-              <span
-                className={
-                  callFilter === "missed" ? "opacity-75" : "text-[#D63C30]"
-                }
+              {missedCount}
+            </span>
+          </CallFilterButton>
+
+          <CallFilterButton
+            active={callFilter === "connected"}
+            onClick={() => changeFilter("connected")}
+          >
+            <PhoneCall size={13} />
+            Connected
+            <span
+              className={
+                callFilter === "connected" ? "opacity-75" : "text-[#16845B]"
+              }
+            >
+              {connectedCount}
+            </span>
+          </CallFilterButton>
+
+          <span
+            aria-hidden="true"
+            className="hidden h-6 w-px bg-[#DCE3EF] lg:block"
+          />
+
+          {/* From / To date range, inline with the status filters */}
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#14213D] sm:text-xs">
+              <CalendarDays size={14} className="text-[#0A2E66]" />
+              Custom date range
+            </span>
+
+            <div className="flex min-w-0 items-center gap-1.5">
+              <label
+                htmlFor="daily-call-from-date"
+                className="whitespace-nowrap text-[11px] font-medium text-slate-500"
               >
-                {missedCount}
-              </span>
-            </CallFilterButton>
+                From
+              </label>
 
-            <CallFilterButton
-              active={callFilter === "connected"}
-              onClick={() => changeFilter("connected")}
-            >
-              <PhoneCall size={13} />
-              Connected
-              <span
-                className={
-                  callFilter === "connected" ? "opacity-75" : "text-[#16845B]"
-                }
-              >
-                {connectedCount}
-              </span>
-            </CallFilterButton>
-          </div>
-
-          {/* From / To date range */}
-          <div className="mt-4 rounded-2xl border border-[#E8EDF5] bg-[#F8FAFD] p-3 sm:p-4">
-            <div className="mb-3 flex items-center gap-2">
-              <CalendarDays size={16} className="text-[#0A2E66]" />
-              <span className="text-xs font-bold text-[#14213D] sm:text-sm">
-                Custom date range
-              </span>
+              <input
+                id="daily-call-from-date"
+                type="date"
+                value={fromDate}
+                max={toDate || undefined}
+                onChange={(event) => changeFromDate(event.target.value)}
+                className="w-[138px] min-w-0 rounded-lg border border-[#DCE3EF] bg-white px-2 py-1.5 text-xs text-slate-700 outline-none transition focus:border-[#0A2E66] focus:ring-2 focus:ring-[#0A2E66]/10"
+              />
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
-              <div className="min-w-0">
-                <label
-                  htmlFor="daily-call-from-date"
-                  className="mb-1.5 block text-xs font-medium text-slate-500"
-                >
-                  From date
-                </label>
+            <div className="flex min-w-0 items-center gap-1.5">
+              <label
+                htmlFor="daily-call-to-date"
+                className="whitespace-nowrap text-[11px] font-medium text-slate-500"
+              >
+                To
+              </label>
 
-                <input
-                  id="daily-call-from-date"
-                  type="date"
-                  value={fromDate}
-                  max={toDate || undefined}
-                  onChange={(event) => changeFromDate(event.target.value)}
-                  className="w-full min-w-0 rounded-xl border border-[#DCE3EF] bg-white px-2.5 py-2 text-sm text-slate-700 outline-none transition focus:border-[#0A2E66] focus:ring-2 focus:ring-[#0A2E66]/10 sm:px-3"
-                />
-              </div>
-
-              <div className="min-w-0">
-                <label
-                  htmlFor="daily-call-to-date"
-                  className="mb-1.5 block text-xs font-medium text-slate-500"
-                >
-                  To date
-                </label>
-
-                <input
-                  id="daily-call-to-date"
-                  type="date"
-                  value={toDate}
-                  min={fromDate || undefined}
-                  onChange={(event) => changeToDate(event.target.value)}
-                  className="w-full min-w-0 rounded-xl border border-[#DCE3EF] bg-white px-2.5 py-2 text-sm text-slate-700 outline-none transition focus:border-[#0A2E66] focus:ring-2 focus:ring-[#0A2E66]/10 sm:px-3"
-                />
-              </div>
-
-              {hasDateFilter && (
-                <button
-                  type="button"
-                  onClick={clearDateRange}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#F0D6D2] bg-white px-3 py-2 text-xs font-semibold text-[#D63C30] transition hover:bg-red-50"
-                >
-                  <X size={14} />
-                  Clear dates
-                </button>
-              )}
+              <input
+                id="daily-call-to-date"
+                type="date"
+                value={toDate}
+                min={fromDate || undefined}
+                onChange={(event) => changeToDate(event.target.value)}
+                className="w-[138px] min-w-0 rounded-lg border border-[#DCE3EF] bg-white px-2 py-1.5 text-xs text-slate-700 outline-none transition focus:border-[#0A2E66] focus:ring-2 focus:ring-[#0A2E66]/10"
+              />
             </div>
 
             {hasDateFilter && (
-              <p className="mt-3 text-xs leading-relaxed text-slate-500">
-                {fromDate && toDate
-                  ? `Showing calls from ${fromDate} through ${toDate}, inclusive.`
-                  : fromDate
-                    ? `Showing calls from ${fromDate} onward.`
-                    : `Showing calls through ${toDate}.`}
-              </p>
+              <button
+                type="button"
+                onClick={clearDateRange}
+                className="inline-flex items-center justify-center gap-1 rounded-lg border border-[#F0D6D2] bg-white px-2 py-1.5 text-[11px] font-semibold text-[#D63C30] transition hover:bg-red-50"
+              >
+                <X size={13} />
+                Clear dates
+              </button>
             )}
-          </div>
-
-          {/* Exactly four or fewer call items per page */}
-          <div className="mt-4 flex-1 space-y-2.5">
-            {visibleCalls.length > 0 ? (
-              visibleCalls.map((call, index) => (
-                <RecentCallItem
-                  key={
-                    call?._id ||
-                    `${getCallDateKey(call)}-${call?.customerPhone || call?.toNumber || "call"}-${index}`
-                  }
-                  call={call}
-                />
-              ))
-            ) : (
-              <div className="flex min-h-[160px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#D8E0ED] bg-[#F8FAFD] px-5 text-center">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#EAF0FA] text-[#0A2E66]">
-                  <PhoneCall size={21} />
-                </div>
-
-                <p className="mt-3 text-sm font-semibold text-[#14213D]">
-                  No calls found
-                </p>
-
-                <p className="mt-1 max-w-xs text-xs leading-relaxed text-slate-500">
-                  Try another status or date range to find call activity.
-                </p>
-
-                {(hasDateFilter || callFilter !== "all") && (
-                  <button
-                    type="button"
-                    onClick={resetFilters}
-                    className="mt-3 rounded-xl bg-[#0A2E66] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#153F80]"
-                  >
-                    Reset filters
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Pagination */}
-          {filteredCalls.length > 0 && (
-            <div className="mt-4 flex flex-col gap-3 border-t border-[#E8EDF5] pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-slate-500">
-                Showing{" "}
-                <span className="font-semibold text-[#14213D]">
-                  {firstVisibleCall}–{lastVisibleCall}
-                </span>{" "}
-                of{" "}
-                <span className="font-semibold text-[#14213D]">
-                  {filteredCalls.length}
-                </span>{" "}
-                calls
-              </p>
-
-              <div className="flex items-center justify-between gap-2 sm:justify-end">
-                <button
-                  type="button"
-                  onClick={() => goToCallPage(callPage - 1)}
-                  disabled={callPage === 0}
-                  className="inline-flex items-center gap-1 rounded-xl border border-[#DCE3EF] px-3 py-2 text-xs font-semibold text-[#0A2E66] transition hover:bg-[#F5F7FB] disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <ChevronLeft size={15} />
-                  Previous
-                </button>
-
-                <span className="whitespace-nowrap text-xs font-semibold text-slate-600">
-                  Page {callPage + 1} of {Math.max(1, totalCallPages)}
-                </span>
-
-                <button
-                  type="button"
-                  onClick={() => goToCallPage(callPage + 1)}
-                  disabled={callPage >= totalCallPages - 1}
-                  className="inline-flex items-center gap-1 rounded-xl bg-[#0A2E66] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#153F80] disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Next
-                  <ChevronRight size={15} />
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-[#F5F7FB] p-3">
-            <Activity size={17} className="mt-0.5 shrink-0 text-[#F27B1E]" />
-
-            <p className="text-xs leading-relaxed text-slate-600 sm:text-sm">
-              Review recent activity and follow up with clients who need a
-              response.
-            </p>
           </div>
         </div>
 
-        {/* RIGHT: Daily call statistics */}
-        <aside className="flex min-w-0 flex-col rounded-[26px] border border-[#E1E7F1] bg-white p-4 shadow-[0_6px_24px_rgba(10,46,102,0.04)] sm:p-5 lg:p-6">
-          <PanelHeader
-            icon={TrendingUp}
-            title="My calls today"
-            subtitle={`${formatNumber(totalCalls)} calls so far`}
-            iconColor="#3767A6"
-          />
+        {hasDateFilter && (
+          <p className="mt-1.5 text-[11px] leading-snug text-slate-500">
+            {fromDate && toDate
+              ? `Showing calls from ${fromDate} through ${toDate}, inclusive.`
+              : fromDate
+                ? `Showing calls from ${fromDate} onward.`
+                : `Showing calls through ${toDate}.`}
+          </p>
+        )}
 
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <MetricCard
-              title="Connected"
-              value={formatNumber(connectedCalls)}
-              icon={PhoneCall}
-              color="#16845B"
-              background="#E4F5ED"
-            />
+        {/* Exactly four or fewer call items per page, in two columns where wide enough */}
+        <div className="mt-3 grid flex-1 content-start gap-2 md:grid-cols-2">
+          {visibleCalls.length > 0 ? (
+            visibleCalls.map((call, index) => (
+              <RecentCallItem
+                key={
+                  call?._id ||
+                  `${getCallDateKey(call)}-${call?.customerPhone || call?.toNumber || "call"}-${index}`
+                }
+                call={call}
+              />
+            ))
+          ) : (
+            <div className="flex min-h-[96px] flex-col items-center justify-center rounded-xl border border-dashed border-[#D8E0ED] bg-[#F8FAFD] px-4 py-3 text-center md:col-span-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EAF0FA] text-[#0A2E66]">
+                <PhoneCall size={18} />
+              </div>
 
-            <MetricCard
-              title="Missed"
-              value={formatNumber(missedCalls)}
-              icon={PhoneMissed}
-              color="#D63C30"
-              background="#FDEAE7"
-            />
+              <p className="mt-2 text-sm font-semibold text-[#14213D]">
+                No calls found
+              </p>
 
-            <MetricCard
-              title="Talk time"
-              value={formatNumber(totalTalkMinutes)}
-              suffix="m"
-              icon={Clock3}
-              color="#7050D8"
-              background="#F0EBFF"
-            />
+              <p className="mt-0.5 max-w-xs text-xs leading-relaxed text-slate-500">
+                Try another status or date range to find call activity.
+              </p>
 
-            <MetricCard
-              title="Connect rate"
-              value={formatNumber(connectRate)}
-              suffix="%"
-              icon={TrendingUp}
-              color="#3767A6"
-              background="#EAF0FA"
-            />
-          </div>
+              {(hasDateFilter || callFilter !== "all") && (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="mt-2 rounded-lg bg-[#0A2E66] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#153F80]"
+                >
+                  Reset filters
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
-          <div className="mt-4 rounded-2xl border border-[#E8EDF5] bg-[#F7F8FC] p-3.5">
-            <div className="flex items-center gap-2">
-              <Users size={17} className="shrink-0 text-[#3767A6]" />
+        {/* Pagination */}
+        {filteredCalls.length > 0 && (
+          <div className="mt-3 flex flex-col gap-2 border-t border-[#E8EDF5] pt-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-slate-500">
+              Showing{" "}
+              <span className="font-semibold text-[#14213D]">
+                {firstVisibleCall}–{lastVisibleCall}
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-[#14213D]">
+                {filteredCalls.length}
+              </span>{" "}
+              calls
+            </p>
 
-              <span className="text-sm font-semibold text-[#14213D]">
-                Unique clients reached
+            <div className="flex items-center justify-between gap-2 sm:justify-end">
+              <button
+                type="button"
+                onClick={() => goToCallPage(callPage - 1)}
+                disabled={callPage === 0}
+                className="inline-flex items-center gap-1 rounded-lg border border-[#DCE3EF] px-2.5 py-1.5 text-xs font-semibold text-[#0A2E66] transition hover:bg-[#F5F7FB] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft size={15} />
+                Previous
+              </button>
+
+              <span className="whitespace-nowrap text-xs font-semibold text-slate-600">
+                Page {callPage + 1} of {Math.max(1, totalCallPages)}
               </span>
 
-              <span className="ml-auto text-lg font-bold text-[#0A2E66]">
-                {formatNumber(uniqueCustomerCount)}
-              </span>
+              <button
+                type="button"
+                onClick={() => goToCallPage(callPage + 1)}
+                disabled={callPage >= totalCallPages - 1}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0A2E66] px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-[#153F80] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+                <ChevronRight size={15} />
+              </button>
             </div>
           </div>
+        )}
 
-          <div className="mt-3 rounded-2xl bg-[#F7F8FC] p-3.5">
-            <p className="text-sm leading-relaxed text-slate-600">
-              {getCallInsight()}
+        <div className="mt-3 flex items-center gap-2 rounded-lg bg-[#F5F7FB] px-2.5 py-2">
+          <Activity size={15} className="shrink-0 text-[#F27B1E]" />
+
+          <p className="text-[11px] leading-snug text-slate-600 sm:text-xs">
+            Review recent activity and follow up with clients who need a
+            response.
+          </p>
+        </div>
+      </div>
+
+      {/* RIGHT: Daily call statistics */}
+      <aside className="flex min-w-0 flex-col rounded-2xl border border-[#E1E7F1] bg-white p-3 shadow-[0_6px_24px_rgba(10,46,102,0.04)] sm:p-4">
+        <PanelHeader
+          icon={TrendingUp}
+          title="My calls today"
+          subtitle={`${formatNumber(totalCalls)} calls so far`}
+          iconColor="#3767A6"
+        />
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <MetricCard
+            title="Connected"
+            value={formatNumber(connectedCalls)}
+            icon={PhoneCall}
+            color="#16845B"
+            background="#E4F5ED"
+          />
+
+          <MetricCard
+            title="Missed"
+            value={formatNumber(missedCalls)}
+            icon={PhoneMissed}
+            color="#D63C30"
+            background="#FDEAE7"
+          />
+
+          <MetricCard
+            title="Talk time"
+            value={formatNumber(totalTalkMinutes)}
+            suffix="m"
+            icon={Clock3}
+            color="#7050D8"
+            background="#F0EBFF"
+          />
+
+          <MetricCard
+            title="Connect rate"
+            value={formatNumber(connectRate)}
+            suffix="%"
+            icon={TrendingUp}
+            color="#3767A6"
+            background="#EAF0FA"
+          />
+        </div>
+
+        <div className="mt-2.5 rounded-xl border border-[#E8EDF5] bg-[#F7F8FC] px-3 py-2.5">
+          <div className="flex items-center gap-2">
+            <Users size={15} className="shrink-0 text-[#3767A6]" />
+
+            <span className="text-xs font-semibold text-[#14213D] sm:text-sm">
+              Unique clients reached
+            </span>
+
+            <span className="ml-auto text-base font-bold text-[#0A2E66]">
+              {formatNumber(uniqueCustomerCount)}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-2 rounded-xl bg-[#F7F8FC] px-3 py-2.5">
+          <p className="text-xs leading-snug text-slate-600">
+            {getCallInsight()}
+          </p>
+        </div>
+
+        <div className="mt-auto grid grid-cols-2 gap-2 pt-3">
+          <div className="rounded-xl border border-[#DCEFE5] bg-[#F6FBF8] p-2.5">
+            <div className="flex items-center gap-1.5 text-[#16845B]">
+              <ArrowDown size={14} />
+              <span className="text-[11px] font-semibold">Inbound</span>
+            </div>
+
+            <p className="mt-1 text-lg font-bold leading-tight text-[#14213D]">
+              {formatNumber(inboundCalls)}
             </p>
           </div>
 
-          <div className="mt-auto grid grid-cols-2 gap-3 pt-4">
-            <div className="rounded-2xl border border-[#DCEFE5] bg-[#F6FBF8] p-3">
-              <div className="flex items-center gap-2 text-[#16845B]">
-                <ArrowDown size={16} />
-                <span className="text-xs font-semibold">Inbound</span>
-              </div>
-
-              <p className="mt-2 text-xl font-bold text-[#14213D]">
-                {formatNumber(inboundCalls)}
-              </p>
+          <div className="rounded-xl border border-[#F8E4D4] bg-[#FFFAF5] p-2.5">
+            <div className="flex items-center gap-1.5 text-[#D96A12]">
+              <PhoneOutgoing size={14} />
+              <span className="text-[11px] font-semibold">Outbound</span>
             </div>
 
-            <div className="rounded-2xl border border-[#F8E4D4] bg-[#FFFAF5] p-3">
-              <div className="flex items-center gap-2 text-[#D96A12]">
-                <PhoneOutgoing size={16} />
-                <span className="text-xs font-semibold">Outbound</span>
-              </div>
-
-              <p className="mt-2 text-xl font-bold text-[#14213D]">
-                {formatNumber(outboundCalls)}
-              </p>
-            </div>
+            <p className="mt-1 text-lg font-bold leading-tight text-[#14213D]">
+              {formatNumber(outboundCalls)}
+            </p>
           </div>
-        </aside>
-      </section>
-    </div>
+        </div>
+      </aside>
+    </section>
   );
 };
 

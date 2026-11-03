@@ -5,6 +5,7 @@ import { connectDB } from "@/lib/db";
 import { getAuthUser } from "@/lib/getAuthUser";
 import CallLog from "@/models/employee/sales/CallLog";
 import Employee from "@/models/employee/Employee";
+import Customer from "@/models/admin/Customer";
 
 export async function GET(req) {
   try {
@@ -46,6 +47,23 @@ export async function GET(req) {
       .sort({ startedAt: -1 })
       .limit(limit)
       .lean();
+
+    // CallLog has no company field — attach each client's company name.
+    const customerIds = [
+      ...new Set(calls.map((c) => c.customerId?.toString()).filter(Boolean)),
+    ];
+    if (customerIds.length) {
+      const customers = await Customer.find({ _id: { $in: customerIds } })
+        .select("company")
+        .lean();
+      const companyById = new Map(
+        customers.map((c) => [c._id.toString(), c.company || ""]),
+      );
+      for (const call of calls) {
+        call.customerCompany =
+          companyById.get(call.customerId?.toString()) || "";
+      }
+    }
 
     return NextResponse.json({ success: true, data: calls });
   } catch (err) {
