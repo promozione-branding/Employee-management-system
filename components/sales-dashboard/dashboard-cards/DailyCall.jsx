@@ -24,6 +24,7 @@ import {
   CalendarDays,
   X,
   RefreshCw,
+  Search,
 } from "lucide-react";
 
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
@@ -91,6 +92,23 @@ const getCallDate = (call) => {
   const date = new Date(rawDate);
 
   return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatCallDateTime = (call) => {
+  const date = getCallDate(call);
+  if (!date) return "";
+
+  const day = date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+  });
+  const time = date.toLocaleTimeString("en-IN", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  return `${day}, ${time}`;
 };
 
 const getCallDateKey = (call) => {
@@ -238,6 +256,16 @@ function RecentCallItem({ call }) {
             {phoneNumber || "No phone number"}
           </span>
 
+          {formatCallDateTime(call) && (
+            <span
+              title={getCallDate(call)?.toLocaleString("en-IN")}
+              className="inline-flex shrink-0 items-center gap-1 text-[10px] font-medium text-slate-400 sm:text-[11px]"
+            >
+              <Clock3 size={10} />
+              {formatCallDateTime(call)}
+            </span>
+          )}
+
           <span
             className={`inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${badge.className}`}
           >
@@ -310,6 +338,7 @@ const DailyCall = () => {
   const [recentCalls, setRecentCalls] = useState([]);
 
   const [callFilter, setCallFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [callPage, setCallPage] = useState(0);
@@ -395,35 +424,47 @@ const DailyCall = () => {
     });
   }, [recentCalls, fromDate, toDate]);
 
+  // Then narrow by the search text (client name or company name).
+  const searchedCalls = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return dateFilteredCalls;
+
+    return dateFilteredCalls.filter((call) => {
+      const name = String(call?.customerName || "").toLowerCase();
+      const company = String(
+        call?.customerCompany || call?.company || call?.customer?.company || "",
+      ).toLowerCase();
+
+      return name.includes(query) || company.includes(query);
+    });
+  }, [dateFilteredCalls, searchQuery]);
+
   const missedCount = useMemo(
     () =>
-      dateFilteredCalls.filter((call) => getCallStatus(call) === "missed")
-        .length,
-    [dateFilteredCalls],
+      searchedCalls.filter((call) => getCallStatus(call) === "missed").length,
+    [searchedCalls],
   );
 
   const connectedCount = useMemo(
     () =>
-      dateFilteredCalls.filter((call) => getCallStatus(call) === "connected")
+      searchedCalls.filter((call) => getCallStatus(call) === "connected")
         .length,
-    [dateFilteredCalls],
+    [searchedCalls],
   );
 
   const filteredCalls = useMemo(() => {
     if (callFilter === "missed") {
-      return dateFilteredCalls.filter(
-        (call) => getCallStatus(call) === "missed",
-      );
+      return searchedCalls.filter((call) => getCallStatus(call) === "missed");
     }
 
     if (callFilter === "connected") {
-      return dateFilteredCalls.filter(
+      return searchedCalls.filter(
         (call) => getCallStatus(call) === "connected",
       );
     }
 
-    return dateFilteredCalls;
-  }, [dateFilteredCalls, callFilter]);
+    return searchedCalls;
+  }, [searchedCalls, callFilter]);
 
   const totalCallPages = Math.ceil(filteredCalls.length / CALLS_PER_PAGE);
 
@@ -472,8 +513,14 @@ const DailyCall = () => {
     setCallPage(0);
   };
 
+  const changeSearch = (value) => {
+    setSearchQuery(value);
+    setCallPage(0);
+  };
+
   const resetFilters = () => {
     setCallFilter("all");
+    setSearchQuery("");
     setFromDate("");
     setToDate("");
     setCallPage(0);
@@ -579,7 +626,7 @@ const DailyCall = () => {
             onClick={() => changeFilter("all")}
           >
             All
-            <span className="opacity-75">{dateFilteredCalls.length}</span>
+            <span className="opacity-75">{searchedCalls.length}</span>
           </CallFilterButton>
 
           <CallFilterButton
@@ -611,6 +658,34 @@ const DailyCall = () => {
               {connectedCount}
             </span>
           </CallFilterButton>
+
+          {/* Search by client name or company name */}
+          <div className="relative min-w-[150px] flex-1 sm:max-w-[210px]">
+            <Search
+              size={13}
+              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              id="daily-call-search"
+              type="search"
+              value={searchQuery}
+              onChange={(event) => changeSearch(event.target.value)}
+              placeholder="Search name / company"
+              aria-label="Search calls by client name or company name"
+              className="w-full min-w-0 rounded-full border border-[#E1E7F1] bg-white py-1.5 pl-7 pr-7 text-[11px] text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#0A2E66] focus:ring-2 focus:ring-[#0A2E66]/10 sm:text-xs [&::-webkit-search-cancel-button]:hidden"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => changeSearch("")}
+                aria-label="Clear search"
+                title="Clear search"
+                className="absolute right-1.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
 
           <span
             aria-hidden="true"
@@ -709,7 +784,7 @@ const DailyCall = () => {
                 Try another status or date range to find call activity.
               </p>
 
-              {(hasDateFilter || callFilter !== "all") && (
+              {(hasDateFilter || callFilter !== "all" || searchQuery) && (
                 <button
                   type="button"
                   onClick={resetFilters}
