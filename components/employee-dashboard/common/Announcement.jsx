@@ -1,3 +1,5 @@
+// components/employee-dashboard/common/Announcement.jsx
+
 "use client";
 
 import { useEffect, useState } from "react";

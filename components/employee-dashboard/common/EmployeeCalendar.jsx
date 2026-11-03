@@ -1,3 +1,5 @@
+// components/employee-dashboard/common/EmployeeCalendar.jsx
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";

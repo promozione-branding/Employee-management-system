@@ -1,3 +1,5 @@
+// components/layout/sales-dashboard/SalesSidebar.jsx
+
 "use client";
 
 import { useState } from "react";
