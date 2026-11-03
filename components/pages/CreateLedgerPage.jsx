@@ -16,7 +16,7 @@ import Loading from "../layout/Loading";
 const CreateLedger = ({ proposalId }) => {
   const [loadingForProposalInfo, setLoadingForProposalInfo] = useState(true);
   const [ledgerFormData, setLedgerFormData] = useState(
-    ledgerFormInitialFormData
+    ledgerFormInitialFormData,
   );
 
   const [proposalDetails, setProposalDetails] = useState(null);
@@ -47,7 +47,7 @@ const CreateLedger = ({ proposalId }) => {
       console.log(error);
       setLoadingForProposalInfo(true);
       toast.error(
-        error.message || "error while fetching the proposal Information"
+        error.message || "error while fetching the proposal Information",
       );
     }
   }
@@ -98,7 +98,7 @@ const CreateLedger = ({ proposalId }) => {
       !ledgerFormData?.credit
     ) {
       toast.error(
-        "Please fill at least one field: Opening Balance, Voucher, Debit, or Credit."
+        "Please fill at least one field: Opening Balance, Voucher, Debit, or Credit.",
       );
       return;
     }

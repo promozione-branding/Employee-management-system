@@ -20,13 +20,13 @@ export async function POST(req) {
           success: false,
           message: "User doesn't exist, please register.",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     const checkPasswordMatch = await bcrypt.compare(
       password,
-      checkUser?.password
+      checkUser?.password,
     );
 
     if (!checkPasswordMatch) {
@@ -35,7 +35,7 @@ export async function POST(req) {
           success: false,
           message: "Incorrect password! Please try again.",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -47,7 +47,7 @@ export async function POST(req) {
         username: checkUser.username,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "1d" },
     );
 
     const userResponse = {
@@ -77,7 +77,7 @@ export async function POST(req) {
         success: false,
         message: "An internal server error occurred.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

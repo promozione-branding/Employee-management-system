@@ -1,6 +1,5 @@
 // app/api/sales-dashboard/client/create/route.js
 
-
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
 import { NextResponse } from "next/server";
@@ -24,23 +23,20 @@ export async function POST(req) {
     if (!authUser) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const body = await req.json();
 
     // Only name and phone are required
-    if (
-      typeof body.name !== "string" ||
-      !body.name.trim()
-    ) {
+    if (typeof body.name !== "string" || !body.name.trim()) {
       return NextResponse.json(
         {
           success: false,
           message: "Please enter client name",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -52,7 +48,7 @@ export async function POST(req) {
           success: false,
           message: "Please enter a valid client phone number",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -71,7 +67,7 @@ export async function POST(req) {
             },
           ],
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -83,10 +79,7 @@ export async function POST(req) {
         : [];
 
     const salesExecutive = rawSalesExecutive
-      .filter(
-        (value) =>
-          typeof value === "string" && value.trim() !== ""
-      )
+      .filter((value) => typeof value === "string" && value.trim() !== "")
       .map((value) => value.trim());
 
     for (const employeeId of salesExecutive) {
@@ -96,7 +89,7 @@ export async function POST(req) {
             success: false,
             message: "Invalid sales employee ID",
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -113,7 +106,7 @@ export async function POST(req) {
             success: false,
             message: "Sales employee not found",
           },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -145,7 +138,7 @@ export async function POST(req) {
           success: false,
           message: "Invalid isPaid value",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -190,8 +183,7 @@ export async function POST(req) {
         await employee.save();
       } else {
         const alreadyAssigned = (salesEmployee.client || []).some(
-          (clientId) =>
-            clientId.toString() === client._id.toString()
+          (clientId) => clientId.toString() === client._id.toString(),
         );
 
         if (!alreadyAssigned) {
@@ -217,15 +209,12 @@ export async function POST(req) {
         message: "Client created successfully",
         data: client,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Create client error:", error);
 
-    if (
-      error.name === "ValidationError" ||
-      error.name === "CastError"
-    ) {
+    if (error.name === "ValidationError" || error.name === "CastError") {
       return NextResponse.json(
         {
           success: false,
@@ -243,7 +232,7 @@ export async function POST(req) {
                   },
                 ],
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -252,7 +241,7 @@ export async function POST(req) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

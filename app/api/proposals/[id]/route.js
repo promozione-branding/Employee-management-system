@@ -14,7 +14,9 @@ export async function GET(req, { params }) {
 
     const { id } = await params;
 
-    const proposal = await Proposal.findById(id).select("-ledgerEntry -discount -discountPercentage");
+    const proposal = await Proposal.findById(id).select(
+      "-ledgerEntry -discount -discountPercentage",
+    );
 
     if (!proposal) {
       return Response.json(
@@ -103,7 +105,7 @@ export async function DELETE(req, { params }) {
   }
 }
 
-// without history 
+// without history
 // export async function PUT(req, { params }) {
 //   try {
 //     await connectDB();
@@ -122,7 +124,6 @@ export async function DELETE(req, { params }) {
 //     delete body.proposalNo;
 //     delete body.createdAt;
 //     delete body.updatedAt;
-
 
 //     const updatedProposal = await Proposal.findByIdAndUpdate(
 //       id,
@@ -175,14 +176,14 @@ export async function PUT(req, { params }) {
     if (!authUser) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (!id) {
       return NextResponse.json(
         { success: false, message: "Proposal ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -196,7 +197,7 @@ export async function PUT(req, { params }) {
     if (!existingProposal) {
       return NextResponse.json(
         { success: false, message: "Proposal not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -206,7 +207,7 @@ export async function PUT(req, { params }) {
     const updatedProposal = await Proposal.findByIdAndUpdate(
       id,
       { $set: body },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     // 🆕 3. NEW DATA SNAPSHOT
@@ -236,7 +237,7 @@ export async function PUT(req, { params }) {
         message: "Proposal updated successfully",
         data: updatedProposal,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("UPDATE Proposal Error:", error);
@@ -246,7 +247,7 @@ export async function PUT(req, { params }) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

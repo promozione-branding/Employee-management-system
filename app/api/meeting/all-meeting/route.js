@@ -8,7 +8,7 @@ export async function GET(req) {
   try {
     await connectDB();
     const allMeetings = await Meeting.find().populate(
-      "meetingUpdate.salesPersonId"
+      "meetingUpdate.salesPersonId",
     );
 
     if (!allMeetings) {
@@ -19,7 +19,7 @@ export async function GET(req) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -29,7 +29,7 @@ export async function GET(req) {
         message: "get all meeting successfully",
         data: allMeetings,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log(error);

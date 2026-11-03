@@ -9,21 +9,21 @@ export async function createMeetingService(formData) {
 
 export async function clientMeetingHistory(id) {
   const { data } = await axiosInstance.get(
-    `/api/customer/meeting/meeting-history/${id}`
+    `/api/customer/meeting/meeting-history/${id}`,
   );
   return data;
 }
 
 export async function myClientMeetingHistory(customerId, salesPersonId) {
   const { data } = await axiosInstance.get(
-    `/api/customer/meeting/my-meeting-history/${customerId}?salesPersonId=${salesPersonId}`
+    `/api/customer/meeting/my-meeting-history/${customerId}?salesPersonId=${salesPersonId}`,
   );
   return data;
 }
 
 export async function checkNewMeetService(id) {
   const { data } = await axiosInstance.get(
-    `/api/customer/meeting/is-new-meeting-check/${id}`
+    `/api/customer/meeting/is-new-meeting-check/${id}`,
   );
   return data;
 }

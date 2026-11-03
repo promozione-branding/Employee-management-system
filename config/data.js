@@ -311,7 +311,6 @@ export const editFormControls = [
   },
 ];
 
-
 export const createInviceFormControls = [
   {
     label: "Invoice Type",
@@ -348,7 +347,6 @@ export const createInviceFormControls = [
     type: "date",
   },
 ];
-
 
 export const createServiceForInvoice = [
   {
@@ -758,7 +756,6 @@ export const attachmentFormControl = [
   },
 ];
 
-
 export const editProposalFormControl = [
   {
     label: "Customer Name",
@@ -802,5 +799,4 @@ export const editProposalFormControl = [
     componentType: "input",
     type: "date",
   },
-
 ];

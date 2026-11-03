@@ -21,7 +21,7 @@ const TotalClientCount = () => {
       const res = await totalClientCount(employee?._id);
       console.log(res);
       if (res.success) {
-        setCallData(res.client); 
+        setCallData(res.client);
       }
     } catch (error) {
       console.log(error);
@@ -52,7 +52,10 @@ const TotalClientCount = () => {
   }
 
   return (
-    <Link href={"/sales-dashboard/clients"}  className="bg-[#f3eaea] p-4 rounded-lg shadow-sm border border-gray-200 w-full h-full hover:shadow-md transition-shadow block">
+    <Link
+      href={"/sales-dashboard/clients"}
+      className="bg-[#f3eaea] p-4 rounded-lg shadow-sm border border-gray-200 w-full h-full hover:shadow-md transition-shadow block"
+    >
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">

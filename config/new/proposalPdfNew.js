@@ -174,7 +174,7 @@ export const INDUSTRIES_SERVED = [
   "Cybersecurity & Networking",
 
   // Business & Professional Services
-  
+
   "Real Estate & Infrastructure",
   "Corporate & Enterprise Services",
 
@@ -186,5 +186,4 @@ export const INDUSTRIES_SERVED = [
   "Cosmetics & Personal Care",
   "Fashion & Apparel",
   "Furniture & Interiors",
-
 ];

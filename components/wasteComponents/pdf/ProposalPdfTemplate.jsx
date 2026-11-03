@@ -27,7 +27,7 @@ const ProposalPdfTemplate = ({ data }) => {
   // Format the date for display
   const proposalDate = new Date(data.dateOfProposal).toLocaleDateString(
     "en-GB",
-    { day: "numeric", month: "long", year: "numeric" }
+    { day: "numeric", month: "long", year: "numeric" },
   );
 
   const formatIndianCurrency = (num) => {
@@ -97,7 +97,7 @@ const ProposalPdfTemplate = ({ data }) => {
   const discountShow = data.services.some(
     (service) =>
       (service.discountAmount !== null && service.discountAmount > 0) ||
-      (service.discountPercentage !== null && service.discountPercentage > 0)
+      (service.discountPercentage !== null && service.discountPercentage > 0),
   );
 
   // total Amount in words
@@ -165,8 +165,8 @@ const ProposalPdfTemplate = ({ data }) => {
                   ? formatIndianCurrency(service.discountAmount)
                   : service.discountPercentage && service.amount
                     ? formatIndianCurrency(
-                      (service.amount * service.discountPercentage) / 100
-                    )
+                        (service.amount * service.discountPercentage) / 100,
+                      )
                     : ""}
               </Text>
 
@@ -185,12 +185,12 @@ const ProposalPdfTemplate = ({ data }) => {
                 <Text style={styles.colAmt}>
                   {service?.discountAmount
                     ? formatIndianCurrency(
-                      service?.amount - service?.discountAmount
-                    )
+                        service?.amount - service?.discountAmount,
+                      )
                     : formatIndianCurrency(
-                      service?.amount -
-                      (service.amount * service.discountPercentage) / 100
-                    )}
+                        service?.amount -
+                          (service.amount * service.discountPercentage) / 100,
+                      )}
                 </Text>
               </View>
             </View>
@@ -284,8 +284,8 @@ const ProposalPdfTemplate = ({ data }) => {
           <Text>
             • All online content including text & pictures are to be provided by
             the client who should be the legal copyright owner of the same.
-            Inquiry Bazaar shall not be liable for any claims/damages
-            arising out of content posted on your catalog
+            Inquiry Bazaar shall not be liable for any claims/damages arising
+            out of content posted on your catalog
           </Text>
 
           <Text>
@@ -299,9 +299,8 @@ const ProposalPdfTemplate = ({ data }) => {
 
           <Text>
             • Pursuant to the approval of this proposal, The Customer hereby
-            allows Inquiry Bazaar Private Limited to make commercial calls
-            on its registered mobile number(s) and organization's contact
-            number(s
+            allows Inquiry Bazaar Private Limited to make commercial calls on
+            its registered mobile number(s) and organization's contact number(s
           </Text>
 
           <Text>
@@ -357,8 +356,8 @@ const ProposalPdfTemplate = ({ data }) => {
           }}
         >
           <Text style={{ marginTop: 8 }}>
-            Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi, 110034,
-            India
+            Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi,
+            110034, India
           </Text>
           <Text>CIN: U92112DL2024PTC432424</Text>
           <Text>011 42603232 • info@inquirybazaar.com</Text>
@@ -507,16 +506,16 @@ const ProposalPdfTemplate = ({ data }) => {
         {/* TERMS LIST */}
         <View style={styles.termsList}>
           <Text style={styles.termItem}>
-            1) Inquiry Bazaar Private Limited excludes any warranty,
-            express or implied, as to the quality, accuracy, timeliness,
-            completeness, performance, fitness, for a particular purpose of any
-            of its contents, hosted on any of Inquiry Bazaar Private
-            Limited servers, unless otherwise specified in writing.
+            1) Inquiry Bazaar Private Limited excludes any warranty, express or
+            implied, as to the quality, accuracy, timeliness, completeness,
+            performance, fitness, for a particular purpose of any of its
+            contents, hosted on any of Inquiry Bazaar Private Limited servers,
+            unless otherwise specified in writing.
           </Text>
 
           <Text style={styles.termItem}>
-            2) Inquiry Bazaar Private Limited will not be liable for any
-            damages (including, without limitation, damages for loss of business
+            2) Inquiry Bazaar Private Limited will not be liable for any damages
+            (including, without limitation, damages for loss of business
             projects, or loss of profits) arising in contract, tort or otherwise
             from the use of or inability to use any site or any of its contents.
           </Text>
@@ -553,9 +552,9 @@ const ProposalPdfTemplate = ({ data }) => {
           </Text>
 
           <Text style={styles.termItem}>
-            8) Inquiry Bazaar Private Limited may have an option to convert
-            your service to an annual service plan. If unable to pay the
-            outstanding amount, you may need to discontinue the service plan.
+            8) Inquiry Bazaar Private Limited may have an option to convert your
+            service to an annual service plan. If unable to pay the outstanding
+            amount, you may need to discontinue the service plan.
           </Text>
 
           <Text style={styles.termItem}>

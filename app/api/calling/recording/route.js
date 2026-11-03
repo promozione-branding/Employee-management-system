@@ -41,9 +41,7 @@ export async function GET(req) {
       );
     }
 
-    const emp = await Employee.findOne({ user: user._id })
-      .select("_id")
-      .lean();
+    const emp = await Employee.findOne({ user: user._id }).select("_id").lean();
 
     const isAdmin = ["ADMIN", "MANAGER", "SR_MANAGER"].includes(user.role);
 

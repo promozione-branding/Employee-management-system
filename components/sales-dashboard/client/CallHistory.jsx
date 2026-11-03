@@ -64,7 +64,7 @@ function mapLog(log) {
 const CallHistory = ({ calls = [] }) => {
   const [open, setOpen] = useState(true);
   const [expanded, setExpanded] = useState(null);
-  const [loadingId, setLoadingId] = useState(null);   // ← defined here
+  const [loadingId, setLoadingId] = useState(null); // ← defined here
 
   const rows = (calls || []).map(mapLog);
 
@@ -124,9 +124,7 @@ const CallHistory = ({ calls = [] }) => {
                   : isInbound
                     ? PhoneIncoming
                     : PhoneOutgoing;
-                const hasRecording = Boolean(
-                  call.recordingFile || call.callId,
-                );
+                const hasRecording = Boolean(call.recordingFile || call.callId);
                 const isLoading = loadingId === call.id;
 
                 return (

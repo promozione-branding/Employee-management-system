@@ -1,6 +1,5 @@
 // components/sales-dashboard/auth-role/executive/client/ExecutiveClientList.jsx
 
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -101,14 +100,12 @@ const ExecutiveClientList = () => {
         page,
         LIMIT,
         debouncedSearch,
-        isPaid
+        isPaid,
       );
 
       if (res?.success) {
         setCustomers(Array.isArray(res.data) ? res.data : []);
-        setTotalPages(
-          Math.max(1, res.pagination?.totalPages || 1)
-        );
+        setTotalPages(Math.max(1, res.pagination?.totalPages || 1));
       } else {
         setCustomers([]);
         setTotalPages(1);
@@ -117,9 +114,7 @@ const ExecutiveClientList = () => {
     } catch (error) {
       console.error("Fetch clients error:", error);
 
-      toast.error(
-        error.response?.data?.message || "Something went wrong"
-      );
+      toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       setClientLoading(false);
     }
@@ -165,9 +160,7 @@ const ExecutiveClientList = () => {
         res = await editCustomerServices(editingId, formData);
       } else {
         if (!employee?._id) {
-          toast.error(
-            "Unable to identify the logged-in sales executive"
-          );
+          toast.error("Unable to identify the logged-in sales executive");
           return;
         }
 
@@ -195,9 +188,7 @@ const ExecutiveClientList = () => {
           toast.error(err.message);
         });
       } else {
-        toast.error(
-          error.response?.data?.message || "Something went wrong"
-        );
+        toast.error(error.response?.data?.message || "Something went wrong");
       }
     }
   };
@@ -227,7 +218,7 @@ const ExecutiveClientList = () => {
   // Delete a client.
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this client?"
+      "Are you sure you want to delete this client?",
     );
 
     if (!confirmed) return;
@@ -249,9 +240,7 @@ const ExecutiveClientList = () => {
     } catch (error) {
       console.error("Delete client error:", error);
 
-      toast.error(
-        error.response?.data?.message || "Delete failed"
-      );
+      toast.error(error.response?.data?.message || "Delete failed");
     }
   };
 
@@ -318,9 +307,7 @@ const ExecutiveClientList = () => {
   const PaymentBadge = ({ paid }) => (
     <span
       className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-xs font-bold ${
-        paid
-          ? "bg-[#E5F5EC] text-[#17845A]"
-          : "bg-[#FFF4D9] text-[#B86A00]"
+        paid ? "bg-[#E5F5EC] text-[#17845A]" : "bg-[#FFF4D9] text-[#B86A00]"
       }`}
     >
       <span
@@ -453,19 +440,14 @@ const ExecutiveClientList = () => {
                   >
                     <td className="px-5 py-4">
                       <div className="flex min-w-[190px] items-center gap-3">
-                        <ClientAvatar
-                          name={customer.name}
-                          index={index}
-                        />
+                        <ClientAvatar name={customer.name} index={index} />
 
                         <div className="min-w-0">
                           <p className="truncate font-semibold text-[#0F1B33]">
                             {customer.name || "Unnamed client"}
                           </p>
 
-                          <p className="mt-1 text-xs text-[#8A92A6]">
-                            Client
-                          </p>
+                          <p className="mt-1 text-xs text-[#8A92A6]">Client</p>
                         </div>
                       </div>
                     </td>
@@ -585,10 +567,7 @@ const ExecutiveClientList = () => {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <ClientAvatar
-                    name={customer.name}
-                    index={index}
-                  />
+                  <ClientAvatar name={customer.name} index={index} />
 
                   <div className="min-w-0">
                     <h3 className="truncate font-bold text-[#0F1B33]">
@@ -606,10 +585,7 @@ const ExecutiveClientList = () => {
 
               <div className="mt-4 space-y-3 border-t border-[#E3E7F0] pt-4">
                 <div className="flex items-start gap-2 text-sm">
-                  <Phone
-                    size={16}
-                    className="mt-0.5 shrink-0 text-[#8A92A6]"
-                  />
+                  <Phone size={16} className="mt-0.5 shrink-0 text-[#8A92A6]" />
                   {customer.phone ? (
                     <a
                       href={`tel:${customer.phone}`}
@@ -618,9 +594,7 @@ const ExecutiveClientList = () => {
                       {customer.phone}
                     </a>
                   ) : (
-                    <span className="text-[#CC3B32]">
-                      Phone not provided
-                    </span>
+                    <span className="text-[#CC3B32]">Phone not provided</span>
                   )}
                 </div>
 
@@ -685,11 +659,7 @@ const ExecutiveClientList = () => {
         <SheetContent className="w-full overflow-y-auto border-l border-[#E3E7F0] bg-white p-5 sm:max-w-xl sm:p-7">
           <div className="mb-6 border-b border-[#E3E7F0] pb-5">
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FFF1E4] text-[#F27B1E]">
-              {editingId ? (
-                <SquarePen size={23} />
-              ) : (
-                <Plus size={24} />
-              )}
+              {editingId ? <SquarePen size={23} /> : <Plus size={24} />}
             </div>
 
             <h2 className="text-2xl font-bold text-[#0F1B33]">
@@ -717,20 +687,11 @@ const ExecutiveClientList = () => {
 };
 
 // Shared pagination component.
-const Pagination = ({
-  page,
-  totalPages,
-  loading,
-  onPrevious,
-  onNext,
-}) => (
+const Pagination = ({ page, totalPages, loading, onPrevious, onNext }) => (
   <footer className="flex flex-col gap-3 border-t border-[#E3E7F0] bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
     <p className="text-sm text-[#68738A]">
-      Page{" "}
-      <span className="font-semibold text-[#0F1B33]">{page}</span> of{" "}
-      <span className="font-semibold text-[#0F1B33]">
-        {totalPages}
-      </span>
+      Page <span className="font-semibold text-[#0F1B33]">{page}</span> of{" "}
+      <span className="font-semibold text-[#0F1B33]">{totalPages}</span>
     </p>
 
     <div className="flex items-center gap-2">

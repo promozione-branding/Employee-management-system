@@ -180,7 +180,7 @@ const Proposal = ({ customerId }) => {
       }
 
       const response = await createProposelService(propsalAllItemForm);
-     
+
       if (response.success) {
         toast.success("Proposal created successfully!");
         setFormData(initialPerposelFormData);

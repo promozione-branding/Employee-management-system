@@ -92,7 +92,9 @@ const ClientHistory = ({ customerId }) => {
             </div>
 
             <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
-              <p className="font-semibold text-sm text-gray-700 mb-2">Changes</p>
+              <p className="font-semibold text-sm text-gray-700 mb-2">
+                Changes
+              </p>
               <ul className="space-y-3">
                 {item.changes?.map((change) => (
                   <li key={change._id}>
@@ -101,12 +103,12 @@ const ClientHistory = ({ customerId }) => {
                         <p className="text-sm font-medium text-gray-700">
                           Entire record {item.action.toLowerCase()}d
                         </p>
-                        {change.newValue && typeof change.newValue === "object" ? (
+                        {change.newValue &&
+                        typeof change.newValue === "object" ? (
                           <div className="bg-green-50 border border-green-200 rounded p-2 space-y-1">
                             {Object.entries(change.newValue)
                               .filter(([key]) => !HIDDEN_ALL_FIELDS.has(key))
-                              .map(
-                              ([key, value]) => (
+                              .map(([key, value]) => (
                                 <div
                                   key={key}
                                   className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2 text-sm"
@@ -118,8 +120,7 @@ const ClientHistory = ({ customerId }) => {
                                     {renderValue(value)}
                                   </span>
                                 </div>
-                              ),
-                            )}
+                              ))}
                           </div>
                         ) : (
                           <span className="text-sm text-gray-700">

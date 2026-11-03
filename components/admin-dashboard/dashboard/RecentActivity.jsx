@@ -1,6 +1,5 @@
 // components/admin-dashboard/dashboard/RecentActivity.jsx
 
-
 "use client";
 
 // components/admin-dashboard/dashboard/RecentActivity.jsx
@@ -114,13 +113,11 @@ function RecentActivity() {
         sm:p-[22px]
       "
     >
-
       {/* ================================== */}
       {/* HEADER */}
       {/* ================================== */}
 
       <div className="mb-4 flex shrink-0 items-center gap-3">
-
         <div
           className="
             flex h-10 w-10
@@ -135,7 +132,6 @@ function RecentActivity() {
         </div>
 
         <div className="min-w-0">
-
           <h2
             className="
               font-serif
@@ -161,9 +157,7 @@ function RecentActivity() {
           >
             What&apos;s happening across the team
           </p>
-
         </div>
-
       </div>
 
       {/* ================================== */}
@@ -189,64 +183,35 @@ function RecentActivity() {
           [scrollbar-color:#DDE4EF_transparent]
         "
       >
-
         {/* LOADING STATE */}
 
         {loading ? (
-
           <div className="space-y-3 pt-1">
-
             {Array.from({ length: 5 }).map((_, index) => (
-
-              <div
-                key={index}
-                className="flex items-start gap-3 py-2"
-              >
-
-                <Skeleton
-                  circle
-                  height={40}
-                  width={40}
-                />
+              <div key={index} className="flex items-start gap-3 py-2">
+                <Skeleton circle height={40} width={40} />
 
                 <div className="min-w-0 flex-1 pt-1">
-
-                  <Skeleton
-                    height={14}
-                    width="85%"
-                  />
+                  <Skeleton height={14} width="85%" />
 
                   <div className="mt-2">
-                    <Skeleton
-                      height={12}
-                      width="45%"
-                    />
+                    <Skeleton height={12} width="45%" />
                   </div>
-
                 </div>
-
               </div>
-
             ))}
-
           </div>
-
         ) : activities.length > 0 ? (
-
           <div className="flex flex-col">
-
             {activities.slice(0, 10).map((activity, index) => {
-
               const style = activityStyles[activity.type] || {
                 icon: <Activity size={19} strokeWidth={1.8} />,
                 color: "bg-[#E5F5EC] text-[#16865D]",
               };
 
-              const isLast =
-                index === Math.min(activities.length, 10) - 1;
+              const isLast = index === Math.min(activities.length, 10) - 1;
 
               return (
-
                 <div
                   key={
                     activity.refId ??
@@ -261,7 +226,6 @@ function RecentActivity() {
                     py-[9px]
                   "
                 >
-
                   {/* TIMELINE ICON */}
 
                   <div
@@ -274,7 +238,6 @@ function RecentActivity() {
                       items-center
                     "
                   >
-
                     <div
                       className={`
                         flex
@@ -307,13 +270,11 @@ function RecentActivity() {
                         "
                       />
                     )}
-
                   </div>
 
                   {/* ACTIVITY DETAILS */}
 
                   <div className="min-w-0 flex-1 pt-[2px]">
-
                     <div
                       className="
                         flex
@@ -323,7 +284,6 @@ function RecentActivity() {
                         gap-y-1
                       "
                     >
-
                       <p
                         className="
                           break-words
@@ -358,13 +318,11 @@ function RecentActivity() {
                           New
                         </span>
                       )}
-
                     </div>
 
                     {/* TIMESTAMP */}
 
                     <div className="mt-[3px] flex items-center gap-1.5">
-
                       <Clock
                         size={12}
                         strokeWidth={1.8}
@@ -381,21 +339,13 @@ function RecentActivity() {
                       >
                         {formatActivityDate(activity.createdAt)}
                       </span>
-
                     </div>
-
                   </div>
-
                 </div>
-
               );
-
             })}
-
           </div>
-
         ) : (
-
           /* EMPTY STATE */
 
           <div
@@ -409,7 +359,6 @@ function RecentActivity() {
               text-center
             "
           >
-
             <div
               className="
                 mb-3
@@ -427,22 +376,20 @@ function RecentActivity() {
               No recent activity
             </h3>
 
-            <p className="
+            <p
+              className="
               mt-1
               max-w-[220px]
               text-[12px]
               leading-5
               text-[#64748B]
-            ">
+            "
+            >
               New workspace updates will appear here when available.
             </p>
-
           </div>
-
         )}
-
       </div>
-
     </section>
   );
 }

@@ -8,7 +8,6 @@ import SalesNavbar from "./SalesNavbar";
 
 const Layout = ({ children }) => {
   const [open, setOpen] = useState(true);
- 
 
   return (
     <div className="flex min-h-screen bg-gray-100">

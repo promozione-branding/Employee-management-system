@@ -158,7 +158,6 @@ const AllHistory = ({ customerId }) => {
         )}
       </div>
       <div className="shrink-0 py-2 border-t">
-      
         <Pagination
           currentPage={pagination.currentPage}
           totalPages={pagination.totalPages}

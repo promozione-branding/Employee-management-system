@@ -69,7 +69,8 @@ const CustomerTab = ({ employeeId }) => {
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 h-[calc(100vh-220px)] overflow-y-auto pb-4 pr-2">
       {clients.map((client) => (
-        <Link href={`/sales-dashboard/clients/69940a64f0b76fbee01408c3/${client._id}`}
+        <Link
+          href={`/sales-dashboard/clients/69940a64f0b76fbee01408c3/${client._id}`}
           key={client._id}
           className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between"
         >

@@ -22,7 +22,6 @@ import {
 } from "@/service/meeting";
 import { SalesPeopleMeetingService } from "@/service/customer";
 
-
 // Convert local date + "HH:mm" -> ISO string with browser tz offset.
 // Keeps DB instant correct (fixes "5:05 shows as 11:56" issues).
 const toLocalISO = (dateStr, timeStr) => {
@@ -178,7 +177,10 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       status: meetingForm?.status,
       note: meetingForm?.note,
       meetingAt: toLocalISO(meetingForm.meetingDate, meetingForm.meetingTime),
-      reminderAt: toLocalISO(meetingForm.reminderDate, meetingForm.reminderTime),
+      reminderAt: toLocalISO(
+        meetingForm.reminderDate,
+        meetingForm.reminderTime,
+      ),
     };
     if (!formData?.salesPersonId || !formData?.clientId) {
       toast.error("client id and salesPersonId not found");
@@ -220,7 +222,10 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       status: meetingForm?.status,
       note: meetingForm?.note,
       meetingAt: toLocalISO(meetingForm.meetingDate, meetingForm.meetingTime),
-      reminderAt: toLocalISO(meetingForm.reminderDate, meetingForm.reminderTime),
+      reminderAt: toLocalISO(
+        meetingForm.reminderDate,
+        meetingForm.reminderTime,
+      ),
     };
 
     if (!formData?.salesPersonId || !formData?.clientId) {
@@ -267,7 +272,10 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       updateType: "general",
       note: generalForm?.note,
       meetingAt: toLocalISO(generalForm.meetingDate, generalForm.meetingTime),
-      reminderAt: toLocalISO(generalForm.reminderDate, generalForm.reminderTime),
+      reminderAt: toLocalISO(
+        generalForm.reminderDate,
+        generalForm.reminderTime,
+      ),
     };
     if (!formData?.salesPersonId || !formData?.clientId) {
       toast.error("client id and salesPersonId not found");
@@ -307,7 +315,10 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
       updateType: "general",
       note: generalForm?.note,
       meetingAt: toLocalISO(generalForm.meetingDate, generalForm.meetingTime),
-      reminderAt: toLocalISO(generalForm.reminderDate, generalForm.reminderTime),
+      reminderAt: toLocalISO(
+        generalForm.reminderDate,
+        generalForm.reminderTime,
+      ),
     };
 
     if (!formData?.salesPersonId || !formData?.clientId) {
@@ -435,12 +446,12 @@ const MeetingDashboard = ({ customerId, salesPersonId }) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="talk">Talk</SelectItem>
-<SelectItem value="no-talk">No Talk</SelectItem>
-<SelectItem value="appointment">APPOINTMENT</SelectItem>
+                  <SelectItem value="no-talk">No Talk</SelectItem>
+                  <SelectItem value="appointment">APPOINTMENT</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-             
+
             <div className="flex flex-col gap-3">
               <Label>Note</Label>
               <Textarea

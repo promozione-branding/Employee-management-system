@@ -14,7 +14,7 @@ export async function GET(req) {
     if (!authUser)
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
 
     const { searchParams } = new URL(req.url);
@@ -22,7 +22,7 @@ export async function GET(req) {
     if (!clientId)
       return NextResponse.json(
         { success: false, message: "clientId required" },
-        { status: 400 }
+        { status: 400 },
       );
 
     const list = await ProposalNew.find({ clientId })
@@ -39,7 +39,7 @@ export async function GET(req) {
     console.log("listProposalNew error:", error);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -51,7 +51,7 @@ export async function POST(req) {
     if (!authUser)
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
 
     const body = await req.json();
@@ -73,30 +73,30 @@ export async function POST(req) {
     if (!clientId)
       return NextResponse.json(
         { success: false, message: "clientId required" },
-        { status: 400 }
+        { status: 400 },
       );
     if (!items.length)
       return NextResponse.json(
         { success: false, message: "At least one item required" },
-        { status: 400 }
+        { status: 400 },
       );
 
     if (Number(discountInput) < 0)
       return NextResponse.json(
         { success: false, message: "Discount cannot be negative" },
-        { status: 400 }
+        { status: 400 },
       );
 
     for (const p of partialPayments) {
       if (Number(p.paymentAmount) < 0)
         return NextResponse.json(
           { success: false, message: "Partial payment cannot be negative" },
-          { status: 400 }
+          { status: 400 },
         );
     }
 
     const subtotal = round0(
-      items.reduce((s, it) => s + Number(it.amount || 0), 0)
+      items.reduce((s, it) => s + Number(it.amount || 0), 0),
     );
 
     const discountAmount =
@@ -107,7 +107,7 @@ export async function POST(req) {
     if (discountAmount > subtotal) {
       return NextResponse.json(
         { success: false, message: "Discount cannot exceed subtotal" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -123,7 +123,7 @@ export async function POST(req) {
     const grandTotal = round0(baseAfterDiscount + gstAmount - tdsAmount);
 
     const totalPartial = round0(
-      partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0)
+      partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0),
     );
 
     if (totalPartial > grandTotal) {
@@ -132,7 +132,7 @@ export async function POST(req) {
           success: false,
           message: `Partial payments (₹${totalPartial}) exceed grand total (₹${grandTotal})`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -144,7 +144,7 @@ export async function POST(req) {
             grandTotal - totalPartial
           }`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -177,7 +177,7 @@ export async function POST(req) {
     console.log("createProposalNew error:", error);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

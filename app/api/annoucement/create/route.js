@@ -63,8 +63,7 @@ export async function POST(req) {
     return NextResponse.json(
       {
         success: false,
-        message:
-          error?.message || "Server error while creating announcement",
+        message: error?.message || "Server error while creating announcement",
       },
       { status: 500 },
     );

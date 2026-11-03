@@ -19,7 +19,6 @@ export async function getEmployeeBasicDetailsAdminService(id) {
   return data;
 }
 
-
 export async function resignedEmployeeAdminService(id) {
   const { data } = await axiosInstance.patch(
     `/api/employee/resign-delete-employee/${id}`,

@@ -20,7 +20,7 @@ import toast from "react-hot-toast";
 
 const AddEntries = ({ ledgerId, customerId, setOpen }) => {
   const [ledgerFormData, setLedgerFormData] = useState(
-    ledgerFormInitialFormData
+    ledgerFormInitialFormData,
   );
 
   const [globalEntries, setGlobalEntries] = useState([]);
@@ -36,7 +36,7 @@ const AddEntries = ({ ledgerId, customerId, setOpen }) => {
 
   const lastPaymentEntry = ledgerData?.ledger?.entries
     ?.filter((item) =>
-      ["upi", "card", "net banking", "cheque"].includes(item?.voucher)
+      ["upi", "card", "net banking", "cheque"].includes(item?.voucher),
     )
     .at(-1);
 
@@ -108,7 +108,7 @@ const AddEntries = ({ ledgerId, customerId, setOpen }) => {
       !ledgerFormData?.credit
     ) {
       toast.error(
-        "Please fill at least one field: Opening Balance, Voucher, Debit, or Credit."
+        "Please fill at least one field: Opening Balance, Voucher, Debit, or Credit.",
       );
       return;
     }
@@ -141,7 +141,7 @@ const AddEntries = ({ ledgerId, customerId, setOpen }) => {
       lastPaymentEntry?.debit === ledgerFormData?.debit
     ) {
       toast.error(
-        `The amount should be ${Number(lastPaymentEntry?.credit || 0)}`
+        `The amount should be ${Number(lastPaymentEntry?.credit || 0)}`,
       );
       return;
     }

@@ -42,9 +42,11 @@ const SeoSheet = ({ clientId }) => {
     const res = await getSeoSheetService(clientId);
 
     const sheet = res.data;
-    const newData = sheet.keywords.filter((i) => i.project?.employeeId?.some(
-      (id) => id.toString() === employee?._id?.toString()
-    ));
+    const newData = sheet.keywords.filter((i) =>
+      i.project?.employeeId?.some(
+        (id) => id.toString() === employee?._id?.toString(),
+      ),
+    );
 
     // console.log( sheet.keywords, employee)
     // 🧠 Extract all unique dates
@@ -102,7 +104,7 @@ const SeoSheet = ({ clientId }) => {
   }, [employee]);
 
   if (!data) return <p>Loading...</p>;
-  console.log(data)
+  console.log(data);
 
   const groupedData = data.reduce((acc, kw) => {
     const projectId = kw.projectId;
@@ -136,7 +138,7 @@ const SeoSheet = ({ clientId }) => {
       });
       if (res.success) {
         toast.success("Keyword create success");
-        setKeywords("")
+        setKeywords("");
         fetchData();
       }
     } catch (error) {
@@ -169,134 +171,119 @@ const SeoSheet = ({ clientId }) => {
         </thead>
 
         <tbody>
-          {Object.entries(groupedData).map(
-            ([projectId, projectData]) => (
-              <React.Fragment key={projectId}>
-                <tr className="bg-gray-100">
-                  <td colSpan={dates.length + 3}
-                    className="px-4 py-3 font-bold text-gray-800"
-                  >
-                    <div className="flex justify-between items-center">
-                      {projectData.projectName}
+          {Object.entries(groupedData).map(([projectId, projectData]) => (
+            <React.Fragment key={projectId}>
+              <tr className="bg-gray-100">
+                <td
+                  colSpan={dates.length + 3}
+                  className="px-4 py-3 font-bold text-gray-800"
+                >
+                  <div className="flex justify-between items-center">
+                    {projectData.projectName}
 
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <button className="p-1 bg-blue-500 text-white rounded">
-                            <Plus size={18} />
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="p-1 bg-blue-500 text-white rounded">
+                          <Plus size={18} />
+                        </button>
+                      </DialogTrigger>
+
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Add Your Keyword</DialogTitle>
+                        </DialogHeader>
+
+                        <div className="gap-3 mt-4 flex flex-col">
+                          <Label className="">Keyword</Label>
+                          <Input
+                            type="text"
+                            onChange={(e) => setKeywords(e.target.value)}
+                          />
+                        </div>
+
+                        <div>
+                          <button
+                            className="bg-black text-white rounded p-2 w-full"
+                            onClick={() => createKeywordHandle(projectId)}
+                          >
+                            Add
                           </button>
-                        </DialogTrigger>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </td>
+              </tr>
 
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>
-                              Add Your Keyword
-                            </DialogTitle>
-                          </DialogHeader>
+              {/* PROJECT KEYWORDS */}
+              {projectData.keywords.map((kw, index) => {
+                return (
+                  <tr key={kw._id} className="border px-5">
+                    <td className="border-r px-2">{index + 1}</td>
 
-                          <div className="gap-3 mt-4 flex flex-col">
-                            <Label className="">
-                              Keyword
-                            </Label>
-                            <Input
-                              type="text"
-                              onChange={(e) => setKeywords(e.target.value)}
-                            />
-                          </div>
-
-                          <div>
-                            <button className="bg-black text-white rounded p-2 w-full" onClick={() => createKeywordHandle(projectId)}>
-                              Add
-                            </button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </td>
-                </tr>
-
-                {/* PROJECT KEYWORDS */}
-                {projectData.keywords.map((kw, index) => {
-                  return (
-                    <tr key={kw._id} className="border px-5">
-                      <td className="border-r px-2">
-                        {index + 1}
-                      </td>
-
-                      <Dialog
-                        open={updatekeywordId === kw._id}
-                        onOpenChange={(open) =>
-                          !open && setUpdatekeywordId("")
-                        }
-                      >
-                        <DialogTrigger asChild>
-                          <td
-                            onClick={() =>
-                              setUpdatekeywordId(kw._id)
-                            }
-                            className={`border-r px-5 py-2 capitalize cursor-pointer ${kw.type === "primary"
+                    <Dialog
+                      open={updatekeywordId === kw._id}
+                      onOpenChange={(open) => !open && setUpdatekeywordId("")}
+                    >
+                      <DialogTrigger asChild>
+                        <td
+                          onClick={() => setUpdatekeywordId(kw._id)}
+                          className={`border-r px-5 py-2 capitalize cursor-pointer ${
+                            kw.type === "primary"
                               ? "font-bold text-blue-600"
                               : ""
-                              }`}
-                          >
-                            {kw.keyword}
-                          </td>
-                        </DialogTrigger>
+                          }`}
+                        >
+                          {kw.keyword}
+                        </td>
+                      </DialogTrigger>
 
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>
-                              Update Ranking
-                            </DialogTitle>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Update Ranking</DialogTitle>
 
-                            <DialogDescription>
-                              {kw.keyword}
-                            </DialogDescription>
-                          </DialogHeader>
+                          <DialogDescription>{kw.keyword}</DialogDescription>
+                        </DialogHeader>
 
-                          <div>
-                            <CommonForm
-                              formControls={
-                                updateRankingFormControls
-                              }
-                              formData={updateRankingFormData}
-                              setFormData={
-                                setUpdateRankingFormData
-                              }
-                              onSubmit={updateRankingHandler}
-                            />
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                        <div>
+                          <CommonForm
+                            formControls={updateRankingFormControls}
+                            formData={updateRankingFormData}
+                            setFormData={setUpdateRankingFormData}
+                            onSubmit={updateRankingHandler}
+                          />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
 
-                      {dates.map((date, i) => {
-                        const found = kw.rankings.find(
-                          (r) =>
-                            new Date(r.date).toDateString() ===
-                            date
-                        );
+                    {dates.map((date, i) => {
+                      const found = kw.rankings.find(
+                        (r) => new Date(r.date).toDateString() === date,
+                      );
 
-                        return (
-                          <td
-                            key={i}
-                            className={`px-2 text-center ${found ? "bg-red-100" : ""
-                              }`}
-                          >
-                            {found ? (
-                              <>
-                                {found.page} Page <br />
-                                {found.position} Position
-                              </>
-                            ) : (
-                              "-"
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-              </React.Fragment>
-            ))}
+                      return (
+                        <td
+                          key={i}
+                          className={`px-2 text-center ${
+                            found ? "bg-red-100" : ""
+                          }`}
+                        >
+                          {found ? (
+                            <>
+                              {found.page} Page <br />
+                              {found.position} Position
+                            </>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </React.Fragment>
+          ))}
         </tbody>
       </table>
     </div>

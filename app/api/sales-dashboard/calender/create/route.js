@@ -13,7 +13,7 @@ export async function POST(req) {
     if (!calendar || !calendar.title || !calendar.date) {
       return NextResponse.json(
         { success: false, message: "Invalid calendar data" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -21,7 +21,7 @@ export async function POST(req) {
     if (!employee) {
       return NextResponse.json(
         { success: false, message: "Employee not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -42,13 +42,13 @@ export async function POST(req) {
 
     return NextResponse.json(
       { success: true, message: "Calendar event added successfully" },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

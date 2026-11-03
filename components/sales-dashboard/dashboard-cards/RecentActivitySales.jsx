@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
@@ -45,7 +44,7 @@ const RecentActivitySales = () => {
         if (!cancelled) {
           toast.error(
             error?.response?.data?.message ||
-              "Error while fetching recent activity"
+              "Error while fetching recent activity",
           );
         }
       } finally {
@@ -122,9 +121,7 @@ const RecentActivitySales = () => {
               Recent Activity
             </h2>
 
-            <p className="mt-0.5 text-xs text-[#8A92A6]">
-              Your latest updates
-            </p>
+            <p className="mt-0.5 text-xs text-[#8A92A6]">Your latest updates</p>
           </div>
         </div>
 

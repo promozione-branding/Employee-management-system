@@ -615,7 +615,6 @@ export const announcementFormControls = [
 ];
 
 export const createKeyWordFormControls = [
- 
   {
     name: "keyword",
     label: "Keyword",
@@ -657,7 +656,6 @@ export const updateRankingFormControls = [
     placeholder: "Enter where Page of keyword ranks",
   },
 ];
-
 
 export const d2cWebsiteChecklistTemplate = [
   // 🔹 Strategy & Planning
@@ -1291,7 +1289,8 @@ export const b2bWebsiteChecklistTemplate = [
   // 🔹 Content & Trust
   {
     key: "homepage_messaging",
-    label: "Homepage clearly explains who you help, how, and why you're different",
+    label:
+      "Homepage clearly explains who you help, how, and why you're different",
     completed: false,
     completedAt: null,
     remarks: "",
@@ -1315,7 +1314,7 @@ export const b2bWebsiteChecklistTemplate = [
   },
   {
     key: "client_logos",
-    label: "\"Trusted by\" client logo section added",
+    label: '"Trusted by" client logo section added',
     completed: false,
     completedAt: null,
     remarks: "",

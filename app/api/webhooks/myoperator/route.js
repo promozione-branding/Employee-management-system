@@ -303,7 +303,12 @@ export async function POST(req) {
             systemUserId = emp?.user || null;
           }
 
-          console.log("[AUDIT DEBUG] Attempting to record call for client:", log.customerId, "Action:", action);
+          console.log(
+            "[AUDIT DEBUG] Attempting to record call for client:",
+            log.customerId,
+            "Action:",
+            action,
+          );
           await recordEdit({
             clientId: log.customerId,
             module: "call",
@@ -312,7 +317,7 @@ export async function POST(req) {
             summary,
             changes: [],
             actor: {
-              userId: systemUserId,          // <-- real User ID or null
+              userId: systemUserId, // <-- real User ID or null
               name: log.agentName || "System",
               email: log.agentEmail || "",
               role: "system",

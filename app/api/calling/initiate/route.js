@@ -65,7 +65,10 @@ export async function POST(req) {
     }
 
     // --- phone selection: primary, existing alternate, or auto-save valid new ---
-    const normalizeCmp = (n) => String(n || "").replace(/\D/g, "").slice(-10);
+    const normalizeCmp = (n) =>
+      String(n || "")
+        .replace(/\D/g, "")
+        .slice(-10);
     const requested = phone ? normalizeCmp(phone) : "";
     let dialNumber = customer.phone;
 

@@ -13,9 +13,7 @@ export async function employeeClientService(id) {
 export async function announcementService(designation) {
   const qs = new URLSearchParams();
   if (designation) qs.set("designation", designation);
-  const url = `/api/annoucement/get${
-    qs.toString() ? `?${qs.toString()}` : ""
-  }`;
+  const url = `/api/annoucement/get${qs.toString() ? `?${qs.toString()}` : ""}`;
   const { data } = await axiosInstance.get(url);
   return data;
 }

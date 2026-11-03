@@ -43,7 +43,6 @@ const AllHistory = ({ customerId }) => {
       icon: <Volleyball />,
       href: `/employee-dashboard/clients/history/team-update/${customerId}`,
     },
-
   ];
 
   return (

@@ -18,7 +18,10 @@ function getRange(preset, fromStr, toStr) {
       nowIST.getUTCFullYear(),
       nowIST.getUTCMonth(),
       nowIST.getUTCDate(),
-      0, 0, 0, 0,
+      0,
+      0,
+      0,
+      0,
     ),
   );
   const startOfTodayUTC = new Date(

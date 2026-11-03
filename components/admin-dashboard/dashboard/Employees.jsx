@@ -1,6 +1,5 @@
 // components/admin-dashboard/dashboard/Employees.jsx
 
-
 "use client";
 
 import { teamMemberService } from "@/service/admin-dashboard/dashboard-api";
@@ -76,19 +75,13 @@ const getDepartment = (designation = "") => {
 
   if (value.includes("sales")) return "sales";
 
-  if (
-    value.includes("web") ||
-    value.includes("developer")
-  ) {
+  if (value.includes("web") || value.includes("developer")) {
     return "web";
   }
 
   if (value.includes("seo")) return "seo";
 
-  if (
-    value.includes("ads") ||
-    value.includes("advertising")
-  ) {
+  if (value.includes("ads") || value.includes("advertising")) {
     return "ads";
   }
 
@@ -125,29 +118,21 @@ const Employees = () => {
       const res = await teamMemberService();
 
       if (res?.success) {
-        const formattedEmployees = (res?.data || []).map(
-          (employee, index) => ({
-            _id: employee?._id,
+        const formattedEmployees = (res?.data || []).map((employee, index) => ({
+          _id: employee?._id,
 
-            name:
-              employee?.basicDetails?.name || "Employee",
+          name: employee?.basicDetails?.name || "Employee",
 
-            designation:
-              employee?.basicDetails?.designation || "Employee",
+          designation: employee?.basicDetails?.designation || "Employee",
 
-            profileImage:
-              employee?.basicDetails?.profileImage || null,
+          profileImage: employee?.basicDetails?.profileImage || null,
 
-            // Use online status only if the API provides it.
-            isOnline:
-              employee?.isOnline ??
-              employee?.basicDetails?.isOnline ??
-              false,
+          // Use online status only if the API provides it.
+          isOnline:
+            employee?.isOnline ?? employee?.basicDetails?.isOnline ?? false,
 
-            avatarColor:
-              AVATAR_COLORS[index % AVATAR_COLORS.length],
-          })
-        );
+          avatarColor: AVATAR_COLORS[index % AVATAR_COLORS.length],
+        }));
 
         setEmployees(formattedEmployees);
       }
@@ -203,16 +188,11 @@ const Employees = () => {
       const department = getDepartment(employee.designation);
 
       const matchesDepartment =
-        activeDepartment === "all" ||
-        department === activeDepartment;
+        activeDepartment === "all" || department === activeDepartment;
 
       const matchesSearch =
-        employee.name
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        employee.designation
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase());
+        employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.designation.toLowerCase().includes(searchQuery.toLowerCase());
 
       return matchesDepartment && matchesSearch;
     });
@@ -256,7 +236,8 @@ const Employees = () => {
 
   if (loading) {
     return (
-      <section className="
+      <section
+        className="
         h-full min-w-0
         overflow-hidden
         rounded-[22px]
@@ -265,41 +246,32 @@ const Employees = () => {
         p-5
         shadow-[0_3px_12px_rgba(10,46,102,0.04)]
         sm:p-6
-      ">
-
+      "
+      >
         <div className="mb-6 flex items-center gap-3">
-
-          <Skeleton
-            height={40}
-            width={40}
-            borderRadius={12}
-          />
+          <Skeleton height={40} width={40} borderRadius={12} />
 
           <div>
             <Skeleton height={21} width={150} />
             <Skeleton height={14} width={190} />
           </div>
-
         </div>
 
         <div className="mb-5 flex gap-2">
           {[1, 2, 3, 4, 5].map((item) => (
-            <Skeleton
-              key={item}
-              height={33}
-              width={75}
-              borderRadius={30}
-            />
+            <Skeleton key={item} height={33} width={75} borderRadius={30} />
           ))}
         </div>
 
-        <div className="
+        <div
+          className="
           grid grid-cols-2
           gap-2.5
           sm:grid-cols-3
           lg:grid-cols-4
           2xl:grid-cols-6
-        ">
+        "
+        >
           {Array.from({ length: 12 }).map((_, index) => (
             <div
               key={index}
@@ -313,11 +285,7 @@ const Employees = () => {
             >
               <Skeleton circle height={52} width={52} />
 
-              <Skeleton
-                height={13}
-                width={85}
-                className="mt-3"
-              />
+              <Skeleton height={13} width={85} className="mt-3" />
 
               <Skeleton
                 height={21}
@@ -328,7 +296,6 @@ const Employees = () => {
             </div>
           ))}
         </div>
-
       </section>
     );
   }
@@ -338,7 +305,8 @@ const Employees = () => {
   // ========================================
 
   return (
-    <section className="
+    <section
+      className="
       h-full min-w-0
       overflow-hidden
       rounded-[22px]
@@ -349,60 +317,60 @@ const Employees = () => {
       transition-shadow duration-300
       hover:shadow-[0_8px_24px_rgba(10,46,102,0.07)]
       sm:p-[22px]
-    ">
-
+    "
+    >
       {/* ================================== */}
       {/* HEADER */}
       {/* ================================== */}
 
-      <div className="
+      <div
+        className="
         mb-5
         flex items-center
         justify-between gap-3
-      ">
-
+      "
+      >
         <div className="flex min-w-0 items-center gap-3">
-
           {/* Header icon */}
-          <div className="
+          <div
+            className="
             flex h-10 w-10
             shrink-0 items-center
             justify-center
             rounded-xl
             bg-[#FFF1E5]
             text-[#F27B1E]
-          ">
-            <UsersRound
-              size={20}
-              strokeWidth={1.9}
-            />
+          "
+          >
+            <UsersRound size={20} strokeWidth={1.9} />
           </div>
 
           {/* Heading */}
           <div className="min-w-0">
-
-            <h2 className="
+            <h2
+              className="
               font-serif
               text-[21px]
               font-bold
               leading-tight
               tracking-tight
               text-[#0A2E66]
-            ">
+            "
+            >
               Team members
             </h2>
 
-            <p className="
+            <p
+              className="
               mt-1
               text-[13px]
               leading-5
               text-[#56647D]
-            ">
+            "
+            >
               {onlineCount} online now, {employees.length} in the organization
             </p>
-
           </div>
-
         </div>
 
         {/* View all */}
@@ -426,42 +394,38 @@ const Employees = () => {
         >
           View all
         </Link>
-
       </div>
 
       {/* ================================== */}
       {/* FILTERS + SEARCH */}
       {/* ================================== */}
 
-      <div className="
+      <div
+        className="
         mb-[17px]
         flex flex-col
         gap-3
         xl:flex-row
         xl:items-center
         xl:justify-between
-      ">
-
+      "
+      >
         {/* Department filters */}
-        <div className="
+        <div
+          className="
           flex min-w-0
           flex-wrap items-center
           gap-1.5
-        ">
-
+        "
+        >
           {filters.map((filter) => {
-
-            const isActive =
-              activeDepartment === filter.id;
+            const isActive = activeDepartment === filter.id;
 
             return (
-
               <button
                 key={filter.id}
                 type="button"
-                onClick={() =>
-                  setActiveDepartment(filter.id)
-                }
+                onClick={() => setActiveDepartment(filter.id)}
                 aria-pressed={isActive}
                 className={`
                   inline-flex h-[33px]
@@ -484,32 +448,28 @@ const Employees = () => {
               >
                 <span>{filter.label}</span>
 
-                <span className={`
+                <span
+                  className={`
                   text-[11px]
-                  ${
-                    isActive
-                      ? "text-[#D5E1F4]"
-                      : "text-[#8491A8]"
-                  }
-                `}>
+                  ${isActive ? "text-[#D5E1F4]" : "text-[#8491A8]"}
+                `}
+                >
                   {filter.count}
                 </span>
-
               </button>
-
             );
           })}
-
         </div>
 
         {/* Search */}
-        <div className="
+        <div
+          className="
           relative
           w-full
           xl:w-[220px]
           xl:shrink-0
-        ">
-
+        "
+        >
           <Search
             size={16}
             className="
@@ -524,9 +484,7 @@ const Employees = () => {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) =>
-              setSearchQuery(e.target.value)
-            }
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Find a teammate"
             aria-label="Find a teammate"
             className="
@@ -546,9 +504,7 @@ const Employees = () => {
               focus:ring-[#376BB5]/10
             "
           />
-
         </div>
-
       </div>
 
       {/* ================================== */}
@@ -556,21 +512,18 @@ const Employees = () => {
       {/* ================================== */}
 
       {filteredEmployees.length > 0 ? (
-
-        <div className="
+        <div
+          className="
           grid
           grid-cols-2
           gap-2.5
           sm:grid-cols-3
           lg:grid-cols-4
           2xl:grid-cols-6
-        ">
-
+        "
+        >
           {filteredEmployees.map((employee) => {
-
-            const department = getDepartment(
-              employee.designation
-            );
+            const department = getDepartment(employee.designation);
 
             const badge = DEPARTMENTS[department];
 
@@ -580,7 +533,6 @@ const Employees = () => {
                 : `/dashboard/employee/employee-details/${employee._id}`;
 
             return (
-
               <Link
                 href={employeeHref}
                 key={employee._id}
@@ -607,7 +559,6 @@ const Employees = () => {
                   focus-visible:ring-offset-2
                 "
               >
-
                 {/* Online status */}
                 <span
                   className={`
@@ -616,17 +567,9 @@ const Employees = () => {
                     h-[10px] w-[10px]
                     rounded-full
                     border border-white
-                    ${
-                      employee.isOnline
-                        ? "bg-[#16865D]"
-                        : "bg-[#C9CED9]"
-                    }
+                    ${employee.isOnline ? "bg-[#16865D]" : "bg-[#C9CED9]"}
                   `}
-                  title={
-                    employee.isOnline
-                      ? "Online"
-                      : "Offline"
-                  }
+                  title={employee.isOnline ? "Online" : "Offline"}
                 />
 
                 {/* Avatar */}
@@ -649,9 +592,7 @@ const Employees = () => {
                     backgroundColor: employee.avatarColor,
                   }}
                 >
-
                   {employee.profileImage ? (
-
                     <Image
                       src={employee.profileImage}
                       alt={employee.name}
@@ -664,24 +605,23 @@ const Employees = () => {
                         group-hover:scale-110
                       "
                     />
-
                   ) : (
-
-                    <span className="
+                    <span
+                      className="
                       text-[17px]
                       font-bold
                       tracking-tight
                       text-white
-                    ">
+                    "
+                    >
                       {getInitials(employee.name)}
                     </span>
-
                   )}
-
                 </div>
 
                 {/* Employee name */}
-                <h3 className="
+                <h3
+                  className="
                   w-full
                   truncate
                   px-1
@@ -691,7 +631,8 @@ const Employees = () => {
                   text-[#0F1B33]
                   transition-colors
                   group-hover:text-[#0A2E66]
-                ">
+                "
+                >
                   {employee.name}
                 </h3>
 
@@ -715,21 +656,17 @@ const Employees = () => {
                 >
                   {badge.label}
                 </span>
-
               </Link>
-
             );
           })}
-
         </div>
-
       ) : (
-
         /* ================================== */
         /* EMPTY STATE */
         /* ================================== */
 
-        <div className="
+        <div
+          className="
           flex min-h-[190px]
           flex-col
           items-center
@@ -740,35 +677,41 @@ const Employees = () => {
           bg-[#F7F8FC]
           px-4 py-8
           text-center
-        ">
-
-          <div className="
+        "
+        >
+          <div
+            className="
             mb-3
             flex h-12 w-12
             items-center justify-center
             rounded-2xl
             bg-[#FFF1E5]
             text-[#F27B1E]
-          ">
+          "
+          >
             <UsersRound size={23} />
           </div>
 
-          <h3 className="
+          <h3
+            className="
             text-sm font-semibold
             text-[#0A2E66]
-          ">
+          "
+          >
             {searchQuery || activeDepartment !== "all"
               ? "No matching teammates"
               : "No team members found"}
           </h3>
 
-          <p className="
+          <p
+            className="
             mt-1
             max-w-xs
             text-xs
             leading-5
             text-[#8491A8]
-          ">
+          "
+          >
             {searchQuery || activeDepartment !== "all"
               ? "Try another search or select a different department."
               : "Employee profiles will appear here once team members are available."}
@@ -819,11 +762,8 @@ const Employees = () => {
               <ArrowUpRight size={14} />
             </Link>
           )}
-
         </div>
-
       )}
-
     </section>
   );
 };

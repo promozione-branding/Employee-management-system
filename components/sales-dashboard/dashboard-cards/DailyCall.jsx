@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -32,8 +31,7 @@ const NAVY = "#0A2E66";
 const ORANGE = "#F27B1E";
 const CALLS_PER_PAGE = 4;
 
-const formatNumber = (value) =>
-  Number(value || 0).toLocaleString("en-IN");
+const formatNumber = (value) => Number(value || 0).toLocaleString("en-IN");
 
 const formatCurrency = (value) =>
   `₹${Number(value || 0).toLocaleString("en-IN")}`;
@@ -105,12 +103,7 @@ const getCallDateKey = (call) => {
   return `${year}-${month}-${day}`;
 };
 
-function PanelHeader({
-  icon: Icon,
-  title,
-  subtitle,
-  iconColor = NAVY,
-}) {
+function PanelHeader({ icon: Icon, title, subtitle, iconColor = NAVY }) {
   return (
     <div className="flex min-w-0 items-center gap-3">
       <div
@@ -129,9 +122,7 @@ function PanelHeader({
         </h2>
 
         {subtitle && (
-          <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-            {subtitle}
-          </p>
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">{subtitle}</p>
         )}
       </div>
     </div>
@@ -152,10 +143,7 @@ function MetricCard({
       style={{ backgroundColor: background }}
     >
       <div className="flex items-center justify-between gap-2">
-        <span
-          className="text-xs font-semibold sm:text-sm"
-          style={{ color }}
-        >
+        <span className="text-xs font-semibold sm:text-sm" style={{ color }}>
           {title}
         </span>
 
@@ -168,9 +156,7 @@ function MetricCard({
       >
         {value}
 
-        {suffix && (
-          <span className="ml-1 text-sm font-semibold">{suffix}</span>
-        )}
+        {suffix && <span className="ml-1 text-sm font-semibold">{suffix}</span>}
       </p>
     </div>
   );
@@ -182,10 +168,7 @@ function RecentCallItem({ call }) {
   const status = getCallStatus(call);
 
   const phoneNumber =
-    call?.customerPhone ||
-    call?.toNumber ||
-    call?.fromNumber ||
-    "";
+    call?.customerPhone || call?.toNumber || call?.fromNumber || "";
 
   const statusStyles = {
     missed: {
@@ -347,17 +330,14 @@ const DailyCall = () => {
         }),
       ]);
 
-      if (
-        statsResult.status === "fulfilled" &&
-        statsResult.value?.success
-      ) {
+      if (statsResult.status === "fulfilled" && statsResult.value?.success) {
         setStats(statsResult.value.data || {});
       } else {
         console.error(
           "Failed to fetch daily call statistics:",
           statsResult.status === "rejected"
             ? statsResult.reason
-            : statsResult.value
+            : statsResult.value,
         );
 
         toast.error("Unable to load daily call statistics");
@@ -375,7 +355,7 @@ const DailyCall = () => {
           "Failed to fetch call history:",
           historyResult.status === "rejected"
             ? historyResult.reason
-            : historyResult.value
+            : historyResult.value,
         );
 
         toast.error("Unable to load recent calls");
@@ -411,57 +391,48 @@ const DailyCall = () => {
 
   const missedCount = useMemo(
     () =>
-      dateFilteredCalls.filter(
-        (call) => getCallStatus(call) === "missed"
-      ).length,
-    [dateFilteredCalls]
+      dateFilteredCalls.filter((call) => getCallStatus(call) === "missed")
+        .length,
+    [dateFilteredCalls],
   );
 
   const connectedCount = useMemo(
     () =>
-      dateFilteredCalls.filter(
-        (call) => getCallStatus(call) === "connected"
-      ).length,
-    [dateFilteredCalls]
+      dateFilteredCalls.filter((call) => getCallStatus(call) === "connected")
+        .length,
+    [dateFilteredCalls],
   );
 
   const filteredCalls = useMemo(() => {
     if (callFilter === "missed") {
       return dateFilteredCalls.filter(
-        (call) => getCallStatus(call) === "missed"
+        (call) => getCallStatus(call) === "missed",
       );
     }
 
     if (callFilter === "connected") {
       return dateFilteredCalls.filter(
-        (call) => getCallStatus(call) === "connected"
+        (call) => getCallStatus(call) === "connected",
       );
     }
 
     return dateFilteredCalls;
   }, [dateFilteredCalls, callFilter]);
 
-  const totalCallPages = Math.ceil(
-    filteredCalls.length / CALLS_PER_PAGE
-  );
+  const totalCallPages = Math.ceil(filteredCalls.length / CALLS_PER_PAGE);
 
   const visibleCalls = useMemo(() => {
     const startIndex = callPage * CALLS_PER_PAGE;
 
-    return filteredCalls.slice(
-      startIndex,
-      startIndex + CALLS_PER_PAGE
-    );
+    return filteredCalls.slice(startIndex, startIndex + CALLS_PER_PAGE);
   }, [filteredCalls, callPage]);
 
   const firstVisibleCall =
-    filteredCalls.length === 0
-      ? 0
-      : callPage * CALLS_PER_PAGE + 1;
+    filteredCalls.length === 0 ? 0 : callPage * CALLS_PER_PAGE + 1;
 
   const lastVisibleCall = Math.min(
     (callPage + 1) * CALLS_PER_PAGE,
-    filteredCalls.length
+    filteredCalls.length,
   );
 
   const changeFilter = (filter) => {
@@ -504,10 +475,7 @@ const DailyCall = () => {
 
   const goToCallPage = (nextPage) => {
     setCallPage(
-      Math.max(
-        0,
-        Math.min(nextPage, Math.max(0, totalCallPages - 1))
-      )
+      Math.max(0, Math.min(nextPage, Math.max(0, totalCallPages - 1))),
     );
   };
 
@@ -606,9 +574,7 @@ const DailyCall = () => {
               onClick={() => changeFilter("all")}
             >
               All
-              <span className="opacity-75">
-                {dateFilteredCalls.length}
-              </span>
+              <span className="opacity-75">{dateFilteredCalls.length}</span>
             </CallFilterButton>
 
             <CallFilterButton
@@ -619,9 +585,7 @@ const DailyCall = () => {
               Missed
               <span
                 className={
-                  callFilter === "missed"
-                    ? "opacity-75"
-                    : "text-[#D63C30]"
+                  callFilter === "missed" ? "opacity-75" : "text-[#D63C30]"
                 }
               >
                 {missedCount}
@@ -636,9 +600,7 @@ const DailyCall = () => {
               Connected
               <span
                 className={
-                  callFilter === "connected"
-                    ? "opacity-75"
-                    : "text-[#16845B]"
+                  callFilter === "connected" ? "opacity-75" : "text-[#16845B]"
                 }
               >
                 {connectedCount}
@@ -669,9 +631,7 @@ const DailyCall = () => {
                   type="date"
                   value={fromDate}
                   max={toDate || undefined}
-                  onChange={(event) =>
-                    changeFromDate(event.target.value)
-                  }
+                  onChange={(event) => changeFromDate(event.target.value)}
                   className="w-full min-w-0 rounded-xl border border-[#DCE3EF] bg-white px-2.5 py-2 text-sm text-slate-700 outline-none transition focus:border-[#0A2E66] focus:ring-2 focus:ring-[#0A2E66]/10 sm:px-3"
                 />
               </div>
@@ -689,9 +649,7 @@ const DailyCall = () => {
                   type="date"
                   value={toDate}
                   min={fromDate || undefined}
-                  onChange={(event) =>
-                    changeToDate(event.target.value)
-                  }
+                  onChange={(event) => changeToDate(event.target.value)}
                   className="w-full min-w-0 rounded-xl border border-[#DCE3EF] bg-white px-2.5 py-2 text-sm text-slate-700 outline-none transition focus:border-[#0A2E66] focus:ring-2 focus:ring-[#0A2E66]/10 sm:px-3"
                 />
               </div>
@@ -802,13 +760,11 @@ const DailyCall = () => {
           )}
 
           <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-[#F5F7FB] p-3">
-            <Activity
-              size={17}
-              className="mt-0.5 shrink-0 text-[#F27B1E]"
-            />
+            <Activity size={17} className="mt-0.5 shrink-0 text-[#F27B1E]" />
 
             <p className="text-xs leading-relaxed text-slate-600 sm:text-sm">
-              Review recent activity and follow up with clients who need a response.
+              Review recent activity and follow up with clients who need a
+              response.
             </p>
           </div>
         </div>

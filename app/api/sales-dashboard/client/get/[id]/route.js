@@ -1,7 +1,6 @@
 // app/api/sales-dashboard/client/get/[id]/route.js
 
-
- // app/api/sales-dashboard/client/get/[id]/route.js
+// app/api/sales-dashboard/client/get/[id]/route.js
 
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
@@ -21,7 +20,7 @@ export async function GET(req, { params }) {
           success: false,
           message: "Invalid sales executive ID",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,15 +28,12 @@ export async function GET(req, { params }) {
 
     const page = Math.max(
       1,
-      Number.parseInt(searchParams.get("page"), 10) || 1
+      Number.parseInt(searchParams.get("page"), 10) || 1,
     );
 
     const limit = Math.min(
       100,
-      Math.max(
-        1,
-        Number.parseInt(searchParams.get("limit"), 10) || 20
-      )
+      Math.max(1, Number.parseInt(searchParams.get("limit"), 10) || 20),
     );
 
     const search = (searchParams.get("search") || "").trim();
@@ -99,7 +95,7 @@ export async function GET(req, { params }) {
         success: false,
         message: "Failed to fetch clients",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

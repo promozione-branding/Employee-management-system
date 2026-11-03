@@ -21,7 +21,7 @@ export async function POST(req) {
           success: false,
           message: "Unauthorized",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -53,7 +53,7 @@ export async function POST(req) {
         admins
           .map((admin) => admin.email)
           .filter(Boolean)
-          .map((email) => email.toLowerCase().trim())
+          .map((email) => email.toLowerCase().trim()),
       ),
     ];
 
@@ -79,10 +79,7 @@ export async function POST(req) {
           newCustomer.clientName ||
           "New Customer";
 
-        const createdBy =
-          authUser.username ||
-          authUser.email ||
-          "ERP User";
+        const createdBy = authUser.username || authUser.email || "ERP User";
 
         await transporter.sendMail({
           from: `"ERP Notifications" <${process.env.YOUR_EMAIL_ADDRESS}>`,
@@ -203,8 +200,8 @@ export async function POST(req) {
 
                     <td style="padding: 8px 0;">
                       ${new Date().toLocaleString("en-IN", {
-            timeZone: "Asia/Kolkata",
-          })}
+                        timeZone: "Asia/Kolkata",
+                      })}
                     </td>
                   </tr>
 
@@ -234,16 +231,10 @@ export async function POST(req) {
           `,
         });
 
-        console.log(
-          "✅ Client creation email sent to admins:",
-          adminEmails
-        );
+        console.log("✅ Client creation email sent to admins:", adminEmails);
       } catch (mailError) {
         // Email failure should NOT fail customer creation
-        console.error(
-          "❌ Client email sending error:",
-          mailError.message
-        );
+        console.error("❌ Client email sending error:", mailError.message);
       }
     } else {
       console.log("⚠️ No admin users found to send email");
@@ -259,7 +250,7 @@ export async function POST(req) {
         message: "Customer created successfully",
         data: newCustomer,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Create customer API error:", error);
@@ -270,7 +261,7 @@ export async function POST(req) {
         message: "Server error",
         error: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

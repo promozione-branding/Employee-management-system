@@ -1,6 +1,5 @@
 // components/admin-dashboard/dashboard/AdminReminder.jsx
 
-
 "use client";
 
 // components/admin-dashboard/dashboard/AdminReminder.jsx
@@ -133,8 +132,7 @@ const isOverdue = (date) => {
   const parsedDate = new Date(date);
 
   return (
-    !Number.isNaN(parsedDate.getTime()) &&
-    parsedDate.getTime() < Date.now()
+    !Number.isNaN(parsedDate.getTime()) && parsedDate.getTime() < Date.now()
   );
 };
 
@@ -182,9 +180,7 @@ const AdminReminder = () => {
 
   const isManager = pathname?.startsWith("/manager");
 
-  const clientBase = isManager
-    ? "/manager/customer"
-    : "/dashboard/customer";
+  const clientBase = isManager ? "/manager/customer" : "/dashboard/customer";
 
   const { adminDetail } = useAdminStore();
 
@@ -298,8 +294,7 @@ const AdminReminder = () => {
       }
     } catch (error) {
       toast.error(
-        error?.response?.data?.message ||
-          "Error while creating reminder"
+        error?.response?.data?.message || "Error while creating reminder",
       );
     } finally {
       setCreating(false);
@@ -314,7 +309,7 @@ const AdminReminder = () => {
     setSelectEmail((prev) =>
       prev.some((item) => item?._id === email?._id)
         ? prev.filter((item) => item?._id !== email?._id)
-        : [...prev, email]
+        : [...prev, email],
     );
   };
 
@@ -352,9 +347,7 @@ const AdminReminder = () => {
     } catch (err) {
       console.error(err);
 
-      toast.error(
-        err?.message || "Error fetching client reminders"
-      );
+      toast.error(err?.message || "Error fetching client reminders");
     } finally {
       setClientLoading(false);
     }
@@ -402,9 +395,7 @@ const AdminReminder = () => {
       {/* ================================== */}
 
       <div className="mb-5 flex shrink-0 items-center justify-between gap-3">
-
         <div className="flex min-w-0 items-center gap-3">
-
           {/* Bell icon */}
           <div
             className="
@@ -424,7 +415,6 @@ const AdminReminder = () => {
 
           {/* Title */}
           <div className="min-w-0">
-
             <h2
               className="
                 font-serif
@@ -438,15 +428,10 @@ const AdminReminder = () => {
               Reminders
             </h2>
 
-            <p
-              className="mt-1 text-[13px]"
-              style={{ color: COLORS.muted }}
-            >
+            <p className="mt-1 text-[13px]" style={{ color: COLORS.muted }}>
               {openCount} open
             </p>
-
           </div>
-
         </div>
 
         {/* CC EMAIL CONTROL - EXISTING FUNCTIONALITY */}
@@ -497,7 +482,6 @@ const AdminReminder = () => {
             )}
           </button>
         )}
-
       </div>
 
       {/* ================================== */}
@@ -545,9 +529,7 @@ const AdminReminder = () => {
               style={{
                 background: active ? COLORS.white : "transparent",
                 color: active ? COLORS.ink : COLORS.muted,
-                boxShadow: active
-                  ? "0 1px 3px rgba(10,46,102,.08)"
-                  : "none",
+                boxShadow: active ? "0 1px 3px rgba(10,46,102,.08)" : "none",
                 border: active
                   ? `1px solid ${COLORS.line}`
                   : "1px solid transparent",
@@ -568,17 +550,13 @@ const AdminReminder = () => {
           {/* CREATE REMINDER FORM */}
 
           <div className="shrink-0">
-
             <div className="flex flex-col gap-2">
-
               {/* Description */}
               <input
                 type="text"
                 placeholder="What should you remember?"
                 value={description}
-                onChange={(event) =>
-                  setDescription(event.target.value)
-                }
+                onChange={(event) => setDescription(event.target.value)}
                 className="
                   h-[42px]
                   w-full
@@ -603,13 +581,10 @@ const AdminReminder = () => {
 
               {/* Date + Add */}
               <div className="grid grid-cols-[minmax(0,1fr)_60px] gap-2">
-
                 <input
                   type="datetime-local"
                   value={reminderAt}
-                  onChange={(event) =>
-                    setReminderAt(event.target.value)
-                  }
+                  onChange={(event) => setReminderAt(event.target.value)}
                   className="
                     h-[42px]
                     w-full
@@ -658,11 +633,8 @@ const AdminReminder = () => {
                 >
                   {creating ? "..." : "Add"}
                 </button>
-
               </div>
-
             </div>
-
           </div>
 
           {/* ================================== */}
@@ -683,9 +655,7 @@ const AdminReminder = () => {
                 background: COLORS.card2,
               }}
             >
-
               <div className="mb-2 flex items-center justify-between gap-2">
-
                 <div>
                   <p
                     className="text-xs font-bold"
@@ -716,11 +686,9 @@ const AdminReminder = () => {
                 >
                   {selectEmail.length} selected
                 </span>
-
               </div>
 
               {emailListLoading ? (
-
                 <div className="flex flex-wrap gap-2">
                   {Array.from({ length: 3 }).map((_, index) => (
                     <Skeleton
@@ -731,14 +699,11 @@ const AdminReminder = () => {
                     />
                   ))}
                 </div>
-
               ) : emailList.length > 0 ? (
-
                 <div className="flex max-h-24 flex-wrap gap-2 overflow-y-auto">
-
                   {emailList.map((item) => {
                     const selected = selectEmail.some(
-                      (email) => email?._id === item?._id
+                      (email) => email?._id === item?._id,
                     );
 
                     return (
@@ -761,15 +726,9 @@ const AdminReminder = () => {
                           transition-colors
                         "
                         style={{
-                          borderColor: selected
-                            ? COLORS.orange
-                            : COLORS.line,
-                          background: selected
-                            ? COLORS.cream
-                            : COLORS.white,
-                          color: selected
-                            ? COLORS.navy
-                            : COLORS.muted,
+                          borderColor: selected ? COLORS.orange : COLORS.line,
+                          background: selected ? COLORS.cream : COLORS.white,
+                          color: selected ? COLORS.navy : COLORS.muted,
                         }}
                       >
                         {selected && (
@@ -786,18 +745,12 @@ const AdminReminder = () => {
                       </button>
                     );
                   })}
-
                 </div>
-
               ) : (
-                <p
-                  className="text-xs"
-                  style={{ color: COLORS.muted }}
-                >
+                <p className="text-xs" style={{ color: COLORS.muted }}>
                   No email recipients available.
                 </p>
               )}
-
             </div>
           )}
 
@@ -816,11 +769,8 @@ const AdminReminder = () => {
               pr-1
             "
           >
-
             {loading ? (
-
               <div className="space-y-2.5">
-
                 {Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={index}
@@ -838,11 +788,8 @@ const AdminReminder = () => {
                     </div>
                   </div>
                 ))}
-
               </div>
-
             ) : reminders.length === 0 ? (
-
               <div
                 className="
                   flex
@@ -862,7 +809,6 @@ const AdminReminder = () => {
                   background: COLORS.card2,
                 }}
               >
-
                 <div
                   className="
                     mb-3
@@ -878,10 +824,7 @@ const AdminReminder = () => {
                   <Bell size={21} />
                 </div>
 
-                <p
-                  className="text-sm font-bold"
-                  style={{ color: COLORS.ink }}
-                >
+                <p className="text-sm font-bold" style={{ color: COLORS.ink }}>
                   No reminders yet
                 </p>
 
@@ -896,17 +839,12 @@ const AdminReminder = () => {
                 >
                   Add a reminder above to keep an important task on your radar.
                 </p>
-
               </div>
-
             ) : (
-
               <ul className="space-y-2.5">
-
                 {reminders.map((item) => {
                   const overdue =
-                    isOverdue(item.reminderAt) &&
-                    !item.reminderSend;
+                    isOverdue(item.reminderAt) && !item.reminderSend;
 
                   return (
                     <li
@@ -931,7 +869,6 @@ const AdminReminder = () => {
                         background: COLORS.white,
                       }}
                     >
-
                       {/* Visual checkbox */}
                       <div
                         className="
@@ -954,7 +891,6 @@ const AdminReminder = () => {
 
                       {/* Reminder content */}
                       <div className="min-w-0 flex-1">
-
                         <p
                           className="
                             break-words
@@ -978,26 +914,17 @@ const AdminReminder = () => {
                             leading-4
                           "
                           style={{
-                            color: overdue
-                              ? COLORS.red
-                              : COLORS.muted,
+                            color: overdue ? COLORS.red : COLORS.muted,
                           }}
                         >
                           {overdue ? (
                             <>
-                              <span className="font-medium">
-                                Overdue,
-                              </span>
-                              <span>
-                                {formatReminderDate(item.reminderAt)}
-                              </span>
+                              <span className="font-medium">Overdue,</span>
+                              <span>{formatReminderDate(item.reminderAt)}</span>
                             </>
                           ) : (
                             <>
-                              <Clock
-                                size={12}
-                                className="shrink-0"
-                              />
+                              <Clock size={12} className="shrink-0" />
                               {formatReminderDate(item.reminderAt)}
                             </>
                           )}
@@ -1025,17 +952,12 @@ const AdminReminder = () => {
                             Sent
                           </span>
                         )}
-
                       </div>
-
                     </li>
                   );
                 })}
-
               </ul>
-
             )}
-
           </div>
         </>
       )}
@@ -1046,7 +968,6 @@ const AdminReminder = () => {
 
       {activeTab === "clients" && (
         <>
-
           {/* CLIENT FILTERS */}
 
           <div
@@ -1058,10 +979,8 @@ const AdminReminder = () => {
             "
             style={{ borderColor: COLORS.line }}
           >
-
             {/* Activity type */}
             <div>
-
               <p
                 className="
                   mb-2
@@ -1076,7 +995,6 @@ const AdminReminder = () => {
               </p>
 
               <div className="flex flex-wrap gap-1.5">
-
                 {TYPE_TABS.map((item) => (
                   <button
                     key={item.id}
@@ -1093,31 +1011,19 @@ const AdminReminder = () => {
                       transition-all
                     "
                     style={{
-                      borderColor:
-                        type === item.id
-                          ? COLORS.navy
-                          : COLORS.line,
-                      background:
-                        type === item.id
-                          ? COLORS.navy
-                          : COLORS.white,
-                      color:
-                        type === item.id
-                          ? COLORS.white
-                          : COLORS.muted,
+                      borderColor: type === item.id ? COLORS.navy : COLORS.line,
+                      background: type === item.id ? COLORS.navy : COLORS.white,
+                      color: type === item.id ? COLORS.white : COLORS.muted,
                     }}
                   >
                     {item.label}
                   </button>
                 ))}
-
               </div>
-
             </div>
 
             {/* Date presets */}
             <div>
-
               <p
                 className="
                   mb-2
@@ -1132,7 +1038,6 @@ const AdminReminder = () => {
               </p>
 
               <div className="flex flex-wrap gap-1.5">
-
                 {DATE_PRESETS.map((item) => (
                   <button
                     key={item.id}
@@ -1150,25 +1055,16 @@ const AdminReminder = () => {
                     "
                     style={{
                       borderColor:
-                        preset === item.id
-                          ? COLORS.navy
-                          : COLORS.line,
+                        preset === item.id ? COLORS.navy : COLORS.line,
                       background:
-                        preset === item.id
-                          ? COLORS.navy
-                          : COLORS.white,
-                      color:
-                        preset === item.id
-                          ? COLORS.white
-                          : COLORS.muted,
+                        preset === item.id ? COLORS.navy : COLORS.white,
+                      color: preset === item.id ? COLORS.white : COLORS.muted,
                     }}
                   >
                     {item.label}
                   </button>
                 ))}
-
               </div>
-
             </div>
 
             {/* Custom dates */}
@@ -1188,9 +1084,7 @@ const AdminReminder = () => {
                   background: COLORS.card2,
                 }}
               >
-
                 <label className="min-w-0">
-
                   <span
                     className="mb-1 block text-[11px] font-bold"
                     style={{ color: COLORS.muted }}
@@ -1215,11 +1109,9 @@ const AdminReminder = () => {
                     "
                     style={{ borderColor: COLORS.line }}
                   />
-
                 </label>
 
                 <label className="min-w-0">
-
                   <span
                     className="mb-1 block text-[11px] font-bold"
                     style={{ color: COLORS.muted }}
@@ -1245,7 +1137,6 @@ const AdminReminder = () => {
                     "
                     style={{ borderColor: COLORS.line }}
                   />
-
                 </label>
 
                 {(from || to) && (
@@ -1274,10 +1165,8 @@ const AdminReminder = () => {
                     Clear
                   </button>
                 )}
-
               </div>
             )}
-
           </div>
 
           {/* ================================== */}
@@ -1295,23 +1184,13 @@ const AdminReminder = () => {
               pr-1
             "
           >
-
             {clientLoading ? (
-
               <div className="space-y-3">
-
                 {Array.from({ length: 3 }).map((_, index) => (
-                  <Skeleton
-                    key={index}
-                    height={90}
-                    borderRadius={14}
-                  />
+                  <Skeleton key={index} height={90} borderRadius={14} />
                 ))}
-
               </div>
-
             ) : clientReminders.length === 0 ? (
-
               <div
                 className="
                   flex
@@ -1331,7 +1210,6 @@ const AdminReminder = () => {
                   background: COLORS.card2,
                 }}
               >
-
                 <div
                   className="
                     mb-3
@@ -1348,10 +1226,7 @@ const AdminReminder = () => {
                   <UsersRound size={21} />
                 </div>
 
-                <p
-                  className="text-sm font-bold"
-                  style={{ color: COLORS.ink }}
-                >
+                <p className="text-sm font-bold" style={{ color: COLORS.ink }}>
                   No client reminders found
                 </p>
 
@@ -1366,13 +1241,9 @@ const AdminReminder = () => {
                 >
                   Try another activity type or date range.
                 </p>
-
               </div>
-
             ) : (
-
               <div className="space-y-2.5">
-
                 {clientReminders.map((activity) => {
                   const typeStyle = getTypeStyle(activity.updateType);
                   const TypeIcon = typeStyle.icon;
@@ -1391,7 +1262,6 @@ const AdminReminder = () => {
                       "
                       style={{ "--tw-ring-color": COLORS.orange }}
                     >
-
                       <article
                         className="
                           rounded-[15px]
@@ -1409,19 +1279,14 @@ const AdminReminder = () => {
                         onMouseEnter={(event) => {
                           event.currentTarget.style.borderColor =
                             COLORS.orangeLight;
-                          event.currentTarget.style.background =
-                            COLORS.card2;
+                          event.currentTarget.style.background = COLORS.card2;
                         }}
                         onMouseLeave={(event) => {
-                          event.currentTarget.style.borderColor =
-                            COLORS.line;
-                          event.currentTarget.style.background =
-                            COLORS.white;
+                          event.currentTarget.style.borderColor = COLORS.line;
+                          event.currentTarget.style.background = COLORS.white;
                         }}
                       >
-
                         <div className="flex min-w-0 items-start gap-3">
-
                           <div
                             className="
                               flex h-10 w-10
@@ -1439,18 +1304,17 @@ const AdminReminder = () => {
                           </div>
 
                           <div className="min-w-0 flex-1">
-
-                            <div className="
+                            <div
+                              className="
                               flex
                               min-w-0
                               flex-wrap
                               items-start
                               justify-between
                               gap-2
-                            ">
-
+                            "
+                            >
                               <div className="min-w-0 flex-1">
-
                                 <h3
                                   className="
                                     break-words
@@ -1470,7 +1334,6 @@ const AdminReminder = () => {
                                     {activity.company}
                                   </p>
                                 )}
-
                               </div>
 
                               <span
@@ -1490,7 +1353,6 @@ const AdminReminder = () => {
                               >
                                 {typeStyle.label}
                               </span>
-
                             </div>
 
                             <p
@@ -1542,9 +1404,7 @@ const AdminReminder = () => {
                                 {String(activity.status).replace(/-/g, " ")}
                               </span>
                             )}
-
                           </div>
-
                         </div>
 
                         {activity.note && (
@@ -1570,22 +1430,15 @@ const AdminReminder = () => {
                             {activity.note}
                           </p>
                         )}
-
                       </article>
-
                     </Link>
                   );
                 })}
-
               </div>
-
             )}
-
           </div>
-
         </>
       )}
-
     </section>
   );
 };

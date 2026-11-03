@@ -24,7 +24,11 @@ function sanitizePhone(v) {
 function sanitizeFiles(arr) {
   // Accept: string JSON, array, or mixed
   if (typeof arr === "string") {
-    try { arr = JSON.parse(arr); } catch { arr = []; }
+    try {
+      arr = JSON.parse(arr);
+    } catch {
+      arr = [];
+    }
   }
   if (!Array.isArray(arr)) return [];
   return arr
@@ -35,18 +39,21 @@ function sanitizeFiles(arr) {
         if (t.startsWith("{")) {
           try {
             const o = JSON.parse(t);
-            return { url: String(o.url || "").trim(),
-                     description: String(o.description || "").trim() };
-          } catch { return null; }
+            return {
+              url: String(o.url || "").trim(),
+              description: String(o.description || "").trim(),
+            };
+          } catch {
+            return null;
+          }
         }
         return { url: t, description: "" };
       }
       if (item && typeof item === "object" && item.url) {
         return {
           url: String(item.url).trim(),
-          description: typeof item.description === "string"
-            ? item.description.trim()
-            : "",
+          description:
+            typeof item.description === "string" ? item.description.trim() : "",
         };
       }
       return null;
@@ -63,7 +70,7 @@ export async function GET(req, { params }) {
     if (!authUser) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -71,7 +78,7 @@ export async function GET(req, { params }) {
     if (!mongoose.Types.ObjectId.isValid(clientId)) {
       return NextResponse.json(
         { success: false, message: "Invalid clientId" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -84,12 +91,12 @@ export async function GET(req, { params }) {
           logos: (doc.logos || []).map((x) =>
             typeof x === "string"
               ? { url: x, description: "" }
-              : { url: x.url, description: x.description || "" }
+              : { url: x.url, description: x.description || "" },
           ),
           products: (doc.products || []).map((x) =>
             typeof x === "string"
               ? { url: x, description: "" }
-              : { url: x.url, description: x.description || "" }
+              : { url: x.url, description: x.description || "" },
           ),
         }
       : null;
@@ -103,7 +110,7 @@ export async function GET(req, { params }) {
     console.error("BRAND ASSET GET ERROR:", error);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -117,13 +124,13 @@ export async function PUT(req, { params }) {
     if (!authUser) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
     if (!WRITE_ROLES.includes(authUser.role)) {
       return NextResponse.json(
         { success: false, message: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -131,7 +138,7 @@ export async function PUT(req, { params }) {
     if (!mongoose.Types.ObjectId.isValid(clientId)) {
       return NextResponse.json(
         { success: false, message: "Invalid clientId" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -143,13 +150,13 @@ export async function PUT(req, { params }) {
     if (primaryPhone && !/^\d{10}$/.test(primaryPhone)) {
       return NextResponse.json(
         { success: false, message: "Primary phone must be 10 digits" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (secondaryPhone && !/^\d{10}$/.test(secondaryPhone)) {
       return NextResponse.json(
         { success: false, message: "Secondary phone must be 10 digits" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -188,7 +195,7 @@ export async function PUT(req, { params }) {
     console.error("BRAND ASSET PUT ERROR:", error);
     return NextResponse.json(
       { success: false, message: error?.message || "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

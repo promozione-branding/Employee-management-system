@@ -106,9 +106,7 @@ const CustomerManager = () => {
 
       if (res.success) {
         setCustomers(Array.isArray(res.data) ? res.data : []);
-        setTotalPages(
-          res.pagination?.pages || res.pagination?.totalPages || 1
-        );
+        setTotalPages(res.pagination?.pages || res.pagination?.totalPages || 1);
         setSelectedCustomers([]);
       }
     } catch (error) {
@@ -138,10 +136,7 @@ const CustomerManager = () => {
     })),
   };
 
-  const customerFormControls = [
-    ...addCustomerFormControl,
-    salesPersonControl,
-  ];
+  const customerFormControls = [...addCustomerFormControl, salesPersonControl];
 
   // Filter currently loaded customers by sales executive
   const visibleCustomers = useMemo(() => {
@@ -151,8 +146,8 @@ const CustomerManager = () => {
 
     return customers.filter((customer) =>
       customer.salesExecutive?.some(
-        (executive) => executive._id === executiveFilter
-      )
+        (executive) => executive._id === executiveFilter,
+      ),
     );
   }, [customers, executiveFilter]);
 
@@ -161,7 +156,7 @@ const CustomerManager = () => {
     const paid = customers.filter((customer) => customer.isPaid).length;
 
     const missingPhone = customers.filter(
-      (customer) => !String(customer.phone || "").trim()
+      (customer) => !String(customer.phone || "").trim(),
     ).length;
 
     return {
@@ -210,13 +205,9 @@ const CustomerManager = () => {
       }
     } catch (error) {
       if (error.response?.data?.errors?.length) {
-        error.response.data.errors.forEach((item) =>
-          toast.error(item.message)
-        );
+        error.response.data.errors.forEach((item) => toast.error(item.message));
       } else {
-        toast.error(
-          error.response?.data?.message || "Something went wrong."
-        );
+        toast.error(error.response?.data?.message || "Something went wrong.");
       }
     }
   };
@@ -280,14 +271,14 @@ const CustomerManager = () => {
     setSelectedCustomers((previous) =>
       checked
         ? [...new Set([...previous, id])]
-        : previous.filter((item) => item !== id)
+        : previous.filter((item) => item !== id),
     );
   };
 
   // Select all visible customers
   const toggleAllCustomers = (checked) => {
     setSelectedCustomers(
-      checked ? visibleCustomers.map((customer) => customer._id) : []
+      checked ? visibleCustomers.map((customer) => customer._id) : [],
     );
   };
 
@@ -298,8 +289,7 @@ const CustomerManager = () => {
       return;
     }
 
-    const escapeCSV = (value) =>
-      `"${String(value ?? "").replace(/"/g, '""')}"`;
+    const escapeCSV = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
 
     const headers = [
       "Name",
@@ -619,7 +609,7 @@ const CustomerManager = () => {
                       checked={
                         visibleCustomers.length > 0 &&
                         visibleCustomers.every((customer) =>
-                          selectedCustomers.includes(customer._id)
+                          selectedCustomers.includes(customer._id),
                         )
                       }
                       onCheckedChange={toggleAllCustomers}
@@ -630,10 +620,7 @@ const CustomerManager = () => {
                   <th className="px-4 py-4">
                     <span className="inline-flex items-center gap-1.5">
                       Client
-                      <ArrowUpDown
-                        size={13}
-                        className="text-[#F27B1E]"
-                      />
+                      <ArrowUpDown size={13} className="text-[#F27B1E]" />
                     </span>
                   </th>
 
@@ -673,10 +660,7 @@ const CustomerManager = () => {
 
                       <td className="px-4 py-4">
                         <div className="flex min-w-[190px] items-center gap-3">
-                          <CustomerAvatar
-                            customer={customer}
-                            index={index}
-                          />
+                          <CustomerAvatar customer={customer} index={index} />
 
                           <div className="min-w-0">
                             <p className="truncate font-semibold text-[#0F1B33]">
@@ -715,9 +699,7 @@ const CustomerManager = () => {
                                 className="inline-flex items-center gap-2 rounded-full bg-[#FFF1E4] py-1 pl-1 pr-3 text-xs font-semibold text-[#0F1B33]"
                               >
                                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#087E8B] text-[10px] font-bold text-white">
-                                  {(
-                                    executive.basicDetails?.name || "SE"
-                                  )
+                                  {(executive.basicDetails?.name || "SE")
                                     .split(" ")
                                     .map((part) => part[0])
                                     .slice(0, 2)
@@ -746,9 +728,7 @@ const CustomerManager = () => {
                         >
                           <span
                             className={`h-2 w-2 rounded-full ${
-                              customer.isPaid
-                                ? "bg-[#17845A]"
-                                : "bg-[#B86A00]"
+                              customer.isPaid ? "bg-[#17845A]" : "bg-[#B86A00]"
                             }`}
                           />
 
@@ -814,10 +794,7 @@ const CustomerManager = () => {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-3">
-                        <CustomerAvatar
-                          customer={customer}
-                          index={index}
-                        />
+                        <CustomerAvatar customer={customer} index={index} />
 
                         <div className="min-w-0">
                           <h3 className="truncate font-bold text-[#0F1B33]">
@@ -884,11 +861,8 @@ const CustomerManager = () => {
         {/* Pagination */}
         <footer className="flex flex-col gap-3 border-t border-[#E3E7F0] bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <p className="text-sm text-[#68738A]">
-            Page{" "}
-            <span className="font-semibold text-[#0F1B33]">{page}</span> of{" "}
-            <span className="font-semibold text-[#0F1B33]">
-              {totalPages}
-            </span>
+            Page <span className="font-semibold text-[#0F1B33]">{page}</span> of{" "}
+            <span className="font-semibold text-[#0F1B33]">{totalPages}</span>
           </p>
 
           <div className="flex items-center gap-2">
@@ -896,9 +870,7 @@ const CustomerManager = () => {
               type="button"
               variant="outline"
               disabled={page <= 1 || loading}
-              onClick={() =>
-                setPage((previous) => Math.max(1, previous - 1))
-              }
+              onClick={() => setPage((previous) => Math.max(1, previous - 1))}
               className="h-10 gap-1.5 rounded-lg border-[#E0E5EF] text-[#0F1B33] disabled:opacity-40"
             >
               <ChevronLeft size={16} />
@@ -910,9 +882,7 @@ const CustomerManager = () => {
               variant="outline"
               disabled={page >= totalPages || loading}
               onClick={() =>
-                setPage((previous) =>
-                  Math.min(totalPages, previous + 1)
-                )
+                setPage((previous) => Math.min(totalPages, previous + 1))
               }
               className="h-10 gap-1.5 rounded-lg border-[#E0E5EF] text-[#0F1B33] disabled:opacity-40"
             >

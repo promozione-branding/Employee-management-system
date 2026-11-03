@@ -1,6 +1,5 @@
 // components/admin-dashboard/dashboard/Callinfo.jsx
 
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -47,17 +46,17 @@ const Callinfo = () => {
       const res = await getAdminDailyCallStatsService();
 
       if (res?.success) {
-        setData(res.data || {
-          agents: [],
-          totals: null,
-        });
+        setData(
+          res.data || {
+            agents: [],
+            totals: null,
+          },
+        );
       }
     } catch (err) {
       console.error("Failed to load call statistics:", err);
 
-      toast.error(
-        err?.message || "Failed to load call info"
-      );
+      toast.error(err?.message || "Failed to load call info");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -85,13 +84,8 @@ const Callinfo = () => {
   if (loading) {
     return (
       <section className="min-w-0 rounded-[25px] border border-[#E1E7F0] bg-white p-5 shadow-[0_3px_12px_rgba(10,46,102,0.04)] sm:p-7">
-
         <div className="mb-7 flex items-center gap-3">
-          <Skeleton
-            height={50}
-            width={50}
-            borderRadius={15}
-          />
+          <Skeleton height={50} width={50} borderRadius={15} />
 
           <div>
             <Skeleton height={24} width={220} />
@@ -101,17 +95,12 @@ const Callinfo = () => {
 
         <div className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton
-              key={index}
-              height={104}
-              borderRadius={20}
-            />
+            <Skeleton key={index} height={104} borderRadius={20} />
           ))}
         </div>
 
         <Skeleton height={35} className="mb-3" />
         <Skeleton height={75} count={3} className="mb-2" />
-
       </section>
     );
   }
@@ -134,29 +123,28 @@ const Callinfo = () => {
         lg:p-7
       "
     >
-
       {/* ================================== */}
       {/* HEADER */}
       {/* ================================== */}
 
       <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-
         {/* Left heading */}
         <div className="flex min-w-0 items-center gap-3.5">
-
-          <div className="
+          <div
+            className="
             flex h-[50px] w-[50px] shrink-0
             items-center justify-center
             rounded-[15px]
             bg-[#E9EFF9]
             text-[#376BB5]
-          ">
+          "
+          >
             <Phone size={25} strokeWidth={1.9} />
           </div>
 
           <div className="min-w-0">
-
-            <h2 className="
+            <h2
+              className="
               font-serif
               text-[23px]
               font-bold
@@ -164,27 +152,28 @@ const Callinfo = () => {
               tracking-tight
               text-[#0A2E66]
               sm:text-[25px]
-            ">
+            "
+            >
               Team call activity
             </h2>
 
-            <p className="
+            <p
+              className="
               mt-1
               text-[15px]
               font-normal
               leading-5
               text-[#56647D]
               sm:text-[16px]
-            ">
+            "
+            >
               Live overview of every agent&apos;s calls today
             </p>
-
           </div>
         </div>
 
         {/* Right actions */}
         <div className="flex shrink-0 items-center gap-3">
-
           {/* Refresh */}
           <button
             type="button"
@@ -206,10 +195,7 @@ const Callinfo = () => {
               disabled:opacity-60
             "
           >
-            <RefreshCw
-              size={23}
-              className={refreshing ? "animate-spin" : ""}
-            />
+            <RefreshCw size={23} className={refreshing ? "animate-spin" : ""} />
           </button>
 
           {/* View all logs */}
@@ -234,12 +220,8 @@ const Callinfo = () => {
             "
           >
             View all logs
-            <ArrowUpRight
-              size={16}
-              className="text-[#F27B1E]"
-            />
+            <ArrowUpRight size={16} className="text-[#F27B1E]" />
           </Link>
-
         </div>
       </div>
 
@@ -248,15 +230,16 @@ const Callinfo = () => {
       {/* ================================== */}
 
       {totals && (
-        <div className="
+        <div
+          className="
           mb-7
           grid
           grid-cols-2
           gap-3
           sm:gap-4
           lg:grid-cols-4
-        ">
-
+        "
+        >
           <SummaryTile
             icon={PhoneCall}
             label="Connected"
@@ -284,7 +267,6 @@ const Callinfo = () => {
             value={`${totals.connectRate || 0}%`}
             tone="blue"
           />
-
         </div>
       )}
 
@@ -293,25 +275,26 @@ const Callinfo = () => {
       {/* ================================== */}
 
       <div className="min-w-0">
-
         <div className="overflow-x-auto">
-
-          <table className="
+          <table
+            className="
             w-full
             min-w-[850px]
             border-collapse
             text-sm
-          ">
-
+          "
+          >
             {/* Table header */}
             <thead>
-              <tr className="
+              <tr
+                className="
                 border-b
                 border-[#DDE4EF]
                 text-[#52627E]
-              ">
-
-                <th className="
+              "
+              >
+                <th
+                  className="
                   w-[34%]
                   px-2
                   pb-4
@@ -319,7 +302,8 @@ const Callinfo = () => {
                   text-left
                   text-[14px]
                   font-bold
-                ">
+                "
+                >
                   Agent
                 </th>
 
@@ -346,29 +330,25 @@ const Callinfo = () => {
                 <th className="px-3 pb-4 pt-1 text-center text-[14px] font-bold">
                   <span className="inline-flex items-center gap-1">
                     Rate
-                    <span className="text-[#F58220] text-[13px]">
-                      ▼
-                    </span>
+                    <span className="text-[#F58220] text-[13px]">▼</span>
                   </span>
                 </th>
-
               </tr>
             </thead>
 
             {/* Table body */}
             <tbody>
-
               {agents.length === 0 ? (
-
                 <tr>
                   <td colSpan={7} className="px-4 py-14 text-center">
-
-                    <div className="
+                    <div
+                      className="
                       mx-auto flex h-12 w-12
                       items-center justify-center
                       rounded-2xl bg-[#E9EFF9]
                       text-[#376BB5]
-                    ">
+                    "
+                    >
                       <Headphones size={24} />
                     </div>
 
@@ -379,14 +359,10 @@ const Callinfo = () => {
                     <p className="mt-1 text-[13px] text-[#8491A8]">
                       Agent call activity will appear here when available.
                     </p>
-
                   </td>
                 </tr>
-
               ) : (
-
                 agents.map((agent, index) => {
-
                   const rate = Number(agent.connectRate) || 0;
 
                   const agentName = agent.agentName || "Unknown";
@@ -407,7 +383,6 @@ const Callinfo = () => {
                   ];
 
                   return (
-
                     <tr
                       key={agent.agentErpUserId}
                       className="
@@ -418,14 +393,12 @@ const Callinfo = () => {
                         last:border-b-0
                       "
                     >
-
                       {/* Agent profile */}
                       <td className="px-2 py-[19px]">
-
                         <div className="flex min-w-0 items-center gap-3.5">
-
                           {/* Avatar */}
-                          <div className={`
+                          <div
+                            className={`
                             flex h-[48px] w-[48px]
                             shrink-0 items-center
                             justify-center
@@ -434,118 +407,121 @@ const Callinfo = () => {
                             font-bold
                             text-white
                             ${avatarColors[index % avatarColors.length]}
-                          `}>
+                          `}
+                          >
                             {initials || <Users size={20} />}
                           </div>
 
                           {/* Agent details */}
                           <div className="min-w-0">
-
-                            <p className="
+                            <p
+                              className="
                               max-w-[220px]
                               truncate
                               text-[16px]
                               font-semibold
                               text-[#0F1B33]
-                            ">
+                            "
+                            >
                               {agentName}
                             </p>
 
-                            <p className="
+                            <p
+                              className="
                               mt-1
                               max-w-[220px]
                               truncate
                               text-[14px]
                               font-normal
                               text-[#64748B]
-                            ">
+                            "
+                            >
                               {agent.agentEmail || "—"}
                             </p>
-
                           </div>
-
                         </div>
-
                       </td>
 
                       {/* Total calls */}
-                      <td className="
+                      <td
+                        className="
                         px-3 py-5
                         text-center
                         text-[16px]
                         font-semibold
                         tabular-nums
                         text-[#0F1B33]
-                      ">
+                      "
+                      >
                         {agent.totalCalls ?? 0}
                       </td>
 
                       {/* Connected */}
-                      <td className="
+                      <td
+                        className="
                         px-3 py-5
                         text-center
                         text-[16px]
                         font-bold
                         tabular-nums
                         text-[#16865D]
-                      ">
+                      "
+                      >
                         {agent.connectedCalls ?? 0}
                       </td>
 
                       {/* Missed */}
-                      <td className="
+                      <td
+                        className="
                         px-3 py-5
                         text-center
                         text-[16px]
                         font-semibold
                         tabular-nums
                         text-[#E53935]
-                      ">
+                      "
+                      >
                         {agent.missedCalls ?? 0}
                       </td>
 
                       {/* Clients */}
-                      <td className="
+                      <td
+                        className="
                         px-3 py-5
                         text-center
                         text-[16px]
                         font-medium
                         tabular-nums
                         text-[#0F1B33]
-                      ">
+                      "
+                      >
                         {agent.uniqueCustomerCount ?? 0}
                       </td>
 
                       {/* Talk time */}
-                      <td className="
+                      <td
+                        className="
                         px-3 py-5
                         text-center
                         text-[16px]
                         font-medium
                         tabular-nums
                         text-[#0F1B33]
-                      ">
+                      "
+                      >
                         {agent.totalTalkMinutes ?? 0}m
                       </td>
 
                       {/* Rate progress */}
                       <td className="px-3 py-5">
-
                         <RateBadge rate={rate} />
-
                       </td>
-
                     </tr>
-
                   );
                 })
-
               )}
-
             </tbody>
-
           </table>
-
         </div>
 
         {/* Mobile scrolling hint */}
@@ -554,25 +530,16 @@ const Callinfo = () => {
             Swipe horizontally to view all call statistics.
           </p>
         )}
-
       </div>
-
     </section>
   );
 };
-
 
 // ========================================
 // SUMMARY TILE
 // ========================================
 
-function SummaryTile({
-  icon: Icon,
-  label,
-  value,
-  tone = "blue",
-}) {
-
+function SummaryTile({ icon: Icon, label, value, tone = "blue" }) {
   const tones = {
     emerald: {
       bg: "bg-[#E5F5EC]",
@@ -598,8 +565,8 @@ function SummaryTile({
   const style = tones[tone] || tones.blue;
 
   return (
-
-    <div className={`
+    <div
+      className={`
       flex min-w-0
       min-h-[104px]
       flex-col justify-between
@@ -609,33 +576,32 @@ function SummaryTile({
       hover:-translate-y-0.5
       sm:p-5
       ${style.bg}
-    `}>
-
+    `}
+    >
       {/* Label and icon */}
-      <div className={`
+      <div
+        className={`
         flex items-center gap-2
         ${style.color}
-      `}>
+      `}
+      >
+        <Icon size={19} strokeWidth={2} className="shrink-0" />
 
-        <Icon
-          size={19}
-          strokeWidth={2}
-          className="shrink-0"
-        />
-
-        <span className="
+        <span
+          className="
           truncate
           text-[14px]
           font-semibold
           sm:text-[15px]
-        ">
+        "
+        >
           {label}
         </span>
-
       </div>
 
       {/* Value */}
-      <p className={`
+      <p
+        className={`
         mt-2
         text-[29px]
         font-bold
@@ -644,39 +610,38 @@ function SummaryTile({
         tabular-nums
         sm:text-[34px]
         ${style.color}
-      `}>
+      `}
+      >
         {value}
       </p>
-
     </div>
   );
 }
-
 
 // ========================================
 // RATE PROGRESS BAR
 // ========================================
 
 function RateBadge({ rate }) {
-
   return (
-
-    <div className="
+    <div
+      className="
       flex min-w-[145px]
       items-center gap-3
       px-1
-    ">
-
+    "
+    >
       {/* Progress track */}
-      <div className="
+      <div
+        className="
         h-[10px]
         min-w-[60px]
         flex-1
         overflow-hidden
         rounded-full
         bg-[#FCEAE9]
-      ">
-
+      "
+      >
         <div
           className="
             h-full
@@ -688,21 +653,21 @@ function RateBadge({ rate }) {
             width: `${Math.min(100, Math.max(0, rate))}%`,
           }}
         />
-
       </div>
 
       {/* Percentage */}
-      <span className="
+      <span
+        className="
         min-w-[40px]
         text-right
         text-[15px]
         font-bold
         tabular-nums
         text-[#0F1B33]
-      ">
+      "
+      >
         {rate}%
       </span>
-
     </div>
   );
 }

@@ -59,11 +59,7 @@ export async function GET(req, { params }) {
     const now = new Date();
 
     // Start of the current month, using server-local calendar time.
-    const monthStart = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      1,
-    );
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
     // Start of the current week: Monday at 00:00.
     const weekStart = new Date(now);
@@ -72,9 +68,7 @@ export async function GET(req, { params }) {
     const dayOfWeek = weekStart.getDay();
     const daysSinceMonday = (dayOfWeek + 6) % 7;
 
-    weekStart.setDate(
-      weekStart.getDate() - daysSinceMonday,
-    );
+    weekStart.setDate(weekStart.getDate() - daysSinceMonday);
 
     const employeeObjectId = new mongoose.Types.ObjectId(id);
 

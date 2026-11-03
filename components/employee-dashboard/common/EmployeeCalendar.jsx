@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -17,12 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import {
-  CalendarDays,
-  Plus,
-  Palette,
-  X,
-} from "lucide-react";
+import { CalendarDays, Plus, Palette, X } from "lucide-react";
 
 import toast from "react-hot-toast";
 import {
@@ -69,7 +63,7 @@ const EmployeeCalendar = ({ employeeId }) => {
               start: item.date,
               backgroundColor: item.backgroundColor || NAVY,
               borderColor: item.backgroundColor || NAVY,
-            }))
+            })),
           );
         }
       } catch (error) {
@@ -150,8 +144,7 @@ const EmployeeCalendar = ({ employeeId }) => {
       console.error("Error adding calendar event:", error);
 
       toast.error(
-        error?.response?.data?.message ||
-          "Failed to add calendar event"
+        error?.response?.data?.message || "Failed to add calendar event",
       );
     } finally {
       setSaving(false);
@@ -213,10 +206,7 @@ const EmployeeCalendar = ({ employeeId }) => {
 
   const handleEventMouseLeave = (info) => {
     if (info.el._calendarTooltipMove) {
-      info.el.removeEventListener(
-        "mousemove",
-        info.el._calendarTooltipMove
-      );
+      info.el.removeEventListener("mousemove", info.el._calendarTooltipMove);
 
       delete info.el._calendarTooltipMove;
     }
@@ -398,9 +388,7 @@ const EmployeeCalendar = ({ employeeId }) => {
         <Button
           type="button"
           onClick={() => {
-            setSelectedDate(
-              new Date().toLocaleDateString("en-CA")
-            );
+            setSelectedDate(new Date().toLocaleDateString("en-CA"));
             setNewEventTitle("");
             setNewEventColor("");
             setIsDialogOpen(true);
@@ -432,11 +420,7 @@ const EmployeeCalendar = ({ employeeId }) => {
           </div>
         ) : (
           <FullCalendar
-            plugins={[
-              dayGridPlugin,
-              timeGridPlugin,
-              interactionPlugin,
-            ]}
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
             headerToolbar={{
               left: "prev,next today",
@@ -456,10 +440,7 @@ const EmployeeCalendar = ({ employeeId }) => {
       </div>
 
       {/* Add event dialog */}
-      <Dialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-      >
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="w-[calc(100%-2rem)] max-w-md rounded-2xl border border-[#E3E7F0] bg-white p-0">
           <DialogHeader className="border-b border-[#EDF0F5] px-5 py-4">
             <div className="flex items-center gap-3">
@@ -479,10 +460,7 @@ const EmployeeCalendar = ({ employeeId }) => {
             </div>
           </DialogHeader>
 
-          <form
-            onSubmit={handleAddEvent}
-            className="space-y-5 p-5"
-          >
+          <form onSubmit={handleAddEvent} className="space-y-5 p-5">
             <div>
               <label
                 htmlFor="employee-event-title"
@@ -494,9 +472,7 @@ const EmployeeCalendar = ({ employeeId }) => {
               <Input
                 id="employee-event-title"
                 value={newEventTitle}
-                onChange={(event) =>
-                  setNewEventTitle(event.target.value)
-                }
+                onChange={(event) => setNewEventTitle(event.target.value)}
                 placeholder="e.g. Team meeting"
                 maxLength={120}
                 required
@@ -542,9 +518,7 @@ const EmployeeCalendar = ({ employeeId }) => {
 
             {selectedDate && (
               <div className="rounded-lg border border-[#E3E7F0] bg-[#FAFBFD] px-3 py-2.5">
-                <p className="text-xs text-[#8A92A6]">
-                  Event date
-                </p>
+                <p className="text-xs text-[#8A92A6]">Event date</p>
 
                 <p className="mt-1 text-sm font-semibold text-[#26344D]">
                   {selectedDate}

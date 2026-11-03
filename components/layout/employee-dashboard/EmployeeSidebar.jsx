@@ -100,7 +100,11 @@ const EmployeeSidebar = ({ open, setOpen }) => {
               !open && "justify-center"
             }`}
           >
-            <Link href={link.href} title={link?.title} className="flex items-center w-full">
+            <Link
+              href={link.href}
+              title={link?.title}
+              className="flex items-center w-full"
+            >
               {link.icon}
               {open && <span className="ml-3">{link.label}</span>}
             </Link>

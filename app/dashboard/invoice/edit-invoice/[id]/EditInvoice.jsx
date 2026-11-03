@@ -60,28 +60,17 @@ const EditInvoice = ({ id }) => {
   const [editInvoiceServiceId, setEditInvoiceServiceId] = useState(null);
 
   const [serviceFormData, setServiceFormData] = useState(
-    initialInvoiceServiceFormData
+    initialInvoiceServiceFormData,
   );
 
-  const [editData, setEditData] = useState(
-    initialInvoiceServiceFormData
-  );
+  const [editData, setEditData] = useState(initialInvoiceServiceFormData);
 
   // -----------------------------------------
   // CLIENT DETAILS
   // -----------------------------------------
 
-  const {
-    Address,
-    GSTIN,
-    city,
-    company,
-    country,
-    name,
-    phone,
-    tanNo,
-    email,
-  } = clientDetails;
+  const { Address, GSTIN, city, company, country, name, phone, tanNo, email } =
+    clientDetails;
 
   // -----------------------------------------
   // CALCULATE TOTAL
@@ -90,7 +79,7 @@ const EditInvoice = ({ id }) => {
   function calculationOfTotalAmount() {
     const totalServicePrice = selectedServices.reduce(
       (total, service) => total + Number(service?.price || 0),
-      0
+      0,
     );
 
     const taxAmount = totalServicePrice * 0.18;
@@ -112,9 +101,7 @@ const EditInvoice = ({ id }) => {
         return response.data || [];
       }
 
-      toast.error(
-        response?.message || "Failed to fetch invoice services"
-      );
+      toast.error(response?.message || "Failed to fetch invoice services");
 
       return [];
     } catch (error) {
@@ -122,8 +109,8 @@ const EditInvoice = ({ id }) => {
 
       toast.error(
         error?.response?.data?.message ||
-        error?.message ||
-        "Failed to fetch invoice services"
+          error?.message ||
+          "Failed to fetch invoice services",
       );
 
       return [];
@@ -151,9 +138,7 @@ const EditInvoice = ({ id }) => {
       // -----------------------------------------
 
       if (!invoiceResponse?.success) {
-        toast.error(
-          invoiceResponse?.message || "Failed to fetch invoice"
-        );
+        toast.error(invoiceResponse?.message || "Failed to fetch invoice");
 
         return;
       }
@@ -164,8 +149,7 @@ const EditInvoice = ({ id }) => {
 
       if (!servicesResponse?.success) {
         toast.error(
-          servicesResponse?.message ||
-          "Failed to fetch invoice services"
+          servicesResponse?.message || "Failed to fetch invoice services",
         );
 
         return;
@@ -188,9 +172,7 @@ const EditInvoice = ({ id }) => {
         taxType: invoice?.taxType || "",
 
         invoiceDate: invoice?.invoiceDate
-          ? new Date(invoice.invoiceDate)
-            .toISOString()
-            .split("T")[0]
+          ? new Date(invoice.invoiceDate).toISOString().split("T")[0]
           : "",
 
         invoiceNo: invoice?.invoiceNo || "",
@@ -234,8 +216,7 @@ const EditInvoice = ({ id }) => {
               (service) =>
                 service?.serviceName === savedService?.serviceName &&
                 String(service?.HSN) === String(savedService?.HSN) &&
-                Number(service?.price) ===
-                Number(savedService?.price)
+                Number(service?.price) === Number(savedService?.price),
             );
 
             return matchedService || null;
@@ -247,7 +228,7 @@ const EditInvoice = ({ id }) => {
         // If some old service no longer exists
         if (matchedServices.length !== savedServices.length) {
           toast.error(
-            "Some services from this invoice are no longer available."
+            "Some services from this invoice are no longer available.",
           );
         }
       } else {
@@ -258,8 +239,8 @@ const EditInvoice = ({ id }) => {
 
       toast.error(
         error?.response?.data?.message ||
-        error?.message ||
-        "Failed to load invoice"
+          error?.message ||
+          "Failed to load invoice",
       );
     } finally {
       setInvoiceLoading(false);
@@ -278,14 +259,12 @@ const EditInvoice = ({ id }) => {
 
     setSelectedServices((prevSelected) => {
       const isSelected = prevSelected.some(
-        (selected) =>
-          String(selected?._id) === String(service?._id)
+        (selected) => String(selected?._id) === String(service?._id),
       );
 
       if (isSelected) {
         return prevSelected.filter(
-          (selected) =>
-            String(selected?._id) !== String(service?._id)
+          (selected) => String(selected?._id) !== String(service?._id),
         );
       }
 
@@ -319,13 +298,8 @@ const EditInvoice = ({ id }) => {
       return;
     }
 
-    if (
-      !invoiceFormData.invoiceDate ||
-      !invoiceFormData.taxType
-    ) {
-      toast.error(
-        "Please fill in Invoice Date and Tax Type."
-      );
+    if (!invoiceFormData.invoiceDate || !invoiceFormData.taxType) {
+      toast.error("Please fill in Invoice Date and Tax Type.");
 
       return;
     }
@@ -344,7 +318,7 @@ const EditInvoice = ({ id }) => {
         selectedServices
           .map((service) => service?._id)
           .filter(Boolean)
-          .map((serviceId) => String(serviceId))
+          .map((serviceId) => String(serviceId)),
       ),
     ];
 
@@ -370,8 +344,9 @@ const EditInvoice = ({ id }) => {
 
         clientCompany: company,
 
-        clientAddress: `${Address || ""}${city ? ` - ${city}` : ""
-          }${country ? ` - ${country}` : ""}`,
+        clientAddress: `${Address || ""}${
+          city ? ` - ${city}` : ""
+        }${country ? ` - ${country}` : ""}`,
 
         GSTIN,
 
@@ -384,37 +359,22 @@ const EditInvoice = ({ id }) => {
         totalAmount: calculationOfTotalAmount(),
       };
 
-      console.log(
-        "UPDATE INVOICE PAYLOAD:",
-        invoiceData
-      );
+      console.log("UPDATE INVOICE PAYLOAD:", invoiceData);
 
-      const response = await editInvoiceById(
-        id,
-        invoiceData
-      );
+      const response = await editInvoiceById(id, invoiceData);
 
       if (response?.success) {
-        toast.success(
-          "Invoice updated successfully!"
-        );
-
+        toast.success("Invoice updated successfully!");
       } else {
-        toast.error(
-          response?.message ||
-          "Failed to update invoice"
-        );
+        toast.error(response?.message || "Failed to update invoice");
       }
     } catch (error) {
-      console.error(
-        "UPDATE INVOICE ERROR:",
-        error
-      );
+      console.error("UPDATE INVOICE ERROR:", error);
 
       toast.error(
         error?.response?.data?.message ||
-        error?.message ||
-        "Failed to update invoice"
+          error?.message ||
+          "Failed to update invoice",
       );
     } finally {
       setIsUpdatingInvoice(false);
@@ -431,37 +391,24 @@ const EditInvoice = ({ id }) => {
     setIsCreatingService(true);
 
     try {
-      const response =
-        await createInvoiceServiceService(
-          serviceFormData
-        );
+      const response = await createInvoiceServiceService(serviceFormData);
 
       if (response?.success) {
-        toast.success(
-          "Service added successfully!"
-        );
+        toast.success("Service added successfully!");
 
-        setServiceFormData(
-          initialInvoiceServiceFormData
-        );
+        setServiceFormData(initialInvoiceServiceFormData);
 
         await allInvoiceService();
       } else {
-        toast.error(
-          response?.message ||
-          "Failed to create service"
-        );
+        toast.error(response?.message || "Failed to create service");
       }
     } catch (error) {
-      console.error(
-        "CREATE SERVICE ERROR:",
-        error
-      );
+      console.error("CREATE SERVICE ERROR:", error);
 
       toast.error(
         error?.response?.data?.message ||
-        error?.message ||
-        "Failed to create service"
+          error?.message ||
+          "Failed to create service",
       );
     } finally {
       setIsCreatingService(false);
@@ -481,15 +428,10 @@ const EditInvoice = ({ id }) => {
     try {
       setEditInvoiceServiceId(serviceId);
 
-      const response =
-        await fetchInvoiceServiceById(serviceId);
+      const response = await fetchInvoiceServiceById(serviceId);
 
       if (response?.success) {
-        const {
-          HSN,
-          price,
-          serviceName,
-        } = response.data;
+        const { HSN, price, serviceName } = response.data;
 
         setEditData({
           HSN: HSN || "",
@@ -497,23 +439,17 @@ const EditInvoice = ({ id }) => {
           serviceName: serviceName || "",
         });
       } else {
-        toast.error(
-          response?.message ||
-          "Failed to fetch service details."
-        );
+        toast.error(response?.message || "Failed to fetch service details.");
 
         setEditInvoiceServiceId(null);
       }
     } catch (error) {
-      console.error(
-        "FETCH SERVICE DETAILS ERROR:",
-        error
-      );
+      console.error("FETCH SERVICE DETAILS ERROR:", error);
 
       toast.error(
         error?.response?.data?.message ||
-        error?.message ||
-        "Failed to fetch service details."
+          error?.message ||
+          "Failed to fetch service details.",
       );
 
       setEditInvoiceServiceId(null);
@@ -534,24 +470,20 @@ const EditInvoice = ({ id }) => {
     setIsUpdatingService(true);
 
     try {
-      const response =
-        await editInvoiceServiceById(
-          editInvoiceServiceId,
-          editData
-        );
+      const response = await editInvoiceServiceById(
+        editInvoiceServiceId,
+        editData,
+      );
 
       if (response?.success) {
-        toast.success(
-          "Service updated successfully!"
-        );
+        toast.success("Service updated successfully!");
 
         // -----------------------------------------
         // IMPORTANT
         // Reload ALL services after update
         // -----------------------------------------
 
-        const updatedServices =
-          await allInvoiceService();
+        const updatedServices = await allInvoiceService();
 
         // -----------------------------------------
         // Update selected service
@@ -559,19 +491,13 @@ const EditInvoice = ({ id }) => {
 
         setSelectedServices((prevSelected) =>
           prevSelected.map((service) => {
-            if (
-              String(service?._id) !==
-              String(editInvoiceServiceId)
-            ) {
+            if (String(service?._id) !== String(editInvoiceServiceId)) {
               return service;
             }
 
-            const updatedService =
-              updatedServices.find(
-                (item) =>
-                  String(item?._id) ===
-                  String(editInvoiceServiceId)
-              );
+            const updatedService = updatedServices.find(
+              (item) => String(item?._id) === String(editInvoiceServiceId),
+            );
 
             return (
               updatedService || {
@@ -579,30 +505,22 @@ const EditInvoice = ({ id }) => {
                 ...editData,
               }
             );
-          })
+          }),
         );
 
         setEditInvoiceServiceId(null);
 
-        setEditData(
-          initialInvoiceServiceFormData
-        );
+        setEditData(initialInvoiceServiceFormData);
       } else {
-        toast.error(
-          response?.message ||
-          "Failed to update service"
-        );
+        toast.error(response?.message || "Failed to update service");
       }
     } catch (error) {
-      console.error(
-        "UPDATE SERVICE ERROR:",
-        error
-      );
+      console.error("UPDATE SERVICE ERROR:", error);
 
       toast.error(
         error?.response?.data?.message ||
-        error?.message ||
-        "Error updating service"
+          error?.message ||
+          "Error updating service",
       );
     } finally {
       setIsUpdatingService(false);
@@ -619,7 +537,7 @@ const EditInvoice = ({ id }) => {
     }
 
     const confirmed = window.confirm(
-      "Are you sure you want to delete this service?"
+      "Are you sure you want to delete this service?",
     );
 
     if (!confirmed) {
@@ -627,8 +545,7 @@ const EditInvoice = ({ id }) => {
     }
 
     try {
-      const response =
-        await deleteInvoiceServiceById(serviceId);
+      const response = await deleteInvoiceServiceById(serviceId);
 
       if (response?.success) {
         toast.success("Service deleted.");
@@ -637,8 +554,7 @@ const EditInvoice = ({ id }) => {
         // Remove from service list
         // -----------------------------------------
 
-        const updatedServices =
-          await allInvoiceService();
+        const updatedServices = await allInvoiceService();
 
         // -----------------------------------------
         // Remove from selected services
@@ -646,42 +562,29 @@ const EditInvoice = ({ id }) => {
 
         setSelectedServices((prevSelected) =>
           prevSelected.filter(
-            (service) =>
-              String(service?._id) !==
-              String(serviceId)
-          )
+            (service) => String(service?._id) !== String(serviceId),
+          ),
         );
 
         // -----------------------------------------
         // Close edit form if same service
         // -----------------------------------------
 
-        if (
-          String(editInvoiceServiceId) ===
-          String(serviceId)
-        ) {
+        if (String(editInvoiceServiceId) === String(serviceId)) {
           setEditInvoiceServiceId(null);
 
-          setEditData(
-            initialInvoiceServiceFormData
-          );
+          setEditData(initialInvoiceServiceFormData);
         }
       } else {
-        toast.error(
-          response?.message ||
-          "Failed to delete service"
-        );
+        toast.error(response?.message || "Failed to delete service");
       }
     } catch (error) {
-      console.error(
-        "DELETE SERVICE ERROR:",
-        error
-      );
+      console.error("DELETE SERVICE ERROR:", error);
 
       toast.error(
         error?.response?.data?.message ||
-        error?.message ||
-        "Failed to delete service"
+          error?.message ||
+          "Failed to delete service",
       );
     }
   }
@@ -703,9 +606,7 @@ const EditInvoice = ({ id }) => {
   if (invoiceLoading) {
     return (
       <div className="flex justify-center items-center min-h-[300px]">
-        <p className="text-lg font-medium">
-          Loading invoice...
-        </p>
+        <p className="text-lg font-medium">Loading invoice...</p>
       </div>
     );
   }
@@ -716,18 +617,14 @@ const EditInvoice = ({ id }) => {
 
   return (
     <div>
-      <p className="font-bold text-2xl text-center mb-6">
-        Edit Invoice
-      </p>
+      <p className="font-bold text-2xl text-center mb-6">Edit Invoice</p>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-
         {/* ================================= */}
         {/* LEFT SIDE */}
         {/* ================================= */}
 
         <div>
-
           {/* INVOICE FORM */}
 
           <CommonForm
@@ -742,71 +639,44 @@ const EditInvoice = ({ id }) => {
           {/* SELECT SERVICES */}
 
           <div className="border-t-2 mt-6 py-4">
-
             <div className="flex justify-between items-center mb-4">
-
-              <h2 className="font-semibold text-xl">
-                Select Services
-              </h2>
+              <h2 className="font-semibold text-xl">Select Services</h2>
 
               <p className="font-semibold">
-                Total: ₹
-                {calculationOfTotalAmount().toLocaleString(
-                  "en-IN"
-                )}
+                Total: ₹{calculationOfTotalAmount().toLocaleString("en-IN")}
               </p>
-
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
               {invoiceServiceItem.map((item) => {
-
-                const isSelected =
-                  selectedServices.some(
-                    (service) =>
-                      String(service?._id) ===
-                      String(item?._id)
-                  );
+                const isSelected = selectedServices.some(
+                  (service) => String(service?._id) === String(item?._id),
+                );
 
                 return (
-                  <div
-                    key={item?._id}
-                    className="flex flex-col"
-                  >
-
+                  <div key={item?._id} className="flex flex-col">
                     {/* SELECT SERVICE */}
 
                     <button
                       type="button"
-                      onClick={() =>
-                        handleSelectService(item)
-                      }
-                      className={`group block rounded-t-lg p-4 border shadow-sm transition-all duration-300 ${isSelected
-                        ? "bg-blue-100 border-blue-400"
-                        : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
-                        }`}
+                      onClick={() => handleSelectService(item)}
+                      className={`group block rounded-t-lg p-4 border shadow-sm transition-all duration-300 ${
+                        isSelected
+                          ? "bg-blue-100 border-blue-400"
+                          : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
+                      }`}
                     >
-
                       <div className="text-center">
-
                         <p className="font-semibold text-gray-800 capitalize mt-5">
                           {item?.serviceName}
                         </p>
-
                       </div>
 
-                      <div className="text-center">
-                        HSN CODE: {item?.HSN}
-                      </div>
+                      <div className="text-center">HSN CODE: {item?.HSN}</div>
 
                       <div className="mt-2 text-lg font-bold text-black text-center">
                         Price: ₹
-                        {Number(
-                          item?.price || 0
-                        ).toLocaleString(
-                          "en-IN"
-                        )}
+                        {Number(item?.price || 0).toLocaleString("en-IN")}
                       </div>
 
                       {isSelected && (
@@ -814,20 +684,14 @@ const EditInvoice = ({ id }) => {
                           Selected
                         </p>
                       )}
-
                     </button>
 
                     {/* EDIT / DELETE */}
 
                     <div className="flex justify-between px-4 py-3 border rounded-b-2xl">
-
                       <button
                         type="button"
-                        onClick={() =>
-                          handleEditInvoiceService(
-                            item?._id
-                          )
-                        }
+                        onClick={() => handleEditInvoiceService(item?._id)}
                         className="bg-blue-300 p-2 rounded-full cursor-pointer"
                       >
                         <Edit size={18} />
@@ -835,22 +699,15 @@ const EditInvoice = ({ id }) => {
 
                       <button
                         type="button"
-                        onClick={() =>
-                          handleDeleteInvoiceById(
-                            item?._id
-                          )
-                        }
+                        onClick={() => handleDeleteInvoiceById(item?._id)}
                         className="bg-red-300 p-2 rounded-full cursor-pointer"
                       >
                         <Trash size={18} />
                       </button>
-
                     </div>
-
                   </div>
                 );
               })}
-
             </div>
 
             {invoiceServiceItem.length === 0 && (
@@ -858,9 +715,7 @@ const EditInvoice = ({ id }) => {
                 No services available.
               </p>
             )}
-
           </div>
-
         </div>
 
         {/* ================================= */}
@@ -868,56 +723,44 @@ const EditInvoice = ({ id }) => {
         {/* ================================= */}
 
         <div className="flex flex-col mt-10 gap-5">
-
           {/* CLIENT DETAILS */}
 
           <div className="border p-6 rounded-lg shadow-md bg-gray-50">
-
             <h2 className="text-xl font-semibold mb-1 border-b pb-1 text-gray-700">
               Client Details
             </h2>
 
             <div className="space-y-1 text-gray-600">
-
               <p>
-                <strong>Company:</strong>{" "}
-                {company || "NA"}
+                <strong>Company:</strong> {company || "NA"}
               </p>
 
               <p>
-                <strong>Name:</strong>{" "}
-                {name || "NA"}
+                <strong>Name:</strong> {name || "NA"}
               </p>
 
               <p>
-                <strong>Phone:</strong>{" "}
-                {phone || "NA"}
+                <strong>Phone:</strong> {phone || "NA"}
               </p>
 
               <p>
-                <strong>TAN NO:</strong>{" "}
-                {tanNo || "NA"}
+                <strong>TAN NO:</strong> {tanNo || "NA"}
               </p>
 
               <p>
-                <strong>Email:</strong>{" "}
-                {email || "NA"}
+                <strong>Email:</strong> {email || "NA"}
               </p>
 
               <p>
-                <strong>Address:</strong>{" "}
-                {Address || "NA"}
+                <strong>Address:</strong> {Address || "NA"}
                 {city ? `, ${city}` : ""}
                 {country ? `, ${country}` : ""}
               </p>
 
               <p>
-                <strong>GSTIN:</strong>{" "}
-                {GSTIN || "NA"}
+                <strong>GSTIN:</strong> {GSTIN || "NA"}
               </p>
-
             </div>
-
           </div>
 
           {/* CREATE / EDIT SERVICE */}
@@ -925,16 +768,10 @@ const EditInvoice = ({ id }) => {
           <CommonForm
             formControls={createServiceForInvoice}
 
-            formData={
-              editInvoiceServiceId
-                ? editData
-                : serviceFormData
-            }
+            formData={editInvoiceServiceId ? editData : serviceFormData}
 
             setFormData={
-              editInvoiceServiceId
-                ? setEditData
-                : setServiceFormData
+              editInvoiceServiceId ? setEditData : setServiceFormData
             }
 
             onSubmit={
@@ -943,21 +780,13 @@ const EditInvoice = ({ id }) => {
                 : handleServiceFormSubmit
             }
 
-            buttonText={
-              editInvoiceServiceId
-                ? "Update Service"
-                : "Add Service"
-            }
+            buttonText={editInvoiceServiceId ? "Update Service" : "Add Service"}
 
             isBtnDisabled={
-              editInvoiceServiceId
-                ? isUpdatingService
-                : isCreatingService
+              editInvoiceServiceId ? isUpdatingService : isCreatingService
             }
           />
-
         </div>
-
       </div>
     </div>
   );

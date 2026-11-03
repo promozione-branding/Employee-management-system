@@ -20,25 +20,24 @@ export async function POST(req) {
           success: false,
           message: "Unauthorized",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const data = await req.json();
-    
-// Validate invoice type; preserve normal invoice behavior for older clients.
-const invoiceType = data.invoiceType || "normal";
 
-if (!["normal", "tds"].includes(invoiceType)) {
-  return NextResponse.json(
-    {
-      success: false,
-      message: "Invalid invoice type.",
-    }, 
-    { status: 400 }
-  );
-}
+    // Validate invoice type; preserve normal invoice behavior for older clients.
+    const invoiceType = data.invoiceType || "normal";
 
+    if (!["normal", "tds"].includes(invoiceType)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid invoice type.",
+        },
+        { status: 400 },
+      );
+    }
 
     // 1. FIND CUSTOMER
     const findCustomer = await Customer.findById(data.clientId);
@@ -49,7 +48,7 @@ if (!["normal", "tds"].includes(invoiceType)) {
           success: false,
           message: "Customer with the provided clientId not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -60,7 +59,7 @@ if (!["normal", "tds"].includes(invoiceType)) {
           success: false,
           message: "Invalid tax type.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -71,16 +70,14 @@ if (!["normal", "tds"].includes(invoiceType)) {
           success: false,
           message: "Please select at least one service.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Remove duplicate service IDs
     const serviceIds = [
       ...new Set(
-        data.services
-          .filter(Boolean)
-          .map((serviceId) => String(serviceId))
+        data.services.filter(Boolean).map((serviceId) => String(serviceId)),
       ),
     ];
 
@@ -96,7 +93,7 @@ if (!["normal", "tds"].includes(invoiceType)) {
             success: false,
             message: `Invoice number ${data.invoiceNo} already exists.`,
           },
-          { status: 409 }
+          { status: 409 },
         );
       }
     }
@@ -113,7 +110,7 @@ if (!["normal", "tds"].includes(invoiceType)) {
           success: false,
           message: "One or more selected services were not found.",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -127,7 +124,7 @@ if (!["normal", "tds"].includes(invoiceType)) {
     // 7. CALCULATE TAXABLE AMOUNT
     const taxableAmount = serviceSnapshot.reduce(
       (total, service) => total + Number(service.price || 0),
-      0
+      0,
     );
 
     // 8. CALCULATE TAX
@@ -150,14 +147,13 @@ if (!["normal", "tds"].includes(invoiceType)) {
     const totalAmount = taxableAmount + taxAmount;
 
     // 10. CREATE INVOICE
-   
-const invoice = await Invoice.create({
-  ...data,
-  invoiceType,
-  services: serviceSnapshot,
-  totalAmount,
-});
 
+    const invoice = await Invoice.create({
+      ...data,
+      invoiceType,
+      services: serviceSnapshot,
+      totalAmount,
+    });
 
     // 11. CREATE AUDIT HISTORY
     const { _id } = await createAuditLog({
@@ -182,7 +178,7 @@ const invoice = await Invoice.create({
         message: "Invoice created successfully!",
         data: invoice,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("CREATE INVOICE API ERROR:", error);
@@ -194,7 +190,7 @@ const invoice = await Invoice.create({
           success: false,
           message: "Invoice number already exists.",
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -204,7 +200,7 @@ const invoice = await Invoice.create({
         message: "Invoice error",
         error: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

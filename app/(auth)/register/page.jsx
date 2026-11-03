@@ -1,12 +1,10 @@
 // app/(auth)/register/page.jsx
 
-import React from 'react'
-import Register from './Register'
+import React from "react";
+import Register from "./Register";
 
 const page = () => {
-  return (
-    <Register />
-  )
-}
+  return <Register />;
+};
 
-export default page
+export default page;

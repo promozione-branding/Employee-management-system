@@ -22,7 +22,7 @@ export async function GET(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -53,7 +53,7 @@ export async function GET(req, context) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

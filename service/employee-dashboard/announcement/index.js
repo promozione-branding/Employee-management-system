@@ -3,9 +3,7 @@
 import axiosInstance from "@/service/axiosInstance";
 
 export async function acceptAnnouncementService(id) {
-  const { data } = await axiosInstance.put(
-    `/api/annoucement/accept/${id}`,
-  );
+  const { data } = await axiosInstance.put(`/api/annoucement/accept/${id}`);
   return data;
 }
 
@@ -29,5 +27,3 @@ export async function getListAnnouncementService(quiry) {
   );
   return data;
 }
-
-

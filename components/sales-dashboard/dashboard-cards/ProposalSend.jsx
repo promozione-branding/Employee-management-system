@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
@@ -9,11 +8,7 @@ import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-import {
-  FileText,
-  ArrowUpRight,
-  CalendarDays,
-} from "lucide-react";
+import { FileText, ArrowUpRight, CalendarDays } from "lucide-react";
 
 const ProposalSend = () => {
   const { employee } = useSalesEmployeeStore();
@@ -43,8 +38,7 @@ const ProposalSend = () => {
           console.error("Error fetching proposals:", error);
 
           toast.error(
-            error?.response?.data?.message ||
-              "Error fetching proposals"
+            error?.response?.data?.message || "Error fetching proposals",
           );
         }
       } finally {
@@ -175,8 +169,7 @@ const ProposalSend = () => {
                       </div>
 
                       <p className="mt-1 break-words text-xs leading-5 text-[#8A92A6]">
-                        {proposal.clientCompany ||
-                          "No company specified"}
+                        {proposal.clientCompany || "No company specified"}
                       </p>
 
                       <div className="mt-2.5 flex min-w-0 flex-wrap items-center gap-2">
@@ -185,10 +178,7 @@ const ProposalSend = () => {
                         </span>
 
                         <span className="inline-flex items-center gap-1 text-[11px] text-[#929BAD]">
-                          <CalendarDays
-                            size={12}
-                            className="shrink-0"
-                          />
+                          <CalendarDays size={12} className="shrink-0" />
                           {formatDate(proposal.dateOfProposal)}
                         </span>
                       </div>

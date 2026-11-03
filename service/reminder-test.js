@@ -54,7 +54,7 @@ function scheduleCheck() {
     sendReminderEmail(
       "aalekh@promozionebranding.com",
       "Scheduled Reminder Test",
-      emailHTML
+      emailHTML,
     )
       .then(() => {
         console.log("✅ Email sent successfully!");
@@ -68,7 +68,5 @@ function scheduleCheck() {
     setTimeout(scheduleCheck, 1000); // check again after 1 sec
   }
 }
-
-
 
 scheduleCheck();

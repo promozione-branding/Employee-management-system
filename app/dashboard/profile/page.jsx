@@ -5,7 +5,7 @@
 import Profile from "./Profile";
 
 const page = () => {
-  return <Profile />
+  return <Profile />;
 };
 
 export default page;

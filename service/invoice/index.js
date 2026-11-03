@@ -6,7 +6,7 @@ import axiosInstance from "../axiosInstance";
 export async function createInvoiceServiceService(formData) {
   const { data } = await axiosInstance.post(
     "/api/invoice/service/create",
-    formData
+    formData,
   );
   return data;
 }
@@ -14,7 +14,7 @@ export async function createInvoiceServiceService(formData) {
 export async function getAllinvoiceServices() {
   try {
     const { data } = await axiosInstance.get(
-      "/api/invoice/service/all-invoice-service"
+      "/api/invoice/service/all-invoice-service",
     );
     if (data.success) {
       toast.success(data.message);
@@ -32,7 +32,7 @@ export async function createInvoiceService(invoiceFormData) {
   try {
     const { data } = await axiosInstance.post(
       "/api/invoice/create",
-      invoiceFormData
+      invoiceFormData,
     );
 
     return data;
@@ -52,10 +52,7 @@ export async function createInvoiceService(invoiceFormData) {
 
 export async function editInvoiceById(id, invoiceData) {
   try {
-    const { data } = await axiosInstance.put(
-      `/api/invoice/${id}`,
-      invoiceData
-    );
+    const { data } = await axiosInstance.put(`/api/invoice/${id}`, invoiceData);
 
     return data;
   } catch (error) {
@@ -71,7 +68,6 @@ export async function editInvoiceById(id, invoiceData) {
     };
   }
 }
-
 
 export async function getNextInvoiceNumber() {
   try {
@@ -133,9 +129,7 @@ export async function sendInvoicePdfService(id) {
 // GET SINGLE INVOICE
 export async function fetchInvoiceById(id) {
   try {
-    const { data } = await axiosInstance.get(
-      `/api/invoice/${id}`
-    );
+    const { data } = await axiosInstance.get(`/api/invoice/${id}`);
 
     return data;
   } catch (error) {
@@ -152,12 +146,9 @@ export async function fetchInvoiceById(id) {
   }
 }
 
-
 export async function deleteInvoiceById(id) {
   try {
-    const { data } = await axiosInstance.delete(
-      `/api/invoice/${id}`
-    );
+    const { data } = await axiosInstance.delete(`/api/invoice/${id}`);
 
     return data;
   } catch (error) {

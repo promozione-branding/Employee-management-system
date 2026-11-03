@@ -1,6 +1,5 @@
 // app/api/manager-dashboard-api/reminder/route.js
 
-
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import AdminReminder from "@/models/admin/adminDetails/AdminReminder";
@@ -10,12 +9,7 @@ import { getAuthUser } from "@/lib/getAuthUser";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const IST_OFFSET_MS = 330 * 60 * 1000;
 
-const VALID_PRESETS = new Set([
-  "today",
-  "yesterday",
-  "tomorrow",
-  "custom",
-]);
+const VALID_PRESETS = new Set(["today", "yesterday", "tomorrow", "custom"]);
 
 /**
  * Returns the start of today in IST, represented as a UTC Date.
@@ -282,9 +276,7 @@ export async function POST(req) {
 
     for (const item of reminder) {
       const description =
-        typeof item?.description === "string"
-          ? item.description.trim()
-          : "";
+        typeof item?.description === "string" ? item.description.trim() : "";
 
       const reminderDate = new Date(item?.reminderAt);
 

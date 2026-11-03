@@ -13,22 +13,29 @@ export default function ReportsPage() {
     setLoading(true);
     try {
       const [c, s] = await Promise.all([
-        fetch("/api/reports/clients").then(r => r.json()),
-        fetch("/api/reports/admin/status").then(r => r.json()),
+        fetch("/api/reports/clients").then((r) => r.json()),
+        fetch("/api/reports/admin/status").then((r) => r.json()),
       ]);
       setClients(c.clients || []);
       setStatus(s);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   async function handleDelete(id, name) {
-    if (!confirm(`Are you sure you want to delete the report for "${name}"?`)) return;
+    if (!confirm(`Are you sure you want to delete the report for "${name}"?`))
+      return;
     try {
       await fetch(`/api/reports/clients/${id}`, { method: "DELETE" });
       load();
-    } catch (e) { alert(`Error: ${e.message}`); }
+    } catch (e) {
+      alert(`Error: ${e.message}`);
+    }
   }
 
   if (loading) return <div className="p-6">Loading...</div>;
@@ -38,13 +45,24 @@ export default function ReportsPage() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Client Reports</h1>
         <div className="space-x-2">
-          <a href="/api/reports/auth/google" className={`px-3 py-1 text-sm rounded ${status?.googleConnected ? "bg-green-100 text-green-700" : "bg-red-600 text-white"}`}>
+          <a
+            href="/api/reports/auth/google"
+            className={`px-3 py-1 text-sm rounded ${status?.googleConnected ? "bg-green-100 text-green-700" : "bg-red-600 text-white"}`}
+          >
             {status?.googleConnected ? "✓ Google Connected" : "Connect Google"}
           </a>
-          <a href="/api/reports/auth/meta" className={`px-3 py-1 text-sm rounded ${status?.metaConnected ? "bg-green-100 text-green-700" : "bg-blue-600 text-white"}`}>
+          <a
+            href="/api/reports/auth/meta"
+            className={`px-3 py-1 text-sm rounded ${status?.metaConnected ? "bg-green-100 text-green-700" : "bg-blue-600 text-white"}`}
+          >
             {status?.metaConnected ? "✓ Meta Connected" : "Connect Meta"}
           </a>
-          <Link href="/reports/discover" className="px-3 py-1 text-sm bg-purple-600 text-white rounded">+ Add Client</Link>
+          <Link
+            href="/reports/discover"
+            className="px-3 py-1 text-sm bg-purple-600 text-white rounded"
+          >
+            + Add Client
+          </Link>
         </div>
       </div>
 
@@ -58,7 +76,9 @@ export default function ReportsPage() {
       {clients.length === 0 ? (
         <div className="border rounded p-6 text-center text-gray-500">
           <p className="mb-2">No clients yet.</p>
-          <Link href="/reports/discover" className="text-blue-600 underline">Discover accounts →</Link>
+          <Link href="/reports/discover" className="text-blue-600 underline">
+            Discover accounts →
+          </Link>
         </div>
       ) : (
         <table className="w-full text-sm border">
@@ -71,17 +91,35 @@ export default function ReportsPage() {
             </tr>
           </thead>
           <tbody>
-            {clients.map(c => (
+            {clients.map((c) => (
               <tr key={c._id} className="border-t">
                 <td className="p-2 font-medium">{c.name}</td>
                 <td className="p-2">{c.emails?.join(", ") || "-"}</td>
                 <td className="p-2 text-xs">
-                  GA4: {c.ga4PropertyIds?.length || 0} · GSC: {c.gscSiteUrls?.length || 0} · GAds: {c.googleAdsCustomerIds?.length || 0} · Meta: {c.metaAdAccountIds?.length || 0}
+                  GA4: {c.ga4PropertyIds?.length || 0} · GSC:{" "}
+                  {c.gscSiteUrls?.length || 0} · GAds:{" "}
+                  {c.googleAdsCustomerIds?.length || 0} · Meta:{" "}
+                  {c.metaAdAccountIds?.length || 0}
                 </td>
                 <td className="p-2 space-x-2 whitespace-nowrap">
-                  <Link href={`/reports/${c._id}`} className="px-3 py-1 text-sm bg-blue-600 text-white rounded">Open</Link>
-                  <Link href={`/reports/discover?clientId=${c._id}`} className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 rounded">✏️ Edit</Link>
-                  <button onClick={() => handleDelete(c._id, c.name)} className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded">🗑️ Delete</button>
+                  <Link
+                    href={`/reports/${c._id}`}
+                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded"
+                  >
+                    Open
+                  </Link>
+                  <Link
+                    href={`/reports/discover?clientId=${c._id}`}
+                    className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 rounded"
+                  >
+                    ✏️ Edit
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(c._id, c.name)}
+                    className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded"
+                  >
+                    🗑️ Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -94,8 +132,12 @@ export default function ReportsPage() {
 
 function StatusCard({ label, on }) {
   return (
-    <div className={`border rounded p-2 ${on ? "bg-green-50 border-green-300" : "bg-red-50 border-red-300"}`}>
-      <div className="font-semibold">{on ? "✓" : "✗"} {label}</div>
+    <div
+      className={`border rounded p-2 ${on ? "bg-green-50 border-green-300" : "bg-red-50 border-red-300"}`}
+    >
+      <div className="font-semibold">
+        {on ? "✓" : "✗"} {label}
+      </div>
     </div>
   );
 }

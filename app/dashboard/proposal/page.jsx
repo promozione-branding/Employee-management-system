@@ -13,8 +13,12 @@ const page = () => {
           <TabsTrigger value="Create-Proposal">Create</TabsTrigger>
           <TabsTrigger value="Proposals">Proposals</TabsTrigger>
         </TabsList>
-        <TabsContent value="Create-Proposal" className={"w-full"}><Proposal /></TabsContent>
-        <TabsContent value="Proposals"><AllProposal /></TabsContent>
+        <TabsContent value="Create-Proposal" className={"w-full"}>
+          <Proposal />
+        </TabsContent>
+        <TabsContent value="Proposals">
+          <AllProposal />
+        </TabsContent>
       </Tabs>
     </div>
   );

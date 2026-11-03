@@ -70,13 +70,12 @@ const SideBar = ({ children }) => {
   const pathname = usePathname();
 
   const username = adminDetail?.username || "Admin";
-  const email =
-    adminDetail?.email || "admin2@promozionebranding.com";
+  const email = adminDetail?.email || "admin2@promozionebranding.com";
 
   useEffect(() => {
     setMobileOpen(false);
     setUserMenuOpen(false);
-    
+
     // Clear active customer if we navigate away from customer detail pages
     if (!pathname.includes("/dashboard/customer/")) {
       clearActiveCustomer();
@@ -109,9 +108,7 @@ const SideBar = ({ children }) => {
       toast.success("Logged out successfully");
       router.push("/login");
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Logout failed."
-      );
+      toast.error(error.response?.data?.message || "Logout failed.");
       console.error(error);
     }
   };
@@ -137,11 +134,7 @@ const SideBar = ({ children }) => {
         aria-hidden="true"
         className={`fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-[2px]
           transition-opacity duration-300 md:hidden
-          ${
-            mobileOpen
-              ? "visible opacity-100"
-              : "invisible opacity-0"
-          }`}
+          ${mobileOpen ? "visible opacity-100" : "invisible opacity-0"}`}
         onClick={() => setMobileOpen(false)}
       />
 
@@ -164,9 +157,7 @@ const SideBar = ({ children }) => {
         <div
           className={`flex h-[66px] shrink-0 items-center border-b
             border-white/10 ${
-              showLabels
-                ? "justify-between px-5"
-                : "justify-center px-2"
+              showLabels ? "justify-between px-5" : "justify-center px-2"
             }`}
         >
           <Link
@@ -188,8 +179,10 @@ const SideBar = ({ children }) => {
                 <p className="truncate text-[17px] font-bold tracking-tight">
                   Inquiry Bazaar
                 </p>
-                <p className="mt-0.5 text-[10px] font-semibold
-                  uppercase tracking-[0.18em] text-blue-200/80">
+                <p
+                  className="mt-0.5 text-[10px] font-semibold
+                  uppercase tracking-[0.18em] text-blue-200/80"
+                >
                   Admin workspace
                 </p>
               </div>
@@ -212,8 +205,10 @@ const SideBar = ({ children }) => {
         {/* Navigation heading */}
         <div className="px-4 pb-2 pt-7">
           {showLabels ? (
-            <p className="px-2 text-[10px] font-bold uppercase
-              tracking-[0.18em] text-blue-200/60">
+            <p
+              className="px-2 text-[10px] font-bold uppercase
+              tracking-[0.18em] text-blue-200/60"
+            >
               Workspace
             </p>
           ) : (
@@ -267,9 +262,7 @@ const SideBar = ({ children }) => {
                 </span>
 
                 {showLabels && (
-                  <span className="min-w-0 flex-1 truncate">
-                    {link.label}
-                  </span>
+                  <span className="min-w-0 flex-1 truncate">{link.label}</span>
                 )}
 
                 {showLabels && active && (
@@ -279,16 +272,19 @@ const SideBar = ({ children }) => {
             );
           })}
         </nav>
-        
 
         {/* Bottom section */}
         <div className="shrink-0 border-t border-white/10 p-3">
           {showLabels && (
-            <div className="mb-3 rounded-xl border border-white/10
-              bg-white/[0.06] px-3 py-3">
+            <div
+              className="mb-3 rounded-xl border border-white/10
+              bg-white/[0.06] px-3 py-3"
+            >
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 shrink-0 items-center
-                  justify-center rounded-lg bg-white/10 text-orange-300">
+                <div
+                  className="flex h-8 w-8 shrink-0 items-center
+                  justify-center rounded-lg bg-white/10 text-orange-300"
+                >
                   <Building2 size={16} />
                 </div>
                 <div className="min-w-0">
@@ -313,8 +309,10 @@ const SideBar = ({ children }) => {
               hover:bg-red-400/10 hover:text-red-100
               ${!showLabels ? "justify-center px-0" : ""}`}
           >
-            <span className="flex h-9 w-9 shrink-0 items-center
-              justify-center rounded-xl">
+            <span
+              className="flex h-9 w-9 shrink-0 items-center
+              justify-center rounded-xl"
+            >
               <LogOut size={20} strokeWidth={1.9} />
             </span>
             {showLabels && <span>Sign out</span>}
@@ -345,10 +343,12 @@ const SideBar = ({ children }) => {
       {/* Main application area */}
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
         {/* Topbar */}
-        <header className="sticky top-0 z-30 flex h-[68px]
+        <header
+          className="sticky top-0 z-30 flex h-[68px]
           shrink-0 items-center justify-between border-b
           border-slate-200/80 bg-white/95 px-3 shadow-sm
-          backdrop-blur-xl sm:px-5 lg:px-8">
+          backdrop-blur-xl sm:px-5 lg:px-8"
+        >
           <div className="flex min-w-0 items-center gap-3">
             {/* Mobile menu */}
             <Button
@@ -379,13 +379,16 @@ const SideBar = ({ children }) => {
                     "Workspace"}
                 </p>
               </div>
-              
+
               {/* Dynamic replacement: Customer Name & Company Name if available */}
               {activeCustomer ? (
                 <p className="mt-0.5 truncate text-xs font-medium text-[#0A2E66]">
                   <span className="font-semibold">{activeCustomer.name}</span>
                   {activeCustomer.company && (
-                    <span className="text-slate-500"> ({activeCustomer.company})</span>
+                    <span className="text-slate-500">
+                      {" "}
+                      ({activeCustomer.company})
+                    </span>
                   )}
                 </p>
               ) : (
@@ -413,7 +416,8 @@ const SideBar = ({ children }) => {
               </div>
               {activeCustomer ? (
                 <p className="truncate text-[11px] font-medium text-slate-600">
-                  {activeCustomer.name} {activeCustomer.company ? `- ${activeCustomer.company}` : ""}
+                  {activeCustomer.name}{" "}
+                  {activeCustomer.company ? `- ${activeCustomer.company}` : ""}
                 </p>
               ) : (
                 <p className="truncate text-[11px] text-slate-500">
@@ -462,15 +466,19 @@ const SideBar = ({ children }) => {
                     userMenuOpen ? "bg-slate-50" : ""
                   }`}
               >
-                <div className="flex h-9 w-9 shrink-0 items-center
+                <div
+                  className="flex h-9 w-9 shrink-0 items-center
                   justify-center rounded-xl bg-blue-50 text-[#0A2E66]
-                  ring-1 ring-blue-100">
+                  ring-1 ring-blue-100"
+                >
                   <UserCircle size={23} strokeWidth={1.8} />
                 </div>
 
                 <div className="hidden max-w-36 text-left sm:block">
-                  <p className="truncate text-sm font-semibold capitalize
-                    text-slate-800">
+                  <p
+                    className="truncate text-sm font-semibold capitalize
+                    text-slate-800"
+                  >
                     {username}
                   </p>
                   <p className="text-[11px] text-slate-500">Administrator</p>
@@ -492,20 +500,26 @@ const SideBar = ({ children }) => {
                     onClick={() => setUserMenuOpen(false)}
                   />
 
-                  <div className="absolute right-0 top-[calc(100%+12px)]
+                  <div
+                    className="absolute right-0 top-[calc(100%+12px)]
                     z-50 w-[min(18rem,calc(100vw-1.5rem))]
                     overflow-hidden rounded-2xl border border-slate-200
-                    bg-white shadow-xl shadow-slate-900/10">
+                    bg-white shadow-xl shadow-slate-900/10"
+                  >
                     <div className="bg-[#F2F4F9] p-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0
+                        <div
+                          className="flex h-10 w-10 shrink-0
                           items-center justify-center rounded-xl
-                          bg-white text-[#0A2E66] shadow-sm">
+                          bg-white text-[#0A2E66] shadow-sm"
+                        >
                           <UserCircle size={25} />
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold
-                            capitalize text-slate-800">
+                          <p
+                            className="truncate text-sm font-semibold
+                            capitalize text-slate-800"
+                          >
                             {username}
                           </p>
                           <p className="mt-0.5 truncate text-xs text-slate-500">
@@ -548,8 +562,10 @@ const SideBar = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <main className="min-w-0 flex-1 bg-[#F2F4F9] p-1.5
-          sm:p-1.5 lg:p-1.5">
+        <main
+          className="min-w-0 flex-1 bg-[#F2F4F9] p-1.5
+          sm:p-1.5 lg:p-1.5"
+        >
           {children}
         </main>
       </div>

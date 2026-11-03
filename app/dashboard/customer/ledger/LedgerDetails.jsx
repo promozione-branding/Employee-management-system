@@ -172,7 +172,10 @@ const LedgerDetails = ({ customerId }) => {
                       {date?.split("T")?.[0]}
 
                       <span className="hidden group-hover:flex gap-4 duration-300">
-                        <Pencil size={20} className={`text-blue-500  ${entries?.length - 1 !== idx && "hidden"}`} />
+                        <Pencil
+                          size={20}
+                          className={`text-blue-500  ${entries?.length - 1 !== idx && "hidden"}`}
+                        />
                         <Trash2
                           size={20}
                           className={`text-red-500 ${entries?.length - 1 !== idx && "hidden"}`}

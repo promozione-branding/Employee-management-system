@@ -10,9 +10,8 @@ import { connectDB } from "@/lib/db";
 
 export async function POST(req) {
   try {
-
     await connectDB();
-    
+
     const { proposalId, email } = await req.json();
 
     const proposal = await Proposal.findById(proposalId)

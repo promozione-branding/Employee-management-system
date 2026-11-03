@@ -36,7 +36,7 @@ export async function GET(req, { params }) {
           success: false,
           message: "There is no customer with this id",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -53,7 +53,7 @@ export async function GET(req, { params }) {
                 _id: work.projectId,
               },
             },
-          }
+          },
         );
 
         const project = cycle?.projectDuration?.[0];
@@ -63,16 +63,16 @@ export async function GET(req, { params }) {
 
           project: project
             ? {
-              _id: project._id,
-              projectName: project.projectName,
-              service: project.service,
-              serviceType: project.serviceType,
-              startDate: project.startDate,
-              endDate: project.endDate,
-            }
+                _id: project._id,
+                projectName: project.projectName,
+                service: project.service,
+                serviceType: project.serviceType,
+                startDate: project.startDate,
+                endDate: project.endDate,
+              }
             : null,
         };
-      })
+      }),
     );
 
     return NextResponse.json(
@@ -81,13 +81,13 @@ export async function GET(req, { params }) {
         message: "Client work details history",
         data: { workDetails: workDetails },
       },
-      { status: 200, }
+      { status: 200 },
     );
   } catch (error) {
     console.log(error);
     return NextResponse.json(
-      { success: false, message: "Server error", },
-      { status: 500, }
+      { success: false, message: "Server error" },
+      { status: 500 },
     );
   }
 }

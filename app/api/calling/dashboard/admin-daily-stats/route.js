@@ -165,7 +165,9 @@ export async function GET(req) {
       },
     );
 
-    totals.totalTalkMinutes = +(totals.connectedDurationSeconds / 60).toFixed(1);
+    totals.totalTalkMinutes = +(totals.connectedDurationSeconds / 60).toFixed(
+      1,
+    );
     totals.agentCount = agents.length;
     totals.connectRate =
       totals.totalCalls > 0

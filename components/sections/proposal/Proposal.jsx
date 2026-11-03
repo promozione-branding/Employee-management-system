@@ -1,11 +1,9 @@
 // components/sections/proposal/Proposal.jsx
 
-import React from 'react'
+import React from "react";
 
-const ProposalViewer = ({data}) => {
-  return (
-    <div>ProposalViewer</div>
-  )
-}
+const ProposalViewer = ({ data }) => {
+  return <div>ProposalViewer</div>;
+};
 
-export default ProposalViewer
+export default ProposalViewer;

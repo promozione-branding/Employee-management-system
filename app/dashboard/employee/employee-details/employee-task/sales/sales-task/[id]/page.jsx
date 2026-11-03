@@ -1,11 +1,9 @@
 // app/dashboard/employee/employee-details/employee-task/sales/sales-task/[id]/page.jsx
 
-import SalesTask from './SalesTask'
+import SalesTask from "./SalesTask";
 
 const page = () => {
-  return (
-   <SalesTask />
-  )
-}
+  return <SalesTask />;
+};
 
-export default page
+export default page;

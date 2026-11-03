@@ -10,8 +10,16 @@ export async function PATCH(req) {
     await connectDB();
 
     const body = await req.json();
-    const { projectCycleId, durationId, service, startDate, endDate, projectName, serviceType } = body;
-    console.log(projectName)
+    const {
+      projectCycleId,
+      durationId,
+      service,
+      startDate,
+      endDate,
+      projectName,
+      serviceType,
+    } = body;
+    console.log(projectName);
     // ---- validations ----
     if (!projectCycleId || !durationId) {
       return NextResponse.json(
@@ -19,7 +27,7 @@ export async function PATCH(req) {
           success: false,
           message: "projectCycleId and durationId are required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,7 +37,7 @@ export async function PATCH(req) {
     ) {
       return NextResponse.json(
         { success: false, message: "Invalid ObjectId" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -38,13 +46,15 @@ export async function PATCH(req) {
     if (service) updateFields["projectDuration.$.service"] = service;
     if (startDate) updateFields["projectDuration.$.startDate"] = startDate;
     if (endDate) updateFields["projectDuration.$.endDate"] = endDate;
-    if (projectName) updateFields["projectDuration.$.projectName"] = projectName;
-    if (serviceType) updateFields["projectDuration.$.serviceType"] = serviceType;
+    if (projectName)
+      updateFields["projectDuration.$.projectName"] = projectName;
+    if (serviceType)
+      updateFields["projectDuration.$.serviceType"] = serviceType;
 
     if (Object.keys(updateFields).length === 0) {
       return NextResponse.json(
         { success: false, message: "No fields provided to update" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -59,13 +69,13 @@ export async function PATCH(req) {
       },
       {
         new: true,
-      }
+      },
     );
 
     if (!updatedProject) {
       return NextResponse.json(
         { success: false, message: "Project cycle or duration not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -78,7 +88,7 @@ export async function PATCH(req) {
     console.error("Update Project Duration Error:", error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

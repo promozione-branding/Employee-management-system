@@ -2,12 +2,7 @@
 
 import nodemailer from "nodemailer";
 
-export async function sendAnnouncementEmail({
-  to,
-  subject,
-  title,
-  content,
-}) {
+export async function sendAnnouncementEmail({ to, subject, title, content }) {
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,

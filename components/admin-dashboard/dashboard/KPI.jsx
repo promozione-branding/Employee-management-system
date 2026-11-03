@@ -1,6 +1,5 @@
 // components/admin-dashboard/dashboard/KPI.jsx
 
-
 "use client";
 
 import {
@@ -38,8 +37,7 @@ const KPI_CARDS = [
     chartPath:
       "M0 45 L32 31 L64 39 L96 42 L128 24 L160 17 L192 28 L224 23 L256 5 L288 5 L320 14 L352 2",
     key: "dealValue",
-    getValue: (data) =>
-      `₹${data.dealValue.toLocaleString("en-IN")}`,
+    getValue: (data) => `₹${data.dealValue.toLocaleString("en-IN")}`,
   },
   {
     title: "Total customers",
@@ -52,8 +50,7 @@ const KPI_CARDS = [
     chartPath:
       "M0 40 L32 36 L64 45 L96 37 L128 21 L160 24 L192 32 L224 19 L256 7 L288 14 L320 16 L352 0",
     key: "clientCount",
-    getValue: (data) =>
-      data.clientCount.toLocaleString("en-IN"),
+    getValue: (data) => data.clientCount.toLocaleString("en-IN"),
     href: "/dashboard/customer",
   },
   {
@@ -67,8 +64,7 @@ const KPI_CARDS = [
     chartPath:
       "M0 36 L32 40 L64 45 L96 32 L128 23 L160 31 L192 30 L224 14 L256 11 L288 20 L320 12 L352 0",
     key: "revenue",
-    getValue: (data) =>
-      `₹${data.revenue.toLocaleString("en-IN")}`,
+    getValue: (data) => `₹${data.revenue.toLocaleString("en-IN")}`,
   },
   {
     title: "Total employees",
@@ -81,8 +77,7 @@ const KPI_CARDS = [
     chartPath:
       "M0 0 L32 16 L64 20 L96 9 L128 17 L160 33 L192 30 L224 21 L256 35 L288 48 L320 38 L352 36",
     key: "employeeCount",
-    getValue: (data) =>
-      data.employeeCount.toLocaleString("en-IN"),
+    getValue: (data) => data.employeeCount.toLocaleString("en-IN"),
     href: "/dashboard/employee",
   },
 ];
@@ -111,24 +106,13 @@ function Sparkline({ path, color, id }) {
             y2="52"
             gradientUnits="userSpaceOnUse"
           >
-            <stop
-              offset="0%"
-              stopColor={color}
-              stopOpacity="0.23"
-            />
-            <stop
-              offset="100%"
-              stopColor={color}
-              stopOpacity="0"
-            />
+            <stop offset="0%" stopColor={color} stopOpacity="0.23" />
+            <stop offset="100%" stopColor={color} stopOpacity="0" />
           </linearGradient>
         </defs>
 
         {/* Gradient area */}
-        <path
-          d={`${path} L352 52 L0 52 Z`}
-          fill={`url(#gradient-${id})`}
-        />
+        <path d={`${path} L352 52 L0 52 Z`} fill={`url(#gradient-${id})`} />
 
         {/* Chart line */}
         <path
@@ -170,7 +154,6 @@ function KpiCard({ card, value }) {
     >
       {/* Top row: Icon and trend */}
       <div className="mb-4 flex items-center justify-between">
-
         {/* Icon */}
         <div
           className="
@@ -239,12 +222,7 @@ function KpiCard({ card, value }) {
       </p>
 
       {/* Bottom chart */}
-      <Sparkline
-        path={card.chartPath}
-        color={card.chartColor}
-        id={card.key}
-      />
-
+      <Sparkline path={card.chartPath} color={card.chartColor} id={card.key} />
     </div>
   );
 
@@ -315,10 +293,7 @@ export default function KPI() {
 
       results.forEach((result) => {
         if (result.status === "rejected") {
-          console.error(
-            "Failed to fetch KPI data:",
-            result.reason
-          );
+          console.error("Failed to fetch KPI data:", result.reason);
         }
       });
     }
@@ -351,11 +326,7 @@ export default function KPI() {
       "
     >
       {KPI_CARDS.map((card) => (
-        <KpiCard
-          key={card.key}
-          card={card}
-          value={card.getValue(data)}
-        />
+        <KpiCard key={card.key} card={card} value={card.getValue(data)} />
       ))}
     </section>
   );

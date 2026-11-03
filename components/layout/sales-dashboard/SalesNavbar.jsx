@@ -3,7 +3,19 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Bell, Search, LogOut, Settings, User, Sun, Moon, UserCircle, ChevronDown, UserRound, ArrowLeft } from "lucide-react";
+import {
+  Bell,
+  Search,
+  LogOut,
+  Settings,
+  User,
+  Sun,
+  Moon,
+  UserCircle,
+  ChevronDown,
+  UserRound,
+  ArrowLeft,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import Image from "next/image";
@@ -34,10 +46,9 @@ const SalesNavbar = () => {
     employee?.basicDetails?.email?.split("@")[0] ||
     "Sales Employee";
 
-  const email =
-    Array.isArray(employee?.basicDetails?.email)
-      ? employee?.basicDetails?.email[0]
-      : employee?.basicDetails?.email || "admin2@promozionebranding.com";
+  const email = Array.isArray(employee?.basicDetails?.email)
+    ? employee?.basicDetails?.email[0]
+    : employee?.basicDetails?.email || "admin2@promozionebranding.com";
 
   const handleLogout = async () => {
     try {
@@ -90,7 +101,10 @@ const SalesNavbar = () => {
                 <p className="truncate text-xs font-semibold text-[#0A2E66] sm:text-sm">
                   {activeCustomer.name}
                   {activeCustomer.company && (
-                    <span className="font-normal text-slate-500"> ({activeCustomer.company})</span>
+                    <span className="font-normal text-slate-500">
+                      {" "}
+                      ({activeCustomer.company})
+                    </span>
                   )}
                 </p>
               </div>

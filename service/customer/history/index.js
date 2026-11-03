@@ -30,7 +30,6 @@ export async function getTeamUpdateAdminService(id) {
   return data;
 }
 
-
 export async function seoReportHistoryService(id) {
   const { data } = await axiosInstance.get(
     `/api/customer/history/seo-report/${id}`,
@@ -38,16 +37,12 @@ export async function seoReportHistoryService(id) {
   return data;
 }
 
-
 export async function getClientProposalCreatedHistory(id) {
   const { data } = await axiosInstance.get(
     `/api/customer/history/proposal/create/${id}`,
   );
   return data;
 }
-
-
-
 
 export async function getClientProposalDeletedHistory(id) {
   const { data } = await axiosInstance.get(
@@ -62,4 +57,3 @@ export async function getClientProposalUpdateHistory(id) {
   );
   return data;
 }
-

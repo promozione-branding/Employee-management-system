@@ -1,0 +1,22 @@
+# dependencies / build
+node_modules
+.next
+out
+build
+dist
+
+# lockfiles & env
+package-lock.json
+.env
+.env.*
+
+# generated / static / backups
+public
+*.backup
+*.min.js
+demo.txt
+logo.txt
+
+# misc
+.DS_Store
+coverage

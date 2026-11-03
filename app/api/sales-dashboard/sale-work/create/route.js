@@ -17,7 +17,7 @@ export async function POST(req) {
           success: false,
           message: "employeeId and meetingUpdate are required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -34,10 +34,8 @@ export async function POST(req) {
         meetingUpdate: meetingUpdatesItem,
       });
     } else {
-
       // Push new updates into existing document
       employeeSalesWork.meetingUpdate.push(...meetingUpdatesItem);
-
 
       await employeeSalesWork.save();
     }
@@ -48,7 +46,7 @@ export async function POST(req) {
         message: "Meeting update saved successfully",
         data: employeeSalesWork,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("SalesWork POST Error:", error);
@@ -58,7 +56,7 @@ export async function POST(req) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

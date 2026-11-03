@@ -35,9 +35,7 @@ export async function POST(req) {
       ]);
 
       const origin =
-        req.headers.get("origin") ||
-        process.env.NEXT_PUBLIC_APP_URL ||
-        "";
+        req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "";
       const link = origin
         ? `${origin}/dashboard/employee/seo-sheet/${clientId}`
         : undefined;

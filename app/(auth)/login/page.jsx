@@ -1,12 +1,10 @@
 // app/(auth)/login/page.jsx
 
-import React from 'react'
-import Login from './Login'
+import React from "react";
+import Login from "./Login";
 
 const page = () => {
-  return (
-    <Login />
-  )
-}
+  return <Login />;
+};
 
-export default page
+export default page;

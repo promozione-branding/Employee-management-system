@@ -16,7 +16,7 @@ const CreateInvoice = () => {
   const [formData, setFormData] = useState(initialInvoiceFormData);
   const [serviceList, setServiceList] = useState([]);
   const [serviceData, setServiceData] = useState(
-    initialservicesforInvoiceFormData
+    initialservicesforInvoiceFormData,
   );
 
   function handleService(e) {
@@ -44,7 +44,6 @@ const CreateInvoice = () => {
       taxType,
       services: serviceList,
     };
-
   };
 
   function handleRemoveService(indexToRemove) {

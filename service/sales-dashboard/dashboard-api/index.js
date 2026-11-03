@@ -78,8 +78,6 @@ export async function dailyCallStatsService(id) {
   return data;
 }
 
-
-
 // ------------------------------------------------------------
 // Client acquisition stats (monthly and weekly)
 // ------------------------------------------------------------

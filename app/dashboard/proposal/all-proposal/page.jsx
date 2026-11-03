@@ -1,12 +1,10 @@
 // app/dashboard/proposal/all-proposal/page.jsx
 
-import React from 'react'
-import AllProposal from './AllProposal'
+import React from "react";
+import AllProposal from "./AllProposal";
 
 const page = () => {
-  return (
-   <AllProposal />
-  )
-}
+  return <AllProposal />;
+};
 
-export default page
+export default page;

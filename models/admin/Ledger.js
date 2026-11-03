@@ -83,7 +83,7 @@ const LedgerSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true, strictPopulate: false }
+  { timestamps: true, strictPopulate: false },
 );
 
 const Ledger = mongoose.models.Ledger || mongoose.model("Ledger", LedgerSchema);

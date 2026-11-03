@@ -9,7 +9,7 @@ export async function GET(req) {
     await connectDB();
 
     const allEmployee = await User.find({ role: "employee" }).select(
-      "email username"
+      "email username",
     );
 
     return NextResponse.json(
@@ -20,7 +20,7 @@ export async function GET(req) {
       },
       {
         status: 200,
-      }
+      },
     );
   } catch (error) {
     console.error(error);
@@ -31,7 +31,7 @@ export async function GET(req) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

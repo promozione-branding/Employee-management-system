@@ -15,7 +15,10 @@ function getRange(preset, fromStr, toStr) {
       nowIST.getUTCFullYear(),
       nowIST.getUTCMonth(),
       nowIST.getUTCDate(),
-      0, 0, 0, 0,
+      0,
+      0,
+      0,
+      0,
     ),
   );
   const startOfTodayUTC = new Date(
@@ -24,7 +27,10 @@ function getRange(preset, fromStr, toStr) {
   const dayMs = 24 * 60 * 60 * 1000;
 
   if (preset === "yesterday")
-    return { from: new Date(startOfTodayUTC.getTime() - dayMs), to: startOfTodayUTC };
+    return {
+      from: new Date(startOfTodayUTC.getTime() - dayMs),
+      to: startOfTodayUTC,
+    };
   if (preset === "tomorrow")
     return {
       from: new Date(startOfTodayUTC.getTime() + dayMs),
@@ -51,7 +57,10 @@ function getRange(preset, fromStr, toStr) {
     }
     return { from: fromDate, to: toDate };
   }
-  return { from: startOfTodayUTC, to: new Date(startOfTodayUTC.getTime() + dayMs) };
+  return {
+    from: startOfTodayUTC,
+    to: new Date(startOfTodayUTC.getTime() + dayMs),
+  };
 }
 
 export async function GET(req) {

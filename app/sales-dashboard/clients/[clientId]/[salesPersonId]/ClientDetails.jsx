@@ -14,12 +14,7 @@ import ProposalTab from "@/components/sales-dashboard/client/ProposalTab";
 import UpdateTab from "@/components/sales-dashboard/client/UpdateTab";
 import ProposalTabNew from "@/components/proposalNew/ProposalTabNew";
 
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
   UserRound,
@@ -41,13 +36,20 @@ const CUSTOMER_TABS = [
 
 const VALID_TABS = CUSTOMER_TABS.map((tab) => tab.value);
 
-function ClientDetailsContent({ customerId, salesPersonId, customerName, companyName }) {
+function ClientDetailsContent({
+  customerId,
+  salesPersonId,
+  customerName,
+  companyName,
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setActiveCustomer } = useActiveCustomerStore();
 
   const requestedTab = searchParams.get("tab");
-  const initialTab = VALID_TABS.includes(requestedTab) ? requestedTab : "Customer";
+  const initialTab = VALID_TABS.includes(requestedTab)
+    ? requestedTab
+    : "Customer";
 
   const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -107,7 +109,7 @@ function ClientDetailsContent({ customerId, salesPersonId, customerName, company
 
     router.replace(
       `/sales-dashboard/clients/${customerId}/${salesPersonId}?${params.toString()}`,
-      { scroll: false }
+      { scroll: false },
     );
   };
 
@@ -115,7 +117,11 @@ function ClientDetailsContent({ customerId, salesPersonId, customerName, company
     <div className="min-h-screen w-full bg-[#F2F4F9] p-1 sm:p-1 lg:p-1">
       <div className="mx-auto w-full max-w-[1800px]">
         <section className="w-full min-w-0 rounded-xl border border-[#E3E7F0] bg-white shadow-sm">
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full min-w-0">
+          <Tabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="w-full min-w-0"
+          >
             {/* Sticky Tabs Navigation Bar locked cleanly at the top */}
             <div
               className="
@@ -163,28 +169,52 @@ function ClientDetailsContent({ customerId, salesPersonId, customerName, company
 
             {/* Tab Contents */}
             <div className="w-full min-w-0 p-3 sm:p-4 lg:p-5">
-              <TabsContent value="Customer" className="mt-0 min-w-0 outline-none">
-                <CustomerTab customerId={customerId} salesPersonId={salesPersonId} />
+              <TabsContent
+                value="Customer"
+                className="mt-0 min-w-0 outline-none"
+              >
+                <CustomerTab
+                  customerId={customerId}
+                  salesPersonId={salesPersonId}
+                />
               </TabsContent>
 
-              <TabsContent value="newproposal" className="mt-0 min-w-0 outline-none">
+              <TabsContent
+                value="newproposal"
+                className="mt-0 min-w-0 outline-none"
+              >
                 <ProposalTabNew customerId={customerId} />
               </TabsContent>
 
-              <TabsContent value="meeting" className="mt-0 min-w-0 outline-none">
+              <TabsContent
+                value="meeting"
+                className="mt-0 min-w-0 outline-none"
+              >
                 <UpdateTab customerId={customerId} />
               </TabsContent>
 
-              <TabsContent value="history" className="mt-0 min-w-0 outline-none">
+              <TabsContent
+                value="history"
+                className="mt-0 min-w-0 outline-none"
+              >
                 <HistoryTab customerId={customerId} />
               </TabsContent>
 
-              <TabsContent value="attachment" className="mt-0 min-w-0 outline-none">
+              <TabsContent
+                value="attachment"
+                className="mt-0 min-w-0 outline-none"
+              >
                 <ExecutiveAttachment clientId={customerId} />
               </TabsContent>
 
-              <TabsContent value="proposal" className="mt-0 min-w-0 outline-none">
-                <ProposalTab customerId={customerId} salesPersonId={salesPersonId} />
+              <TabsContent
+                value="proposal"
+                className="mt-0 min-w-0 outline-none"
+              >
+                <ProposalTab
+                  customerId={customerId}
+                  salesPersonId={salesPersonId}
+                />
               </TabsContent>
             </div>
           </Tabs>
@@ -194,7 +224,12 @@ function ClientDetailsContent({ customerId, salesPersonId, customerName, company
   );
 }
 
-export default function ClientDetails({ customerId, salesPersonId, customerName, companyName }) {
+export default function ClientDetails({
+  customerId,
+  salesPersonId,
+  customerName,
+  companyName,
+}) {
   return (
     <Suspense
       fallback={

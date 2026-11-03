@@ -32,8 +32,7 @@ const EmployeeAssigedClient = ({ employeeId }) => {
     }
   }
 
-  const clientFilter = clients?.filter((client)=> client?.clientId !== null);
-
+  const clientFilter = clients?.filter((client) => client?.clientId !== null);
 
   useEffect(() => {
     if (employeeId) {
@@ -74,7 +73,7 @@ const EmployeeAssigedClient = ({ employeeId }) => {
         <div className="space-y-4 overflow-y-auto h-[50vh]">
           {clientFilter.map((item) => (
             <Link
-            href={`/employee-dashboard/clients/client-details/${item.clientId?._id}`}
+              href={`/employee-dashboard/clients/client-details/${item.clientId?._id}`}
               key={item._id}
               className="border rounded-lg p-4 hover:bg-slate-50 transition-colors block"
             >

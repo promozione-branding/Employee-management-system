@@ -1,6 +1,5 @@
 // app/api/invoice/pdf-download/[id]/route.js
 
-
 import { connectDB } from "@/lib/db";
 import Invoice from "@/models/admin/invoice/Invoice";
 
@@ -21,7 +20,7 @@ export async function GET(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -30,8 +29,7 @@ export async function GET(req, context) {
 
     // Backward compatibility for existing invoices
     // without an invoiceType field
-    invoiceData.invoiceType =
-      invoiceData.invoiceType || "normal";
+    invoiceData.invoiceType = invoiceData.invoiceType || "normal";
 
     return Response.json({
       success: true,
@@ -39,10 +37,7 @@ export async function GET(req, context) {
       data: invoiceData,
     });
   } catch (error) {
-    console.error(
-      "Error while fetching invoice for PDF",
-      error
-    );
+    console.error("Error while fetching invoice for PDF", error);
 
     return Response.json(
       {
@@ -51,7 +46,7 @@ export async function GET(req, context) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

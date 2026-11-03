@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
@@ -72,19 +71,13 @@ const TodayMeeting = () => {
         if (to) params.to = to;
       }
 
-      const res = await todayMeetingService(
-        employee.user._id,
-        params
-      );
+      const res = await todayMeetingService(employee.user._id, params);
 
       if (res.success) {
         setTodayMeetingData(res?.data || []);
       }
     } catch (error) {
-      toast.error(
-        error?.response?.data?.message ||
-          "Error fetching meetings"
-      );
+      toast.error(error?.response?.data?.message || "Error fetching meetings");
     } finally {
       setLoading(false);
     }
@@ -140,9 +133,7 @@ const TodayMeeting = () => {
             Meetings
           </h2>
 
-          <p className="mt-0.5 text-xs text-[#8A92A6]">
-            Your meeting schedule
-          </p>
+          <p className="mt-0.5 text-xs text-[#8A92A6]">Your meeting schedule</p>
         </div>
 
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F0F3F8] text-[#0A2E66]">

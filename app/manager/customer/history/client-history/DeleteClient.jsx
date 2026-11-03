@@ -21,18 +21,18 @@ const DeleteClient = () => {
         if (res.success) {
           setCustomerDeleteData(res.data);
           toast.success(
-            res.message || "Deleted customer history fetched successfully"
+            res.message || "Deleted customer history fetched successfully",
           );
         } else {
           toast.error(
-            res.message || "Failed to fetch deleted customer history"
+            res.message || "Failed to fetch deleted customer history",
           );
         }
       } catch (error) {
         console.log(error);
         toast.error(
           error?.response?.data?.message ||
-            "Error while fetching deleted customer"
+            "Error while fetching deleted customer",
         );
       } finally {
         setLoading(false);

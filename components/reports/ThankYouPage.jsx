@@ -1,13 +1,6 @@
 // components/reports/ThankYouPage.jsx
 
-
-import {
-  Page,
-  StyleSheet,
-  Text,
-  View,
-  Link,
-} from "@react-pdf/renderer";
+import { Page, StyleSheet, Text, View, Link } from "@react-pdf/renderer";
 
 const s = StyleSheet.create({
   page: {
@@ -183,9 +176,7 @@ export function ThankYouPage() {
 
         <View style={s.divider} />
 
-        <Text style={s.eyebrow}>
-          PERFORMANCE REPORT COMPLETE
-        </Text>
+        <Text style={s.eyebrow}>PERFORMANCE REPORT COMPLETE</Text>
 
         <Text style={s.title}>
           Thank{"\n"}
@@ -193,47 +184,35 @@ export function ThankYouPage() {
         </Text>
 
         <Text style={s.description}>
-          Thank you for trusting Inquiry Bazaar
-          with your digital growth journey.
+          Thank you for trusting Inquiry Bazaar with your digital growth
+          journey.
           {"\n\n"}
-          We appreciate your partnership and look
-          forward to achieving even greater results
-          together.
+          We appreciate your partnership and look forward to achieving even
+          greater results together.
         </Text>
 
         <View style={s.messageCard}>
-          <Text style={s.cardTitle}>
-            Let's Grow Together
-          </Text>
+          <Text style={s.cardTitle}>Let's Grow Together</Text>
 
           <Text style={s.cardDescription}>
-            Have questions about your performance
-            report or want to explore new opportunities?
+            Have questions about your performance report or want to explore new
+            opportunities?
             {"\n"}
             We're here to help.
           </Text>
         </View>
 
-        <Text style={s.websiteLabel}>
-          LET'S CONNECT
-        </Text>
+        <Text style={s.websiteLabel}>LET'S CONNECT</Text>
 
-        <Link
-          src="https://www.inquirybazaar.com/"
-          style={s.website}
-        >
+        <Link src="https://www.inquirybazaar.com/" style={s.website}>
           www.inquirybazaar.com
         </Link>
       </View>
 
       <View style={s.footer}>
-        <Text style={s.footerBrand}>
-          INQUIRY BAZAAR
-        </Text>
+        <Text style={s.footerBrand}>INQUIRY BAZAAR</Text>
 
-        <Text style={s.footerText}>
-          THANK YOU FOR YOUR PARTNERSHIP
-        </Text>
+        <Text style={s.footerText}>THANK YOU FOR YOUR PARTNERSHIP</Text>
       </View>
     </Page>
   );

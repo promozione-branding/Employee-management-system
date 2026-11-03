@@ -1,11 +1,9 @@
 // app/manager/employee/page.jsx
 
-import Employee from './Employee'
+import Employee from "./Employee";
 
 const page = () => {
-  return (
-    <Employee />
-  )
-}
+  return <Employee />;
+};
 
-export default page
+export default page;

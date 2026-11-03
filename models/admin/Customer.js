@@ -3,7 +3,6 @@
 import { auditPlugin } from "@/lib/auditPlugin";
 // models/admin/Customer.js
 
-
 import mongoose from "mongoose";
 
 const CustomerSchema = new mongoose.Schema(
@@ -42,8 +41,7 @@ const CustomerSchema = new mongoose.Schema(
 
           return /^[0-9A-Z]{15}$/.test(value);
         },
-        message:
-          "GSTIN must contain exactly 15 valid alphanumeric characters",
+        message: "GSTIN must contain exactly 15 valid alphanumeric characters",
       },
     },
 
@@ -163,7 +161,7 @@ const CustomerSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 CustomerSchema.index(
@@ -180,7 +178,7 @@ CustomerSchema.index(
       email: 3,
       GSTIN: 2,
     },
-  }
+  },
 );
 
 CustomerSchema.index({ phone: 1 });
@@ -192,7 +190,7 @@ CustomerSchema.index(
     partialFilterExpression: {
       GSTIN: { $type: "string", $gt: "" },
     },
-  }
+  },
 );
 CustomerSchema.index({ salesExecutive: 1 });
 CustomerSchema.index({ city: 1 });

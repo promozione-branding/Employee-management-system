@@ -60,8 +60,8 @@ const EmployeeDetailsDashboard = ({ employeeId }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
-       <CurrentMonthDealValue employeeId={employeeId}/>
-       <CurrentMonthRevenue employeeId={employeeId}/>
+        <CurrentMonthDealValue employeeId={employeeId} />
+        <CurrentMonthRevenue employeeId={employeeId} />
       </div>
     </div>
   );

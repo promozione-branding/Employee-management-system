@@ -1,12 +1,9 @@
 // app/dashboard/page.jsx
- 
+
 import Dashboard from "./Dashboard";
 
-
 const page = () => {
-  return (
-   <Dashboard />
-  );
+  return <Dashboard />;
 };
 
 export default page;

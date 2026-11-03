@@ -13,7 +13,11 @@ import {
 } from "@/components/ui/select";
 import { createKeyWordFormControls } from "@/config/employee";
 import { getCustomerSeoProjectCycleService } from "@/service/customer";
-import { createKeyService, deleteKeywordService, getSeoSheetService } from "@/service/customer/work";
+import {
+  createKeyService,
+  deleteKeywordService,
+  getSeoSheetService,
+} from "@/service/customer/work";
 import { Trash2 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -30,39 +34,39 @@ const SeoSheet = ({ clientId }) => {
   const [keyLoading, setKeyLoading] = useState(true);
 
   // console.log(keywordList, "res");
-async function createKeywordHandle(e) {
-  e.preventDefault();
+  async function createKeywordHandle(e) {
+    e.preventDefault();
 
-  // 🆕 Guards — stop invalid submissions before hitting the API
-  if (!keywordFormData.projectId) {
-    return toast.error("Please select a project");
-  }
-  if (!keywordFormData.keyword?.trim()) {
-    return toast.error("Please enter a keyword");
-  }
-  if (!keywordFormData.type) {
-    return toast.error("Please select a type (primary / secondary)");
-  }
-
-  try {
-    const res = await createKeyService(keywordFormData);
-    if (res.success) {
-      setKeywordFormData({
-        projectId: "",
-        keyword: "",
-        type: "",
-        clientId: clientId || "",
-      });
-      toast.success("Keyword create success");
-      fetchKeyHandler();
+    // 🆕 Guards — stop invalid submissions before hitting the API
+    if (!keywordFormData.projectId) {
+      return toast.error("Please select a project");
     }
-  } catch (error) {
-    console.log(error);
-    toast.error(
-      error?.response?.data?.message || "error while creating the keyword",
-    );
+    if (!keywordFormData.keyword?.trim()) {
+      return toast.error("Please enter a keyword");
+    }
+    if (!keywordFormData.type) {
+      return toast.error("Please select a type (primary / secondary)");
+    }
+
+    try {
+      const res = await createKeyService(keywordFormData);
+      if (res.success) {
+        setKeywordFormData({
+          projectId: "",
+          keyword: "",
+          type: "",
+          clientId: clientId || "",
+        });
+        toast.success("Keyword create success");
+        fetchKeyHandler();
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message || "error while creating the keyword",
+      );
+    }
   }
-}
 
   async function fetchKeyHandler() {
     setKeyLoading(true);
@@ -94,7 +98,9 @@ async function createKeywordHandle(e) {
   }
 
   async function handleDeleteKeyword(id) {
-    const confirmed = window.confirm("Are you sure you want to delete this keyword?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this keyword?",
+    );
 
     if (!confirmed) return;
     try {
@@ -107,9 +113,7 @@ async function createKeywordHandle(e) {
     } catch (error) {
       console.log(error);
 
-      toast.error(
-        error?.response?.data?.message || "Failed to delete keyword"
-      );
+      toast.error(error?.response?.data?.message || "Failed to delete keyword");
     }
   }
 
@@ -118,7 +122,7 @@ async function createKeywordHandle(e) {
   useEffect(() => {
     if (clientId) {
       fetchKeyHandler();
-      fetchCustomerProjectCycle()
+      fetchCustomerProjectCycle();
     }
   }, [clientId]);
 
@@ -146,10 +150,12 @@ async function createKeywordHandle(e) {
           </div>
 
           <Select
-            onValueChange={(value) => setKeywordFormData({
-              ...keywordFormData,
-              projectId: value,
-            })}
+            onValueChange={(value) =>
+              setKeywordFormData({
+                ...keywordFormData,
+                projectId: value,
+              })
+            }
             value={keywordFormData.projectId}
           >
             <SelectTrigger className="w-full">
@@ -207,56 +213,60 @@ async function createKeywordHandle(e) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {Object.entries(groupedKeywords).map(([projectId, projectData]) => (
-                  <React.Fragment key={projectId}>
+                {Object.entries(groupedKeywords).map(
+                  ([projectId, projectData]) => (
+                    <React.Fragment key={projectId}>
+                      {/* PROJECT HEADER ROW */}
+                      <tr className="bg-gray-100">
+                        <td
+                          colSpan={7}
+                          className="px-4 py-3 font-bold text-gray-800"
+                        >
+                          {projectData.projectName}
+                        </td>
+                      </tr>
 
-                    {/* PROJECT HEADER ROW */}
-                    <tr className="bg-gray-100">
-                      <td
-                        colSpan={7}
-                        className="px-4 py-3 font-bold text-gray-800"
-                      >
-                        {projectData.projectName}
-                      </td>
-                    </tr>
+                      {/* PROJECT KEYWORDS */}
+                      {projectData.keywords.map((item) => {
+                        const latestRanking =
+                          item.rankings?.[item.rankings.length - 1];
 
-                    {/* PROJECT KEYWORDS */}
-                    {projectData.keywords.map((item) => {
-                      const latestRanking =
-                        item.rankings?.[item.rankings.length - 1];
+                        return (
+                          <tr key={item._id}>
+                            <td></td>
+                            <td className="px-4 py-2 text-gray-700">
+                              {item.keyword}
+                            </td>
 
-                      return (
-                        <tr key={item._id}>
-                          <td></td>
-                          <td className="px-4 py-2 text-gray-700">
-                            {item.keyword}
-                          </td>
+                            <td className="px-4 py-2 text-gray-700 capitalize">
+                              {item.type}
+                            </td>
 
-                          <td className="px-4 py-2 text-gray-700 capitalize">
-                            {item.type}
-                          </td>
+                            <td className="px-4 py-2 text-center text-gray-700">
+                              {latestRanking?.position || "N/A"}
+                            </td>
 
-                          <td className="px-4 py-2 text-center text-gray-700">
-                            {latestRanking?.position || "N/A"}
-                          </td>
+                            <td className="px-4 py-2 text-center text-gray-700">
+                              {latestRanking?.page || "N/A"}
+                            </td>
 
-                          <td className="px-4 py-2 text-center text-gray-700">
-                            {latestRanking?.page || "N/A"}
-                          </td>
-
-                          <td className="px-4 py-2 text-right text-gray-700">
-                            {new Date(item.updatedAt).toLocaleDateString()}
-                          </td>
-                          <td className="px-4 py-2 text-right text-gray-700">
-                            <button onClick={() => handleDeleteKeyword(item._id)} className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-md">
-                              <Trash2 size={18} />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </React.Fragment>
-                ))}
+                            <td className="px-4 py-2 text-right text-gray-700">
+                              {new Date(item.updatedAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-4 py-2 text-right text-gray-700">
+                              <button
+                                onClick={() => handleDeleteKeyword(item._id)}
+                                className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-md"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </React.Fragment>
+                  ),
+                )}
               </tbody>
             </table>
           </div>

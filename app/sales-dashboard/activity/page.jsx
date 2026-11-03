@@ -1,11 +1,9 @@
 // app/sales-dashboard/activity/page.jsx
 
-import Activity from './Activity'
+import Activity from "./Activity";
 
 const page = () => {
-  return (
-   <Activity />
-  )
-}
+  return <Activity />;
+};
 
-export default page
+export default page;

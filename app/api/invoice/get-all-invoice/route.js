@@ -16,7 +16,7 @@ export async function GET(req) {
       },
       {
         status: 200,
-      }
+      },
     );
   } catch (error) {
     console.error("GET ALL INVOICE API ERROR:", error);
@@ -28,7 +28,7 @@ export async function GET(req) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

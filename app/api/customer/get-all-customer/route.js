@@ -20,15 +20,16 @@ export async function GET(req) {
     const total = await Customer.countDocuments(filter);
     const customers = await Customer.find(filter)
       .select(`name company phone GSTIN salesExecutive isPaid `)
-      .populate({ path: "salesExecutive", select: "basicDetails.name", })
-      .sort({ createdAt: -1, }).skip((page - 1) * limit).limit(limit);
+      .populate({ path: "salesExecutive", select: "basicDetails.name" })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
 
     return Response.json({
       success: true,
       data: customers,
-      pagination: { totalPages: Math.ceil(total / limit), },
+      pagination: { totalPages: Math.ceil(total / limit) },
     });
-
   } catch (error) {
     console.log(error);
 
@@ -37,7 +38,7 @@ export async function GET(req) {
         success: false,
         error: error.message,
       },
-      { status: 500, }
+      { status: 500 },
     );
   }
 }

@@ -25,9 +25,7 @@ const ViewInvoice = ({ id }) => {
   }, []); // Re-fetch if ID changes
 
   if (loading) {
-    return (
-      <Loading />
-    );
+    return <Loading />;
   }
 
   if (error) {
@@ -49,7 +47,7 @@ const ViewInvoice = ({ id }) => {
   // Calculate subtotal before discount and tax
   const subtotal = invoiceData.services.reduce(
     (sum, service) => sum + service.amount,
-    0
+    0,
   );
   const discountAmount = invoiceData.discountPercentage
     ? (subtotal * invoiceData.discountPercentage) / 100

@@ -57,13 +57,13 @@ export async function DELETE(req, { params }) {
           todos: { _id: id },
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updated) {
       return NextResponse.json(
         { success: false, message: "Todo not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -75,8 +75,7 @@ export async function DELETE(req, { params }) {
     console.error(error);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

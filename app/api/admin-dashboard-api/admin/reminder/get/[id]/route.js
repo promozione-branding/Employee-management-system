@@ -10,16 +10,16 @@ export async function GET(req, { params }) {
 
     const { id } = await params;
 
-      if (!id) {
-          return NextResponse.json(
-            { success: false, message: "User ID is required" },
-            { status: 400 },
-          );
-        }
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "User ID is required" },
+        { status: 400 },
+      );
+    }
 
     const getReminder = await AdminReminder.findOne({ userId: id })
       .select("reminder")
-      .lean()
+      .lean();
 
     if (!getReminder) {
       return NextResponse.json(

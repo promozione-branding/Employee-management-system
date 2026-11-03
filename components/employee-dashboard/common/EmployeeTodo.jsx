@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -165,7 +164,7 @@ const EmployeeTodo = ({ employeeId }) => {
   };
 
   const completedCount = todos.filter(
-    (todo) => todo.status === "COMPLETED"
+    (todo) => todo.status === "COMPLETED",
   ).length;
 
   if (loading) {
@@ -199,21 +198,13 @@ const EmployeeTodo = ({ employeeId }) => {
         </div>
 
         <div className="mb-4 flex gap-2">
-          <Skeleton
-            height={40}
-            className="flex-1"
-            borderRadius={9}
-          />
+          <Skeleton height={40} className="flex-1" borderRadius={9} />
           <Skeleton width={70} height={40} borderRadius={9} />
         </div>
 
         <div className="space-y-3">
           {[1, 2, 3].map((item) => (
-            <Skeleton
-              key={item}
-              height={52}
-              borderRadius={12}
-            />
+            <Skeleton key={item} height={52} borderRadius={12} />
           ))}
         </div>
       </div>
@@ -244,10 +235,7 @@ const EmployeeTodo = ({ employeeId }) => {
       </div>
 
       {/* Add todo */}
-      <form
-        onSubmit={handleAddTodo}
-        className="mb-4 flex shrink-0 gap-2"
-      >
+      <form onSubmit={handleAddTodo} className="mb-4 flex shrink-0 gap-2">
         <Input
           aria-label="New todo description"
           placeholder="Add a new task..."
@@ -311,18 +299,13 @@ const EmployeeTodo = ({ employeeId }) => {
                       }
                       onClick={() =>
                         handleUpdateTodo(todo._id, {
-                          status: isCompleted
-                            ? "PENDING"
-                            : "COMPLETED",
+                          status: isCompleted ? "PENDING" : "COMPLETED",
                         })
                       }
                       className="mt-0.5 shrink-0 rounded-full text-[#A5ADBD] transition hover:text-[#0A2E66] disabled:opacity-50"
                     >
                       {isCompleted ? (
-                        <CheckCircle2
-                          size={19}
-                          className="text-emerald-600"
-                        />
+                        <CheckCircle2 size={19} className="text-emerald-600" />
                       ) : (
                         <Circle size={19} />
                       )}

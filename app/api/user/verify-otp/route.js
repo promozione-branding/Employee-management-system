@@ -14,14 +14,14 @@ export async function POST(req) {
     if (!user || user.loginOTP !== otp) {
       return NextResponse.json(
         { success: false, message: "Invalid OTP" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (user.loginOTPExpiry < new Date()) {
       return NextResponse.json(
         { success: false, message: "OTP expired" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,7 +29,7 @@ export async function POST(req) {
     const token = jwt.sign(
       { id: user._id, role: user.role, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "60m" }
+      { expiresIn: "60m" },
     );
 
     // Clear OTP after success
@@ -52,7 +52,7 @@ export async function POST(req) {
     console.error("Verify OTP Error:", error);
     return NextResponse.json(
       { success: false, message: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

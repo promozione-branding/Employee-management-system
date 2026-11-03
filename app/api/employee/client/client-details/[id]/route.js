@@ -14,7 +14,7 @@ export async function GET(req, { params }) {
       .select(
         "-meetingDate -salesPersonEmail -SalesPersonName -salesExecutive -notes -invoices -proposals -history -workDetails",
       )
-      .populate({path:"projectCycle",select:"projectDuration"});
+      .populate({ path: "projectCycle", select: "projectDuration" });
 
     return NextResponse.json(
       {

@@ -18,7 +18,7 @@ export async function PATCH(req, { params }) {
           success: false,
           message: "Employee not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -40,7 +40,7 @@ export async function PATCH(req, { params }) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

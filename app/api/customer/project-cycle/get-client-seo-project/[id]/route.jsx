@@ -23,13 +23,13 @@ export async function GET(req, { params }) {
           success: false,
           message: "No SEO service project found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Filter only seo services
     const seoProjects = projectCycle.projectDuration.filter(
-      (project) => project.service === "seo"
+      (project) => project.service === "seo",
     );
 
     return NextResponse.json(
@@ -38,7 +38,7 @@ export async function GET(req, { params }) {
         message: "SEO projects fetched successfully",
         data: seoProjects,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log(error);
@@ -48,7 +48,7 @@ export async function GET(req, { params }) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

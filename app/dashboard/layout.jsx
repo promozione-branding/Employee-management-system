@@ -1,6 +1,6 @@
 // app/dashboard/layout.jsx
 
-"use client"
+"use client";
 
 import SideBar from "@/components/layout/SideBar";
 import { useAdminStore } from "@/lib/store/AdminStore";

@@ -145,7 +145,11 @@ function FileViewerModal({ file, onClose }) {
           )}
 
           {kind === "video" && (
-            <video src={url} controls className="mx-auto max-h-full max-w-full rounded-md" />
+            <video
+              src={url}
+              controls
+              className="mx-auto max-h-full max-w-full rounded-md"
+            />
           )}
 
           {kind === "audio" && (
@@ -344,8 +348,8 @@ function MultiFileUploader({ label, folder, files, onChange, onView }) {
           {uploading
             ? "Uploading..."
             : isDragging
-            ? "Drop files to upload"
-            : "Drag & drop files here, or click to browse"}
+              ? "Drop files to upload"
+              : "Drag & drop files here, or click to browse"}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
           Multiple files supported — any format
@@ -402,7 +406,7 @@ export default function BrandAssets({ clientId }) {
       logos: [],
       products: [],
     }),
-    []
+    [],
   );
   const [form, setForm] = useState(empty);
 
@@ -422,16 +426,18 @@ export default function BrandAssets({ clientId }) {
           logos: (d.logos || []).map((x) =>
             typeof x === "string"
               ? { url: x, description: "" }
-              : { url: x.url, description: x.description || "" }
+              : { url: x.url, description: x.description || "" },
           ),
           products: (d.products || []).map((x) =>
             typeof x === "string"
               ? { url: x, description: "" }
-              : { url: x.url, description: x.description || "" }
+              : { url: x.url, description: x.description || "" },
           ),
         });
       } catch (err) {
-        toast.error(err?.response?.data?.message || "Failed to load brand info");
+        toast.error(
+          err?.response?.data?.message || "Failed to load brand info",
+        );
       } finally {
         if (alive) setLoading(false);
       }
@@ -460,12 +466,12 @@ export default function BrandAssets({ clientId }) {
           logos: (d.logos || []).map((x) =>
             typeof x === "string"
               ? { url: x, description: "" }
-              : { url: x.url, description: x.description || "" }
+              : { url: x.url, description: x.description || "" },
           ),
           products: (d.products || []).map((x) =>
             typeof x === "string"
               ? { url: x, description: "" }
-              : { url: x.url, description: x.description || "" }
+              : { url: x.url, description: x.description || "" },
           ),
         });
       }
@@ -534,21 +540,21 @@ export default function BrandAssets({ clientId }) {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-  <ListEditor
-    label="Website URLs"
-    placeholder="https://example.com"
-    values={form.websites}
-    onChange={(v) => setForm((p) => ({ ...p, websites: v }))}
-  />
+              <ListEditor
+                label="Website URLs"
+                placeholder="https://example.com"
+                values={form.websites}
+                onChange={(v) => setForm((p) => ({ ...p, websites: v }))}
+              />
 
-  <ListEditor
-    label="Maid IDs (emails)"
-    placeholder="someone@example.com"
-    type="email"
-    values={form.maidIds}
-    onChange={(v) => setForm((p) => ({ ...p, maidIds: v }))}
-  />
-</div>
+              <ListEditor
+                label="Maid IDs (emails)"
+                placeholder="someone@example.com"
+                type="email"
+                values={form.maidIds}
+                onChange={(v) => setForm((p) => ({ ...p, maidIds: v }))}
+              />
+            </div>
 
             <MultiFileUploader
               label="Logos (any format)"

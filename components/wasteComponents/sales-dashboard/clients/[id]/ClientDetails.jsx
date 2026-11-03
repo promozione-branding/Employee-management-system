@@ -26,6 +26,3 @@ const ClientDetails = ({ customerId }) => {
 };
 
 export default ClientDetails;
-
-
-

@@ -1,18 +1,12 @@
 // app/(auth)/components/AuthBrandPanel.jsx
 
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 
-const awningColors = [
-  "#F58D3F",
-  "#FFF5EB",
-  "#2B5086",
-  "#FFF5EB",
-];
+const awningColors = ["#F58D3F", "#FFF5EB", "#2B5086", "#FFF5EB"];
 
 const bars = [
   {
@@ -102,15 +96,11 @@ export default function AuthBrandPanel() {
         });
 
         gsap.set(
-          [
-            logoRef.current,
-            headlineRef.current,
-            descriptionRef.current,
-          ],
+          [logoRef.current, headlineRef.current, descriptionRef.current],
           {
             opacity: 0,
             y: 25,
-          }
+          },
         );
 
         // Bars start at bottom baseline
@@ -153,7 +143,7 @@ export default function AuthBrandPanel() {
             duration: 0.9,
             ease: "power3.out",
           },
-          0.1
+          0.1,
         );
 
         // 2. Logo entrance
@@ -164,7 +154,7 @@ export default function AuthBrandPanel() {
             y: 0,
             duration: 0.7,
           },
-          0.35
+          0.35,
         );
 
         // 3. Heading entrance
@@ -175,7 +165,7 @@ export default function AuthBrandPanel() {
             y: 0,
             duration: 0.8,
           },
-          0.65
+          0.65,
         );
 
         // 4. Description entrance
@@ -186,7 +176,7 @@ export default function AuthBrandPanel() {
             y: 0,
             duration: 0.6,
           },
-          0.9
+          0.9,
         );
 
         // ==================================
@@ -204,7 +194,7 @@ export default function AuthBrandPanel() {
               duration: 0.85,
               ease: "power3.out",
             },
-            1.1 + index * 0.12
+            1.1 + index * 0.12,
           );
         });
 
@@ -217,7 +207,7 @@ export default function AuthBrandPanel() {
               y: 0,
               duration: 0.35,
             },
-            1.75 + index * 0.1
+            1.75 + index * 0.1,
           );
         });
 
@@ -232,20 +222,14 @@ export default function AuthBrandPanel() {
             duration: 1.1,
             ease: "power1.inOut",
           },
-          1.95
+          1.95,
         );
 
         // ==================================
         // 8. POINTS APPEAR ALONG THE LINE
         // ==================================
 
-        const markerTimes = [
-          1.95,
-          2.16,
-          2.38,
-          2.60,
-          2.82,
-        ];
+        const markerTimes = [1.95, 2.16, 2.38, 2.6, 2.82];
 
         markersRef.current.forEach((marker, index) => {
           tl.to(
@@ -256,7 +240,7 @@ export default function AuthBrandPanel() {
               duration: 0.2,
               ease: "back.out(2)",
             },
-            markerTimes[index]
+            markerTimes[index],
           );
         });
 
@@ -269,7 +253,7 @@ export default function AuthBrandPanel() {
             duration: 0.3,
             ease: "back.out(2)",
           },
-          3.08
+          3.08,
         );
 
         return () => {
@@ -282,17 +266,10 @@ export default function AuthBrandPanel() {
       // ==================================
 
       mm.add("(max-width: 980px)", () => {
-        gsap.set(
-          [
-            awningRef.current,
-            logoRef.current,
-            headlineRef.current,
-          ],
-          {
-            opacity: 0,
-            y: 20,
-          }
-        );
+        gsap.set([awningRef.current, logoRef.current, headlineRef.current], {
+          opacity: 0,
+          y: 20,
+        });
 
         const mobileTl = gsap.timeline({
           defaults: {
@@ -313,7 +290,7 @@ export default function AuthBrandPanel() {
               y: 0,
               duration: 0.6,
             },
-            "-=0.3"
+            "-=0.3",
           )
           .to(
             headlineRef.current,
@@ -322,7 +299,7 @@ export default function AuthBrandPanel() {
               y: 0,
               duration: 0.7,
             },
-            "-=0.2"
+            "-=0.2",
           );
 
         return () => mobileTl.kill();
@@ -361,33 +338,18 @@ export default function AuthBrandPanel() {
             height="100"
             patternUnits="userSpaceOnUse"
           >
-            <g
-              fill="none"
-              stroke="#FFFFFF"
-              strokeWidth="1.5"
-              opacity=".065"
-            >
+            <g fill="none" stroke="#FFFFFF" strokeWidth="1.5" opacity=".065">
               <path d="M50 22 C60 34 60 42 50 50 C40 42 40 34 50 22Z" />
               <path d="M50 78 C60 66 60 58 50 50 C40 58 40 66 50 78Z" />
               <path d="M22 50 C34 40 42 40 50 50 C42 60 34 60 22 50Z" />
               <path d="M78 50 C66 40 58 40 50 50 C58 60 66 60 78 50Z" />
             </g>
 
-            <circle
-              cx="50"
-              cy="50"
-              r="2.5"
-              fill="#F27B1E"
-              opacity=".45"
-            />
+            <circle cx="50" cy="50" r="2.5" fill="#F27B1E" opacity=".45" />
           </pattern>
         </defs>
 
-        <rect
-          width="100%"
-          height="100%"
-          fill="url(#brand-floral-pattern)"
-        />
+        <rect width="100%" height="100%" fill="url(#brand-floral-pattern)" />
       </svg>
 
       {/* ================================== */}
@@ -409,8 +371,7 @@ export default function AuthBrandPanel() {
               key={index}
               className="h-[90px] w-11 shrink-0 rounded-b-[22px]"
               style={{
-                backgroundColor:
-                  awningColors[index % awningColors.length],
+                backgroundColor: awningColors[index % awningColors.length],
               }}
             />
           ))}
@@ -422,7 +383,6 @@ export default function AuthBrandPanel() {
       {/* ================================== */}
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-
         {/* LOGO */}
 
         <div ref={logoRef}>
@@ -447,8 +407,7 @@ export default function AuthBrandPanel() {
               </span>
 
               <span>
-                Inquiry{" "}
-                <span className="text-[#F27B1E]">Bazaar</span>
+                Inquiry <span className="text-[#F27B1E]">Bazaar</span>
               </span>
             </div>
           )}
@@ -467,13 +426,9 @@ export default function AuthBrandPanel() {
                 lg:leading-[1.12]
               "
             >
-              <span className="block">
-                Inquiry se
-              </span>
+              <span className="block">Inquiry se</span>
 
-              <span className="block text-[#F27B1E]">
-                INCOME tak!
-              </span>
+              <span className="block text-[#F27B1E]">INCOME tak!</span>
             </h1>
           </div>
 
@@ -505,7 +460,6 @@ export default function AuthBrandPanel() {
             role="img"
             aria-label="Business growth from inquiry to income"
           >
-
             {/* BARS - BOTTOM TO TOP */}
 
             {bars.map((bar, index) => (
@@ -587,7 +541,6 @@ export default function AuthBrandPanel() {
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-
           </svg>
         </div>
       </div>

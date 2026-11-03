@@ -16,7 +16,7 @@ export const computeTotals = ({
   tdsRate = 0.02,
 }) => {
   const subtotal = round0(
-    items.reduce((s, it) => s + Number(it.amount || 0), 0)
+    items.reduce((s, it) => s + Number(it.amount || 0), 0),
   );
 
   const discountAmount =
@@ -48,15 +48,13 @@ export const computeTotals = ({
 
 export const isPartialPaymentsValid = (partialPayments, grandTotal) => {
   const total = round0(
-    partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0)
+    partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0),
   );
   return total === round0(grandTotal);
 };
 
 export const sumPartials = (partialPayments) =>
-  round0(
-    partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0)
-  );
+  round0(partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0));
 
 const SummaryNew = (props) => {
   const { subtotal, discountAmount, gstAmount, tdsAmount, grandTotal } =

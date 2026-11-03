@@ -59,8 +59,7 @@ async function checkAdminReminders() {
       const username = reminderDoc.userId?.username || "User";
 
       // ✅ Clean email
-      const cleanEmail =
-        typeof rawEmail === "string" ? rawEmail.trim() : "";
+      const cleanEmail = typeof rawEmail === "string" ? rawEmail.trim() : "";
 
       if (!cleanEmail) {
         console.log("❌ Invalid user email:", rawEmail);
@@ -70,7 +69,9 @@ async function checkAdminReminders() {
       for (const reminder of reminderDoc.reminder) {
         if (!reminder.reminderAt) continue;
 
-        const reminderDate = new Date(reminder.reminderAt).toLocaleDateString("en-CA");
+        const reminderDate = new Date(reminder.reminderAt).toLocaleDateString(
+          "en-CA",
+        );
         const reminderTime = new Date(reminder.reminderAt)
           .toTimeString()
           .slice(0, 5);
@@ -106,7 +107,7 @@ async function checkAdminReminders() {
             cleanEmail,
             "⏰ Admin Reminder Notification",
             html,
-            ccEmails
+            ccEmails,
           );
 
           reminder.reminderSend = true;
@@ -115,7 +116,7 @@ async function checkAdminReminders() {
           console.log(
             `📨 Sent → To: ${cleanEmail} | CC: ${
               ccEmails.length ? ccEmails.join(", ") : "None"
-            }`
+            }`,
           );
         }
       }

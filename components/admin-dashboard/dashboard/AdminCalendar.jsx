@@ -1,6 +1,5 @@
 // components/admin-dashboard/dashboard/AdminCalendar.jsx
 
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -113,7 +112,7 @@ const AdminCalendar = () => {
   const [events, setEvents] = useState([]);
 
   const [currentMonth, setCurrentMonth] = useState(
-    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   );
 
   const [selectedDate, setSelectedDate] = useState(today);
@@ -154,7 +153,7 @@ const AdminCalendar = () => {
             id: item._id || item.id || `${item.date}-${index}`,
             date: item.date || item.start,
             backgroundColor: item.backgroundColor || COLORS.navy,
-          }))
+          })),
         );
       }
     } catch (error) {
@@ -178,25 +177,18 @@ const AdminCalendar = () => {
       const next = new Date(
         previous.getFullYear(),
         previous.getMonth() + direction,
-        1
+        1,
       );
 
-      const maxDay = getMonthDays(
-        next.getFullYear(),
-        next.getMonth()
-      );
+      const maxDay = getMonthDays(next.getFullYear(), next.getMonth());
 
       const selectedDay = Math.min(
         parseDateKey(selectedDate).getDate(),
-        maxDay
+        maxDay,
       );
 
       const nextSelectedDate = getLocalDateKey(
-        new Date(
-          next.getFullYear(),
-          next.getMonth(),
-          selectedDay
-        )
+        new Date(next.getFullYear(), next.getMonth(), selectedDay),
       );
 
       setSelectedDate(nextSelectedDate);
@@ -208,9 +200,7 @@ const AdminCalendar = () => {
   const goToToday = () => {
     const now = new Date();
 
-    setCurrentMonth(
-      new Date(now.getFullYear(), now.getMonth(), 1)
-    );
+    setCurrentMonth(new Date(now.getFullYear(), now.getMonth(), 1));
 
     setSelectedDate(getLocalDateKey(now));
   };
@@ -280,10 +270,7 @@ const AdminCalendar = () => {
           id: `event-${Date.now()}`,
         };
 
-        setEvents((previous) => [
-          ...previous,
-          createdEvent,
-        ]);
+        setEvents((previous) => [...previous, createdEvent]);
 
         toast.success(res.message || "Calendar event added");
 
@@ -291,16 +278,13 @@ const AdminCalendar = () => {
         setNewEventColor("");
         setIsDialogOpen(false);
       } else {
-        toast.error(
-          res?.message || "Unable to save calendar event"
-        );
+        toast.error(res?.message || "Unable to save calendar event");
       }
     } catch (error) {
       console.error("Failed to create calendar event:", error);
 
       toast.error(
-        error?.response?.data?.message ||
-          "Unable to save calendar event"
+        error?.response?.data?.message || "Unable to save calendar event",
       );
     } finally {
       setSaving(false);
@@ -318,8 +302,7 @@ const AdminCalendar = () => {
     const firstDay = new Date(year, month, 1).getDay();
     const totalDays = getMonthDays(year, month);
 
-    const totalCells =
-      Math.ceil((firstDay + totalDays) / 7) * 7;
+    const totalCells = Math.ceil((firstDay + totalDays) / 7) * 7;
 
     return Array.from({ length: totalCells }, (_, index) => {
       const dayNumber = index - firstDay + 1;
@@ -341,18 +324,15 @@ const AdminCalendar = () => {
   const agendaDates = useMemo(() => {
     const numberOfDays = agendaRange === "day" ? 1 : 3;
 
-    return Array.from(
-      { length: numberOfDays },
-      (_, index) => addDays(selectedDate, index)
+    return Array.from({ length: numberOfDays }, (_, index) =>
+      addDays(selectedDate, index),
     );
   }, [selectedDate, agendaRange]);
 
   const agendaEvents = useMemo(() => {
     return events
       .filter((event) => {
-        const eventDate = String(
-          event.date || event.start || ""
-        ).slice(0, 10);
+        const eventDate = String(event.date || event.start || "").slice(0, 10);
 
         return agendaDates.includes(eventDate);
       })
@@ -367,7 +347,7 @@ const AdminCalendar = () => {
   const hasEventsOnDate = (dateKey) => {
     return events.some(
       (event) =>
-        String(event.date || event.start || "").slice(0, 10) === dateKey
+        String(event.date || event.start || "").slice(0, 10) === dateKey,
     );
   };
 
@@ -377,13 +357,15 @@ const AdminCalendar = () => {
 
   if (loading) {
     return (
-      <section className="
+      <section
+        className="
         w-full max-w-[490px]
         rounded-[22px]
         border border-[#E1E7F0]
         bg-white p-5
         shadow-[0_3px_12px_rgba(10,46,102,0.05)]
-      ">
+      "
+      >
         <div className="mb-7 flex items-center gap-3">
           <div className="h-10 w-10 animate-pulse rounded-xl bg-[#EDE9FC]" />
 
@@ -415,7 +397,8 @@ const AdminCalendar = () => {
 
   return (
     <>
-      <section className="
+      <section
+        className="
         w-full 
         overflow-hidden
         rounded-[22px]
@@ -426,43 +409,43 @@ const AdminCalendar = () => {
         transition-shadow duration-300
         hover:shadow-[0_8px_24px_rgba(10,46,102,0.07)]
         sm:p-[22px]
-      ">
-
+      "
+      >
         {/* ================================== */}
         {/* HEADER */}
         {/* ================================== */}
 
         <div className="mb-[18px] flex items-center justify-between gap-3">
-
           <div className="flex min-w-0 items-center gap-3">
-
-            <div className="
+            <div
+              className="
               flex h-10 w-10 shrink-0
               items-center justify-center
               rounded-xl
               bg-[#EDE9FC]
               text-[#7050E8]
-            ">
+            "
+            >
               <CalendarDays size={21} strokeWidth={1.9} />
             </div>
 
             <div className="min-w-0">
-
-              <h2 className="
+              <h2
+                className="
                 font-serif
                 text-[21px]
                 font-bold
                 leading-tight
                 tracking-tight
                 text-[#0A2E66]
-              ">
+              "
+              >
                 Schedule
               </h2>
 
               <p className="mt-1 text-[13px] text-[#56647D]">
                 Meetings and reminders
               </p>
-
             </div>
           </div>
 
@@ -490,7 +473,6 @@ const AdminCalendar = () => {
             <Plus size={15} strokeWidth={2.5} />
             Meeting
           </button>
-
         </div>
 
         {/* ================================== */}
@@ -498,19 +480,19 @@ const AdminCalendar = () => {
         {/* ================================== */}
 
         <div className="mb-3 flex items-center justify-between gap-2">
-
-          <h3 className="
+          <h3
+            className="
             font-serif
             text-[18px]
             font-bold
             tracking-tight
             text-[#0A2E66]
-          ">
+          "
+          >
             {formatMonth(currentMonth)}
           </h3>
 
           <div className="flex shrink-0 items-center gap-2">
-
             <button
               type="button"
               onClick={() => changeMonth(-1)}
@@ -567,7 +549,6 @@ const AdminCalendar = () => {
             >
               <ChevronRight size={19} />
             </button>
-
           </div>
         </div>
 
@@ -576,40 +557,32 @@ const AdminCalendar = () => {
         {/* ================================== */}
 
         <div className="w-full">
-
           {/* Weekdays */}
           <div className="mb-2 grid grid-cols-7">
-
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
-              (day) => (
-                <div
-                  key={day}
-                  className="
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+              <div
+                key={day}
+                className="
                     flex h-[35px]
                     items-center justify-center
                     text-[11px]
                     font-semibold
                     text-[#8A95AC]
                   "
-                >
-                  {day}
-                </div>
-              )
-            )}
-
+              >
+                {day}
+              </div>
+            ))}
           </div>
 
           {/* Dates */}
           <div className="grid grid-cols-7">
-
             {calendarDays.map((item) => {
-
               const isSelected = item.dateKey === selectedDate;
               const isToday = item.dateKey === today;
               const hasEvent = hasEventsOnDate(item.dateKey);
 
               return (
-
                 <button
                   key={item.dateKey}
                   type="button"
@@ -641,7 +614,6 @@ const AdminCalendar = () => {
                     }
                   `}
                 >
-
                   <span>{item.day}</span>
 
                   {/* Event indicator */}
@@ -651,29 +623,24 @@ const AdminCalendar = () => {
                         absolute bottom-[7px]
                         h-[4px] w-[4px]
                         rounded-full
-                        ${
-                          isSelected
-                            ? "bg-[#F7A25C]"
-                            : "bg-[#F27B1E]"
-                        }
+                        ${isSelected ? "bg-[#F7A25C]" : "bg-[#F27B1E]"}
                       `}
                     />
                   )}
 
                   {/* Today's indicator when not selected */}
                   {isToday && !isSelected && (
-                    <span className="
+                    <span
+                      className="
                       absolute bottom-[5px]
                       h-[3px] w-[3px]
                       rounded-full bg-[#F27B1E]
-                    " />
+                    "
+                    />
                   )}
-
                 </button>
-
               );
             })}
-
           </div>
         </div>
 
@@ -681,21 +648,23 @@ const AdminCalendar = () => {
         {/* AGENDA SECTION */}
         {/* ================================== */}
 
-        <div className="
+        <div
+          className="
           mt-4
           border-t border-dashed
           border-[#DDE4EF]
           pt-3
-        ">
-
+        "
+        >
           {/* Agenda header */}
           <div className="mb-5 flex items-center justify-between gap-2">
-
-            <h3 className="
+            <h3
+              className="
               text-[14px]
               font-semibold
               text-[#0A2E66]
-            ">
+            "
+            >
               {selectedDate === today
                 ? "Today"
                 : formatAgendaDate(selectedDate)}
@@ -703,7 +672,6 @@ const AdminCalendar = () => {
 
             {/* Day / Next 3 days */}
             <div className="flex items-center gap-1.5">
-
               <button
                 type="button"
                 onClick={() => setAgendaRange("day")}
@@ -746,33 +714,34 @@ const AdminCalendar = () => {
               >
                 Next 3 days
               </button>
-
             </div>
           </div>
 
           {/* Agenda content */}
           {agendaEvents.length === 0 ? (
-
-            <div className="
+            <div
+              className="
               flex min-h-[165px]
               flex-col items-center
               justify-center
               px-2
               pb-1
               text-center
-            ">
-
+            "
+            >
               <Calendar
                 size={39}
                 strokeWidth={1.6}
                 className="mb-3 text-[#8A95AC]"
               />
 
-              <p className="
+              <p
+                className="
                 text-[13px]
                 leading-5
                 text-[#64748B]
-              ">
+              "
+              >
                 Nothing planned. A great time to call back missed leads.
               </p>
 
@@ -800,21 +769,16 @@ const AdminCalendar = () => {
                 <Plus size={14} className="text-[#8A95AC]" />
                 Schedule a meeting
               </button>
-
             </div>
-
           ) : (
-
             <div className="space-y-2 pb-1">
-
               {agendaEvents.map((event, index) => {
-
-                const eventDate = String(
-                  event.date || event.start || ""
-                ).slice(0, 10);
+                const eventDate = String(event.date || event.start || "").slice(
+                  0,
+                  10,
+                );
 
                 return (
-
                   <div
                     key={event.id || index}
                     title={`${event.title} · ${formatAgendaDate(eventDate)}`}
@@ -828,23 +792,22 @@ const AdminCalendar = () => {
                       hover:bg-[#F2F4F9]
                     "
                   >
-
                     <div
                       className="h-9 w-1 shrink-0 rounded-full"
                       style={{
-                        backgroundColor:
-                          event.backgroundColor || COLORS.navy,
+                        backgroundColor: event.backgroundColor || COLORS.navy,
                       }}
                     />
 
                     <div className="min-w-0 flex-1">
-
-                      <p className="
+                      <p
+                        className="
                         truncate
                         text-[13px]
                         font-semibold
                         text-[#0A2E66]
-                      ">
+                      "
+                      >
                         {event.title}
                       </p>
 
@@ -853,16 +816,13 @@ const AdminCalendar = () => {
                           {formatAgendaDate(eventDate)}
                         </p>
                       )}
-
                     </div>
 
                     <CalendarDays
                       size={16}
                       className="shrink-0 text-[#8A95AC]"
                     />
-
                   </div>
-
                 );
               })}
 
@@ -886,24 +846,16 @@ const AdminCalendar = () => {
                 <Plus size={14} />
                 Schedule a meeting
               </button>
-
             </div>
-
           )}
-
         </div>
-
       </section>
 
       {/* ================================== */}
       {/* CREATE EVENT DIALOG */}
       {/* ================================== */}
 
-      <Dialog
-        open={isDialogOpen}
-        onOpenChange={handleDialogChange}
-      >
-
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
         <DialogContent
           className="
             w-[calc(100%-24px)]
@@ -920,52 +872,49 @@ const AdminCalendar = () => {
             color: COLORS.ink,
           }}
         >
-
           {/* Accent line */}
-          <div className="
+          <div
+            className="
             h-1.5 w-full
             bg-gradient-to-r
             from-[#0A2E66]
             to-[#F27B1E]
-          " />
+          "
+          />
 
           <div className="p-5 sm:p-6">
-
             <DialogHeader className="mb-5">
-
-              <div className="
+              <div
+                className="
                 mb-3 flex h-11 w-11
                 items-center justify-center
                 rounded-xl
                 bg-[#EDE9FC]
                 text-[#7050E8]
-              ">
+              "
+              >
                 <CalendarDays size={21} />
               </div>
 
-              <DialogTitle className="
+              <DialogTitle
+                className="
                 text-xl
                 font-bold
                 tracking-tight
                 text-[#0A2E66]
-              ">
+              "
+              >
                 Schedule a meeting
               </DialogTitle>
 
               <p className="text-sm text-[#56647D]">
                 Create a calendar event for your selected date.
               </p>
-
             </DialogHeader>
 
-            <form
-              onSubmit={handleAddEvent}
-              className="space-y-5"
-            >
-
+            <form onSubmit={handleAddEvent} className="space-y-5">
               {/* Event title */}
               <div>
-
                 <label
                   htmlFor="calendar-event-title"
                   className="
@@ -980,9 +929,7 @@ const AdminCalendar = () => {
                 <Input
                   id="calendar-event-title"
                   value={newEventTitle}
-                  onChange={(e) =>
-                    setNewEventTitle(e.target.value)
-                  }
+                  onChange={(e) => setNewEventTitle(e.target.value)}
                   placeholder="e.g. Client follow-up"
                   required
                   maxLength={150}
@@ -996,22 +943,23 @@ const AdminCalendar = () => {
                     focus-visible:ring-[#7050E8]
                   "
                 />
-
               </div>
 
               {/* Event date */}
               <div>
-
-                <label className="
+                <label
+                  className="
                   mb-1.5 flex items-center gap-2
                   text-xs font-bold
                   text-[#0F1B33]
-                ">
+                "
+                >
                   <Clock3 size={14} className="text-[#7050E8]" />
                   Event date
                 </label>
 
-                <div className="
+                <div
+                  className="
                   flex min-h-11
                   items-center gap-2
                   rounded-xl
@@ -1019,55 +967,47 @@ const AdminCalendar = () => {
                   bg-[#F7F8FC]
                   px-3 py-2
                   text-sm text-[#56647D]
-                ">
-                  <CalendarDays
-                    size={16}
-                    className="shrink-0 text-[#7050E8]"
-                  />
+                "
+                >
+                  <CalendarDays size={16} className="shrink-0 text-[#7050E8]" />
 
                   {selectedDate
                     ? formatAgendaDate(selectedDate)
                     : "Select a date"}
                 </div>
-
               </div>
 
               {/* Event color */}
               <div>
-
-                <div className="
+                <div
+                  className="
                   mb-2 flex items-center
                   justify-between gap-2
-                ">
-                  <label className="
+                "
+                >
+                  <label
+                    className="
                     flex items-center gap-2
                     text-xs font-bold
                     text-[#0F1B33]
-                  ">
+                  "
+                  >
                     <Palette size={14} className="text-[#7050E8]" />
                     Event color
                   </label>
 
-                  <span className="text-[11px] text-[#8491A8]">
-                    Optional
-                  </span>
+                  <span className="text-[11px] text-[#8491A8]">Optional</span>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-
                   {eventColors.map((color) => {
-
                     const selected = newEventColor === color;
 
                     return (
                       <button
                         key={color}
                         type="button"
-                        onClick={() =>
-                          setNewEventColor(
-                            selected ? "" : color
-                          )
-                        }
+                        onClick={() => setNewEventColor(selected ? "" : color)}
                         aria-label={`Choose event color ${color}`}
                         aria-pressed={selected}
                         title={color}
@@ -1093,35 +1033,36 @@ const AdminCalendar = () => {
                         }}
                       >
                         {selected && (
-                          <span className="
+                          <span
+                            className="
                             text-sm font-black
                             text-white
-                          ">
+                          "
+                          >
                             ✓
                           </span>
                         )}
                       </button>
                     );
                   })}
-
                 </div>
 
                 <p className="mt-2 text-[11px] text-[#8491A8]">
                   {newEventColor || "Default color: Navy"}
                 </p>
-
               </div>
 
               {/* Actions */}
-              <div className="
+              <div
+                className="
                 flex flex-col-reverse
                 gap-2
                 border-t border-[#E1E7F0]
                 pt-4
                 sm:flex-row
                 sm:justify-end
-              ">
-
+              "
+              >
                 <Button
                   type="button"
                   variant="outline"
@@ -1154,15 +1095,10 @@ const AdminCalendar = () => {
                 >
                   {saving ? "Saving..." : "Save event"}
                 </Button>
-
               </div>
-
             </form>
-
           </div>
-
         </DialogContent>
-
       </Dialog>
     </>
   );

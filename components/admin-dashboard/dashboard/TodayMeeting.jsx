@@ -1,6 +1,5 @@
 // components/admin-dashboard/dashboard/TodayMeeting.jsx
 
-
 "use client";
 
 // components/admin-dashboard/dashboard/TodayMeeting.jsx
@@ -165,9 +164,7 @@ const TodayMeeting = () => {
 
   const isManager = pathname?.startsWith("/manager");
 
-  const clientBase = isManager
-    ? "/manager/customer"
-    : "/dashboard/customer";
+  const clientBase = isManager ? "/manager/customer" : "/dashboard/customer";
 
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -240,9 +237,7 @@ const TodayMeeting = () => {
       {/* ================================== */}
 
       <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
-
         <div className="flex min-w-0 items-center gap-3">
-
           {/* Header icon */}
 
           <div
@@ -263,7 +258,6 @@ const TodayMeeting = () => {
           {/* Heading */}
 
           <div className="min-w-0">
-
             <h2
               className="
                 font-serif
@@ -280,9 +274,7 @@ const TodayMeeting = () => {
             <p className="mt-1 text-[13px] leading-5 text-[#56647D]">
               Scheduled calls and client meetings
             </p>
-
           </div>
-
         </div>
 
         {/* Meeting count */}
@@ -303,10 +295,8 @@ const TodayMeeting = () => {
           "
         >
           <Calendar size={13} />
-
           {meetings.length} Meetings
         </span>
-
       </div>
 
       {/* ================================== */}
@@ -322,9 +312,7 @@ const TodayMeeting = () => {
           pb-3
         "
       >
-
         <div className="mb-2 flex items-center justify-between gap-2">
-
           <p
             className="
               text-[10px]
@@ -340,15 +328,12 @@ const TodayMeeting = () => {
           <span className="text-[10px] font-medium text-[#8793AA]">
             {PRESETS.find((item) => item.id === preset)?.label}
           </span>
-
         </div>
 
         {/* Filter buttons */}
 
         <div className="flex flex-wrap items-center gap-1.5">
-
           {PRESETS.map((item) => {
-
             const isActive = preset === item.id;
 
             return (
@@ -385,13 +370,11 @@ const TodayMeeting = () => {
               </button>
             );
           })}
-
         </div>
 
         {/* Custom date range */}
 
         {preset === "custom" && (
-
           <div
             className="
               mt-3
@@ -402,13 +385,10 @@ const TodayMeeting = () => {
               p-3
             "
           >
-
             <div className="grid grid-cols-2 gap-2">
-
               {/* From */}
 
               <label className="min-w-0">
-
                 <span
                   className="
                     mb-1.5
@@ -422,7 +402,6 @@ const TodayMeeting = () => {
                 </span>
 
                 <div className="relative">
-
                   <CalendarDays
                     size={14}
                     className="
@@ -458,15 +437,12 @@ const TodayMeeting = () => {
                       focus:ring-[#0A2E66]/10
                     "
                   />
-
                 </div>
-
               </label>
 
               {/* To */}
 
               <label className="min-w-0">
-
                 <span
                   className="
                     mb-1.5
@@ -480,7 +456,6 @@ const TodayMeeting = () => {
                 </span>
 
                 <div className="relative">
-
                   <CalendarDays
                     size={14}
                     className="
@@ -517,15 +492,11 @@ const TodayMeeting = () => {
                       focus:ring-[#0A2E66]/10
                     "
                   />
-
                 </div>
-
               </label>
-
             </div>
 
             {(from || to) && (
-
               <button
                 type="button"
                 onClick={() => {
@@ -547,13 +518,9 @@ const TodayMeeting = () => {
                 <X size={13} />
                 Clear dates
               </button>
-
             )}
-
           </div>
-
         )}
-
       </div>
 
       {/* ================================== */}
@@ -570,15 +537,11 @@ const TodayMeeting = () => {
           pr-1
         "
       >
-
         {/* LOADING */}
 
         {loading ? (
-
           <div className="space-y-2.5">
-
             {Array.from({ length: 3 }).map((_, index) => (
-
               <div
                 key={index}
                 className="
@@ -590,42 +553,27 @@ const TodayMeeting = () => {
                   p-3
                 "
               >
-
-                <Skeleton
-                  width={62}
-                  height={65}
-                  borderRadius={12}
-                />
+                <Skeleton width={62} height={65} borderRadius={12} />
 
                 <div className="min-w-0 flex-1 space-y-2 pt-1">
-
                   <Skeleton height={14} width="65%" />
 
                   <Skeleton height={11} width="45%" />
 
                   <Skeleton height={11} width="55%" />
-
                 </div>
-
               </div>
-
             ))}
-
           </div>
-
         ) : meetings.length > 0 ? (
-
           /* MEETING CARDS */
 
           <div className="space-y-2.5">
-
             {meetings.map((meeting) => {
-
               const typeStyle = getMeetingTypeStyle(meeting.updateType);
               const TypeIcon = typeStyle.icon;
 
               return (
-
                 <Link
                   key={meeting._id}
                   href={`${clientBase}/${meeting.clientId}`}
@@ -639,7 +587,6 @@ const TodayMeeting = () => {
                     focus-visible:ring-offset-2
                   "
                 >
-
                   <article
                     className="
                       flex
@@ -659,7 +606,6 @@ const TodayMeeting = () => {
                       sm:p-3.5
                     "
                   >
-
                     {/* DATE AND TIME */}
 
                     <div
@@ -683,11 +629,7 @@ const TodayMeeting = () => {
                         group-hover:bg-[#FFF8F0]
                       "
                     >
-
-                      <Clock
-                        size={15}
-                        className="mb-1.5 text-[#F27B1E]"
-                      />
+                      <Clock size={15} className="mb-1.5 text-[#F27B1E]" />
 
                       <span
                         className="
@@ -712,17 +654,14 @@ const TodayMeeting = () => {
                       >
                         {formatMeetingDate(meeting.meetingAt)}
                       </span>
-
                     </div>
 
                     {/* MEETING DETAILS */}
 
                     <div className="min-w-0 flex-1">
-
                       {/* Client name and type icon */}
 
                       <div className="flex min-w-0 items-center justify-between gap-2">
-
                         <h3
                           className="
                             min-w-0
@@ -754,13 +693,11 @@ const TodayMeeting = () => {
                         >
                           <TypeIcon size={16} strokeWidth={1.9} />
                         </div>
-
                       </div>
 
                       {/* Company */}
 
                       {meeting.company && (
-
                         <p
                           className="
                             mt-1
@@ -773,18 +710,13 @@ const TodayMeeting = () => {
                             text-[#56647D]
                           "
                         >
-
                           <Building2
                             size={12}
                             className="shrink-0 text-[#8793AA]"
                           />
 
-                          <span className="truncate">
-                            {meeting.company}
-                          </span>
-
+                          <span className="truncate">{meeting.company}</span>
                         </p>
-
                       )}
 
                       {/* Salesperson */}
@@ -801,26 +733,18 @@ const TodayMeeting = () => {
                           text-[#8793AA]
                         "
                       >
+                        <UserRound size={12} className="shrink-0" />
 
-                        <UserRound
-                          size={12}
-                          className="shrink-0"
-                        />
-
-                        <span className="shrink-0">
-                          Assigned to
-                        </span>
+                        <span className="shrink-0">Assigned to</span>
 
                         <span className="truncate font-semibold text-[#56647D]">
                           {meeting.salesPersonName || "Unknown"}
                         </span>
-
                       </p>
 
                       {/* Badges */}
 
                       <div className="mt-2 flex flex-wrap items-center gap-1.5">
-
                         <span
                           className="
                             inline-flex
@@ -841,7 +765,6 @@ const TodayMeeting = () => {
                         </span>
 
                         {meeting.status && (
-
                           <span
                             className="
                               inline-flex
@@ -860,15 +783,12 @@ const TodayMeeting = () => {
                           >
                             {String(meeting.status).replace(/-/g, " ")}
                           </span>
-
                         )}
-
                       </div>
 
                       {/* Meeting note */}
 
                       {meeting.note && (
-
                         <p
                           className="
                             mt-2
@@ -887,9 +807,7 @@ const TodayMeeting = () => {
                         >
                           {meeting.note}
                         </p>
-
                       )}
-
                     </div>
 
                     {/* NAVIGATION INDICATOR */}
@@ -918,19 +836,12 @@ const TodayMeeting = () => {
                         "
                       />
                     </div>
-
                   </article>
-
                 </Link>
-
               );
-
             })}
-
           </div>
-
         ) : (
-
           /* EMPTY STATE */
 
           <div
@@ -950,7 +861,6 @@ const TodayMeeting = () => {
               text-center
             "
           >
-
             <div
               className="
                 mb-3
@@ -987,11 +897,8 @@ const TodayMeeting = () => {
             >
               There are no scheduled meetings for the selected date range.
             </p>
-
           </div>
-
         )}
-
       </div>
 
       {/* ================================== */}
@@ -999,7 +906,6 @@ const TodayMeeting = () => {
       {/* ================================== */}
 
       {!loading && meetings.length > 0 && (
-
         <div
           className="
             mt-3
@@ -1013,7 +919,6 @@ const TodayMeeting = () => {
             pt-3
           "
         >
-
           <p className="text-[11px] text-[#8793AA]">
             {meetings.length}{" "}
             {meetings.length === 1 ? "appointment" : "appointments"}
@@ -1032,11 +937,8 @@ const TodayMeeting = () => {
             <CalendarCheck size={13} />
             Scheduled
           </span>
-
         </div>
-
       )}
-
     </section>
   );
 };

@@ -115,9 +115,7 @@ export default function ManagerReminder() {
         setMyReminders(res?.data?.reminder || []);
       } else {
         setMyReminders([]);
-        toast.error(
-          res?.message || "Unable to load your personal reminders",
-        );
+        toast.error(res?.message || "Unable to load your personal reminders");
       }
     } catch (error) {
       setMyReminders([]);
@@ -155,14 +153,14 @@ export default function ManagerReminder() {
       setCreating(true);
 
       const res = await createManagerReminderService({
-  reminder: [
-    {
-      description: description.trim(),
-      reminderAt: parsedDate.toISOString(),
-      cc_email: [],
-    },
-  ],
-});
+        reminder: [
+          {
+            description: description.trim(),
+            reminderAt: parsedDate.toISOString(),
+            cc_email: [],
+          },
+        ],
+      });
       if (res?.success) {
         toast.success("Reminder created successfully");
         setDescription("");
@@ -174,8 +172,7 @@ export default function ManagerReminder() {
       }
     } catch (error) {
       toast.error(
-        error?.response?.data?.message ||
-          "Unable to create reminder",
+        error?.response?.data?.message || "Unable to create reminder",
       );
     } finally {
       setCreating(false);
@@ -200,15 +197,12 @@ export default function ManagerReminder() {
         setReminders(res.data || []);
       } else {
         setReminders([]);
-        toast.error(
-          res?.message || "Unable to load client reminders",
-        );
+        toast.error(res?.message || "Unable to load client reminders");
       }
     } catch (error) {
       setReminders([]);
       toast.error(
-        error?.response?.data?.message ||
-          "Unable to load client reminders",
+        error?.response?.data?.message || "Unable to load client reminders",
       );
     } finally {
       setLoading(false);
@@ -248,9 +242,7 @@ export default function ManagerReminder() {
 
           <div className="min-w-0">
             <h2 className="text-lg font-bold text-slate-900">
-              {activeTab === "mine"
-                ? "My Reminders"
-                : "Client Reminders"}
+              {activeTab === "mine" ? "My Reminders" : "Client Reminders"}
             </h2>
 
             <p className="text-xs text-slate-500">
@@ -264,9 +256,7 @@ export default function ManagerReminder() {
         <button
           type="button"
           onClick={
-            activeTab === "mine"
-              ? fetchPersonalReminders
-              : fetchReminders
+            activeTab === "mine" ? fetchPersonalReminders : fetchReminders
           }
           disabled={personalLoading || loading}
           className="shrink-0 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
@@ -315,9 +305,7 @@ export default function ManagerReminder() {
 
             <textarea
               value={description}
-              onChange={(event) =>
-                setDescription(event.target.value)
-              }
+              onChange={(event) => setDescription(event.target.value)}
               placeholder="What do you need to remember?"
               required
               rows={2}
@@ -328,9 +316,7 @@ export default function ManagerReminder() {
               <input
                 type="datetime-local"
                 value={reminderAt}
-                onChange={(event) =>
-                  setReminderAt(event.target.value)
-                }
+                onChange={(event) => setReminderAt(event.target.value)}
                 required
                 className="min-w-0 flex-1 rounded-md border border-gray-200 p-2 text-sm outline-none focus:border-blue-500"
                 aria-label="Reminder date and time"
@@ -353,9 +339,7 @@ export default function ManagerReminder() {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() =>
-                    handlePersonalPresetChange(item.id)
-                  }
+                  onClick={() => handlePersonalPresetChange(item.id)}
                   className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
                     personalPreset === item.id
                       ? "border-blue-600 bg-blue-600 text-white"
@@ -380,9 +364,7 @@ export default function ManagerReminder() {
                     <input
                       type="date"
                       value={personalFrom}
-                      onChange={(event) =>
-                        setPersonalFrom(event.target.value)
-                      }
+                      onChange={(event) => setPersonalFrom(event.target.value)}
                       max={personalTo || undefined}
                       className="min-w-0 bg-transparent py-1.5 text-xs outline-none"
                       aria-label="Personal reminders start date"
@@ -400,9 +382,7 @@ export default function ManagerReminder() {
                     <input
                       type="date"
                       value={personalTo}
-                      onChange={(event) =>
-                        setPersonalTo(event.target.value)
-                      }
+                      onChange={(event) => setPersonalTo(event.target.value)}
                       min={personalFrom || undefined}
                       className="min-w-0 bg-transparent py-1.5 text-xs outline-none"
                       aria-label="Personal reminders end date"
@@ -416,13 +396,11 @@ export default function ManagerReminder() {
                   </p>
                 )}
 
-                {personalFrom &&
-                  personalTo &&
-                  personalTo < personalFrom && (
-                    <p className="mt-2 text-xs text-red-600">
-                      End date cannot be earlier than start date.
-                    </p>
-                  )}
+                {personalFrom && personalTo && personalTo < personalFrom && (
+                  <p className="mt-2 text-xs text-red-600">
+                    End date cannot be earlier than start date.
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -432,21 +410,13 @@ export default function ManagerReminder() {
             {personalLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((item) => (
-                  <Skeleton
-                    key={item}
-                    height={76}
-                    borderRadius={8}
-                  />
+                  <Skeleton key={item} height={76} borderRadius={8} />
                 ))}
               </div>
             ) : personalPreset === "custom" &&
-              (!personalFrom ||
-                (personalTo && personalTo < personalFrom)) ? (
+              (!personalFrom || (personalTo && personalTo < personalFrom)) ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <CalendarDays
-                  size={30}
-                  className="mb-2 text-gray-400"
-                />
+                <CalendarDays size={30} className="mb-2 text-gray-400" />
                 <p className="text-sm text-gray-600">
                   Select a valid date range to view reminders.
                 </p>
@@ -538,10 +508,7 @@ export default function ManagerReminder() {
           {preset === "custom" && (
             <div className="mb-3 flex shrink-0 flex-wrap items-center gap-2">
               <div className="flex items-center gap-1 rounded border bg-white px-2">
-                <CalendarDays
-                  size={14}
-                  className="text-gray-400"
-                />
+                <CalendarDays size={14} className="text-gray-400" />
 
                 <input
                   type="date"
@@ -556,10 +523,7 @@ export default function ManagerReminder() {
               <span className="text-xs text-gray-500">to</span>
 
               <div className="flex items-center gap-1 rounded border bg-white px-2">
-                <CalendarDays
-                  size={14}
-                  className="text-gray-400"
-                />
+                <CalendarDays size={14} className="text-gray-400" />
 
                 <input
                   type="date"
@@ -578,11 +542,7 @@ export default function ManagerReminder() {
             {loading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((item) => (
-                  <Skeleton
-                    key={item}
-                    height={86}
-                    borderRadius={8}
-                  />
+                  <Skeleton key={item} height={86} borderRadius={8} />
                 ))}
               </div>
             ) : reminders.length === 0 ? (

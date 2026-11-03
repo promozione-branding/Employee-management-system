@@ -16,7 +16,6 @@ import { useEffect } from "react";
 const SalesDashboard = () => {
   const { employee, loading } = useSalesEmployeeStore();
 
-
   if (loading) return <Loading />;
   if (!employee) return null;
 

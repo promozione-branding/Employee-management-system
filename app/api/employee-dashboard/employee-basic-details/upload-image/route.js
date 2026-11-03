@@ -11,7 +11,7 @@ export async function POST(req) {
     if (!file) {
       return NextResponse.json(
         { success: false, message: "No file provided" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -35,7 +35,7 @@ export async function POST(req) {
     console.error(error);
     return NextResponse.json(
       { success: false, message: "Upload failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

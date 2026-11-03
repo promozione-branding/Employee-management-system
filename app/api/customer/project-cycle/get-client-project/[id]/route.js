@@ -29,7 +29,7 @@ export async function GET(req, { params }) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -39,7 +39,7 @@ export async function GET(req, { params }) {
         message: "customer project cycle fetched successfully",
         data: customerProjects,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log(error);
@@ -48,7 +48,7 @@ export async function GET(req, { params }) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -71,7 +71,7 @@ export async function PUT(req, { params }) {
     const updateSubDocument = await ProjectCycle.findOneAndUpdate(
       { "projectDuration._id": id },
       { $set: setOptions },
-      { new: true }
+      { new: true },
     );
 
     if (updateSubDocument) {
@@ -81,7 +81,7 @@ export async function PUT(req, { params }) {
           message: "Project duration updated successfully",
           data: updateSubDocument,
         },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -97,7 +97,7 @@ export async function PUT(req, { params }) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -107,7 +107,7 @@ export async function PUT(req, { params }) {
         message: "Project Cycle Updated",
         data: updateProjectCycle,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log(error);
@@ -116,7 +116,7 @@ export async function PUT(req, { params }) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -134,7 +134,7 @@ export async function DELETE(req, { params }) {
           projectDuration: { _id: id },
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (updateProjectCycle) {
@@ -144,7 +144,7 @@ export async function DELETE(req, { params }) {
           message: "Project duration deleted successfully",
           data: updateProjectCycle,
         },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -156,7 +156,7 @@ export async function DELETE(req, { params }) {
           success: false,
           message: "Project Cycle not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -165,7 +165,7 @@ export async function DELETE(req, { params }) {
         success: true,
         message: "Project Cycle deleted successfully",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log(error);
@@ -174,7 +174,7 @@ export async function DELETE(req, { params }) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

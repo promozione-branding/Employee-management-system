@@ -9,12 +9,7 @@ import { getCustomerServices } from "@/service/customer";
 import { createWorkflowService } from "@/service/workflow";
 import { useActiveCustomerStore } from "@/lib/store/ActiveCustomerStore";
 
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
   UserRound,
@@ -74,13 +69,13 @@ function DashboardContent({
   });
 
   const [customerLoading, setCustomerLoading] = useState(
-    !customerName || !companyName
+    !customerName || !companyName,
   );
 
   const [activeTab, setActiveTab] = useState(() =>
     CUSTOMER_TABS.some((tab) => tab.value === requestedTab)
       ? requestedTab
-      : "Customer"
+      : "Customer",
   );
 
   // Fetch customer information.
@@ -130,9 +125,7 @@ function DashboardContent({
 
   // Keep the selected tab synchronized with the URL.
   useEffect(() => {
-    const nextTab = CUSTOMER_TABS.some(
-      (tab) => tab.value === requestedTab
-    )
+    const nextTab = CUSTOMER_TABS.some((tab) => tab.value === requestedTab)
       ? requestedTab
       : "Customer";
 
@@ -150,11 +143,9 @@ function DashboardContent({
     });
   };
 
-  const displayedCustomerName =
-    customerDetails?.name || customerName || "";
+  const displayedCustomerName = customerDetails?.name || customerName || "";
 
-  const displayedCompanyName =
-    customerDetails?.company || companyName || "";
+  const displayedCompanyName = customerDetails?.company || companyName || "";
 
   return (
     <div className="min-h-screen w-full bg-[#F2F4F9] p-1 sm:p-1 lg:p-1">
@@ -231,12 +222,11 @@ function DashboardContent({
                   [scrollbar-width:thin]
                 "
               >
-                {CUSTOMER_TABS.map(
-                  ({ value, label, icon: Icon }) => (
-                    <TabsTrigger
-                      key={value}
-                      value={value}
-                      className="
+                {CUSTOMER_TABS.map(({ value, label, icon: Icon }) => (
+                  <TabsTrigger
+                    key={value}
+                    value={value}
+                    className="
                         relative flex min-h-9 flex-none
                         items-center justify-center gap-1.5
                         whitespace-nowrap rounded-md
@@ -249,17 +239,16 @@ function DashboardContent({
                         data-[state=active]:text-[#0A2E66]
                         data-[state=active]:shadow-sm
                       "
-                    >
-                      <Icon size={14} className="shrink-0" />
+                  >
+                    <Icon size={14} className="shrink-0" />
 
-                      <span>{label}</span>
+                    <span>{label}</span>
 
-                      {activeTab === value && (
-                        <span className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full bg-[#F27B1E]" />
-                      )}
-                    </TabsTrigger>
-                  )
-                )}
+                    {activeTab === value && (
+                      <span className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full bg-[#F27B1E]" />
+                    )}
+                  </TabsTrigger>
+                ))}
               </TabsList>
             </div>
 
@@ -337,10 +326,7 @@ function DashboardContent({
                 <CustomerProposal customerId={customerId} />
               </TabsContent>
 
-              <TabsContent
-                value="ledger"
-                className="mt-0 min-w-0 outline-none"
-              >
+              <TabsContent value="ledger" className="mt-0 min-w-0 outline-none">
                 <LedgerDetails customerId={customerId} />
               </TabsContent>
             </div>

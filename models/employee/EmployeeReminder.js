@@ -27,7 +27,7 @@ const EmployeeReminderSchema = new mongoose.Schema(
           {
             type: String,
           },
-        ], 
+        ],
       },
     ],
   },

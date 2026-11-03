@@ -1,10 +1,5 @@
 // app/loading.js
 
-
-
- 
-
-
 export default function Loading() {
   return (
     <main className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden bg-slate-950 px-5 py-10 text-white">
@@ -45,5 +40,3 @@ export default function Loading() {
     </main>
   );
 }
-
-

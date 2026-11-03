@@ -17,7 +17,7 @@ export async function GET(req, { params }) {
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, message: "Invalid id" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -32,7 +32,7 @@ export async function GET(req, { params }) {
     if (!doc)
       return NextResponse.json(
         { success: false, message: "Not found" },
-        { status: 404 }
+        { status: 404 },
       );
 
     return NextResponse.json({ success: true, data: doc }, { status: 200 });
@@ -40,7 +40,7 @@ export async function GET(req, { params }) {
     console.log("getProposalNew error:", error);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -52,14 +52,14 @@ export async function PUT(req, { params }) {
     if (!authUser)
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
 
     const { id } = await params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, message: "Invalid id" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -67,7 +67,7 @@ export async function PUT(req, { params }) {
     if (!existing)
       return NextResponse.json(
         { success: false, message: "Not found" },
-        { status: 404 }
+        { status: 404 },
       );
 
     const body = await req.json();
@@ -88,25 +88,25 @@ export async function PUT(req, { params }) {
     if (!items.length)
       return NextResponse.json(
         { success: false, message: "At least one item required" },
-        { status: 400 }
+        { status: 400 },
       );
 
     if (Number(discountInput) < 0)
       return NextResponse.json(
         { success: false, message: "Discount cannot be negative" },
-        { status: 400 }
+        { status: 400 },
       );
 
     for (const p of partialPayments) {
       if (Number(p.paymentAmount) < 0)
         return NextResponse.json(
           { success: false, message: "Partial payment cannot be negative" },
-          { status: 400 }
+          { status: 400 },
         );
     }
 
     const subtotal = round0(
-      items.reduce((s, it) => s + Number(it.amount || 0), 0)
+      items.reduce((s, it) => s + Number(it.amount || 0), 0),
     );
 
     const discountAmount =
@@ -117,7 +117,7 @@ export async function PUT(req, { params }) {
     if (discountAmount > subtotal) {
       return NextResponse.json(
         { success: false, message: "Discount cannot exceed subtotal" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -127,7 +127,7 @@ export async function PUT(req, { params }) {
     const grandTotal = round0(baseAfterDiscount + gstAmount - tdsAmount);
 
     const totalPartial = round0(
-      partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0)
+      partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0),
     );
 
     if (totalPartial > grandTotal) {
@@ -136,7 +136,7 @@ export async function PUT(req, { params }) {
           success: false,
           message: `Partial payments (₹${totalPartial}) exceed grand total (₹${grandTotal})`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -148,7 +148,7 @@ export async function PUT(req, { params }) {
             grandTotal - totalPartial
           }`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -173,15 +173,12 @@ export async function PUT(req, { params }) {
 
     const updated = await existing.save();
 
-    return NextResponse.json(
-      { success: true, data: updated },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true, data: updated }, { status: 200 });
   } catch (error) {
     console.log("updateProposalNew error:", error);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -193,27 +190,27 @@ export async function DELETE(req, { params }) {
     if (!authUser)
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
 
     const { id } = await params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, message: "Invalid id" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     await ProposalNew.findByIdAndDelete(id);
     return NextResponse.json(
       { success: true, message: "Deleted" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log("deleteProposalNew error:", error);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

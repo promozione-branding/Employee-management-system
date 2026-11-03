@@ -164,11 +164,13 @@ const Attachment = ({ clientId }) => {
     loadAttachments();
   }, [clientId]);
 
-  console.log(attachmentList)
+  console.log(attachmentList);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(320px,380px)_1fr]">
-      <div className="lg:col-span-2"><BrandAssets clientId={clientId} /></div>
+      <div className="lg:col-span-2">
+        <BrandAssets clientId={clientId} />
+      </div>
       <Card className="h-fit">
         <CardHeader>
           <CardTitle>Create Attachment</CardTitle>
@@ -208,10 +210,11 @@ const Attachment = ({ clientId }) => {
                 <button
                   key={item?._id}
                   onClick={() => handleSelectEmail(item)}
-                  className={`p-1 border rounded-lg shadow-sm text-sm font-medium text-gray-700 duration-300 capitalize ${selectEmail.includes(item?.email)
+                  className={`p-1 border rounded-lg shadow-sm text-sm font-medium text-gray-700 duration-300 capitalize ${
+                    selectEmail.includes(item?.email)
                       ? "bg-blue-50 border-emerald-500 scale-105"
                       : "bg-white border-gray-200 hover:border-gray-300"
-                    }`}
+                  }`}
                 >
                   @{item?.email?.split("@")?.[0]}
                 </button>
@@ -268,10 +271,11 @@ const Attachment = ({ clientId }) => {
                         {getAssetLabel(item.assetType)}
                       </span>
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-medium ${item.visibility === "public"
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          item.visibility === "public"
                             ? "bg-emerald-100 text-emerald-700"
                             : "bg-amber-100 text-amber-700"
-                          }`}
+                        }`}
                       >
                         {item.visibility}
                       </span>
@@ -290,7 +294,9 @@ const Attachment = ({ clientId }) => {
                         {item.description || "No description provided."}
                       </p>
                       <p className="mt-1 text-sm leading-6 text-slate-600">
-                        {item.cc_email.length > 0 ? item.cc_email.join(", ") : "No CC emails provided."}
+                        {item.cc_email.length > 0
+                          ? item.cc_email.join(", ")
+                          : "No CC emails provided."}
                       </p>
                     </div>
 

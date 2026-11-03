@@ -3,8 +3,7 @@
 export async function getEditHistoryService(customerId, params = {}) {
   const query = new URLSearchParams(params).toString();
   const url = `/api/customer/${customerId}/edit-history${query ? `?${query}` : ""}`;
-  
-  
+
   const response = await fetch(url);
   const data = await response.json();
   if (!data.success) throw new Error(data.message || "Failed to fetch history");
@@ -87,14 +86,15 @@ export async function getClientProposalUpdateHistory(id) {
 
 /** Team update admin history for a client */
 export async function getTeamUpdateAdminService(clientId) {
-  if (!clientId) return { success: false, message: "clientId is required", data: [] };
+  if (!clientId)
+    return { success: false, message: "clientId is required", data: [] };
   try {
     return await _get(`/api/customer/history/team-update/${clientId}`);
   } catch (err) {
     return { success: false, message: err.message, data: [] };
   }
 }
- 
+
 /** SEO report history */
 export async function seoReportHistoryService(id) {
   if (!id) return { success: false, message: "id is required", data: [] };

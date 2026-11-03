@@ -1,6 +1,5 @@
 // app/api/customer/[id]/route.js
 
-
 import { connectDB } from "@/lib/db";
 import Customer from "@/models/admin/Customer";
 import SalesEmployee from "@/models/employee/sales/SalesEmployee";
@@ -25,8 +24,7 @@ const OPTIONAL_TEXT_FIELDS = [
 ];
 
 const isValidId = (id) =>
-  typeof id === "string" &&
-  mongoose.Types.ObjectId.isValid(id);
+  typeof id === "string" && mongoose.Types.ObjectId.isValid(id);
 
 export async function GET(req, { params }) {
   try {
@@ -37,7 +35,7 @@ export async function GET(req, { params }) {
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, message: "Invalid customer ID" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -49,20 +47,20 @@ export async function GET(req, { params }) {
     if (!customer) {
       return NextResponse.json(
         { success: false, message: "Customer not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     return NextResponse.json(
       { success: true, data: customer },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Get customer by ID error:", error);
 
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -76,7 +74,7 @@ export async function DELETE(req, { params }) {
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, message: "Invalid customer ID" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -85,7 +83,7 @@ export async function DELETE(req, { params }) {
     if (!authUser) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -94,7 +92,7 @@ export async function DELETE(req, { params }) {
     if (!customer) {
       return NextResponse.json(
         { success: false, message: "Customer not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -104,13 +102,13 @@ export async function DELETE(req, { params }) {
 
     // Remove the client from its sales employee assignments.
     const assignedEmployeeIds = (customer.salesExecutive || []).map(
-      (employeeId) => employeeId.toString()
+      (employeeId) => employeeId.toString(),
     );
 
     for (const employeeId of assignedEmployeeIds) {
       await SalesEmployee.updateOne(
         { employeeId },
-        { $pull: { client: customer._id } }
+        { $pull: { client: customer._id } },
       );
     }
 
@@ -136,7 +134,10 @@ export async function DELETE(req, { params }) {
         req,
       });
     } catch (auditErr) {
-      console.error("[edit-history] failed to record customer delete:", auditErr);
+      console.error(
+        "[edit-history] failed to record customer delete:",
+        auditErr,
+      );
     }
     // ── END ──
 
@@ -145,14 +146,14 @@ export async function DELETE(req, { params }) {
         success: true,
         message: `${customer.name} customer deleted successfully`,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Delete customer error:", error);
 
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -166,7 +167,7 @@ export async function PUT(req, { params }) {
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, message: "Invalid customer ID" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -175,7 +176,7 @@ export async function PUT(req, { params }) {
     if (!authUser) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -184,7 +185,7 @@ export async function PUT(req, { params }) {
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return NextResponse.json(
         { success: false, message: "Invalid request body" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -196,14 +197,14 @@ export async function PUT(req, { params }) {
           success: false,
           message: "Customer does not exist",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     const oldData = customer.toObject();
 
-    const oldEmployeeIds = (customer.salesExecutive || []).map(
-      (employeeId) => employeeId.toString()
+    const oldEmployeeIds = (customer.salesExecutive || []).map((employeeId) =>
+      employeeId.toString(),
     );
 
     // Validate GSTIN only when a non-empty value is provided.
@@ -219,7 +220,7 @@ export async function PUT(req, { params }) {
             success: false,
             message: "GSTIN must be a string",
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -229,8 +230,7 @@ export async function PUT(req, { params }) {
         return NextResponse.json(
           {
             success: false,
-            message:
-              "GSTIN must contain exactly 15 alphanumeric characters.",
+            message: "GSTIN must contain exactly 15 alphanumeric characters.",
             errors: [
               {
                 field: "GSTIN",
@@ -238,7 +238,7 @@ export async function PUT(req, { params }) {
               },
             ],
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -252,9 +252,7 @@ export async function PUT(req, { params }) {
     // Keep the existing assignment if the form sends an empty array.
     let newEmployeeIds = oldEmployeeIds;
 
-    if (
-      Object.prototype.hasOwnProperty.call(body, "salesExecutive")
-    ) {
+    if (Object.prototype.hasOwnProperty.call(body, "salesExecutive")) {
       const rawIds = Array.isArray(body.salesExecutive)
         ? body.salesExecutive
         : body.salesExecutive
@@ -266,10 +264,9 @@ export async function PUT(req, { params }) {
           rawIds
             .filter(
               (employeeId) =>
-                typeof employeeId === "string" &&
-                employeeId.trim() !== ""
+                typeof employeeId === "string" && employeeId.trim() !== "",
             )
-            .map((employeeId) => employeeId.trim())
+            .map((employeeId) => employeeId.trim()),
         ),
       ];
 
@@ -279,7 +276,7 @@ export async function PUT(req, { params }) {
             success: false,
             message: "Invalid sales employee ID",
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -294,7 +291,7 @@ export async function PUT(req, { params }) {
                 success: false,
                 message: "Sales employee not found",
               },
-              { status: 404 }
+              { status: 404 },
             );
           }
         }
@@ -361,7 +358,7 @@ export async function PUT(req, { params }) {
               success: false,
               message: "Please enter a valid client phone number",
             },
-            { status: 400 }
+            { status: 400 },
           );
         }
 
@@ -381,19 +378,17 @@ export async function PUT(req, { params }) {
     // Synchronize the SalesEmployee client lists if the assignment changed.
     const assignmentsChanged =
       oldEmployeeIds.length !== newEmployeeIds.length ||
-      oldEmployeeIds.some(
-        (employeeId) => !newEmployeeIds.includes(employeeId)
-      );
+      oldEmployeeIds.some((employeeId) => !newEmployeeIds.includes(employeeId));
 
     if (assignmentsChanged) {
       const removedEmployeeIds = oldEmployeeIds.filter(
-        (employeeId) => !newEmployeeIds.includes(employeeId)
+        (employeeId) => !newEmployeeIds.includes(employeeId),
       );
 
       for (const employeeId of removedEmployeeIds) {
         await SalesEmployee.updateOne(
           { employeeId },
-          { $pull: { client: editedCustomer._id } }
+          { $pull: { client: editedCustomer._id } },
         );
       }
 
@@ -416,8 +411,7 @@ export async function PUT(req, { params }) {
           }
         } else {
           const alreadyAssigned = (salesEmployee.client || []).some(
-            (clientId) =>
-              clientId.toString() === editedCustomer._id.toString()
+            (clientId) => clientId.toString() === editedCustomer._id.toString(),
           );
 
           if (!alreadyAssigned) {
@@ -463,7 +457,10 @@ export async function PUT(req, { params }) {
         });
       }
     } catch (auditErr) {
-      console.error("[edit-history] failed to record customer update:", auditErr);
+      console.error(
+        "[edit-history] failed to record customer update:",
+        auditErr,
+      );
     }
     // ── END ──
 
@@ -473,15 +470,12 @@ export async function PUT(req, { params }) {
         message: "Customer updated successfully",
         data: editedCustomer,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Edit customer by ID error:", error);
 
-    if (
-      error.name === "ValidationError" ||
-      error.name === "CastError"
-    ) {
+    if (error.name === "ValidationError" || error.name === "CastError") {
       return NextResponse.json(
         {
           success: false,
@@ -499,13 +493,13 @@ export async function PUT(req, { params }) {
                   },
                 ],
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

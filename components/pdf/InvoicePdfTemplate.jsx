@@ -77,7 +77,7 @@ const Invoice = ({ data }) => {
   // -----------------------------
   const subtotal = services.reduce(
     (sum, service) => sum + Number(service?.price || 0),
-    0
+    0,
   );
 
   const taxableAmount = subtotal;
@@ -86,10 +86,7 @@ const Invoice = ({ data }) => {
   const sgstAmount = taxableAmount * 0.09;
   const igstAmount = taxableAmount * 0.18;
 
-  const taxAmount =
-    taxType === "IGST"
-      ? igstAmount
-      : cgstAmount + sgstAmount;
+  const taxAmount = taxType === "IGST" ? igstAmount : cgstAmount + sgstAmount;
 
   // IMPORTANT:
   // totalAmount coming from API is already tax-inclusive.
@@ -147,22 +144,16 @@ const Invoice = ({ data }) => {
             INVOICE INFO
         ========================== */}
         <View style={styles.invoiceInfo}>
-          <Text>
-            Invoice No.: {invoiceNo || "-"}
-          </Text>
+          <Text>Invoice No.: {invoiceNo || "-"}</Text>
 
-          <Text>
-            Invoice Date: {formatDate(invoiceDate)}
-          </Text>
+          <Text>Invoice Date: {formatDate(invoiceDate)}</Text>
         </View>
 
         {/* =========================
             CUSTOMER DETAILS
         ========================== */}
         <View style={styles.customerDetails}>
-          <Text style={styles.sectionTitle}>
-            Customer Details
-          </Text>
+          <Text style={styles.sectionTitle}>Customer Details</Text>
 
           <Text>
             <Text style={styles.bold}>Client Name: </Text>
@@ -257,81 +248,79 @@ const Invoice = ({ data }) => {
           {/* =========================
               SERVICE ROWS
           ========================== */}
-          {services.map(
-            ({ serviceName, HSN, price, _id }, idx) => {
-              return (
-                <View
-                  style={styles.tableRow}
-                  key={_id || `${serviceName}-${idx}`}
+          {services.map(({ serviceName, HSN, price, _id }, idx) => {
+            return (
+              <View
+                style={styles.tableRow}
+                key={_id || `${serviceName}-${idx}`}
+              >
+                {/* S.NO */}
+                <Text
+                  style={[
+                    styles.tableCell,
+                    {
+                      flex: 0.5,
+                    },
+                  ]}
                 >
-                  {/* S.NO */}
-                  <Text
-                    style={[
-                      styles.tableCell,
-                      {
-                        flex: 0.5,
-                      },
-                    ]}
-                  >
-                    {idx + 1}
-                  </Text>
+                  {idx + 1}
+                </Text>
 
-                  {/* DESCRIPTION */}
-                  <Text
-                    style={[
-                      styles.tableCell,
-                      {
-                        flex: 3,
-                        fontFamily: "LiberationSans",
-                        fontWeight: "bold",
-                      },
-                    ]}
-                  >
-                    {serviceName || "-"}
-                  </Text>
+                {/* DESCRIPTION */}
+                <Text
+                  style={[
+                    styles.tableCell,
+                    {
+                      flex: 3,
+                      fontFamily: "LiberationSans",
+                      fontWeight: "bold",
+                    },
+                  ]}
+                >
+                  {serviceName || "-"}
+                </Text>
 
-                  {/* HSN */}
-                  <Text
-                    style={[
-                      styles.tableCell,
-                      {
-                        flex: 1,
-                        textAlign: "right",
-                      },
-                    ]}
-                  >
-                    {HSN || "-"}
-                  </Text>
+                {/* HSN */}
+                <Text
+                  style={[
+                    styles.tableCell,
+                    {
+                      flex: 1,
+                      textAlign: "right",
+                    },
+                  ]}
+                >
+                  {HSN || "-"}
+                </Text>
 
-                  {/* RATE */}
-                  <Text
-                    style={[
-                      styles.tableCell,
-                      {
-                        flex: 1,
-                        textAlign: "right",
-                      },
-                    ]}
-                  >
-                    {formatIndianCurrency(price)}
-                  </Text>
+                {/* RATE */}
+                <Text
+                  style={[
+                    styles.tableCell,
+                    {
+                      flex: 1,
+                      textAlign: "right",
+                    },
+                  ]}
+                >
+                  {formatIndianCurrency(price)}
+                </Text>
 
-                  {/* AMOUNT */}
-                  <Text
-                    style={[
-                      styles.tableCell,
-                      {
-                        flex: 1,
-                        textAlign: "right",
-                      },
-                    ]}
-                  >
-                    {formatIndianCurrency(price)}
-                  </Text>
-                </View>
-              );
-            }
-          )}
+                {/* AMOUNT */}
+                <Text
+                  style={[
+                    styles.tableCell,
+                    {
+                      flex: 1,
+                      textAlign: "right",
+                    },
+                  ]}
+                >
+                  {formatIndianCurrency(price)}
+                </Text>
+              </View>
+            );
+          })}
 
           {/* =========================
               TAXABLE AMOUNT
@@ -720,9 +709,7 @@ const Invoice = ({ data }) => {
             },
           ]}
         >
-          <Text>
-            Whether the tax is payable on reverse charge basis: No
-          </Text>
+          <Text>Whether the tax is payable on reverse charge basis: No</Text>
 
           <Text
             style={{
@@ -748,18 +735,18 @@ const Invoice = ({ data }) => {
           </Text>
 
           <Text>
-            • This invoice is valid, subject to realization of due payments,
-            as mentioned in details above.
+            • This invoice is valid, subject to realization of due payments, as
+            mentioned in details above.
           </Text>
 
           <Text>
-            • Any payment made is covered under "Advertising Contract" u/s
-            194C. TDS, if applicable, shall be @ 2%.
+            • Any payment made is covered under "Advertising Contract" u/s 194C.
+            TDS, if applicable, shall be @ 2%.
           </Text>
 
           <Text>
-            • You are requested to validate this invoice along with GSTIN
-            within one month of Invoice date.
+            • You are requested to validate this invoice along with GSTIN within
+            one month of Invoice date.
           </Text>
 
           {/* =========================
@@ -775,13 +762,11 @@ const Invoice = ({ data }) => {
             </Text>
 
             <Text>
-              Regd. Office: 606 Best Business Park, Netaji Subhash Place,
-              Delhi, 110034,
+              Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi,
+              110034,
             </Text>
 
-            <Text>
-              Ph no: +91 - 011 42603232
-            </Text>
+            <Text>Ph no: +91 - 011 42603232</Text>
 
             <Text>
               PAN No.: AAOCP9163C, GSTIN No.: 07AAOCP9163C1Z5, CIN:

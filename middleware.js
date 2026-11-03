@@ -3,12 +3,7 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const PUBLIC_ROUTES = [
-  "/login",
-  "/register",
-  "/login-otp",
-  "/forgot-password",
-];
+const PUBLIC_ROUTES = ["/login", "/register", "/login-otp", "/forgot-password"];
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -73,34 +68,29 @@ export async function middleware(req) {
 
     // Admin-only
     if (pathname.startsWith("/dashboard") && role !== "admin") {
-      return NextResponse.redirect(
-        new URL(ROLE_REDIRECT[role], req.url),
-      );
+      return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
     }
 
     // Employee-only
     if (pathname.startsWith("/employee-dashboard") && role !== "employee") {
-      return NextResponse.redirect(
-        new URL(ROLE_REDIRECT[role], req.url),
-      );
+      return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
     }
 
     // Sales-only
     if (pathname.startsWith("/sales-dashboard") && role !== "sales") {
-      return NextResponse.redirect(
-        new URL(ROLE_REDIRECT[role], req.url),
-      );
+      return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
     }
 
     // Manager-only
     if (pathname.startsWith("/manager") && role !== "manager") {
-      return NextResponse.redirect(
-        new URL(ROLE_REDIRECT[role], req.url),
-      );
+      return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
     }
 
     // 👇👇👇 NEW BLOCK: Reports module - Admin & Manager only 👇👇👇
-    if (pathname.startsWith("/reports") && !["admin", "manager"].includes(role)) {
+    if (
+      pathname.startsWith("/reports") &&
+      !["admin", "manager"].includes(role)
+    ) {
       return NextResponse.redirect(
         new URL(ROLE_REDIRECT[role] || "/login", req.url),
       );

@@ -1,6 +1,5 @@
 // app/manager/Dashboard.jsx
 
-
 "use client";
 
 import React from "react";

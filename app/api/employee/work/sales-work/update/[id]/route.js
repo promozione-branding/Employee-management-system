@@ -20,7 +20,6 @@ export async function GET(req, { params }) {
       );
     }
 
-
     const meetings = await Meeting.aggregate([
       {
         $unwind: "$meetingUpdate",

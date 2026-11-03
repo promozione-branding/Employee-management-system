@@ -3,14 +3,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  Bell,
-  Search,
-  LogOut,
-  Settings,
-  User,
-
-} from "lucide-react";
+import { Bell, Search, LogOut, Settings, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import Image from "next/image";
@@ -35,9 +28,7 @@ const EmployeeNavbar = () => {
   async function fetchAnnouncement() {
     try {
       if (designation_value === undefined) return;
-      const res = await noticationAnnouncementService(
-        designation_value
-      );
+      const res = await noticationAnnouncementService(designation_value);
       console.log(res, "res");
       if (res?.success) {
         setNotification(res?.data?.length > 0);
@@ -47,7 +38,7 @@ const EmployeeNavbar = () => {
       console.log(error);
       toast.error(
         error?.response?.data?.message ||
-        "error while fetching the announcement",
+          "error while fetching the announcement",
       );
     }
   }

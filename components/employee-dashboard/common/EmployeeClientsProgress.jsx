@@ -33,8 +33,9 @@ const EmployeeClientsProgress = ({ employeeId }) => {
     fetchEmployeeClient();
   }, [employeeId]);
 
-const employeeFilter = employeeClientData?.filter((client)=> client?.clientId !== null)
-
+  const employeeFilter = employeeClientData?.filter(
+    (client) => client?.clientId !== null,
+  );
 
   if (loading) {
     return (

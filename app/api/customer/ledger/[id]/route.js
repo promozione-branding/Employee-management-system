@@ -23,7 +23,7 @@ export async function GET(req, { params }) {
           success: false,
           message: "Customer not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function GET(req, { params }) {
         success: false,
         message: "Server error while fetching the ledger",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

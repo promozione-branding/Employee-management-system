@@ -73,14 +73,13 @@
 //   }
 // }
 
-
 import { connectDB } from "@/lib/db";
 import Ledger from "@/models/admin/Ledger";
 import Customer from "@/models/admin/Customer";
 import { NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/getAuthUser";
 import { createAuditLog } from "@/utils/createAuditLog";
-import { ledgerValidationSchema } from "@/lib/validation/admin/ledger"; 
+import { ledgerValidationSchema } from "@/lib/validation/admin/ledger";
 
 export async function POST(req) {
   try {

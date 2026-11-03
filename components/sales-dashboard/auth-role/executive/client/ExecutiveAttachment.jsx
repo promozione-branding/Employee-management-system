@@ -1,6 +1,5 @@
 // components/sales-dashboard/auth-role/executive/client/ExecutiveAttachment.jsx
 
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -40,7 +39,7 @@ import {
 
 const Attachment = ({ clientId }) => {
   const [attachmentFormData, setAttachmentFormData] = useState(
-    initialAttachmentFormData
+    initialAttachmentFormData,
   );
   const [uploading, setUploading] = useState(false);
   const [attachmentList, setAttachmentList] = useState([]);
@@ -68,7 +67,7 @@ const Attachment = ({ clientId }) => {
     } catch (error) {
       console.error("Fetch attachments error:", error);
       toast.error(
-        error?.response?.data?.message || "Unable to load attachments"
+        error?.response?.data?.message || "Unable to load attachments",
       );
     } finally {
       setAttachmentLoading(false);
@@ -88,7 +87,7 @@ const Attachment = ({ clientId }) => {
     } catch (error) {
       console.error("Fetch email list error:", error);
       toast.error(
-        error?.response?.data?.message || "Unable to load email list"
+        error?.response?.data?.message || "Unable to load email list",
       );
     } finally {
       setEmailListLoading(false);
@@ -122,9 +121,7 @@ const Attachment = ({ clientId }) => {
       }
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error(
-        error?.response?.data?.message || "Upload failed"
-      );
+      toast.error(error?.response?.data?.message || "Upload failed");
     } finally {
       setUploading(false);
       // Allows the same file to be selected again.
@@ -159,9 +156,7 @@ const Attachment = ({ clientId }) => {
       }
     } catch (error) {
       console.error("Create attachment error:", error);
-      toast.error(
-        error?.response?.data?.message || "Server error"
-      );
+      toast.error(error?.response?.data?.message || "Server error");
     }
   }
 
@@ -171,7 +166,7 @@ const Attachment = ({ clientId }) => {
     setSelectEmail((previous) =>
       previous.includes(email)
         ? previous.filter((value) => value !== email)
-        : [...previous, email]
+        : [...previous, email],
     );
   };
 
@@ -201,7 +196,10 @@ const Attachment = ({ clientId }) => {
     const type = String(item.assetType || "").toLowerCase();
     const file = String(item.file || item.referenceLink || "").toLowerCase();
 
-    if (type.includes("image") || /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(file)) {
+    if (
+      type.includes("image") ||
+      /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(file)
+    ) {
       return ImageIcon;
     }
 
@@ -250,7 +248,8 @@ const Attachment = ({ clientId }) => {
         <div className="flex w-fit items-center gap-2 rounded-xl border border-[#E3E7F0] bg-white px-4 py-3">
           <FolderOpen size={19} className="text-[#F27B1E]" />
           <span className="text-sm font-semibold text-[#0F1B33]">
-            {attachmentCount} {attachmentCount === 1 ? "attachment" : "attachments"}
+            {attachmentCount}{" "}
+            {attachmentCount === 1 ? "attachment" : "attachments"}
           </span>
         </div>
       </header>
@@ -304,7 +303,9 @@ const Attachment = ({ clientId }) => {
                 </div>
 
                 <p className="mt-3 text-sm font-bold text-[#0F1B33]">
-                  {uploading ? "Uploading your file..." : "Choose a file to upload"}
+                  {uploading
+                    ? "Uploading your file..."
+                    : "Choose a file to upload"}
                 </p>
 
                 <p className="mt-1 text-xs leading-5 text-[#68738A]">
@@ -415,9 +416,7 @@ const Attachment = ({ clientId }) => {
                         }`}
                       >
                         {selected && <Check size={14} />}
-                        <span className="truncate">
-                          @{email.split("@")[0]}
-                        </span>
+                        <span className="truncate">@{email.split("@")[0]}</span>
                       </button>
                     );
                   })}
@@ -512,7 +511,8 @@ const Attachment = ({ clientId }) => {
               {attachmentList.map((item) => {
                 const AssetIcon = getAssetIcon(item);
                 const assetLink = getAssetLink(item);
-                const isPublic = String(item.visibility || "").toLowerCase() === "public";
+                const isPublic =
+                  String(item.visibility || "").toLowerCase() === "public";
 
                 return (
                   <Card

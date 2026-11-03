@@ -130,7 +130,7 @@ const SrClientList = () => {
       if (res.success) {
         toast.success(res.message || "Saved successfully");
         resetForm();
-        fetchData()
+        fetchData();
       }
     } catch (error) {
       if (error.response?.data?.errors?.length) {
@@ -171,7 +171,7 @@ const SrClientList = () => {
       const res = await deleteCustomerServices(id);
       if (res.success) {
         toast.success(res.message);
-        fetchData()
+        fetchData();
       }
     } catch {
       toast.error("Delete failed");
@@ -188,7 +188,6 @@ const SrClientList = () => {
     // fetchCustomers();
     fetchSalesPerson();
   }, []);
-
 
   return (
     <div className="flex flex-col gap-4 p-1 md:p-3">
@@ -231,8 +230,8 @@ const SrClientList = () => {
               id="paid-filter"
               checked={isPaid}
               onCheckedChange={(v) => {
-                setIsPaid(v)
-                setPage(1)
+                setIsPaid(v);
+                setPage(1);
               }}
             />
             <label
@@ -290,30 +289,32 @@ const SrClientList = () => {
                 </div>
               ))}
             </div>
-          ) : customers.length ?
-            (customers.map(({ company, name, phone, salesExecutive, _id, isPaid }, idx) => (
-              <div
-                key={_id}
-                className={`grid grid-cols-6 md:grid-cols-5  px-4 py-3 items-center border-b ${isPaid && "bg-green-100"} ${idx % 2 === 0 ? "bg-gray-50" : ""
+          ) : customers.length ? (
+            customers.map(
+              ({ company, name, phone, salesExecutive, _id, isPaid }, idx) => (
+                <div
+                  key={_id}
+                  className={`grid grid-cols-6 md:grid-cols-5  px-4 py-3 items-center border-b ${isPaid && "bg-green-100"} ${
+                    idx % 2 === 0 ? "bg-gray-50" : ""
                   }`}
-              >
-                <p>{name}</p>
-                <p>{company}</p>
-                <p className="text-center">{phone}</p>
+                >
+                  <p>{name}</p>
+                  <p>{company}</p>
+                  <p className="text-center">{phone}</p>
 
-                <div className="flex flex-wrap gap-1 justify-center">
-                  {salesExecutive?.map((item) => (
-                    <span
-                      key={item._id}
-                      className="bg-orange-200 text-xs px-2 py-1 rounded"
-                    >
-                      {item?.basicDetails?.name}
-                    </span>
-                  ))}
-                </div>
+                  <div className="flex flex-wrap gap-1 justify-center">
+                    {salesExecutive?.map((item) => (
+                      <span
+                        key={item._id}
+                        className="bg-orange-200 text-xs px-2 py-1 rounded"
+                      >
+                        {item?.basicDetails?.name}
+                      </span>
+                    ))}
+                  </div>
 
-                <div className="flex justify-center gap-3 lg:gap-5">
-                  {/* <Link href={`/sales-dashboard/customer/work/${_id}`}>
+                  <div className="flex justify-center gap-3 lg:gap-5">
+                    {/* <Link href={`/sales-dashboard/customer/work/${_id}`}>
                     <Network
                       size={18}
                       className="cursor-pointer lg:h-6 lg:w-6"
@@ -325,44 +326,48 @@ const SrClientList = () => {
                       className="cursor-pointer lg:h-6 lg:w-6"
                     />
                   </Link> */}
-                  <Link href={`/sales-dashboard/clients/client-assign/${_id}`}>
-                    <Network
+                    <Link
+                      href={`/sales-dashboard/clients/client-assign/${_id}`}
+                    >
+                      <Network
+                        size={18}
+                        className="cursor-pointer lg:h-6 lg:w-6"
+                      />
+                    </Link>
+
+                    <Link href={`/sales-dashboard/clients/${_id}`}>
+                      <Eye
+                        size={18}
+                        className="cursor-pointer lg:h-6 lg:w-6 "
+                      />
+                    </Link>
+                    <SquarePen
                       size={18}
+                      onClick={() => handleEdit(_id)}
                       className="cursor-pointer lg:h-6 lg:w-6"
                     />
-                  </Link>
-
-                  <Link href={`/sales-dashboard/clients/${_id}`}>
-                    <Eye size={18} className="cursor-pointer lg:h-6 lg:w-6 " />
-                  </Link>
-                  <SquarePen
-                    size={18}
-                    onClick={() => handleEdit(_id)}
-                    className="cursor-pointer lg:h-6 lg:w-6"
-                  />
-                  <Trash
-                    size={18}
-                    onClick={() => handleDelete(_id)}
-                    className="cursor-pointer lg:h-6 lg:w-6"
-                  />
+                    <Trash
+                      size={18}
+                      onClick={() => handleDelete(_id)}
+                      className="cursor-pointer lg:h-6 lg:w-6"
+                    />
+                  </div>
                 </div>
-              </div>)))
-            : (
-              <div className="text-center py-6 text-gray-500">
-                No customers found
-              </div>)}
+              ),
+            )
+          ) : (
+            <div className="text-center py-6 text-gray-500">
+              No customers found
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-end gap-2 py-2 px-2 border-t border-gray-300">
-
           <button
             disabled={page === 1}
             onClick={() => setPage((prev) => prev - 1)}
             className={`px-4 py-2 rounded-lg border border-gray-300
-      ${page === 1
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-gray-100"
-              }`}
+      ${page === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}`}
           >
             Previous
           </button>
@@ -373,10 +378,11 @@ const SrClientList = () => {
                 key={i}
                 onClick={() => setPage(i + 1)}
                 className={`w-10 h-10 rounded-lg
-          ${page === i + 1
-                    ? "bg-orange-500 text-white"
-                    : "bg-gray-100 hover:bg-gray-200"
-                  }`}
+          ${
+            page === i + 1
+              ? "bg-orange-500 text-white"
+              : "bg-gray-100 hover:bg-gray-200"
+          }`}
               >
                 {i + 1}
               </button>
@@ -387,14 +393,14 @@ const SrClientList = () => {
             disabled={page === totalPages}
             onClick={() => setPage((prev) => prev + 1)}
             className={`px-4 py-2 rounded-lg border border-gray-300
-      ${page === totalPages
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-gray-100"
-              }`}
+      ${
+        page === totalPages
+          ? "opacity-50 cursor-not-allowed"
+          : "hover:bg-gray-100"
+      }`}
           >
             Next
           </button>
-
         </div>
       </div>
 
@@ -424,15 +430,7 @@ const SrClientList = () => {
           ))
         ) : customers.length ? (
           customers.map(
-            ({
-              company,
-              name,
-              phone,
-              GSTIN,
-              salesExecutive,
-              _id,
-              isPaid,
-            }) => (
+            ({ company, name, phone, GSTIN, salesExecutive, _id, isPaid }) => (
               <div
                 key={_id}
                 className={`
@@ -448,17 +446,11 @@ const SrClientList = () => {
             ${isPaid ? "border-green-400 bg-green-50" : ""}
           `}
               >
-
                 <div className="flex justify-between">
-
                   <div>
-                    <p className="font-semibold">
-                      {name}
-                    </p>
+                    <p className="font-semibold">{name}</p>
 
-                    <p className="text-sm text-gray-500">
-                      {company}
-                    </p>
+                    <p className="text-sm text-gray-500">{company}</p>
                   </div>
 
                   {isPaid && (
@@ -477,15 +469,9 @@ const SrClientList = () => {
                   )}
                 </div>
 
-                {GSTIN && (
-                  <p className="text-sm">
-                    GSTIN: {GSTIN}
-                  </p>
-                )}
+                {GSTIN && <p className="text-sm">GSTIN: {GSTIN}</p>}
 
-                <p className="text-sm">
-                  📞 {phone}
-                </p>
+                <p className="text-sm">📞 {phone}</p>
 
                 <div className="flex flex-wrap gap-2">
                   {salesExecutive?.map((item) => (
@@ -506,44 +492,30 @@ const SrClientList = () => {
                 </div>
 
                 <div className="flex justify-end gap-4 pt-2">
-
-                  <Link
-                    href={`/sales-dashboard/customer/work/${_id}`}
-                  >
+                  <Link href={`/sales-dashboard/customer/work/${_id}`}>
                     <Network size={18} />
                   </Link>
 
-                  <Link
-                    href={`/sales-dashboard/customer/${_id}`}
-                  >
+                  <Link href={`/sales-dashboard/customer/${_id}`}>
                     <Eye size={18} />
                   </Link>
 
-                  <SquarePen
-                    size={18}
-                    onClick={() =>
-                      handleEdit(_id)
-                    }
-                  />
+                  <SquarePen size={18} onClick={() => handleEdit(_id)} />
 
                   <Trash
                     size={18}
                     className="text-red-500"
-                    onClick={() =>
-                      handleDelete(_id)
-                    }
+                    onClick={() => handleDelete(_id)}
                   />
-
                 </div>
               </div>
-            )
+            ),
           )
         ) : (
           <div className="text-center py-12 text-gray-500">
             No customers found
           </div>
         )}
-
       </div>
 
       {/* SHEET FORM */}

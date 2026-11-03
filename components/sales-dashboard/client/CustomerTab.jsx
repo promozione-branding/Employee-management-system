@@ -25,7 +25,7 @@ import {
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const CustomerTab = ({ customerId,salesPersonId }) => {
+const CustomerTab = ({ customerId, salesPersonId }) => {
   const [customerDetails, setCustomerDetails] = useState(null);
   const [projectCycleData, setProjectCycleData] = useState(null);
   const [loadingProjectCycle, setLoadingProjectCycle] = useState(false);
@@ -37,7 +37,6 @@ const CustomerTab = ({ customerId,salesPersonId }) => {
     startDate: "",
     endDate: "",
   });
-
 
   const handleProjectSubmit = async (e) => {
     e.preventDefault();

@@ -1,13 +1,11 @@
 // app/sales-dashboard/clients/invoice/pdf-download/[id]/page.jsx
 
-import React from 'react'
-import PdfDownload from './PdfDownload'
+import React from "react";
+import PdfDownload from "./PdfDownload";
 
-const page = async({params}) => {
-  const {id} = await params
-  return (
-    <PdfDownload id={id}/>
-  )
-}
+const page = async ({ params }) => {
+  const { id } = await params;
+  return <PdfDownload id={id} />;
+};
 
-export default page
+export default page;

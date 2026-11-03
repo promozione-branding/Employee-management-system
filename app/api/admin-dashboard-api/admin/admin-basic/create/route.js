@@ -4,7 +4,6 @@ import { connectDB } from "@/lib/db";
 import AdminBasicDetail from "@/models/admin/adminDetails/AdminBasicDetail";
 import { NextResponse } from "next/server";
 
-
 export async function POST(req) {
   try {
     await connectDB();
@@ -19,7 +18,7 @@ export async function POST(req) {
   } catch (error) {
     return NextResponse.json(
       { success: false, message: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

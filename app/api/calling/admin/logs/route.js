@@ -20,7 +20,10 @@ function getDateRange(searchParams) {
       nowIST.getUTCFullYear(),
       nowIST.getUTCMonth(),
       nowIST.getUTCDate(),
-      0, 0, 0, 0,
+      0,
+      0,
+      0,
+      0,
     ),
   );
   const startUTC = new Date(startIST.getTime() - IST_OFFSET_MIN * 60 * 1000);
@@ -117,7 +120,11 @@ export async function GET(req) {
     const skip = (page - 1) * limit;
 
     const [logs, total, summaryRaw, agentPerfRaw] = await Promise.all([
-      CallLog.find(match).sort({ startedAt: -1 }).skip(skip).limit(limit).lean(),
+      CallLog.find(match)
+        .sort({ startedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
       CallLog.countDocuments(match),
       CallLog.aggregate([
         { $match: match },
@@ -132,10 +139,7 @@ export async function GET(req) {
               $sum: {
                 $cond: [
                   {
-                    $in: [
-                      "$status",
-                      ["missed", "failed", "busy", "cancelled"],
-                    ],
+                    $in: ["$status", ["missed", "failed", "busy", "cancelled"]],
                   },
                   1,
                   0,
@@ -171,10 +175,7 @@ export async function GET(req) {
               $sum: {
                 $cond: [
                   {
-                    $in: [
-                      "$status",
-                      ["missed", "failed", "busy", "cancelled"],
-                    ],
+                    $in: ["$status", ["missed", "failed", "busy", "cancelled"]],
                   },
                   1,
                   0,
@@ -212,7 +213,9 @@ export async function GET(req) {
                 $filter: {
                   input: "$uniqueCustomers",
                   as: "c",
-                  cond: { $and: [{ $ne: ["$$c", null] }, { $ne: ["$$c", ""] }] },
+                  cond: {
+                    $and: [{ $ne: ["$$c", null] }, { $ne: ["$$c", ""] }],
+                  },
                 },
               },
             },

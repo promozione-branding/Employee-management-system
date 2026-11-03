@@ -106,7 +106,9 @@ export async function PATCH(req, { params }) {
 
     // 📊 Progress: count all completed items, use max(totalField, actual)
     //    so totalField never goes below the real array length.
-    const completeField = workDetail.checklist.filter((i) => i.completed).length;
+    const completeField = workDetail.checklist.filter(
+      (i) => i.completed,
+    ).length;
     const safeTotal =
       Math.max(Number(totalField) || 0, workDetail.checklist.length) ||
       workDetail.checklist.length;
@@ -114,7 +116,7 @@ export async function PATCH(req, { params }) {
     workDetail.progressPercentage = {
       departmentType:
         workDetail.department === "SALES"
-          ? workDetail.progressPercentage?.departmentType ?? "OTHER"
+          ? (workDetail.progressPercentage?.departmentType ?? "OTHER")
           : workDetail.department,
       totalField: safeTotal,
       completeField,

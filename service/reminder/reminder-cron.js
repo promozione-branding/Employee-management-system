@@ -75,7 +75,7 @@ async function checkReminders() {
           entry?.salesPersonId?.email,
           `Reminder: Meeting with ${entry.clientId?.name || "Client"}`,
           html,
-          ccEmails
+          ccEmails,
         );
 
         entry.reminderSent = true;
@@ -98,7 +98,7 @@ async function checkReminders() {
           entry?.salesPersonId?.email,
           `Reminder: Meeting with ${entry.clientId?.name || "Client"}`,
           htmlForMeetingUpdateReminder,
-          ccEmails
+          ccEmails,
         );
         console.log("📨 Reminder Meeting updated email triggered!");
       }

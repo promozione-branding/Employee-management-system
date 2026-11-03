@@ -8,7 +8,7 @@ import { getAuthUser } from "@/lib/getAuthUser";
 import { createAuditLog } from "@/utils/createAuditLog";
 import Customer from "@/models/admin/Customer";
 
-export async function GET(req, {params}) {
+export async function GET(req, { params }) {
   try {
     await connectDB();
 
@@ -53,8 +53,6 @@ export async function GET(req, {params}) {
     );
   }
 }
-
-
 
 export async function PUT(req, { params }) {
   try {

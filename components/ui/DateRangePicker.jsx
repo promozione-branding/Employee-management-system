@@ -9,20 +9,12 @@ import { format } from "date-fns";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-export default function MyDateRangePicker({
-  value,
-  onChange,
-  open,
-  setOpen,
-}) {
+export default function MyDateRangePicker({ value, onChange, open, setOpen }) {
   const wrapperRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (
-        wrapperRef.current &&
-        !wrapperRef.current.contains(event.target)
-      ) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         setOpen(false);
       }
     }
@@ -43,7 +35,7 @@ export default function MyDateRangePicker({
           value?.startDate && value?.endDate
             ? `${format(value.startDate, "dd MMM yyyy")} - ${format(
                 value.endDate,
-                "dd MMM yyyy"
+                "dd MMM yyyy",
               )}`
             : ""
         }

@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import User from "@/models/admin/User";
-import {connectDB} from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import { sendEmail } from "@/lib/sendEmail";
 
 export async function POST(req) {

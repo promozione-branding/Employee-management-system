@@ -1,6 +1,5 @@
 // app/dashboard/invoice/[create]/CreateInvoice.jsx
 
-
 "use client";
 
 import CommonForm from "@/components/layout/Form";
@@ -33,7 +32,7 @@ const CreateInvoice = ({ id }) => {
   const [editInvoiceServiceId, setEditInvoiceServiceId] = useState(null);
   const [clientDetails, setClientDetails] = useState({});
   const [serviceFormData, setServiceFormData] = useState(
-    initialInvoiceServiceFormData
+    initialInvoiceServiceFormData,
   );
   const [editData, setEditData] = useState(initialInvoiceServiceFormData);
   const [invoiceServiceItem, setInvoiceServiceItem] = useState([]);
@@ -44,17 +43,8 @@ const CreateInvoice = ({ id }) => {
   const [isCreatingService, setIsCreatingService] = useState(false);
   const [isUpdatingService, setIsUpdatingService] = useState(false);
 
-  const {
-    Address,
-    GSTIN,
-    city,
-    company,
-    country,
-    name,
-    phone,
-    tanNo,
-    email,
-  } = clientDetails;
+  const { Address, GSTIN, city, company, country, name, phone, tanNo, email } =
+    clientDetails;
 
   // Invoice Type added; defaults to the existing Tax Invoice.
   const [invoiceFormData, setInvoiceFormData] = useState({
@@ -80,7 +70,7 @@ const CreateInvoice = ({ id }) => {
   function calculationOfTotalAmount() {
     const taxableAmount = selectedServices.reduce(
       (total, service) => total + Number(service?.price || 0),
-      0
+      0,
     );
 
     if (invoiceFormData.taxType === "IGST") {
@@ -246,10 +236,7 @@ const CreateInvoice = ({ id }) => {
     setIsUpdatingService(true);
 
     try {
-      const res = await editInvoiceServiceById(
-        editInvoiceServiceId,
-        editData
-      );
+      const res = await editInvoiceServiceById(editInvoiceServiceId, editData);
 
       if (res.success) {
         toast.success("Service updated successfully!");
@@ -269,7 +256,7 @@ const CreateInvoice = ({ id }) => {
   // ---------------- DELETE SERVICE ----------------
   async function handleDeleteInvoiceById(serviceId) {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this service?"
+      "Are you sure you want to delete this service?",
     );
 
     if (!confirmed) return;
@@ -281,7 +268,7 @@ const CreateInvoice = ({ id }) => {
         toast.success("Service deleted.");
         await allInvoiceService();
         setSelectedServices((prev) =>
-          prev.filter((service) => service._id !== serviceId)
+          prev.filter((service) => service._id !== serviceId),
         );
       } else {
         toast.error(res.message || "Failed to delete service");
@@ -349,9 +336,7 @@ const CreateInvoice = ({ id }) => {
                     </p>
                   </div>
 
-                  <div className="text-center">
-                    HSN CODE: {item?.HSN}
-                  </div>
+                  <div className="text-center">HSN CODE: {item?.HSN}</div>
 
                   <div className="mt-2 text-center text-lg font-bold text-black">
                     Price: ₹{item?.price?.toLocaleString("en-IN")}
@@ -427,9 +412,7 @@ const CreateInvoice = ({ id }) => {
                 ? handleSubmitInvoiceService
                 : handleServiceFormSubmit
             }
-            buttonText={
-              editInvoiceServiceId ? "Update Service" : "Add Service"
-            }
+            buttonText={editInvoiceServiceId ? "Update Service" : "Add Service"}
             isBtnDisabled={
               editInvoiceServiceId ? isUpdatingService : isCreatingService
             }

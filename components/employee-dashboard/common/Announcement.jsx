@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -266,9 +265,7 @@ const EmployeeAnnouncements = () => {
                   </div>
 
                   <div>
-                    <p className="text-[11px] text-[#929BAD]">
-                      Published by
-                    </p>
+                    <p className="text-[11px] text-[#929BAD]">Published by</p>
 
                     <p className="text-sm font-semibold text-[#26344D]">
                       {selectedAnnouncement.author.username || "Admin"}

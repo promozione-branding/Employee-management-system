@@ -1,14 +1,9 @@
 // app/dashboard/Dashboard.jsx
 
-
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  CalendarDays,
-  ChartNoAxesCombined,
-  Clock3,
-} from "lucide-react";
+import { CalendarDays, ChartNoAxesCombined, Clock3 } from "lucide-react";
 
 import { useAdminStore } from "@/lib/store/AdminStore";
 
@@ -41,103 +36,89 @@ const Dashboard = () => {
   }, []);
 
   const userName =
-    adminDetail?.username ||
-    adminDetail?.email?.split("@")[0] ||
-    "there";
+    adminDetail?.username || adminDetail?.email?.split("@")[0] || "there";
 
   return (
     <div className="mx-auto w-full max-w-[1560px] min-w-0 space-y-6 sm:space-y-7 lg:space-y-8">
       {/* Page heading and personalized greeting */}
-        <section className="relative isolate overflow-hidden rounded-[30px] bg-[#0A2E66] px-6 pb-7 pt-[82px] shadow-[0_8px_24px_rgba(10,46,102,0.12)] sm:px-8 sm:pb-8 lg:px-[38px]">
-
-    {/* Top decorative striped awning */}
-    <div className="absolute inset-x-0 top-0 z-10 flex h-[50px] overflow-hidden">
-      {Array.from({ length: 42 }).map((_, index) => (
-        <div
-          key={index}
-          className={`relative h-[50px] min-w-[33px] flex-1 ${
-            index % 2 === 0
-              ? "bg-[#F5A052]"
-              : index % 4 === 1
-                ? "bg-[#FFF2E5]"
-                : "bg-[#3769A9]"
-          }`}
-          style={{
-            borderRadius: "0 0 20px 20px",
-            marginRight: "-1px",
-          }}
-        />
-      ))}
-    </div>
-
-    {/* Subtle background glow */}
-    <div className="pointer-events-none absolute -right-20 -top-20 h-[350px] w-[350px] rounded-full bg-[#315A91]/25 blur-[80px]" />
-
-    <div className="relative z-20">
-
-      {/* Main greeting and actions */}
-      <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
-
-        {/* Left content */}
-        <div className="min-w-0 flex-1">
-
-          {/* Date */}
-          <p className="mb-1 text-[16px] font-semibold tracking-tight text-[#F58220]">
-            {new Date().toLocaleDateString("en-IN", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-            })}
-          </p>
-
-          {/* Greeting */}
-          <h1 className="font-serif text-[34px] font-bold leading-[1.15] tracking-tight text-white sm:text-[40px] lg:text-[46px]">
-            {greeting}, {userName}
-          </h1>
-          
-
-          {/* Description */}
-          <p className="mt-3 max-w-[570px] text-[16px] font-medium leading-[1.7] text-[#C6D3E8] sm:text-[17px]">
-            Welcome back to your workspace. Here's your business performance
-            overview. Monitor team activity, manage clients, and stay on top
-            of today's priorities.
-          </p>
+      <section className="relative isolate overflow-hidden rounded-[30px] bg-[#0A2E66] px-6 pb-7 pt-[82px] shadow-[0_8px_24px_rgba(10,46,102,0.12)] sm:px-8 sm:pb-8 lg:px-[38px]">
+        {/* Top decorative striped awning */}
+        <div className="absolute inset-x-0 top-0 z-10 flex h-[50px] overflow-hidden">
+          {Array.from({ length: 42 }).map((_, index) => (
+            <div
+              key={index}
+              className={`relative h-[50px] min-w-[33px] flex-1 ${
+                index % 2 === 0
+                  ? "bg-[#F5A052]"
+                  : index % 4 === 1
+                    ? "bg-[#FFF2E5]"
+                    : "bg-[#3769A9]"
+              }`}
+              style={{
+                borderRadius: "0 0 20px 20px",
+                marginRight: "-1px",
+              }}
+            />
+          ))}
         </div>
 
-        {/* Right workspace information */}
-        <div className="flex shrink-0 items-center self-start rounded-2xl border border-white/15 bg-[#315487] px-4 py-3.5 shadow-sm lg:self-center">
+        {/* Subtle background glow */}
+        <div className="pointer-events-none absolute -right-20 -top-20 h-[350px] w-[350px] rounded-full bg-[#315A91]/25 blur-[80px]" />
 
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white">
-            <CalendarDays size={22} />
-          </div>
+        <div className="relative z-20">
+          {/* Main greeting and actions */}
+          <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
+            {/* Left content */}
+            <div className="min-w-0 flex-1">
+              {/* Date */}
+              <p className="mb-1 text-[16px] font-semibold tracking-tight text-[#F58220]">
+                {new Date().toLocaleDateString("en-IN", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                })}
+              </p>
 
-          <div className="ml-3">
-            <p className="text-xs font-medium text-[#C6D3E8]">
-              Your workspace
-            </p>
+              {/* Greeting */}
+              <h1 className="font-serif text-[34px] font-bold leading-[1.15] tracking-tight text-white sm:text-[40px] lg:text-[46px]">
+                {greeting}, {userName}
+              </h1>
 
-            <p className="mt-1 text-[15px] font-bold text-white">
-              Admin overview
-            </p>
+              {/* Description */}
+              <p className="mt-3 max-w-[570px] text-[16px] font-medium leading-[1.7] text-[#C6D3E8] sm:text-[17px]">
+                Welcome back to your workspace. Here's your business performance
+                overview. Monitor team activity, manage clients, and stay on top
+                of today's priorities.
+              </p>
+            </div>
+
+            {/* Right workspace information */}
+            <div className="flex shrink-0 items-center self-start rounded-2xl border border-white/15 bg-[#315487] px-4 py-3.5 shadow-sm lg:self-center">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white">
+                <CalendarDays size={22} />
+              </div>
+
+              <div className="ml-3">
+                <p className="text-xs font-medium text-[#C6D3E8]">
+                  Your workspace
+                </p>
+
+                <p className="mt-1 text-[15px] font-bold text-white">
+                  Admin overview
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-        </section>
+      </section>
 
       {/* KPI cards */}
-      <section
-        aria-label="Key performance indicators"
-        className="min-w-0"
-      >
+      <section aria-label="Key performance indicators" className="min-w-0">
         <KPI />
       </section>
 
       {/* Daily calling activity */}
-      <section
-        aria-label="Team call activity"
-        className="min-w-0"
-      >
+      <section aria-label="Team call activity" className="min-w-0">
         <Callinfo />
       </section>
 

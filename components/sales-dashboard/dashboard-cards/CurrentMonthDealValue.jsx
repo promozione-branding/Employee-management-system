@@ -1,13 +1,7 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  HandCoins,
-  TrendingUp,
-  Target,
-  CheckCircle2,
-} from "lucide-react";
+import { HandCoins, TrendingUp, Target, CheckCircle2 } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import toast from "react-hot-toast";
@@ -34,8 +28,7 @@ export default function CurrentMonthDealValue() {
 
   const target = Math.max(0, Number(MONTHLY_DEAL_TARGET) || 0);
 
-  const achievedPercentage =
-    target > 0 ? (dealValue / target) * 100 : 0;
+  const achievedPercentage = target > 0 ? (dealValue / target) * 100 : 0;
 
   const progressPercentage = Math.min(100, achievedPercentage);
   const targetReached = target > 0 && dealValue >= target;
@@ -61,9 +54,7 @@ export default function CurrentMonthDealValue() {
         if (active && res?.success) {
           setDealValue(Math.max(0, Number(res.data) || 0));
         } else if (active && !res?.success) {
-          toast.error(
-            res?.message || "Unable to load monthly deal value",
-          );
+          toast.error(res?.message || "Unable to load monthly deal value");
         }
       } catch (error) {
         if (active) {
@@ -134,9 +125,7 @@ export default function CurrentMonthDealValue() {
               className="text-sm font-bold tabular-nums"
               style={{ color: targetReached ? "#15803D" : NAVY }}
             >
-              {target > 0
-                ? `${achievedPercentage.toFixed(1)}%`
-                : "Not set"}
+              {target > 0 ? `${achievedPercentage.toFixed(1)}%` : "Not set"}
             </span>
           )}
         </div>
@@ -183,10 +172,7 @@ export default function CurrentMonthDealValue() {
             </span>
 
             {targetReached && (
-              <CheckCircle2
-                size={15}
-                className="shrink-0 text-green-600"
-              />
+              <CheckCircle2 size={15} className="shrink-0 text-green-600" />
             )}
           </div>
         )}

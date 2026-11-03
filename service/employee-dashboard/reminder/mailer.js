@@ -1,7 +1,5 @@
 // service/employee-dashboard/reminder/mailer.js
 
-
-
 import nodemailer from "nodemailer"; // ✅ REQUIRED
 
 let transporter;
@@ -22,14 +20,11 @@ export async function sendReminderEmail(to, subject, html, cc = []) {
     }
 
     // ✅ Clean TO
-    const cleanTo =
-      typeof to === "string" && to.trim() ? to.trim() : null;
+    const cleanTo = typeof to === "string" && to.trim() ? to.trim() : null;
 
     // ✅ Clean CC
     const cleanCc = Array.isArray(cc)
-      ? cc
-          .filter((e) => typeof e === "string" && e.trim())
-          .map((e) => e.trim())
+      ? cc.filter((e) => typeof e === "string" && e.trim()).map((e) => e.trim())
       : [];
 
     if (!cleanTo) {

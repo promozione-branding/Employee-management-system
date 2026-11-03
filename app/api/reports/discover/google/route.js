@@ -6,16 +6,20 @@ import { requireReportAdmin } from "@/lib/reportingAuth";
 
 export async function GET(req) {
   const auth = await requireReportAdmin(req);
-  if (!auth.ok) return Response.json({ error: auth.error }, { status: auth.status });
+  if (!auth.ok)
+    return Response.json({ error: auth.error }, { status: auth.status });
 
   await connectDB();
-  const setting = await ReportSetting.findOne({ key: "google_refresh_token" }).lean();
-  if (!setting?.value) return Response.json({ error: "Google not connected" }, { status: 400 });
+  const setting = await ReportSetting.findOne({
+    key: "google_refresh_token",
+  }).lean();
+  if (!setting?.value)
+    return Response.json({ error: "Google not connected" }, { status: 400 });
 
   const oauth2 = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
+    process.env.GOOGLE_REDIRECT_URI,
   );
   oauth2.setCredentials({ refresh_token: setting.value });
 
@@ -26,7 +30,9 @@ export async function GET(req) {
     const accounts = await admin.accounts.list();
     for (const acc of accounts.data.accounts || []) {
       try {
-        const props = await admin.properties.list({ filter: `parent:${acc.name}` });
+        const props = await admin.properties.list({
+          filter: `parent:${acc.name}`,
+        });
         for (const p of props.data.properties || []) {
           result.ga4.push({
             propertyId: p.name.split("/")[1],
@@ -36,15 +42,20 @@ export async function GET(req) {
         }
       } catch (e) {}
     }
-  } catch (e) { result.ga4Error = e.message; }
+  } catch (e) {
+    result.ga4Error = e.message;
+  }
 
   try {
     const sc = google.searchconsole({ version: "v1", auth: oauth2 });
     const sites = await sc.sites.list();
     result.gsc = (sites.data.siteEntry || []).map((s) => ({
-      siteUrl: s.siteUrl, permissionLevel: s.permissionLevel,
+      siteUrl: s.siteUrl,
+      permissionLevel: s.permissionLevel,
     }));
-  } catch (e) { result.gscError = e.message; }
+  } catch (e) {
+    result.gscError = e.message;
+  }
 
   try {
     if (!process.env.GOOGLE_ADS_DEVELOPER_TOKEN) {
@@ -70,7 +81,9 @@ export async function GET(req) {
         currency: r.customer_client.currency_code,
       }));
     }
-  } catch (e) { result.googleAdsError = e.message; }
+  } catch (e) {
+    result.googleAdsError = e.message;
+  }
 
   return Response.json(result);
 }

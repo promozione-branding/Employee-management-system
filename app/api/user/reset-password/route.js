@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import User from "@/models/admin/User";
-import {connectDB} from "@/lib/db";
+import { connectDB } from "@/lib/db";
 
 export async function POST(req) {
   try {
@@ -38,7 +38,6 @@ export async function POST(req) {
       success: true,
       message: "Password reset successful",
     });
-
   } catch (error) {
     return NextResponse.json({
       success: false,
@@ -46,4 +45,3 @@ export async function POST(req) {
     });
   }
 }
-

@@ -32,7 +32,7 @@ const ClientHistory = ({ customerId }) => {
         setClientHistoryData([]);
         toast.error(
           error.response.data.message ||
-            "Error while fetching the client history"
+            "Error while fetching the client history",
         );
       } finally {
         setLoading(false);
@@ -77,23 +77,35 @@ const ClientHistory = ({ customerId }) => {
 
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm mb-4">
                   <p className="text-gray-600">
-                    <span className="font-semibold text-gray-800">History ID:</span>{" "}
+                    <span className="font-semibold text-gray-800">
+                      History ID:
+                    </span>{" "}
                     {history._id}
                   </p>
                   <p className="text-gray-600">
-                    <span className="font-semibold text-gray-800">Client ID:</span>{" "}
+                    <span className="font-semibold text-gray-800">
+                      Client ID:
+                    </span>{" "}
                     {history.clientId || "N/A"}
                   </p>
                   <p className="text-gray-600">
-                    <span className="font-semibold text-gray-800">Entity ID:</span>{" "}
+                    <span className="font-semibold text-gray-800">
+                      Entity ID:
+                    </span>{" "}
                     {history.entityId || "N/A"}
                   </p>
                   <p className="text-gray-600">
-                    <span className="font-semibold text-gray-800">Updated At:</span>{" "}
-                    {history.updatedAt ? new Date(history.updatedAt).toLocaleString() : "N/A"}
+                    <span className="font-semibold text-gray-800">
+                      Updated At:
+                    </span>{" "}
+                    {history.updatedAt
+                      ? new Date(history.updatedAt).toLocaleString()
+                      : "N/A"}
                   </p>
                   <p className="text-gray-600">
-                    <span className="font-semibold text-gray-800">Version:</span>{" "}
+                    <span className="font-semibold text-gray-800">
+                      Version:
+                    </span>{" "}
                     {history.__v ?? "N/A"}
                   </p>
                 </div>
@@ -111,7 +123,9 @@ const ClientHistory = ({ customerId }) => {
                     >
                       <div className="font-medium text-gray-700">
                         <p>{change.field}</p>
-                        <p className="text-xs text-gray-500 mt-1">{change._id}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {change._id}
+                        </p>
                       </div>
                       <div className="text-red-600 break-words">
                         <pre className="whitespace-pre-wrap break-words text-xs bg-red-50 rounded-md p-2 border border-red-100">
@@ -133,7 +147,6 @@ const ClientHistory = ({ customerId }) => {
               No history found
             </div>
           )}
-
         </div>
       )}
     </div>

@@ -95,7 +95,7 @@ ProposalSchema.pre("save", async function (next) {
     if (lastProposal && lastProposal.proposalNo) {
       const lastNumber = parseInt(
         lastProposal.proposalNo.replace(prefix, ""),
-        10
+        10,
       );
       nextNumber = lastNumber + 1;
     }

@@ -33,7 +33,7 @@ export async function POST(req) {
           },
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updated) {
@@ -42,7 +42,7 @@ export async function POST(req) {
           success: false,
           message: "Ranking already updated for today",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -51,13 +51,13 @@ export async function POST(req) {
         success: true,
         message: "Ranking updated",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

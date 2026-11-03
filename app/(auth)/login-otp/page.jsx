@@ -1,6 +1,5 @@
 // app/(auth)/login-otp/page.jsx
 
-
 "use client";
 
 import { useState } from "react";
@@ -65,7 +64,7 @@ export default function LoginOtpPage() {
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          "Unable to send OTP. Please try again."
+          "Unable to send OTP. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -106,7 +105,7 @@ export default function LoginOtpPage() {
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          "OTP verification failed. Please try again."
+          "OTP verification failed. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -133,7 +132,7 @@ export default function LoginOtpPage() {
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          "Unable to resend OTP. Please try again."
+          "Unable to resend OTP. Please try again.",
       );
     } finally {
       setResending(false);
@@ -293,11 +292,7 @@ export default function LoginOtpPage() {
                     placeholder="000000"
                     value={otp}
                     onChange={(event) =>
-                      setOtp(
-                        event.target.value
-                          .replace(/\D/g, "")
-                          .slice(0, 6)
-                      )
+                      setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))
                     }
                     required
                     disabled={loading}

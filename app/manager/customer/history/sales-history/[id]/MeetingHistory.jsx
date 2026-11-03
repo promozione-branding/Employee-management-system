@@ -1,6 +1,5 @@
 // app/manager/customer/history/sales-history/[id]/MeetingHistory.jsx
 
-
 // app/manager/customer/history/sales-history/[id]/MeetingHistory.jsx
 
 "use client";
@@ -46,16 +45,14 @@ const MeetingHistory = ({ customerId }) => {
         } else {
           setHistoryData([]);
           toast.error(
-            res?.message || "Unable to fetch customer meeting history"
+            res?.message || "Unable to fetch customer meeting history",
           );
         }
       } catch (error) {
         if (!isMounted) return;
 
         setHistoryData([]);
-        toast.error(
-          error?.message || "Error while fetching customer history"
-        );
+        toast.error(error?.message || "Error while fetching customer history");
       } finally {
         if (isMounted) {
           setLoading(false);

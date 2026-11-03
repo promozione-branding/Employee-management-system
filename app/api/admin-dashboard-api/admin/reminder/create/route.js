@@ -17,14 +17,14 @@ export async function POST(req) {
     if (!userId || !Array.isArray(reminder)) {
       return NextResponse.json(
         { success: false, message: "Invalid data" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return NextResponse.json(
         { success: false, message: "Invalid userId" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -33,7 +33,7 @@ export async function POST(req) {
     if (!userExists) {
       return NextResponse.json(
         { success: false, message: "User not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -49,7 +49,7 @@ export async function POST(req) {
         new: true,
         upsert: true, // ✅ if not exist → create
         setDefaultsOnInsert: true,
-      }
+      },
     );
 
     return NextResponse.json({
@@ -62,7 +62,7 @@ export async function POST(req) {
 
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

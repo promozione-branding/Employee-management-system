@@ -31,12 +31,12 @@ const ChecklistNew = ({ items = [], checklist = [], onChange }) => {
       const filtered = existing.items.filter((i) => i !== item);
       next = filtered.length
         ? checklist.map((c) =>
-            c.section === section ? { ...c, items: filtered } : c
+            c.section === section ? { ...c, items: filtered } : c,
           )
         : checklist.filter((c) => c.section !== section);
     } else {
       next = checklist.map((c) =>
-        c.section === section ? { ...c, items: [...c.items, item] } : c
+        c.section === section ? { ...c, items: [...c.items, item] } : c,
       );
     }
     onChange(next);

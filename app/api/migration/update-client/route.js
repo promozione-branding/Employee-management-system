@@ -16,7 +16,6 @@ export async function GET(req) {
       { $set: { isPaid: false } },
     );
 
-
     return NextResponse.json({
       success: true,
       message: "Indexes synced successfully",

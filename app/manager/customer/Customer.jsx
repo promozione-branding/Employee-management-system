@@ -54,17 +54,18 @@ const Customer = ({ customerId }) => {
           projectCycleData?.projectCycle?.projectDuration?.map((item) =>
             item._id === currentEditedId
               ? {
-                ...item,
-                service: serviceValue,
-                serviceType: projectFormData?.serviceType,
-                startDate: projectFormData?.startDate,
-                endDate: projectFormData?.endDate,
-              }
+                  ...item,
+                  service: serviceValue,
+                  serviceType: projectFormData?.serviceType,
+                  startDate: projectFormData?.startDate,
+                  endDate: projectFormData?.endDate,
+                }
               : item,
           );
 
-        const res = await updateCustomerProjectCycleService(projectCycleData?.projectCycle?._id,
-          { projectDuration: updatedProjectDuration, },
+        const res = await updateCustomerProjectCycleService(
+          projectCycleData?.projectCycle?._id,
+          { projectDuration: updatedProjectDuration },
         );
 
         if (res.success) {
@@ -183,7 +184,10 @@ const Customer = ({ customerId }) => {
         projectCycleId: projectCycleData?.projectCycle?._id,
         durationId: currentEditedId,
         projectName: projectFormData?.projectName,
-        service: projectFormData.service === "other" ? projectFormData.serviceName : projectFormData.service,
+        service:
+          projectFormData.service === "other"
+            ? projectFormData.serviceName
+            : projectFormData.service,
         serviceType: projectFormData?.serviceType,
         startDate: projectFormData.startDate,
         endDate: projectFormData.endDate,
@@ -248,7 +252,10 @@ const Customer = ({ customerId }) => {
               <p className="text-sm font-medium">{company}</p>
             </div>
           </div>
-          <Link href={`/manager/employee/seo-sheet/${customerId}`} className="font-bold text-sm bg-orange-500 text-white px-4 py-2 rounded-lg">
+          <Link
+            href={`/manager/employee/seo-sheet/${customerId}`}
+            className="font-bold text-sm bg-orange-500 text-white px-4 py-2 rounded-lg"
+          >
             Keywords
           </Link>
         </div>
@@ -338,7 +345,10 @@ const Customer = ({ customerId }) => {
       <div>
         <div className="w-full lg:w-[30vw] border p-4 rounded-lg">
           <p className="font-semibold text-lg mb-4">Add Project</p>
-          <form onSubmit={currentEditedId ? handleProjectUpdate : handleProjectSubmit}
+          <form
+            onSubmit={
+              currentEditedId ? handleProjectUpdate : handleProjectSubmit
+            }
             className="flex flex-col gap-3"
           >
             <div className="flex flex-col gap-1">
@@ -346,7 +356,12 @@ const Customer = ({ customerId }) => {
               <input
                 type="text"
                 value={projectFormData.projectName}
-                onChange={(e) => setProjectFormData({ ...projectFormData, projectName: e.target.value, })}
+                onChange={(e) =>
+                  setProjectFormData({
+                    ...projectFormData,
+                    projectName: e.target.value,
+                  })
+                }
                 placeholder="Enter Project Name"
                 className="border p-2 rounded-md"
               />
@@ -378,8 +393,16 @@ const Customer = ({ customerId }) => {
             {projectFormData.service === "web-dev" && (
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium">Service Type</label>
-                <select value={projectFormData?.serviceType} className="border p-2 rounded-md"
-                  onChange={(e) => setProjectFormData({ ...projectFormData, serviceType: e.target.value, })}>
+                <select
+                  value={projectFormData?.serviceType}
+                  className="border p-2 rounded-md"
+                  onChange={(e) =>
+                    setProjectFormData({
+                      ...projectFormData,
+                      serviceType: e.target.value,
+                    })
+                  }
+                >
                   <option value="">Select Service Type</option>
                   <option value={"B2b"}>B2B</option>
                   <option value={"D2C"}>D2C</option>
@@ -471,8 +494,9 @@ const Customer = ({ customerId }) => {
                   <p className="font-semibold">{item?.projectName || "-"}</p>
                   <div className="flex">
                     <p className="font-semibold capitalize">{item?.service}</p>
-                    {item?.serviceType &&
-                      <p className="">&nbsp;- {item?.serviceType}</p>}
+                    {item?.serviceType && (
+                      <p className="">&nbsp;- {item?.serviceType}</p>
+                    )}
                   </div>
                   <div className="text-sm mt-1">
                     <p>

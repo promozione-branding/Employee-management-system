@@ -8,7 +8,7 @@ const getErrorMessage = (error, fallbackMessage) =>
 export async function fetchingProposalsInfo(id) {
   const { data } = await axiosInstance.post(
     "/api/proposals/proposal-ledger-info",
-    { proposalId: id }
+    { proposalId: id },
   );
   return data;
 }

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -42,8 +41,7 @@ export default function CurrentMonthRevenue() {
       } catch (error) {
         if (active) {
           toast.error(
-            error?.response?.data?.message ||
-              "Unable to load monthly revenue"
+            error?.response?.data?.message || "Unable to load monthly revenue",
           );
         }
       } finally {

@@ -1,6 +1,5 @@
 // components/admin-dashboard/dashboard/Announcement.jsx
 
-
 "use client";
 
 import { getAnnouncementService } from "@/service/admin-dashboard/dashboard-api";
@@ -112,15 +111,12 @@ const Announcement = () => {
           sm:p-[22px]
         "
       >
-
         {/* ================================== */}
         {/* HEADER */}
         {/* ================================== */}
 
         <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
-
           <div className="flex min-w-0 items-center gap-3">
-
             {/* Icon */}
 
             <div
@@ -141,7 +137,6 @@ const Announcement = () => {
             {/* Heading */}
 
             <div className="min-w-0">
-
               <h2
                 className="
                   font-serif
@@ -158,9 +153,7 @@ const Announcement = () => {
               <p className="mt-1 text-[13px] leading-5 text-[#56647D]">
                 Updates and important messages
               </p>
-
             </div>
-
           </div>
 
           {/* Announcement count */}
@@ -181,10 +174,8 @@ const Announcement = () => {
             "
           >
             <BellRing size={13} />
-
             {announcements.length} Updates
           </span>
-
         </div>
 
         {/* ================================== */}
@@ -210,17 +201,13 @@ const Announcement = () => {
             [scrollbar-color:#DDE4EF_transparent]
           "
         >
-
           {/* ================================== */}
           {/* LOADING */}
           {/* ================================== */}
 
           {loading ? (
-
             <div className="space-y-2.5" aria-label="Loading announcements">
-
               {[1, 2, 3].map((item) => (
-
                 <div
                   key={item}
                   className="
@@ -230,43 +217,28 @@ const Announcement = () => {
                     p-3.5
                   "
                 >
-
                   <div className="flex items-center gap-3">
-
-                    <Skeleton
-                      width={40}
-                      height={40}
-                      borderRadius={12}
-                    />
+                    <Skeleton width={40} height={40} borderRadius={12} />
 
                     <div className="flex-1 space-y-2">
-
                       <Skeleton height={14} width="65%" />
 
                       <Skeleton height={11} width="42%" />
-
                     </div>
-
                   </div>
 
                   <div className="mt-3">
                     <Skeleton height={11} width="85%" />
                   </div>
-
                 </div>
-
               ))}
-
             </div>
-
           ) : announcements.length > 0 ? (
-
             /* ================================== */
             /* ANNOUNCEMENT CARDS */
             /* ================================== */
 
             announcements.map((item) => (
-
               <button
                 type="button"
                 key={item._id}
@@ -294,7 +266,6 @@ const Announcement = () => {
                   focus-visible:ring-[#F27B1E]
                 "
               >
-
                 {/* Announcement icon */}
 
                 <div
@@ -318,11 +289,9 @@ const Announcement = () => {
                 {/* Announcement details */}
 
                 <div className="min-w-0 flex-1">
-
                   {/* Title */}
 
                   <div className="flex min-w-0 items-center gap-2">
-
                     <h3
                       className="
                         min-w-0
@@ -357,7 +326,6 @@ const Announcement = () => {
                         {item.targetDepartment}
                       </span>
                     )}
-
                   </div>
 
                   {/* Description */}
@@ -389,9 +357,7 @@ const Announcement = () => {
                       text-[#8793AA]
                     "
                   >
-
                     <span className="inline-flex items-center gap-1.5">
-
                       <CalendarDays size={12} />
 
                       {formatDate(item.createdAt, {
@@ -399,21 +365,16 @@ const Announcement = () => {
                         month: "short",
                         year: "numeric",
                       })}
-
                     </span>
 
                     <span className="inline-flex min-w-0 items-center gap-1.5">
-
                       <UserRound size={12} />
 
                       <span className="max-w-[120px] truncate">
                         {item.author?.username || "Admin"}
                       </span>
-
                     </span>
-
                   </div>
-
                 </div>
 
                 {/* Open icon */}
@@ -443,13 +404,9 @@ const Announcement = () => {
                     "
                   />
                 </div>
-
               </button>
-
             ))
-
           ) : (
-
             /* ================================== */
             /* EMPTY STATE */
             /* ================================== */
@@ -471,7 +428,6 @@ const Announcement = () => {
                 text-center
               "
             >
-
               <div
                 className="
                   mb-3
@@ -502,11 +458,8 @@ const Announcement = () => {
               >
                 Important updates will appear here when they are available.
               </p>
-
             </div>
-
           )}
-
         </div>
 
         {/* ================================== */}
@@ -514,7 +467,6 @@ const Announcement = () => {
         {/* ================================== */}
 
         {!loading && announcements.length > 0 && (
-
           <div
             className="
               mt-3
@@ -528,12 +480,9 @@ const Announcement = () => {
               pt-3
             "
           >
-
             <p className="text-[11px] text-[#8793AA]">
               {announcements.length}{" "}
-              {announcements.length === 1
-                ? "announcement"
-                : "announcements"}
+              {announcements.length === 1 ? "announcement" : "announcements"}
             </p>
 
             <span
@@ -549,11 +498,8 @@ const Announcement = () => {
               Select to read
               <ArrowUpRight size={13} />
             </span>
-
           </div>
-
         )}
-
       </section>
 
       {/* ================================== */}
@@ -561,7 +507,6 @@ const Announcement = () => {
       {/* ================================== */}
 
       {selectedAnnouncement && (
-
         <div
           className="
             fixed
@@ -582,7 +527,6 @@ const Announcement = () => {
             }
           }}
         >
-
           <div
             role="dialog"
             aria-modal="true"
@@ -602,7 +546,6 @@ const Announcement = () => {
               shadow-[0_20px_70px_rgba(10,46,102,0.20)]
             "
           >
-
             {/* Modal header */}
 
             <div
@@ -618,7 +561,6 @@ const Announcement = () => {
                 sm:py-6
               "
             >
-
               <div
                 className="
                   pointer-events-none
@@ -633,9 +575,7 @@ const Announcement = () => {
               />
 
               <div className="relative flex items-start justify-between gap-4">
-
                 <div className="min-w-0 flex-1">
-
                   {/* Modal icon */}
 
                   <div
@@ -689,9 +629,7 @@ const Announcement = () => {
                       text-[#56647D]
                     "
                   >
-
                     <span className="inline-flex items-center gap-1.5">
-
                       <CalendarDays
                         size={14}
                         className="shrink-0 text-[#376BB5]"
@@ -703,22 +641,18 @@ const Announcement = () => {
                         month: "short",
                         year: "numeric",
                       })}
-
                     </span>
 
                     <span className="inline-flex items-center gap-1.5">
-
                       <UserRound
                         size={14}
                         className="shrink-0 text-[#376BB5]"
                       />
 
                       {selectedAnnouncement.author?.username || "Admin"}
-
                     </span>
 
                     {selectedAnnouncement.targetDepartment && (
-
                       <span
                         className="
                           inline-flex
@@ -736,13 +670,9 @@ const Announcement = () => {
                         <Building2 size={13} />
 
                         {selectedAnnouncement.targetDepartment}
-
                       </span>
-
                     )}
-
                   </div>
-
                 </div>
 
                 {/* Close button */}
@@ -772,9 +702,7 @@ const Announcement = () => {
                 >
                   <X size={18} />
                 </button>
-
               </div>
-
             </div>
 
             {/* Modal content */}
@@ -789,7 +717,6 @@ const Announcement = () => {
                 sm:py-7
               "
             >
-
               <div
                 className="
                   whitespace-pre-wrap
@@ -802,7 +729,6 @@ const Announcement = () => {
               >
                 {selectedAnnouncement.content || "No content available."}
               </div>
-
             </div>
 
             {/* Modal footer */}
@@ -819,7 +745,6 @@ const Announcement = () => {
                 sm:px-7
               "
             >
-
               <button
                 type="button"
                 onClick={() => setSelectedAnnouncement(null)}
@@ -846,15 +771,10 @@ const Announcement = () => {
               >
                 Close announcement
               </button>
-
             </div>
-
           </div>
-
         </div>
-
       )}
-
     </>
   );
 };

@@ -2,35 +2,33 @@
 
 import mongoose from "mongoose";
 
-const ChecklistItemSchema = new mongoose.Schema(
-  {
-    key: {
-      type: String,
-      required: true,
-    },
-    label: {
-      type: String,
-      required: true,
-    },
-    completed: {
-      type: Boolean,
-      default: false,
-    },
-    completedAt: {
-      type: Date,
-    },
-    remarks: {
-      type: String,
-    },
-    proofUrl: {
-      type: String,
-    },
-    completedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Employee",
-    },
+const ChecklistItemSchema = new mongoose.Schema({
+  key: {
+    type: String,
+    required: true,
   },
-);
+  label: {
+    type: String,
+    required: true,
+  },
+  completed: {
+    type: Boolean,
+    default: false,
+  },
+  completedAt: {
+    type: Date,
+  },
+  remarks: {
+    type: String,
+  },
+  proofUrl: {
+    type: String,
+  },
+  completedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Employee",
+  },
+});
 
 const EmployeeWorkDetailSchema = new mongoose.Schema(
   {

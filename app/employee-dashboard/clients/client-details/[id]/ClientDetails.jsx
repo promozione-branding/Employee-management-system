@@ -26,10 +26,10 @@ const ClientDetails = ({ clientId }) => {
           <TeamUpdateTab clientId={clientId} />
         </TabsContent>
         <TabsContent value="history">
-         <AllHistory customerId={clientId}/>
+          <AllHistory customerId={clientId} />
         </TabsContent>
         <TabsContent value="attachment">
-         <Attachment clientId={clientId}/>
+          <Attachment clientId={clientId} />
         </TabsContent>
       </Tabs>
     </div>

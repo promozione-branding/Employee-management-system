@@ -29,7 +29,7 @@ import toast from "react-hot-toast";
 
 const CreateProposal = ({ customerId }) => {
   const navigate = useRouter();
-  const { employee,loading } = useSalesEmployeeStore();
+  const { employee, loading } = useSalesEmployeeStore();
 
   // ---------------- STATE ----------------
   const [formData, setFormData] = useState(initialPerposelFormData);
@@ -86,7 +86,7 @@ const CreateProposal = ({ customerId }) => {
     paymentMethod: formData?.paymentMethod,
     totalAmount: calculationOfTotalAmount(),
     partlyPayment: listOfPayments,
-    dateOfProposal:formData?.dateOfProposal
+    dateOfProposal: formData?.dateOfProposal,
   };
 
   async function fetchAllServices() {
@@ -204,7 +204,7 @@ const CreateProposal = ({ customerId }) => {
       }
     }
   }
-  
+
   async function customerDetails() {
     try {
       const response = await getCustomerServices(customerId);
@@ -325,9 +325,8 @@ const CreateProposal = ({ customerId }) => {
     setFormData((prev) => ({ ...prev, services: serviceIds }));
   }, [selectedServices]);
 
-
-  if(loading){
-    return <Loading />
+  if (loading) {
+    return <Loading />;
   }
   return (
     <div className="w-full">

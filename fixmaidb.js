@@ -1,6 +1,5 @@
 // fixmaidb.js
 
-
 import "dotenv/config";
 import { MongoClient } from "mongodb";
 
@@ -45,7 +44,7 @@ function replaceEmail(value, stats) {
 
     if (Object.hasOwn(result, newKey)) {
       throw new Error(
-        `Field-name collision while replacing email in key "${key}"`
+        `Field-name collision while replacing email in key "${key}"`,
       );
     }
 
@@ -68,7 +67,7 @@ function countEmail(value) {
     return Object.entries(value).reduce(
       (sum, [key, item]) =>
         sum + key.split(OLD_EMAIL).length - 1 + countEmail(item),
-      0
+      0,
     );
   }
 
@@ -90,9 +89,7 @@ async function main() {
       nameOnly: true,
     });
 
-    const targets = databases.filter(
-      ({ name }) => !SYSTEM_DATABASES.has(name)
-    );
+    const targets = databases.filter(({ name }) => !SYSTEM_DATABASES.has(name));
 
     console.log(`Accessible application databases: ${targets.length}`);
 
@@ -105,7 +102,7 @@ async function main() {
         .toArray();
 
       const writableCollections = collections.filter(
-        (collection) => collection.type === "collection"
+        (collection) => collection.type === "collection",
       );
 
       console.log(`Collections: ${writableCollections.length}`);
@@ -125,7 +122,7 @@ async function main() {
             failedDocuments++;
             console.error(
               `❌ ${dbName}.${collectionName}, _id=${String(_id)}:`,
-              error.message
+              error.message,
             );
             continue;
           }
@@ -133,10 +130,7 @@ async function main() {
           if (stats.values === 0 && stats.keys === 0) continue;
 
           try {
-            await collection.replaceOne(
-              { _id },
-              { ...updatedBody, _id }
-            );
+            await collection.replaceOne({ _id }, { ...updatedBody, _id });
 
             updatedDocuments++;
             collectionUpdated++;
@@ -146,14 +140,14 @@ async function main() {
             failedDocuments++;
             console.error(
               `❌ ${dbName}.${collectionName}, _id=${String(_id)}:`,
-              error.message
+              error.message,
             );
           }
         }
 
         if (collectionUpdated > 0) {
           console.log(
-            `✅ ${collectionName}: updated ${collectionUpdated} document(s)`
+            `✅ ${collectionName}: updated ${collectionUpdated} document(s)`,
           );
         }
       }

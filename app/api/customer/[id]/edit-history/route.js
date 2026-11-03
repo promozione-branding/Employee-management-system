@@ -13,7 +13,7 @@ export async function GET(req, { params }) {
     if (!mongoose.Types.ObjectId.isValid(customerId)) {
       return NextResponse.json(
         { success: false, message: "Invalid customer id" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -23,7 +23,10 @@ export async function GET(req, { params }) {
     const roleFilter = searchParams.get("role");
     const q = (searchParams.get("q") || "").trim();
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const limit = Math.min(100, parseInt(searchParams.get("limit") || "30", 10));
+    const limit = Math.min(
+      100,
+      parseInt(searchParams.get("limit") || "30", 10),
+    );
 
     const filter = {
       clientId: customerId,
@@ -59,7 +62,7 @@ export async function GET(req, { params }) {
     console.error("[edit-history] error:", err);
     return NextResponse.json(
       { success: false, message: err.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

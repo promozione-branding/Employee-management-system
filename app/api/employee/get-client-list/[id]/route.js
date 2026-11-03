@@ -4,22 +4,21 @@ import { connectDB } from "@/lib/db";
 import Employee from "@/models/employee/Employee";
 import "@/models/employee/EmployeeWorkDetail";
 import { NextResponse } from "next/server";
-import Customer from "@/models/admin/Customer"
+import Customer from "@/models/admin/Customer";
 
 export async function GET(req, { params }) {
   try {
     await connectDB();
     const { id } = await params;
-    console.log(id, "lklkl")
+    console.log(id, "lklkl");
 
-    const employee = await Employee.findById(id)
-      .populate({
-        path: "workDetails",
-        populate: {
-          path: "clientId",
-          select: "name company website updatedAt",
-        },
-      });
+    const employee = await Employee.findById(id).populate({
+      path: "workDetails",
+      populate: {
+        path: "clientId",
+        select: "name company website updatedAt",
+      },
+    });
 
     const uniqueClients = [];
 

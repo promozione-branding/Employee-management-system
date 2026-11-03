@@ -63,8 +63,8 @@ export default function ProposalDeletedHistory({ proposalId }) {
               <p className="font-medium">{service.serviceTitle}</p>
               <p>Amount: ₹{service.amount}</p>
               <p>
-                {service.discountAmount
-                  && `Discount: ₹${service?.discountAmount}`}
+                {service.discountAmount &&
+                  `Discount: ₹${service?.discountAmount}`}
               </p>
               <p>Final: ₹{service.finalAmount}</p>
               <p className="text-xs text-gray-500">

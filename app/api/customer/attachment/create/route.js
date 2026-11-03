@@ -8,7 +8,7 @@ import { sendAttachmentEmail } from "@/lib/email/sendAttachmentEmail";
 
 export async function POST(req) {
   try {
-    await connectDB(); 
+    await connectDB();
 
     const body = await req.json();
 
@@ -79,11 +79,7 @@ export async function POST(req) {
             ? `<p><a href="${referenceLink}">View Attachment</a></p>`
             : ""
         }
-        ${
-          file
-            ? `<p><a href="${file}">View file</a></p>`
-            : ""
-        }
+        ${file ? `<p><a href="${file}">View file</a></p>` : ""}
       `;
 
       try {

@@ -16,8 +16,7 @@ export async function GET(req, { params }) {
       entityType: "Proposal",
       _id: id,
       action: "UPDATE",
-    })
-    .select("changes");
+    }).select("changes");
 
     return NextResponse.json(
       {

@@ -13,7 +13,7 @@ export async function GET() {
     response.cookies.set("token", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      expires: new Date(0), 
+      expires: new Date(0),
       path: "/",
     });
 
@@ -21,7 +21,7 @@ export async function GET() {
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "Logout failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -16,7 +16,7 @@ export async function GET(req, { params }) {
     const getSeoSheet = await SeoSheet.findOne({ clientId: id })
       .populate({
         path: "keywords",
-        model: Keyword, 
+        model: Keyword,
         populate: {
           path: "rankings.employeeID",
           select: "basicDetails.name",
@@ -30,7 +30,7 @@ export async function GET(req, { params }) {
           success: false,
           message: "there is no sheet found of client",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -47,7 +47,7 @@ export async function GET(req, { params }) {
         matchedProject =
           projectCycle.projectDuration.find(
             (project) =>
-              project._id.toString() === keyword.projectId?.toString()
+              project._id.toString() === keyword.projectId?.toString(),
           ) || null;
       }
 
@@ -66,7 +66,7 @@ export async function GET(req, { params }) {
           keywords: keywordsWithProjects,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error(error);
@@ -76,7 +76,7 @@ export async function GET(req, { params }) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

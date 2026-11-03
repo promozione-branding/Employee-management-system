@@ -19,40 +19,57 @@ function resolvePeriod(type, customStart, customEnd) {
   else if (type === "monthly") start.setMonth(start.getMonth() - 1);
   else if (type === "3month") start.setMonth(start.getMonth() - 3);
   else if (type === "6month") start.setMonth(start.getMonth() - 6);
-  else { start = new Date(customStart); end = new Date(customEnd); }
+  else {
+    start = new Date(customStart);
+    end = new Date(customEnd);
+  }
 
   const diffTime = Math.abs(end - start);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-  const prevEnd = new Date(start); prevEnd.setDate(prevEnd.getDate() - 1);
-  const prevStart = new Date(prevEnd); prevStart.setDate(prevStart.getDate() - diffDays);
+  const prevEnd = new Date(start);
+  prevEnd.setDate(prevEnd.getDate() - 1);
+  const prevStart = new Date(prevEnd);
+  prevStart.setDate(prevStart.getDate() - diffDays);
 
-  return { 
-    start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10),
-    prevStart: prevStart.toISOString().slice(0, 10), prevEnd: prevEnd.toISOString().slice(0, 10)
+  return {
+    start: start.toISOString().slice(0, 10),
+    end: end.toISOString().slice(0, 10),
+    prevStart: prevStart.toISOString().slice(0, 10),
+    prevEnd: prevEnd.toISOString().slice(0, 10),
   };
 }
 
 async function fetchAll(arr, fn) {
   const out = [];
   for (const item of arr || []) {
-    try { out.push({ id: item, data: await fn(item) }); }
-    catch (e) { out.push({ id: item, error: e.message }); }
+    try {
+      out.push({ id: item, data: await fn(item) });
+    } catch (e) {
+      out.push({ id: item, error: e.message });
+    }
   }
   return out;
 }
 
 export async function POST(req, { params }) {
   const auth = await requireReportAdmin(req);
-  if (!auth.ok) return Response.json({ error: auth.error }, { status: auth.status });
+  if (!auth.ok)
+    return Response.json({ error: auth.error }, { status: auth.status });
   const { id } = await params;
-  if (!mongoose.isValidObjectId(id)) return Response.json({ error: "Bad id" }, { status: 400 });
+  if (!mongoose.isValidObjectId(id))
+    return Response.json({ error: "Bad id" }, { status: 400 });
 
   await connectDB();
   const body = await req.json();
-  const { start, end, prevStart, prevEnd } = resolvePeriod(body.periodType, body.start, body.end);
+  const { start, end, prevStart, prevEnd } = resolvePeriod(
+    body.periodType,
+    body.start,
+    body.end,
+  );
 
   const client = await ReportClient.findById(id).lean();
-  if (!client) return Response.json({ error: "Client not found" }, { status: 404 });
+  if (!client)
+    return Response.json({ error: "Client not found" }, { status: 404 });
 
   const { getGA4, getGSC, getGoogleAds } = await import("@/lib/google");
   const { getMetaAds, getMetaPage } = await import("@/lib/meta");
@@ -61,44 +78,66 @@ export async function POST(req, { params }) {
   let seoKeywords = [];
   if (client.customerId) {
     try {
-      const SeoSheet = (await import("@/models/employee/seoEmployee/SeoSheet")).default; 
-      const Keyword = (await import("@/models/employee/seoEmployee/Keyword")).default; 
-      const ProjectCycle = (await import("@/models/admin/ProjectCycle")).default;
-      
-      const sheet = await SeoSheet.findOne({ clientId: client.customerId }).populate({ path: "keywords", model: Keyword }).lean();
-      const projectCycle = await ProjectCycle.findOne({ clientId: client.customerId }).lean();
-      
+      const SeoSheet = (await import("@/models/employee/seoEmployee/SeoSheet"))
+        .default;
+      const Keyword = (await import("@/models/employee/seoEmployee/Keyword"))
+        .default;
+      const ProjectCycle = (await import("@/models/admin/ProjectCycle"))
+        .default;
+
+      const sheet = await SeoSheet.findOne({ clientId: client.customerId })
+        .populate({ path: "keywords", model: Keyword })
+        .lean();
+      const projectCycle = await ProjectCycle.findOne({
+        clientId: client.customerId,
+      }).lean();
+
       if (sheet && sheet.keywords) {
-        seoKeywords = sheet.keywords.map(kw => {
+        seoKeywords = sheet.keywords.map((kw) => {
           let matchedProject = null;
 
           // 🔥 MATCH THE PROJECT EXACTLY LIKE THE OLD ERP
           if (projectCycle?.projectDuration?.length) {
-            matchedProject = projectCycle.projectDuration.find(
-              (project) => project._id.toString() === kw.projectId?.toString()
-            ) || null;
+            matchedProject =
+              projectCycle.projectDuration.find(
+                (project) =>
+                  project._id.toString() === kw.projectId?.toString(),
+              ) || null;
           }
 
-          return { 
+          return {
             ...kw,
-            project: matchedProject 
+            project: matchedProject,
           };
         });
       }
-    } catch (e) { console.error("SEO Fetch Error:", e.message); }
+    } catch (e) {
+      console.error("SEO Fetch Error:", e.message);
+    }
   }
 
   const [ga4, gsc, gads, metaAds, metaPage] = await Promise.all([
-    fetchAll(client.ga4PropertyIds,       (cid) => getGA4(cid, start, end)),
-    fetchAll(client.gscSiteUrls,          (cid) => getGSC(cid, start, end, prevStart, prevEnd)),
-    fetchAll(client.googleAdsCustomerIds, (cid) => getGoogleAds(cid, start, end, prevStart, prevEnd)),
-    fetchAll(client.metaAdAccountIds,     (cid) => getMetaAds(cid, start, end, prevStart, prevEnd)),
-    fetchAll(client.metaPageIds,          (cid) => getMetaPage(cid, start, end, prevStart, prevEnd)),
+    fetchAll(client.ga4PropertyIds, (cid) => getGA4(cid, start, end)),
+    fetchAll(client.gscSiteUrls, (cid) =>
+      getGSC(cid, start, end, prevStart, prevEnd),
+    ),
+    fetchAll(client.googleAdsCustomerIds, (cid) =>
+      getGoogleAds(cid, start, end, prevStart, prevEnd),
+    ),
+    fetchAll(client.metaAdAccountIds, (cid) =>
+      getMetaAds(cid, start, end, prevStart, prevEnd),
+    ),
+    fetchAll(client.metaPageIds, (cid) =>
+      getMetaPage(cid, start, end, prevStart, prevEnd),
+    ),
   ]);
 
   const report = await Report.create({
-    clientId: id, periodType: body.periodType, periodStart: new Date(start), periodEnd: new Date(end),
-    data: { client, ga4, gsc, gads, metaAds, metaPage, seoKeywords }, 
+    clientId: id,
+    periodType: body.periodType,
+    periodStart: new Date(start),
+    periodEnd: new Date(end),
+    data: { client, ga4, gsc, gads, metaAds, metaPage, seoKeywords },
     createdBy: auth.user._id,
   });
 

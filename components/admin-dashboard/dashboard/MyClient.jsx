@@ -1,16 +1,10 @@
 // components/admin-dashboard/dashboard/MyClient.jsx
 
-
 "use client";
 
 import { myClientService } from "@/service/admin-dashboard/dashboard-api";
 
-import {
-  Building2,
-  Code2,
-  Package,
-  Users,
-} from "lucide-react";
+import { Building2, Code2, Package, Users } from "lucide-react";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -45,9 +39,7 @@ export const MyClient = () => {
     } catch (error) {
       console.error("Failed to fetch clients:", error);
 
-      toast.error(
-        error?.response?.data?.message || "Unable to load clients."
-      );
+      toast.error(error?.response?.data?.message || "Unable to load clients.");
     } finally {
       setLoading(false);
     }
@@ -62,9 +54,7 @@ export const MyClient = () => {
   // ========================================
 
   const getClientStatus = (client) => {
-    const proposals = Array.isArray(client?.proposals)
-      ? client.proposals
-      : [];
+    const proposals = Array.isArray(client?.proposals) ? client.proposals : [];
 
     return proposals.length > 0 ? "active" : "pending";
   };
@@ -96,9 +86,7 @@ export const MyClient = () => {
   const filteredClients = useMemo(() => {
     if (activeFilter === "all") return clients;
 
-    return clients.filter(
-      (client) => getClientStatus(client) === activeFilter
-    );
+    return clients.filter((client) => getClientStatus(client) === activeFilter);
   }, [clients, activeFilter]);
 
   // ========================================
@@ -134,13 +122,11 @@ export const MyClient = () => {
         sm:p-[22px]
       "
     >
-
       {/* ================================== */}
       {/* HEADER */}
       {/* ================================== */}
 
       <div className="mb-5 flex shrink-0 items-center gap-3">
-
         {/* Header icon */}
 
         <div
@@ -161,7 +147,6 @@ export const MyClient = () => {
         {/* Heading */}
 
         <div className="min-w-0">
-
           <h2
             className="
               font-serif
@@ -178,9 +163,7 @@ export const MyClient = () => {
           <p className="mt-1 text-[13px] leading-5 text-[#56647D]">
             {filterCounts.pending} waiting on you
           </p>
-
         </div>
-
       </div>
 
       {/* ================================== */}
@@ -197,13 +180,10 @@ export const MyClient = () => {
           gap-1.5
         "
       >
-
         {filters.map((filter) => {
-
           const isActive = activeFilter === filter.id;
 
           return (
-
             <button
               key={filter.id}
               type="button"
@@ -231,28 +211,20 @@ export const MyClient = () => {
                 }
               `}
             >
-
               <span>{filter.label}</span>
 
               <span
                 className={`
                   text-[11px]
                   font-medium
-                  ${
-                    isActive
-                      ? "text-[#D5E1F4]"
-                      : "text-[#8491A8]"
-                  }
+                  ${isActive ? "text-[#D5E1F4]" : "text-[#8491A8]"}
                 `}
               >
                 {filterCounts[filter.id]}
               </span>
-
             </button>
-
           );
         })}
-
       </div>
 
       {/* ================================== */}
@@ -278,17 +250,13 @@ export const MyClient = () => {
           [scrollbar-color:#DDE4EF_transparent]
         "
       >
-
         {/* ================================== */}
         {/* LOADING STATE */}
         {/* ================================== */}
 
         {loading ? (
-
           <div className="space-y-2.5" aria-label="Loading clients">
-
             {[1, 2, 3].map((item) => (
-
               <div
                 key={item}
                 className="
@@ -303,48 +271,36 @@ export const MyClient = () => {
                   px-3.5
                 "
               >
-
                 <div className="h-10 w-10 shrink-0 rounded-xl bg-[#E9EFF9]" />
 
                 <div className="min-w-0 flex-1 space-y-2">
-
                   <div className="h-3.5 w-24 rounded bg-[#F2F4F9]" />
 
                   <div className="h-3 w-32 rounded bg-[#F2F4F9]" />
-
                 </div>
 
                 <div className="h-7 w-16 rounded-full bg-[#FFF3D9]" />
-
               </div>
-
             ))}
-
           </div>
-
         ) : filteredClients.length > 0 ? (
-
           /* ================================== */
           /* CLIENT CARDS */
           /* ================================== */
 
           filteredClients.map((client) => {
-
             const originalIndex = clients.findIndex(
-              (item) => item._id === client._id
+              (item) => item._id === client._id,
             );
 
             const ClientIcon =
-              clientIcons[
-                Math.max(originalIndex, 0) % clientIcons.length
-              ];
+              clientIcons[Math.max(originalIndex, 0) % clientIcons.length];
 
             const status = getClientStatus(client);
 
             const isClientActive = status === "active";
 
             return (
-
               <Link
                 key={client._id}
                 href={`/dashboard/customer/${client._id}`}
@@ -371,7 +327,6 @@ export const MyClient = () => {
                   sm:px-3.5
                 "
               >
-
                 {/* CLIENT ICON */}
 
                 <div
@@ -389,16 +344,12 @@ export const MyClient = () => {
                     group-hover:bg-[#DCE7F7]
                   "
                 >
-                  <ClientIcon
-                    size={19}
-                    strokeWidth={1.9}
-                  />
+                  <ClientIcon size={19} strokeWidth={1.9} />
                 </div>
 
                 {/* CLIENT DETAILS */}
 
                 <div className="min-w-0 flex-1">
-
                   <h3
                     className="
                       truncate
@@ -424,7 +375,6 @@ export const MyClient = () => {
                   >
                     {client?.company || "No company"}
                   </p>
-
                 </div>
 
                 {/* STATUS BADGE */}
@@ -451,14 +401,10 @@ export const MyClient = () => {
                 >
                   {isClientActive ? "Active" : "Pending"}
                 </span>
-
               </Link>
-
             );
           })
-
         ) : (
-
           /* ================================== */
           /* EMPTY STATE */
           /* ================================== */
@@ -480,7 +426,6 @@ export const MyClient = () => {
               text-center
             "
           >
-
             <div
               className="
                 mb-3
@@ -497,11 +442,9 @@ export const MyClient = () => {
             </div>
 
             <h3 className="text-[14px] font-semibold text-[#0A2E66]">
-
               {activeFilter === "all"
                 ? "No clients yet"
                 : `No ${activeFilter} clients`}
-
             </h3>
 
             <p
@@ -519,7 +462,6 @@ export const MyClient = () => {
             </p>
 
             {activeFilter !== "all" && (
-
               <button
                 type="button"
                 onClick={() => setActiveFilter("all")}
@@ -538,11 +480,9 @@ export const MyClient = () => {
               >
                 View all clients
               </button>
-
             )}
 
             {activeFilter === "all" && (
-
               <Link
                 href="/dashboard/customer"
                 className="
@@ -556,15 +496,10 @@ export const MyClient = () => {
               >
                 View all clients
               </Link>
-
             )}
-
           </div>
-
         )}
-
       </div>
-
     </section>
   );
 };

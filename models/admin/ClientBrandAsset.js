@@ -17,7 +17,7 @@ const FileEntrySchema = new mongoose.Schema(
     url: { type: String, required: true, trim: true },
     description: { type: String, trim: true, default: "" },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const ClientBrandAssetSchema = new mongoose.Schema(
@@ -29,15 +29,15 @@ const ClientBrandAssetSchema = new mongoose.Schema(
       unique: true,
       index: true,
     },
-    primaryPhone:   { type: String, trim: true, validate: phoneValidator },
+    primaryPhone: { type: String, trim: true, validate: phoneValidator },
     secondaryPhone: { type: String, trim: true, validate: phoneValidator },
     websites: [{ type: String, trim: true }],
-    maidIds:  [{ type: String, trim: true, lowercase: true }],
-    logos:    { type: [FileEntrySchema], default: [] },
+    maidIds: [{ type: String, trim: true, lowercase: true }],
+    logos: { type: [FileEntrySchema], default: [] },
     products: { type: [FileEntrySchema], default: [] },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 ClientBrandAssetSchema.plugin(auditPlugin, {

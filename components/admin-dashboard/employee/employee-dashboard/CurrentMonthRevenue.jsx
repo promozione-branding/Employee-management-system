@@ -2,7 +2,6 @@
 
 "use client";
 
-
 import { currentMonthRevenueService } from "@/service/sales-dashboard/dashboard-api";
 import { BanknoteArrowUp, HandCoins } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -10,8 +9,7 @@ import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-const CurrentMonthRevenue = ({employeeId}) => {
-
+const CurrentMonthRevenue = ({ employeeId }) => {
   const [loading, setLoading] = useState(true);
   const [callData, setCallData] = useState(null);
 

@@ -4,7 +4,11 @@ import mongoose from "mongoose";
 
 const LedgerEntryNewSchema = new mongoose.Schema(
   {
-    customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
+    customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Customer",
+      required: true,
+    },
     proposalId: { type: mongoose.Schema.Types.ObjectId, ref: "ProposalNew" },
     date: { type: Date, required: true },
     particulars: { type: String, required: true },
@@ -15,7 +19,8 @@ const LedgerEntryNewSchema = new mongoose.Schema(
     transactionId: { type: String },
     isConfidential: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-export default mongoose.models.LedgerNew || mongoose.model("LedgerNew", LedgerEntryNewSchema);
+export default mongoose.models.LedgerNew ||
+  mongoose.model("LedgerNew", LedgerEntryNewSchema);

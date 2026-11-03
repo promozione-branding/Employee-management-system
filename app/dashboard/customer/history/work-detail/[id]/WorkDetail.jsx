@@ -44,10 +44,7 @@ function computeProgress({
   const savedDone = (savedChecklist || []).filter((i) => i.completed).length;
 
   const total = Math.max(serverTotal || 0, savedTotal, extraTotal);
-  const done = Math.min(
-    Math.max(serverDone || 0, savedDone),
-    total,
-  );
+  const done = Math.min(Math.max(serverDone || 0, savedDone), total);
 
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
@@ -86,8 +83,12 @@ function mergedTemplateLength(work) {
   ).length;
 
   // Template items not yet saved + custom items = merged list length
-  const templateOnlyCount = template.filter((t) => !savedKeys.has(t.key)).length;
-  const savedTemplateCount = template.filter((t) => savedKeys.has(t.key)).length;
+  const templateOnlyCount = template.filter(
+    (t) => !savedKeys.has(t.key),
+  ).length;
+  const savedTemplateCount = template.filter((t) =>
+    savedKeys.has(t.key),
+  ).length;
 
   // This mirrors: template.length (as merged) + customCount
   return template.length + customCount;
@@ -309,11 +310,11 @@ const WorkDetail = ({ customerId }) => {
             filteredProjects.map((work, id) => {
               // ✅ card progress: same rule, no merged-template available here
               const cardProgress = computeProgress({
-  savedChecklist: work.checklist,
-  serverTotal: work.progressPercentage?.totalField,
-  serverDone: work.progressPercentage?.completeField,
-  extraTotal: mergedTemplateLength(work), // ✅ pull template in
-});
+                savedChecklist: work.checklist,
+                serverTotal: work.progressPercentage?.totalField,
+                serverDone: work.progressPercentage?.completeField,
+                extraTotal: mergedTemplateLength(work), // ✅ pull template in
+              });
 
               return (
                 <div
@@ -481,9 +482,8 @@ const WorkDetail = ({ customerId }) => {
                       className="flex items-center gap-3 bg-gray-50 border border-gray-200 px-4 py-2 rounded-lg"
                     >
                       <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
-                        {emp?.basicDetails?.name
-                          ?.charAt(0)
-                          ?.toUpperCase() || "?"}
+                        {emp?.basicDetails?.name?.charAt(0)?.toUpperCase() ||
+                          "?"}
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900">
@@ -497,10 +497,7 @@ const WorkDetail = ({ customerId }) => {
                   ))}
                 </div>
                 <div>
-                  <Dialog
-                    open={checkListOpen}
-                    onOpenChange={setCheckListOpen}
-                  >
+                  <Dialog open={checkListOpen} onOpenChange={setCheckListOpen}>
                     <DialogTrigger className="flex items-center gap-1 p-2 text-xs font-medium rounded-md bg-gray-200 text-gray-800 hover:text-white hover:bg-blue-600 transition">
                       <Plus className="h-3.5 w-3.5" />
                       Add Checklist

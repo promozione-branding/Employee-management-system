@@ -3,9 +3,7 @@
 "use client";
 
 import Loading from "@/components/layout/Loading";
-import {
-  getProjectsByEmployeeIdService,
-} from "@/service/employee-dashboard/employee";
+import { getProjectsByEmployeeIdService } from "@/service/employee-dashboard/employee";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import SEOChecklistForm from "../CheckList";
@@ -36,9 +34,8 @@ const WorkDetails = ({ workDetailId }) => {
   const { employee } = useEmployeeStore();
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [checkListPopFormData, setCheckListPopFormData] = useState(
-    initialCheckListData,
-  );
+  const [checkListPopFormData, setCheckListPopFormData] =
+    useState(initialCheckListData);
   const [checkListOpen, setCheckListOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);

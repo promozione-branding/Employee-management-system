@@ -306,7 +306,10 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       status: meetingForm?.status,
       note: meetingForm?.note,
       meetingAt: toLocalISO(meetingForm.meetingDate, meetingForm.meetingTime),
-      reminderAt: toLocalISO(meetingForm.reminderDate, meetingForm.reminderTime),
+      reminderAt: toLocalISO(
+        meetingForm.reminderDate,
+        meetingForm.reminderTime,
+      ),
       sendToSelf: true,
       ccAdmin: true,
       mailRecipients: meetingRecipients.map((u) => u?._id),
@@ -351,7 +354,10 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       status: meetingForm?.status,
       note: meetingForm?.note,
       meetingAt: toLocalISO(meetingForm.meetingDate, meetingForm.meetingTime),
-      reminderAt: toLocalISO(meetingForm.reminderDate, meetingForm.reminderTime),
+      reminderAt: toLocalISO(
+        meetingForm.reminderDate,
+        meetingForm.reminderTime,
+      ),
       sendToSelf: true,
       ccAdmin: true,
       mailRecipients: meetingRecipients.map((u) => u?._id),
@@ -401,7 +407,10 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       subject: generalForm?.subject || "",
       note: generalForm?.note,
       meetingAt: toLocalISO(generalForm.meetingDate, generalForm.meetingTime),
-      reminderAt: toLocalISO(generalForm.reminderDate, generalForm.reminderTime),
+      reminderAt: toLocalISO(
+        generalForm.reminderDate,
+        generalForm.reminderTime,
+      ),
       sendToSelf: generalSendMail,
       ccAdmin: generalSendMail,
       mailRecipients: generalSendMail
@@ -450,7 +459,10 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
       subject: generalForm?.subject || "",
       note: generalForm?.note,
       meetingAt: toLocalISO(generalForm.meetingDate, generalForm.meetingTime),
-      reminderAt: toLocalISO(generalForm.reminderDate, generalForm.reminderTime),
+      reminderAt: toLocalISO(
+        generalForm.reminderDate,
+        generalForm.reminderTime,
+      ),
       sendToSelf: generalSendMail,
       ccAdmin: generalSendMail,
       mailRecipients: generalSendMail
@@ -742,7 +754,6 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 />
               </div>
             </div>
-            
 
             <div className="flex flex-col gap-2 border rounded-lg p-3 bg-blue-50/50">
               <div className="text-xs text-gray-700">

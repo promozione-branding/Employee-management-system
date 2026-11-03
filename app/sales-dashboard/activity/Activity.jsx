@@ -12,7 +12,6 @@ import ProposalTab from "@/components/sales-dashboard/activity/ProposalTab";
 const Activity = () => {
   const { employee } = useSalesEmployeeStore();
 
-
   return (
     <div>
       <Tabs defaultValue="updates" className="">

@@ -18,8 +18,6 @@ await connectDB();
 async function announcementCron() {
   console.log("📢 Announcement cron running...");
 
-
-
   const announcements = await Announcement.find({
     sent: false,
   });

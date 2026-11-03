@@ -12,7 +12,9 @@ export async function GET(req, { params }) {
     console.error("error");
     const { id } = await params;
     // Get seo sheet with keywords
-    const getSeoSheet = await SeoSheet.findOne({ clientId: id, }).populate("keywords");
+    const getSeoSheet = await SeoSheet.findOne({ clientId: id }).populate(
+      "keywords",
+    );
 
     if (!getSeoSheet) {
       return NextResponse.json(
@@ -20,7 +22,7 @@ export async function GET(req, { params }) {
           success: false,
           message: "There is no sheet found for this client",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -35,8 +37,7 @@ export async function GET(req, { params }) {
 
       if (projectCycle) {
         matchedProject = projectCycle.projectDuration.find(
-          (project) =>
-            project._id.toString() === keyword.projectId?.toString()
+          (project) => project._id.toString() === keyword.projectId?.toString(),
         );
       }
 
@@ -55,7 +56,7 @@ export async function GET(req, { params }) {
           keywords: keywordsWithProjects,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error(error);
@@ -65,7 +66,7 @@ export async function GET(req, { params }) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

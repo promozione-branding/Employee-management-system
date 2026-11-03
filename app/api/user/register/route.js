@@ -18,7 +18,7 @@ export async function POST(req) {
           success: false,
           message: "Username, email, and password are required.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -27,7 +27,7 @@ export async function POST(req) {
     if (existingUser) {
       return NextResponse.json(
         { success: false, message: "User already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -48,7 +48,7 @@ export async function POST(req) {
         username: newUser.username,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "1d" },
     );
 
     const response = NextResponse.json({
@@ -75,7 +75,7 @@ export async function POST(req) {
     console.error("REGISTER ERROR:", error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

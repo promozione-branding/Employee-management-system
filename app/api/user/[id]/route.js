@@ -19,7 +19,7 @@ export async function GET(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
     return NextResponse.json({
@@ -36,7 +36,7 @@ export async function GET(req, context) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
@@ -56,7 +56,7 @@ export async function DELETE(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
     return NextResponse.json({
@@ -72,7 +72,7 @@ export async function DELETE(req, context) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
@@ -98,7 +98,7 @@ export async function PUT(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -122,7 +122,7 @@ export async function PUT(req, context) {
         success: false,
         message: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

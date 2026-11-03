@@ -9,7 +9,7 @@ export async function GET(req) {
     await connectDB();
 
     const salesPeople = await User.find({
-      role: { $in: ["sales","admin"] },
+      role: { $in: ["sales", "admin"] },
     }).select("email");
 
     return NextResponse.json({
@@ -24,7 +24,7 @@ export async function GET(req) {
         success: false,
         message: "Server error while fetching sales people.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

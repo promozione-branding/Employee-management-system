@@ -1,8 +1,6 @@
 // app/manager/customer/history/my-update/[id]/MyUpdate.jsx
 
-
 // app/manager/customer/history/my-update/[id]/MyUpdate.jsx
-
 
 "use client";
 
@@ -41,32 +39,25 @@ export default function MyUpdate({ customerId }) {
       setLoading(true);
 
       try {
-        const res = await myClientMeetingHistory(
-          customerId,
-          employeeId
-        );
+        const res = await myClientMeetingHistory(customerId, employeeId);
 
         if (!isMounted) return;
 
         if (res?.success) {
           const meetings = res.data?.meetingUpdate?.meetingUpdate;
 
-          setHistoryData(
-            Array.isArray(meetings) ? meetings : []
-          );
+          setHistoryData(Array.isArray(meetings) ? meetings : []);
         } else {
           setHistoryData([]);
           toast.error(
-            res?.message || "Unable to fetch customer meeting history"
+            res?.message || "Unable to fetch customer meeting history",
           );
         }
       } catch (error) {
         if (!isMounted) return;
 
         setHistoryData([]);
-        toast.error(
-          error?.message || "Error while fetching customer history"
-        );
+        toast.error(error?.message || "Error while fetching customer history");
       } finally {
         if (isMounted) {
           setLoading(false);

@@ -26,7 +26,6 @@ export async function GET(req, { params }) {
       message: "success work details fetched",
       data: workDetail,
     });
-    
   } catch (error) {
     console.log(error);
     return NextResponse.json(

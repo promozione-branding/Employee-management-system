@@ -20,7 +20,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { CheckCircle2, Calendar, Users, User, X } from "lucide-react";
-import { getCustomerProjectCycleService, removeEmployee } from "@/service/customer";
+import {
+  getCustomerProjectCycleService,
+  removeEmployee,
+} from "@/service/customer";
 import {
   Dialog,
   DialogContent,
@@ -123,7 +126,7 @@ const ClientWork = ({ customerId }) => {
         // console.log(res, "res");
         if (res.success) {
           setWorkDetailLoading(false);
-          console.log(res.data)
+          console.log(res.data);
           setWorkDetailData(res.data);
         }
       }
@@ -131,13 +134,13 @@ const ClientWork = ({ customerId }) => {
       console.log(error);
       toast.error(
         error.response.data.message ||
-        "Error while fetching client work details",
+          "Error while fetching client work details",
       );
     }
   }
 
   useEffect(() => {
-    fetchCustomerProjectCycle()
+    fetchCustomerProjectCycle();
     fetchClientWork();
   }, []);
 
@@ -155,10 +158,10 @@ const ClientWork = ({ customerId }) => {
 
   const handleClick = (e) => {
     const domainMap = {
-      "seo": "SEO",
+      seo: "SEO",
       "web-dev": "WEB_DEVELOPER",
       "social-media": "SOCIAL_MEDIA",
-      "ads": "ADS_MANAGER",
+      ads: "ADS_MANAGER",
     };
 
     setSelectedDomain(domainMap[e] || "OTHER");
@@ -166,30 +169,32 @@ const ClientWork = ({ customerId }) => {
 
   const handleRemoveEmployee = async (projectDurationId, employeeId) => {
     const confirmed = window.confirm(
-      "Are you sure you want to remove this employee from the project?"
+      "Are you sure you want to remove this employee from the project?",
     );
 
     if (!confirmed) return;
 
     try {
       setButtonDisable(true);
-      const res = await removeEmployee(projectCycleData.projectCycle._id, projectDurationId, employeeId);
+      const res = await removeEmployee(
+        projectCycleData.projectCycle._id,
+        projectDurationId,
+        employeeId,
+      );
       if (res.success) {
         toast.success(res.message);
         fetchCustomerProjectCycle();
-        fetchClientWork()
+        fetchClientWork();
       }
     } catch (error) {
-      console.log(error)
-      toast.error(
-        error?.response?.data?.message || "Something went wrong"
-      );
+      console.log(error);
+      toast.error(error?.response?.data?.message || "Something went wrong");
     } finally {
       setButtonDisable(false);
     }
   };
 
-  console.log(workDetailData?.workDetails)
+  console.log(workDetailData?.workDetails);
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -247,73 +252,107 @@ const ClientWork = ({ customerId }) => {
           <div>
             <div className="flex flex-col gap-3">
               {projectCycleData?.projectCycle?.projectDuration?.length > 0 ? (
-                projectCycleData?.projectCycle?.projectDuration?.map((project) =>
-                  <div key={project._id} className={`border p-4 rounded-lg shadow-sm bg-white w-full`}>
-                    <div className="flex justify-between">
-                      <p className="font-semibold text-lg">
-                        {project?.projectName}
-                      </p>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <button onClick={() => { handleClick(project?.service); setSelectedProject(project._id) }} className="bg-gray-100 hover:bg-gray-200 border text-black p-2 rounded-md">
-                            <User size={18} />
-                          </button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Asign Employee</DialogTitle>
-                          </DialogHeader>
-                          {employeeList.length > 0 ? (
-                            employeeList.map((employee) => (
-                              <button onClick={() => handleSelectEmployee(employee?._id)} key={employee?._id}
-                                className={`${selectedEmployee.includes(employee?._id)
-                                  ? "bg-emerald-100 border-emerald-400"
-                                  : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
-                                  } border p-4 rounded-lg shadow-sm bg-white w-full`}
-                              >
-                                <p className="font-semibold text-lg">
-                                  {employee?.basicDetails?.name}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  {employee?.employeeId}
-                                </p>
-                              </button>
-                            ))
-                          ) : (
-                            <p className="text-gray-500">No employees found</p>
-                          )}
-                          <Button disabled={buttonDisable} className={"mt-2 w-full"} onClick={handleCreateWork}>
-                            Assign client
-                          </Button>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                    <p className="text-sm font-medium text-gray-600 flex">
-                      {project?.service}
-                      {project?.serviceType && <p className="font-normal">&nbsp;- {project?.serviceType}</p>}
-                    </p>
-                    {project.employeeId.length > 0 &&
-                      <div className="flex flex-wrap gap-4 mt-2">
-                        {project.employeeId?.map((item) => (
-                          <div key={item?._id} className="flex items-center gap-2 text-xs text-black p-2 border rounded-md">
-                            <Users className="w-4 h-4" />
-                            <span className="capitalize">
-                              {item?.basicDetails?.name}
-                            </span>
-                            <button onClick={() => handleRemoveEmployee(project._id, item._id)}
-                              className="hover:text-red-600 transition">
-                              <X size={18} />
+                projectCycleData?.projectCycle?.projectDuration?.map(
+                  (project) => (
+                    <div
+                      key={project._id}
+                      className={`border p-4 rounded-lg shadow-sm bg-white w-full`}
+                    >
+                      <div className="flex justify-between">
+                        <p className="font-semibold text-lg">
+                          {project?.projectName}
+                        </p>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <button
+                              onClick={() => {
+                                handleClick(project?.service);
+                                setSelectedProject(project._id);
+                              }}
+                              className="bg-gray-100 hover:bg-gray-200 border text-black p-2 rounded-md"
+                            >
+                              <User size={18} />
                             </button>
-                          </div>
-                        ))}
-                      </div>}
-                  </div>
-                ))
-                : (
-                  <p className="text-center text-gray-500 mt-10">
-                    No Project History Found
-                  </p>
-                )}
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Asign Employee</DialogTitle>
+                            </DialogHeader>
+                            {employeeList.length > 0 ? (
+                              employeeList.map((employee) => (
+                                <button
+                                  onClick={() =>
+                                    handleSelectEmployee(employee?._id)
+                                  }
+                                  key={employee?._id}
+                                  className={`${
+                                    selectedEmployee.includes(employee?._id)
+                                      ? "bg-emerald-100 border-emerald-400"
+                                      : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300"
+                                  } border p-4 rounded-lg shadow-sm bg-white w-full`}
+                                >
+                                  <p className="font-semibold text-lg">
+                                    {employee?.basicDetails?.name}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    {employee?.employeeId}
+                                  </p>
+                                </button>
+                              ))
+                            ) : (
+                              <p className="text-gray-500">
+                                No employees found
+                              </p>
+                            )}
+                            <Button
+                              disabled={buttonDisable}
+                              className={"mt-2 w-full"}
+                              onClick={handleCreateWork}
+                            >
+                              Assign client
+                            </Button>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                      <p className="text-sm font-medium text-gray-600 flex">
+                        {project?.service}
+                        {project?.serviceType && (
+                          <p className="font-normal">
+                            &nbsp;- {project?.serviceType}
+                          </p>
+                        )}
+                      </p>
+                      {project.employeeId.length > 0 && (
+                        <div className="flex flex-wrap gap-4 mt-2">
+                          {project.employeeId?.map((item) => (
+                            <div
+                              key={item?._id}
+                              className="flex items-center gap-2 text-xs text-black p-2 border rounded-md"
+                            >
+                              <Users className="w-4 h-4" />
+                              <span className="capitalize">
+                                {item?.basicDetails?.name}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  handleRemoveEmployee(project._id, item._id)
+                                }
+                                className="hover:text-red-600 transition"
+                              >
+                                <X size={18} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ),
+                )
+              ) : (
+                <p className="text-center text-gray-500 mt-10">
+                  No Project History Found
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -328,7 +367,8 @@ const ClientWork = ({ customerId }) => {
               <h3 className="text-lg font-semibold mb-3">Work History</h3>
               <div className="flex flex-col gap-3">
                 {workDetailData?.workDetails?.map((work, index) => {
-                  const completedTasks = work.checklist?.filter((t) => t.completed).length || 0;
+                  const completedTasks =
+                    work.checklist?.filter((t) => t.completed).length || 0;
                   const totalTasks = work.checklist?.length || 0;
 
                   return (
@@ -349,12 +389,13 @@ const ClientWork = ({ customerId }) => {
                           </div>
                         </div>
                         <span
-                          className={`text-xs px-2.5 py-1 rounded-full font-medium ${work.status === "COMPLETED"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : work.status === "IN_PROGRESS"
-                              ? "bg-blue-50 text-blue-700"
-                              : "bg-gray-100 text-gray-700"
-                            }`}
+                          className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                            work.status === "COMPLETED"
+                              ? "bg-emerald-50 text-emerald-700"
+                              : work.status === "IN_PROGRESS"
+                                ? "bg-blue-50 text-blue-700"
+                                : "bg-gray-100 text-gray-700"
+                          }`}
                         >
                           {work.status?.replace("_", " ")}
                         </span>
@@ -391,14 +432,19 @@ const ClientWork = ({ customerId }) => {
                             </span>
                           </div>
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                            {work.checklist?.filter((t) => t.completed).map((item, i) => (
-                              <div key={i} className="flex items-start gap-2">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
-                                <span className="text-xs text-gray-600 line-clamp-1" title={item.label}>
-                                  {item.label}
-                                </span>
-                              </div>
-                            ))}
+                            {work.checklist
+                              ?.filter((t) => t.completed)
+                              .map((item, i) => (
+                                <div key={i} className="flex items-start gap-2">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                                  <span
+                                    className="text-xs text-gray-600 line-clamp-1"
+                                    title={item.label}
+                                  >
+                                    {item.label}
+                                  </span>
+                                </div>
+                              ))}
                             {completedTasks === 0 && (
                               <p className="text-xs text-gray-400 italic col-span-full">
                                 No completed tasks yet
@@ -427,8 +473,8 @@ const ClientWork = ({ customerId }) => {
                 })}
                 {(!workDetailData?.workDetails ||
                   workDetailData.workDetails.length === 0) && (
-                    <p className="text-gray-500 text-sm">No work history found</p>
-                  )}
+                  <p className="text-gray-500 text-sm">No work history found</p>
+                )}
               </div>
             </div>
           </div>

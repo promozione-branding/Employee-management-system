@@ -27,7 +27,7 @@ export async function GET(req, { params }) {
     })
       .select("-changes")
       .sort({ createdAt: -1 })
-      .populate({ path: "changedBy", select: "username" }); 
+      .populate({ path: "changedBy", select: "username" });
 
     return NextResponse.json({
       success: true,

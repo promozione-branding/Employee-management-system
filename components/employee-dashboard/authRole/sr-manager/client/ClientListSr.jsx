@@ -49,9 +49,7 @@ const CustomerManager = () => {
         const res = await getEmployeeAssignedClientService(employee?._id);
 
         if (res.success) {
-          setAssinedClientList(
-            res?.data?.map((item) => item?.clientId),
-          );
+          setAssinedClientList(res?.data?.map((item) => item?.clientId));
         }
       }
     } catch (error) {

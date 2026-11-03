@@ -43,7 +43,7 @@ const CreateLedgerPage = ({ customerId }) => {
       console.log(error);
       setLoadingForProposalInfo(true);
       toast.error(
-        error.message || "error while fetching the proposal Information"
+        error.message || "error while fetching the proposal Information",
       );
     }
   }
@@ -62,15 +62,14 @@ const CreateLedgerPage = ({ customerId }) => {
     }
   }
 
-  
   const proposalDataEntriesData =
     ledgerData?.ledger?.entries?.filter(
-      (item) => item?.voucher === "Proposal"
+      (item) => item?.voucher === "Proposal",
     ) || [];
 
   const paymentDataList =
     ledgerData?.ledger?.entries?.filter((item) =>
-      ["upi", "card", "net banking", "cheque"].includes(item?.voucher)
+      ["upi", "card", "net banking", "cheque"].includes(item?.voucher),
     ) || [];
 
   const handlePaymentMethodChange = (e) => {
@@ -223,7 +222,7 @@ const CreateLedgerPage = ({ customerId }) => {
       toast.error(
         `Balance is less than the Amount. remaining balance ${ledgerData.ledger?.entries
           .at(-1)
-          .balance.toLocaleString("en-IN")} `
+          .balance.toLocaleString("en-IN")} `,
       );
       return;
     }
@@ -234,7 +233,7 @@ const CreateLedgerPage = ({ customerId }) => {
       debit: 0,
       credit: Number(submissionData?.amount),
       balance: Number(
-        ledgerData?.ledger?.entries?.at(-1)?.balance - submissionData?.amount
+        ledgerData?.ledger?.entries?.at(-1)?.balance - submissionData?.amount,
       ),
       particular: {
         description: submissionData?.description,
@@ -791,7 +790,7 @@ const CreateLedgerPage = ({ customerId }) => {
               <div>
                 Cheque Date :{" "}
                 {new Date(item.chequeDetails.chequeDate).toLocaleDateString(
-                  "en-GB"
+                  "en-GB",
                 )}
               </div>
             )}
@@ -816,7 +815,7 @@ const CreateLedgerPage = ({ customerId }) => {
               <div>
                 Transaction Date :{" "}
                 {new Date(item.net_banking.transactionDate).toLocaleDateString(
-                  "en-GB"
+                  "en-GB",
                 )}
               </div>
             )}
@@ -927,7 +926,7 @@ const CreateLedgerPage = ({ customerId }) => {
                             ₹
                             {item?.particular?.items
                               ?.find(
-                                (i) => i?.subDescription === "Service Amount"
+                                (i) => i?.subDescription === "Service Amount",
                               )
                               ?.price?.toLocaleString("en-IN")}
                           </span>
@@ -942,7 +941,7 @@ const CreateLedgerPage = ({ customerId }) => {
                           </span>
                         </div>
                         {item?.particular?.items?.find(
-                          (i) => i?.subDescription === "2% TDS"
+                          (i) => i?.subDescription === "2% TDS",
                         ) && (
                           <div className="flex justify-between">
                             <span className="text-gray-600">TDS (2%)</span>
@@ -960,7 +959,7 @@ const CreateLedgerPage = ({ customerId }) => {
                             ₹
                             {item?.particular?.items
                               ?.find(
-                                (i) => i?.subDescription === "Total Amount"
+                                (i) => i?.subDescription === "Total Amount",
                               )
                               ?.price?.toLocaleString("en-IN")}
                           </span>
@@ -975,7 +974,7 @@ const CreateLedgerPage = ({ customerId }) => {
                 {proposalDataEntriesData
                   ?.reduce((acc, item) => {
                     const amount = item?.particular?.items?.find(
-                      (i) => i?.subDescription === "Total Amount"
+                      (i) => i?.subDescription === "Total Amount",
                     )?.price;
                     return acc + (amount || 0);
                   }, 0)

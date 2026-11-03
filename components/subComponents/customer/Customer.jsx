@@ -44,10 +44,8 @@ const Customer = ({ customerId }) => {
     meetingDate,
     tanNo,
     email,
-    SalesPersonName
+    SalesPersonName,
   } = customerDetails;
-
-
 
   return (
     <div className="border p-4 flex flex-col w-[30vw] rounded-lg">

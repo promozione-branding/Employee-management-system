@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -142,8 +141,7 @@ const EmployeeReminder = ({ employeeId }) => {
       console.error("Error creating reminder:", error);
 
       toast.error(
-        error?.response?.data?.message ||
-          "Error while creating reminder",
+        error?.response?.data?.message || "Error while creating reminder",
       );
     } finally {
       setCreating(false);
@@ -152,9 +150,7 @@ const EmployeeReminder = ({ employeeId }) => {
 
   const handleSelectEmail = (email) => {
     setSelectEmail((previous) => {
-      const isSelected = previous.some(
-        (item) => item?._id === email?._id,
-      );
+      const isSelected = previous.some((item) => item?._id === email?._id);
 
       return isSelected
         ? previous.filter((item) => item?._id !== email?._id)
@@ -190,7 +186,9 @@ const EmployeeReminder = ({ employeeId }) => {
           type="button"
           onClick={() => setCcMailShow((previous) => !previous)}
           aria-expanded={ccMailShow}
-          aria-label={ccMailShow ? "Hide CC email options" : "Show CC email options"}
+          aria-label={
+            ccMailShow ? "Hide CC email options" : "Show CC email options"
+          }
           title={ccMailShow ? "Hide CC email options" : "Add CC recipients"}
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-colors ${
             ccMailShow
@@ -320,9 +318,7 @@ const EmployeeReminder = ({ employeeId }) => {
       {/* Reminder List */}
       <div className="flex min-h-0 flex-1 flex-col p-4 sm:px-5">
         <div className="mb-3 flex items-center justify-between gap-2">
-          <h3 className="text-sm font-bold text-[#26344D]">
-            Your reminders
-          </h3>
+          <h3 className="text-sm font-bold text-[#26344D]">Your reminders</h3>
 
           <span className="rounded-full bg-[#F0F3F8] px-2.5 py-1 text-[11px] font-semibold tabular-nums text-[#0A2E66]">
             {reminders.length}

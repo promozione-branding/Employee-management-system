@@ -1,11 +1,9 @@
 // app/employee-dashboard/page.jsx
 
-import EmployeeDashboard from './EmployeeDashboard'
+import EmployeeDashboard from "./EmployeeDashboard";
 
 const page = () => {
-  return (
-   <EmployeeDashboard />
-  )
-}
+  return <EmployeeDashboard />;
+};
 
-export default page
+export default page;

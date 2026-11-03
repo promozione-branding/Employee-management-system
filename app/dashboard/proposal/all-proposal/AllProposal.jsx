@@ -35,7 +35,7 @@ const AllProposal = () => {
 
   async function handleDeleteProposal(id) {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this proposal?"
+      "Are you sure you want to delete this proposal?",
     );
     if (confirmed) {
       try {

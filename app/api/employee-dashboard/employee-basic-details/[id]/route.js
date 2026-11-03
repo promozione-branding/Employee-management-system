@@ -10,7 +10,9 @@ export async function GET(req, { params }) {
     await connectDB();
     const { id } = await params;
 
-    const employeeId = await Employee.findById(id).select("basicDetails employeeId");
+    const employeeId = await Employee.findById(id).select(
+      "basicDetails employeeId",
+    );
 
     if (!employeeId) {
       return NextResponse.json(

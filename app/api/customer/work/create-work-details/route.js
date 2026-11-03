@@ -21,7 +21,7 @@ export async function POST(req) {
           success: false,
           message: "Unauthorized",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -45,13 +45,11 @@ export async function POST(req) {
           message:
             "employeeId, clientId, projectId and department are required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const employeeIds = Array.isArray(employeeId)
-      ? employeeId
-      : [employeeId];
+    const employeeIds = Array.isArray(employeeId) ? employeeId : [employeeId];
 
     // ==========================================
     // CHECK IF THIS PROJECT ALREADY EXISTS
@@ -78,7 +76,7 @@ export async function POST(req) {
               $each: employeeIds,
             },
           },
-        }
+        },
       );
 
       await Employee.updateMany(
@@ -91,7 +89,7 @@ export async function POST(req) {
           $addToSet: {
             workDetails: workDetail._id,
           },
-        }
+        },
       );
 
       await ProjectCycle.updateOne(
@@ -104,11 +102,11 @@ export async function POST(req) {
               $each: employeeIds,
             },
           },
-        }
+        },
       );
 
       const updatedWorkDetail = await EmployeeWorkDetail.findById(
-        workDetail._id
+        workDetail._id,
       );
 
       const auditLog = await createAuditLog({
@@ -137,7 +135,7 @@ export async function POST(req) {
         },
         {
           status: 200,
-        }
+        },
       );
     }
 
@@ -154,7 +152,7 @@ export async function POST(req) {
             $each: employeeIds,
           },
         },
-      }
+      },
     );
 
     // ==========================================
@@ -184,7 +182,7 @@ export async function POST(req) {
         $addToSet: {
           workDetails: workDetail._id,
         },
-      }
+      },
     );
 
     // ==========================================
@@ -225,7 +223,7 @@ export async function POST(req) {
       },
       {
         status: 201,
-      }
+      },
     );
   } catch (error) {
     console.error("Create EmployeeWorkDetail Error:", error);
@@ -237,7 +235,7 @@ export async function POST(req) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

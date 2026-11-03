@@ -27,15 +27,27 @@ import {
 import toast from "react-hot-toast";
 
 const ACTION_META = {
-  CREATE: { icon: <Plus size={14} />, color: "bg-emerald-100 text-emerald-700" },
+  CREATE: {
+    icon: <Plus size={14} />,
+    color: "bg-emerald-100 text-emerald-700",
+  },
   UPDATE: { icon: <Pencil size={14} />, color: "bg-blue-100 text-blue-700" },
   DELETE: { icon: <Trash2 size={14} />, color: "bg-red-100 text-red-700" },
   CALL: { icon: <Phone size={14} />, color: "bg-purple-100 text-purple-700" },
   LOGIN: { icon: <LogIn size={14} />, color: "bg-gray-100 text-gray-700" },
-  EXPORT: { icon: <Download size={14} />, color: "bg-orange-100 text-orange-700" },
+  EXPORT: {
+    icon: <Download size={14} />,
+    color: "bg-orange-100 text-orange-700",
+  },
   VIEW: { icon: <Eye size={14} />, color: "bg-gray-100 text-gray-700" },
-  STATUS_CHANGE: { icon: <CheckCircle2 size={14} />, color: "bg-yellow-100 text-yellow-700" },
-  ACKNOWLEDGE: { icon: <CheckCircle2 size={14} />, color: "bg-teal-100 text-teal-700" },
+  STATUS_CHANGE: {
+    icon: <CheckCircle2 size={14} />,
+    color: "bg-yellow-100 text-yellow-700",
+  },
+  ACKNOWLEDGE: {
+    icon: <CheckCircle2 size={14} />,
+    color: "bg-teal-100 text-teal-700",
+  },
 };
 
 const MODULE_ICONS = {
@@ -70,10 +82,14 @@ const MODULE_LABELS = {
   announcement: "Announcement",
 };
 
-const fmt = (d) => new Date(d).toLocaleString("en-IN", {
-  day: "2-digit", month: "short", year: "numeric",
-  hour: "2-digit", minute: "2-digit"
-});
+const fmt = (d) =>
+  new Date(d).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
 export default function EditHistoryView({ customerId }) {
   const [items, setItems] = useState([]);
@@ -130,7 +146,8 @@ export default function EditHistoryView({ customerId }) {
         <div>
           <h1 className="text-xl font-bold text-gray-800">Edit History</h1>
           <p className="text-xs text-gray-500">
-            Every change made to this client — by whom, when, and what — across all modules.
+            Every change made to this client — by whom, when, and what — across
+            all modules.
           </p>
         </div>
       </div>
@@ -157,7 +174,9 @@ export default function EditHistoryView({ customerId }) {
         >
           <option value="all">All Modules</option>
           {meta.modules.map((m) => (
-            <option key={m} value={m}>{MODULE_LABELS[m] || m}</option>
+            <option key={m} value={m}>
+              {MODULE_LABELS[m] || m}
+            </option>
           ))}
         </select>
 
@@ -171,7 +190,9 @@ export default function EditHistoryView({ customerId }) {
         >
           <option value="all">All Actions</option>
           {meta.actions.map((a) => (
-            <option key={a} value={a}>{a}</option>
+            <option key={a} value={a}>
+              {a}
+            </option>
           ))}
         </select>
 
@@ -185,14 +206,18 @@ export default function EditHistoryView({ customerId }) {
         >
           <option value="all">All Roles</option>
           {meta.roles.map((r) => (
-            <option key={r} value={r}>{r}</option>
+            <option key={r} value={r}>
+              {r}
+            </option>
           ))}
         </select>
       </div>
 
       {/* TIMELINE */}
       {loading ? (
-        <div className="text-center py-10 text-gray-500 animate-pulse">Loading history…</div>
+        <div className="text-center py-10 text-gray-500 animate-pulse">
+          Loading history…
+        </div>
       ) : items.length === 0 ? (
         <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-dashed">
           <History className="mx-auto h-10 w-10 text-gray-300 mb-3" />
@@ -204,7 +229,9 @@ export default function EditHistoryView({ customerId }) {
             const a = ACTION_META[row.action] || ACTION_META.VIEW;
             const isExpanded = expandedId === row._id;
             const hasChanges = row.changes && row.changes.length > 0;
-            const moduleIcon = MODULE_ICONS[row.module] || <FileText size={20} className="text-gray-500" />;
+            const moduleIcon = MODULE_ICONS[row.module] || (
+              <FileText size={20} className="text-gray-500" />
+            );
 
             return (
               <div
@@ -213,7 +240,9 @@ export default function EditHistoryView({ customerId }) {
               >
                 <div
                   className={`p-4 flex items-start gap-4 cursor-pointer ${hasChanges ? "hover:bg-gray-50" : ""}`}
-                  onClick={() => hasChanges && setExpandedId(isExpanded ? null : row._id)}
+                  onClick={() =>
+                    hasChanges && setExpandedId(isExpanded ? null : row._id)
+                  }
                 >
                   {/* Module Icon */}
                   <div className="p-2 bg-gray-50 rounded-lg shrink-0 mt-1">
@@ -223,7 +252,9 @@ export default function EditHistoryView({ customerId }) {
                   {/* Main Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold ${a.color}`}>
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold ${a.color}`}
+                      >
                         {a.icon}
                         {row.action}
                       </span>
@@ -231,24 +262,36 @@ export default function EditHistoryView({ customerId }) {
                         {MODULE_LABELS[row.module] || row.module}
                       </span>
                       <span className="text-xs text-gray-400">•</span>
-                      <span className="text-xs text-gray-500">{fmt(row.createdAt)}</span>
+                      <span className="text-xs text-gray-500">
+                        {fmt(row.createdAt)}
+                      </span>
                     </div>
 
-                    <p className="text-sm text-gray-700 font-medium">{row.summary}</p>
+                    <p className="text-sm text-gray-700 font-medium">
+                      {row.summary}
+                    </p>
 
                     <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${ROLE_COLORS[row.performedByRole] || ROLE_COLORS.employee}`}>
+                      <span
+                        className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${ROLE_COLORS[row.performedByRole] || ROLE_COLORS.employee}`}
+                      >
                         {row.performedByRole}
                       </span>
-                      <span className="font-medium text-gray-700">{row.performedByName}</span>
-                      {row.performedByEmail && <span>({row.performedByEmail})</span>}
+                      <span className="font-medium text-gray-700">
+                        {row.performedByName}
+                      </span>
+                      {row.performedByEmail && (
+                        <span>({row.performedByEmail})</span>
+                      )}
                     </div>
                   </div>
 
                   {/* Expand Icon */}
                   {hasChanges && (
                     <div className="shrink-0 mt-2 text-gray-400">
-                      <ChevronDown className={`h-5 w-5 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                      <ChevronDown
+                        className={`h-5 w-5 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                      />
                     </div>
                   )}
                 </div>
@@ -256,10 +299,15 @@ export default function EditHistoryView({ customerId }) {
                 {/* EXPANDED CHANGES */}
                 {isExpanded && hasChanges && (
                   <div className="border-t border-gray-100 bg-gray-50/50 p-4">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Field Changes</h4>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                      Field Changes
+                    </h4>
                     <div className="space-y-2">
                       {row.changes.map((change, i) => (
-                        <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm bg-white p-2 rounded border border-gray-100">
+                        <div
+                          key={i}
+                          className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm bg-white p-2 rounded border border-gray-100"
+                        >
                           <span className="font-mono text-xs font-semibold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded w-fit">
                             {change.field}
                           </span>
@@ -287,7 +335,8 @@ export default function EditHistoryView({ customerId }) {
       {pagination.pages > 1 && (
         <div className="flex items-center justify-between text-sm text-gray-600 bg-white p-3 rounded-lg border shadow-sm">
           <span>
-            Page {pagination.page} of {pagination.pages} — {pagination.total} entries
+            Page {pagination.page} of {pagination.pages} — {pagination.total}{" "}
+            entries
           </span>
           <div className="flex gap-2">
             <button

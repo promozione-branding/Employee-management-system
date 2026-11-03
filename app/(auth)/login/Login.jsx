@@ -1,6 +1,5 @@
 // app/(auth)/login/Login.jsx
 
-
 "use client";
 
 import { useState } from "react";
@@ -82,7 +81,7 @@ export default function Login() {
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          "Something went wrong. Please try again."
+          "Something went wrong. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -116,8 +115,8 @@ export default function Login() {
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-slate-500">
-                Sign in to your Inquiry Bazaar account and continue growing
-                your business.
+                Sign in to your Inquiry Bazaar account and continue growing your
+                business.
               </p>
             </div>
 
@@ -214,11 +213,7 @@ export default function Login() {
                     }
                     className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
                   >
-                    {showPassword ? (
-                      <EyeOff size={17} />
-                    ) : (
-                      <Eye size={17} />
-                    )}
+                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                   </button>
                 </div>
               </div>

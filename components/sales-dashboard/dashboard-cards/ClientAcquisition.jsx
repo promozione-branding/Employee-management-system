@@ -1,12 +1,7 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  UsersRound,
-  CalendarDays,
-  TrendingUp,
-} from "lucide-react";
+import { UsersRound, CalendarDays, TrendingUp } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import toast from "react-hot-toast";
@@ -54,20 +49,14 @@ export default function ClientAcquisition() {
 
         if (res?.success) {
           // The API returns { success, data: { monthlyAdded, weeklyAdded } }.
-          setMonthlyAdded(
-            Math.max(0, Number(res.data?.monthlyAdded) || 0),
-          );
+          setMonthlyAdded(Math.max(0, Number(res.data?.monthlyAdded) || 0));
 
-          setWeeklyAdded(
-            Math.max(0, Number(res.data?.weeklyAdded) || 0),
-          );
+          setWeeklyAdded(Math.max(0, Number(res.data?.weeklyAdded) || 0));
         } else {
           setMonthlyAdded(0);
           setWeeklyAdded(0);
 
-          toast.error(
-            res?.message || "Unable to load client acquisition",
-          );
+          toast.error(res?.message || "Unable to load client acquisition");
         }
       } catch (error) {
         if (!active) return;
@@ -92,11 +81,7 @@ export default function ClientAcquisition() {
     };
   }, [employeeId]);
 
-  const largestValue = Math.max(
-    monthlyAdded,
-    weeklyAdded,
-    1,
-  );
+  const largestValue = Math.max(monthlyAdded, weeklyAdded, 1);
 
   const metrics = [
     {
@@ -133,11 +118,7 @@ export default function ClientAcquisition() {
           {loading ? (
             <div className="mt-3">
               <Skeleton height={34} width={115} />
-              <Skeleton
-                className="mt-1"
-                height={13}
-                width={130}
-              />
+              <Skeleton className="mt-1" height={13} width={130} />
             </div>
           ) : (
             <>
@@ -161,10 +142,7 @@ export default function ClientAcquisition() {
       <div className="mt-6 space-y-5">
         {metrics.map((metric) => {
           const Icon = metric.icon;
-          const width = Math.min(
-            100,
-            (metric.value / largestValue) * 100,
-          );
+          const width = Math.min(100, (metric.value / largestValue) * 100);
 
           return (
             <div key={metric.label}>
@@ -212,11 +190,7 @@ export default function ClientAcquisition() {
 
       {/* Footer */}
       <div className="mt-auto flex items-center gap-2 border-t border-[#EDF0F5] pt-4 mt-6">
-        <TrendingUp
-          size={16}
-          className="shrink-0"
-          style={{ color: NAVY }}
-        />
+        <TrendingUp size={16} className="shrink-0" style={{ color: NAVY }} />
 
         <span className="text-xs font-medium text-[#64748B]">
           New clients assigned to you

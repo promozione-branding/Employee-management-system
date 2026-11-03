@@ -23,7 +23,7 @@ export async function GET(req, { params }) {
     if (!recentActive) {
       return NextResponse.json(
         { success: false, message: "No recent activity found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -32,7 +32,7 @@ export async function GET(req, { params }) {
       ...wd,
       checklist: wd.checklist
         ?.sort(
-          (a, b) => new Date(b.completedAt || 0) - new Date(a.completedAt || 0)
+          (a, b) => new Date(b.completedAt || 0) - new Date(a.completedAt || 0),
         )
         .slice(0, 5),
     }));
@@ -43,15 +43,13 @@ export async function GET(req, { params }) {
         message: "Recent activity",
         data: recentActive,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
       { success: false, error: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-
-

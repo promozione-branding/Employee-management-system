@@ -21,7 +21,7 @@ const SelectorNew = ({
       (it) =>
         it.category === catKey &&
         it.packageKey === pkgKey &&
-        it.duration === durKey
+        it.duration === durKey,
     );
 
   const addItem = (
@@ -29,7 +29,7 @@ const SelectorNew = ({
     pkg,
     durationKey,
     durationLabel,
-    amountOverride
+    amountOverride,
   ) => {
     const amount = amountOverride ?? pkg?.prices?.[durationKey] ?? 0;
     if (amount <= 0) return;
@@ -57,13 +57,13 @@ const SelectorNew = ({
     // If no more items for that category, remove its checklist
     if (it && onChecklistChange) {
       const stillHasCategory = selectedItems.some(
-        (s, i) => i !== index && s.category === it.category
+        (s, i) => i !== index && s.category === it.category,
       );
       if (!stillHasCategory) {
         const cat = PROPOSAL_CATALOG[it.category];
         const catSections = cat?.checklist?.map((s) => s.title) || [];
         onChecklistChange(
-          checklist.filter((c) => !catSections.includes(c.section))
+          checklist.filter((c) => !catSections.includes(c.section)),
         );
       }
     }
@@ -214,14 +214,12 @@ const ChecklistSection = ({ section, checklist, onChange }) => {
       const filtered = existing.items.filter((i) => i !== item);
       next = filtered.length
         ? checklist.map((c) =>
-            c.section === section.title ? { ...c, items: filtered } : c
+            c.section === section.title ? { ...c, items: filtered } : c,
           )
         : checklist.filter((c) => c.section !== section.title);
     } else {
       next = checklist.map((c) =>
-        c.section === section.title
-          ? { ...c, items: [...c.items, item] }
-          : c
+        c.section === section.title ? { ...c, items: [...c.items, item] } : c,
       );
     }
     onChange(next);
@@ -325,8 +323,8 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
   const price = pkg.custom
     ? Number(customAmount || 0)
     : useCustomDuration
-    ? Number(customAmount || 0)
-    : pkg.prices?.[durationKey] || 0;
+      ? Number(customAmount || 0)
+      : pkg.prices?.[durationKey] || 0;
 
   const selected = isSelected(category.key, pkg.key, effectiveDurationKey);
 
@@ -424,15 +422,15 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
             pkg,
             effectiveDurationKey,
             effectiveDurationLabel,
-            price
+            price,
           )
         }
         className={`mt-1 text-xs font-medium rounded-md py-1.5 transition ${
           selected
             ? "bg-emerald-100 text-emerald-700 cursor-default"
             : !canAdd
-            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-            : "bg-gray-900 text-white hover:bg-gray-800"
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-gray-900 text-white hover:bg-gray-800"
         }`}
       >
         {selected ? "Added" : "Add"}

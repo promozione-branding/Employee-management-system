@@ -10,20 +10,25 @@ export async function GET(req) {
   const client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
+    process.env.GOOGLE_REDIRECT_URI,
   );
 
   try {
     const { tokens } = await client.getToken(code);
-    if (!tokens.refresh_token) throw new Error("No refresh token returned. Re-authorize after revoking access at myaccount.google.com/permissions");
+    if (!tokens.refresh_token)
+      throw new Error(
+        "No refresh token returned. Re-authorize after revoking access at myaccount.google.com/permissions",
+      );
 
     await connectDB();
     await ReportSetting.findOneAndUpdate(
       { key: "google_refresh_token" },
       { value: tokens.refresh_token, meta: { connectedAt: new Date() } },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
-    return Response.redirect(`${process.env.NEXT_PUBLIC_URL}/reports?connected=google`);
+    return Response.redirect(
+      `${process.env.NEXT_PUBLIC_URL}/reports?connected=google`,
+    );
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
   }

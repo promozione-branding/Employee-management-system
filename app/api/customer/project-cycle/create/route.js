@@ -29,7 +29,7 @@ export async function POST(req) {
       service: finalService,
       startDate,
       endDate,
-      serviceType
+      serviceType,
     };
 
     if (projectCycle) {

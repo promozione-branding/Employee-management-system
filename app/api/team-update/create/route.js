@@ -76,7 +76,7 @@ export async function POST(req) {
       recipients: cleanedRecipients,
       createdBy: authUser._id,
       clientId,
-      updateType
+      updateType,
     });
 
     const html = buildTeamUpdateEmail({

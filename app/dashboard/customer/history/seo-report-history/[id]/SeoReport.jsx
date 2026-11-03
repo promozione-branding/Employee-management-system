@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { seoReportHistoryService } from "@/service/customer/history";
 import { editRankingService } from "@/service/customer/work";
-import axios from "axios"; 
+import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -174,7 +174,10 @@ const SeoSheetAdmin = ({ clientId }) => {
             </th>
 
             {dates.map((date, i) => (
-              <th className="border-r px-5 bg-gray-100 whitespace-nowrap" key={i}>
+              <th
+                className="border-r px-5 bg-gray-100 whitespace-nowrap"
+                key={i}
+              >
                 {date}
               </th>
             ))}
@@ -203,9 +206,7 @@ const SeoSheetAdmin = ({ clientId }) => {
 
                     <td
                       className={`border-r px-5 py-2 capitalize cursor-pointer bg-white sticky left-[60px] z-10 min-w-[180px] ${
-                        kw.type === "primary"
-                          ? "font-bold text-blue-600"
-                          : ""
+                        kw.type === "primary" ? "font-bold text-blue-600" : ""
                       }`}
                     >
                       {kw.keyword}
@@ -213,7 +214,7 @@ const SeoSheetAdmin = ({ clientId }) => {
 
                     {dates.map((date, i) => {
                       const found = kw.rankings.find(
-                        (r) => new Date(r.date).toDateString() === date
+                        (r) => new Date(r.date).toDateString() === date,
                       );
 
                       return (

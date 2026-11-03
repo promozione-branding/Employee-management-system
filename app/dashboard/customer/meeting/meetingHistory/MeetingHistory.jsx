@@ -33,7 +33,7 @@ const MeetingHistory = ({ customerId }) => {
   return (
     <div>
       {loading ? (
-       <Loading />
+        <Loading />
       ) : (
         <>
           <div className="grid grid-cols-6 font-medium gap-5 mb-4">
@@ -47,7 +47,10 @@ const MeetingHistory = ({ customerId }) => {
           <div className="">
             {historyData?.length > 0 ? (
               historyData?.map((item, idx) => (
-                <div key={item?._id} className="border-b grid grid-cols-6 gap-5">
+                <div
+                  key={item?._id}
+                  className="border-b grid grid-cols-6 gap-5"
+                >
                   <div>{idx + 1}</div>
                   <div>{item?.updateType}</div>
                   <div className="text-sm">{item?.note}</div>

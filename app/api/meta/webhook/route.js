@@ -9,7 +9,8 @@ export async function GET(req) {
   const challenge = searchParams.get("hub.challenge");
 
   // You must match this token in the Meta dashboard
-  const VERIFY_TOKEN = process.env.META_WEBHOOK_SECRET || "promozione_meta_secret";
+  const VERIFY_TOKEN =
+    process.env.META_WEBHOOK_SECRET || "promozione_meta_secret";
 
   if (mode === "subscribe" && token === VERIFY_TOKEN) {
     console.log("✅ WEBHOOK VERIFIED by Meta");

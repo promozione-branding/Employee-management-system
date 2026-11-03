@@ -10,7 +10,7 @@ export async function GET(req, context) {
     const { id } = await context.params;
 
     const invoice = await InvoiceService.findById(id).select(
-      "serviceName HSN price"
+      "serviceName HSN price",
     );
 
     if (!invoice) {
@@ -21,7 +21,7 @@ export async function GET(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -30,7 +30,7 @@ export async function GET(req, context) {
         success: true,
         data: invoice,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log("Get invoice service by id Error", error);
@@ -38,7 +38,7 @@ export async function GET(req, context) {
       { success: false, message: "Server error" },
       {
         status: 500,
-      }
+      },
     );
   }
 }
@@ -59,7 +59,7 @@ export async function DELETE(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -68,7 +68,7 @@ export async function DELETE(req, context) {
         success: true,
         data: invoice,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log("Delete invoice service by id Error", error);
@@ -76,7 +76,7 @@ export async function DELETE(req, context) {
       { success: false, message: "Server error" },
       {
         status: 500,
-      }
+      },
     );
   }
 }
@@ -92,7 +92,7 @@ export async function PUT(req, context) {
     const updatedService = await InvoiceService.findByIdAndUpdate(
       id,
       { serviceName, HSN, price },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedService) {
@@ -103,7 +103,7 @@ export async function PUT(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -113,7 +113,7 @@ export async function PUT(req, context) {
         message: "invoice updated successfully",
         data: updatedService,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log("editing invoice service by id Error", error);
@@ -121,7 +121,7 @@ export async function PUT(req, context) {
       { success: false, message: "Server error" },
       {
         status: 500,
-      }
+      },
     );
   }
 }

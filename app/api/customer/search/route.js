@@ -5,7 +5,9 @@ import Customer from "@/models/admin/Customer";
 import { NextResponse } from "next/server";
 
 function normalize(text = "") {
-  return String(text).toLowerCase().replace(/[\s.\-_]/g, "");
+  return String(text)
+    .toLowerCase()
+    .replace(/[\s.\-_]/g, "");
 }
 
 export async function GET(req) {
@@ -25,8 +27,11 @@ export async function GET(req) {
     }
 
     let customers = await Customer.find(filter)
-      .select(`name company phone Address GSTIN salesExecutive isPaid createdAt`)
-      .populate({ path: "salesExecutive", select: "basicDetails.name", }).lean();
+      .select(
+        `name company phone Address GSTIN salesExecutive isPaid createdAt`,
+      )
+      .populate({ path: "salesExecutive", select: "basicDetails.name" })
+      .lean();
 
     // Elastic search
     if (q.trim()) {
@@ -40,9 +45,7 @@ export async function GET(req) {
           customer?.Address,
         ];
 
-        return fields.some((field) =>
-          normalize(field).includes(search)
-        );
+        return fields.some((field) => normalize(field).includes(search));
       });
     }
 
@@ -61,7 +64,6 @@ export async function GET(req) {
         pages: Math.ceil(total / limit),
       },
     });
-
   } catch (error) {
     console.log("Search API Error:", error);
 
@@ -71,7 +73,7 @@ export async function GET(req) {
         message: "Search failed",
         error: error.message,
       },
-      { status: 500, }
+      { status: 500 },
     );
   }
 }

@@ -134,8 +134,7 @@ export async function POST(req, { params }) {
         normalized,
         customerId: id,
         savedList,
-        hint:
-          "Is 'alternatePhones' in models/admin/Customer.js? Server may need restart after schema change.",
+        hint: "Is 'alternatePhones' in models/admin/Customer.js? Server may need restart after schema change.",
       });
       return NextResponse.json(
         {

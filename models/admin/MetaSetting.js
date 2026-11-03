@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 
 const MetaSettingSchema = new mongoose.Schema(
   {
-    key:   { type: String, unique: true, required: true },
+    key: { type: String, unique: true, required: true },
     value: { type: String },
-    meta:  { type: mongoose.Schema.Types.Mixed },
+    meta: { type: mongoose.Schema.Types.Mixed },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.models.MetaSetting ||

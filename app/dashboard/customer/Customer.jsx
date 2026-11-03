@@ -1,6 +1,5 @@
 // app/dashboard/customer/Customer.jsx
 
-
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
@@ -50,8 +49,7 @@ const INITIAL_PROJECT_FORM = {
 const inputClassName =
   "w-full rounded-lg border border-[#DCE3EE] bg-white px-3 py-2.5 text-sm text-[#24334D] outline-none transition placeholder:text-[#9AA4B5] hover:border-[#B8C6DA] focus:border-[#4779C5] focus:ring-2 focus:ring-[#4779C5]/10";
 
-const labelClassName =
-  "mb-1.5 block text-xs font-semibold text-[#465570]";
+const labelClassName = "mb-1.5 block text-xs font-semibold text-[#465570]";
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -150,9 +148,7 @@ const Customer = ({ customerId }) => {
   const [loadingProjectCycle, setLoadingProjectCycle] = useState(true);
   const [currentEditedId, setCurrentEditedId] = useState(null);
 
-  const [projectFormData, setProjectFormData] = useState(
-    INITIAL_PROJECT_FORM
-  );
+  const [projectFormData, setProjectFormData] = useState(INITIAL_PROJECT_FORM);
 
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
@@ -174,7 +170,7 @@ const Customer = ({ customerId }) => {
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          "Unable to load project history"
+          "Unable to load project history",
       );
     } finally {
       setLoadingProjectCycle(false);
@@ -193,8 +189,7 @@ const Customer = ({ customerId }) => {
     } catch (error) {
       console.error("Failed to fetch customer details:", error);
       toast.error(
-        error?.response?.data?.message ||
-          "Unable to load customer details"
+        error?.response?.data?.message || "Unable to load customer details",
       );
     }
   }, [customerId]);
@@ -255,14 +250,14 @@ const Customer = ({ customerId }) => {
                 startDate: projectFormData.startDate,
                 endDate: projectFormData.endDate,
               }
-            : item
+            : item,
         );
 
         const res = await updateCustomerProjectCycleService(
           projectCycleData?.projectCycle?._id,
           {
             projectDuration: updatedProjectDuration,
-          }
+          },
         );
 
         if (res?.success) {
@@ -293,7 +288,7 @@ const Customer = ({ customerId }) => {
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          "Error while processing project"
+          "Error while processing project",
       );
     } finally {
       setSubmitting(false);
@@ -364,9 +359,7 @@ const Customer = ({ customerId }) => {
     } catch (error) {
       console.error("Failed to update project:", error);
       toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Update failed"
+        error?.response?.data?.message || error?.message || "Update failed",
       );
     } finally {
       setSubmitting(false);
@@ -375,7 +368,7 @@ const Customer = ({ customerId }) => {
 
   const handleDelete = async (id) => {
     const isConfirmed = window.confirm(
-      "Are you sure you want to delete this project?"
+      "Are you sure you want to delete this project?",
     );
 
     if (!isConfirmed) return;
@@ -394,7 +387,7 @@ const Customer = ({ customerId }) => {
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          "Error while deleting project"
+          "Error while deleting project",
       );
     } finally {
       setDeletingId(null);
@@ -423,8 +416,7 @@ const Customer = ({ customerId }) => {
     salesExecutive,
   } = customerDetails;
 
-  const salesPerson =
-    SalesPersonName || salesExecutive?.basicDetails?.name;
+  const salesPerson = SalesPersonName || salesExecutive?.basicDetails?.name;
 
   const address = [Address, city, state, pincode, country]
     .filter(Boolean)
@@ -546,9 +538,7 @@ const Customer = ({ customerId }) => {
                   />
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] text-[#8A96A9]">
-                      Sales Person
-                    </p>
+                    <p className="text-[11px] text-[#8A96A9]">Sales Person</p>
                     <p className="mt-0.5 break-words text-sm font-semibold text-[#34445F]">
                       {salesPerson || "Not assigned"}
                     </p>
@@ -562,9 +552,7 @@ const Customer = ({ customerId }) => {
                   />
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] text-[#8A96A9]">
-                      Meeting Date
-                    </p>
+                    <p className="text-[11px] text-[#8A96A9]">Meeting Date</p>
                     <p className="mt-0.5 text-sm font-semibold text-[#34445F]">
                       {formatDate(meetingDate)}
                     </p>
@@ -630,9 +618,7 @@ const Customer = ({ customerId }) => {
                 id="projectService"
                 required
                 value={projectFormData.service}
-                onChange={(e) =>
-                  updateProjectField("service", e.target.value)
-                }
+                onChange={(e) => updateProjectField("service", e.target.value)}
                 className={inputClassName}
               >
                 <option value="" disabled>
@@ -808,10 +794,7 @@ const Customer = ({ customerId }) => {
           <div className="max-h-[650px] min-h-[240px] space-y-3 overflow-y-auto p-3 sm:p-4">
             {loadingProjectCycle ? (
               <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 text-center">
-                <RefreshCw
-                  size={22}
-                  className="animate-spin text-[#4779C5]"
-                />
+                <RefreshCw size={22} className="animate-spin text-[#4779C5]" />
                 <p className="text-sm font-medium text-[#718097]">
                   Loading project history...
                 </p>
@@ -926,9 +909,7 @@ const Customer = ({ customerId }) => {
                 <button
                   type="button"
                   onClick={() =>
-                    document
-                      .getElementById("projectName")
-                      ?.focus()
+                    document.getElementById("projectName")?.focus()
                   }
                   className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-[#DCE5EE] px-3 py-2 text-xs font-semibold text-[#315F9F] transition hover:bg-[#F2F6FC]"
                 >

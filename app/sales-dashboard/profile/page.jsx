@@ -1,12 +1,10 @@
 // app/sales-dashboard/profile/page.jsx
 
-import React from 'react'
-import Profile from './Profile'
+import React from "react";
+import Profile from "./Profile";
 
 const page = () => {
-  return (
-   <Profile />
-  )
-}
+  return <Profile />;
+};
 
-export default page
+export default page;

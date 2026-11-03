@@ -153,13 +153,17 @@ function calculateChange(current, previous) {
       : { text: "No change", type: "neutral" };
   }
 
-  const change = ((currentNumber - previousNumber) / Math.abs(previousNumber)) * 100;
+  const change =
+    ((currentNumber - previousNumber) / Math.abs(previousNumber)) * 100;
 
   if (change > 0) {
     return { text: `Increased by ${change.toFixed(1)}%`, type: "up" };
   }
   if (change < 0) {
-    return { text: `Decreased by ${Math.abs(change).toFixed(1)}%`, type: "down" };
+    return {
+      text: `Decreased by ${Math.abs(change).toFixed(1)}%`,
+      type: "down",
+    };
   }
   return { text: "No change", type: "neutral" };
 }
@@ -179,7 +183,9 @@ function MetricBox({ label, current, previous, format }) {
     displayValue = `Rs ${formatNumber(current)}`;
   } else if (format === "percent") {
     const number = toNumber(current);
-    displayValue = Number.isFinite(number) ? `${(number * 100).toFixed(2)}%` : "—";
+    displayValue = Number.isFinite(number)
+      ? `${(number * 100).toFixed(2)}%`
+      : "—";
   }
 
   return (
@@ -201,13 +207,20 @@ function getDailyValue(row, valueKey) {
       row?.value ??
       row?.conversions ??
       row?.impressions ??
-      0
+      0,
   );
 }
 
 function getDailyDate(row) {
   if (!row || typeof row !== "object") return null;
-  return row.date ?? row.day ?? row.startDate ?? row.date_start ?? row.timestamp ?? null;
+  return (
+    row.date ??
+    row.day ??
+    row.startDate ??
+    row.date_start ??
+    row.timestamp ??
+    null
+  );
 }
 
 function formatChartDate(value, fallbackIndex) {
@@ -228,7 +241,12 @@ function formatChartDate(value, fallbackIndex) {
   });
 }
 
-function SmoothChart({ data, color = "#3182ce", valueKey = "clicks", title = "Daily clicks" }) {
+function SmoothChart({
+  data,
+  color = "#3182ce",
+  valueKey = "clicks",
+  title = "Daily clicks",
+}) {
   const rows = Array.isArray(data) ? data : [];
   const points = rows
     .map((row, index) => ({
@@ -241,7 +259,9 @@ function SmoothChart({ data, color = "#3182ce", valueKey = "clicks", title = "Da
     return (
       <View style={s.chartBox}>
         <Text style={s.chartTitle}>{title}</Text>
-        <Text style={s.emptyText}>Not enough daily data to render a timeline.</Text>
+        <Text style={s.emptyText}>
+          Not enough daily data to render a timeline.
+        </Text>
       </View>
     );
   }
@@ -257,19 +277,29 @@ function SmoothChart({ data, color = "#3182ce", valueKey = "clicks", title = "Da
   const maxValue = Math.max(...points.map((point) => point.value), 1);
   const axisMax = maxValue === 1 ? 1 : maxValue;
   const xFor = (index) =>
-    left + (points.length === 1 ? 0 : (index / (points.length - 1)) * plotWidth);
+    left +
+    (points.length === 1 ? 0 : (index / (points.length - 1)) * plotWidth);
   const yFor = (value) => bottom - (value / axisMax) * plotHeight;
 
   const linePath = points
-    .map((point, index) => `${index === 0 ? "M" : "L"} ${xFor(index)} ${yFor(point.value)}`)
+    .map(
+      (point, index) =>
+        `${index === 0 ? "M" : "L"} ${xFor(index)} ${yFor(point.value)}`,
+    )
     .join(" ");
 
-  const tickIndexes = [...new Set([0, Math.floor((points.length - 1) / 2), points.length - 1])];
+  const tickIndexes = [
+    ...new Set([0, Math.floor((points.length - 1) / 2), points.length - 1]),
+  ];
 
   return (
     <View>
       <Text style={s.chartTitle}>{title}</Text>
-      <Svg width="100%" height={svgHeight} viewBox={`0 0 ${svgWidth} ${svgHeight}`}>
+      <Svg
+        width="100%"
+        height={svgHeight}
+        viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+      >
         {[0, 1, 2, 3, 4].map((tick) => {
           const value = (axisMax * tick) / 4;
           const y = bottom - (plotHeight * tick) / 4;
@@ -327,7 +357,13 @@ function SmoothChart({ data, color = "#3182ce", valueKey = "clicks", title = "Da
               y={bottom + 17}
               fontSize={8}
               fill="#718096"
-              textAnchor={index === 0 ? "start" : index === points.length - 1 ? "end" : "middle"}
+              textAnchor={
+                index === 0
+                  ? "start"
+                  : index === points.length - 1
+                    ? "end"
+                    : "middle"
+              }
             >
               {points[index].label}
             </SvgText>
@@ -391,7 +427,10 @@ function latestPageOneOrTwoRanking(keyword) {
   const sorted = [...valid].sort((a, b) => {
     const aDate = new Date(a?.date || 0).getTime();
     const bDate = new Date(b?.date || 0).getTime();
-    return (Number.isFinite(bDate) ? bDate : 0) - (Number.isFinite(aDate) ? aDate : 0);
+    return (
+      (Number.isFinite(bDate) ? bDate : 0) -
+      (Number.isFinite(aDate) ? aDate : 0)
+    );
   });
 
   const latest = sorted[0];
@@ -413,7 +452,12 @@ function SeoKeywordTable({ keywords }) {
         <View style={[s.tableRow, s.tableHeader]}>
           <Text style={[s.tableCellWide, { fontWeight: "bold" }]}>Keyword</Text>
           <Text style={[s.tableCellCenter, { fontWeight: "bold" }]}>Page</Text>
-          <Text style={[s.tableCellCenter, { fontWeight: "bold", borderRightWidth: 0 }]}>
+          <Text
+            style={[
+              s.tableCellCenter,
+              { fontWeight: "bold", borderRightWidth: 0 },
+            ]}
+          >
             Position
           </Text>
         </View>
@@ -443,9 +487,7 @@ function groupUnmatchedSeoKeywords(keywords) {
 
   keywords.forEach((keyword) => {
     const label =
-      keyword?.website ||
-      keyword?.project?.projectName ||
-      "General Keywords";
+      keyword?.website || keyword?.project?.projectName || "General Keywords";
     if (!groups.has(label)) groups.set(label, []);
     groups.get(label).push(keyword);
   });
@@ -458,25 +500,25 @@ export function ReportPDF({ report }) {
   const c = d.client || {};
   const seoKeywords = Array.isArray(d.seoKeywords) ? d.seoKeywords : [];
   const gscSites = (Array.isArray(d.gsc) ? d.gsc : []).filter(
-    (site) => !site?.error && site?.data
+    (site) => !site?.error && site?.data,
   );
   const googleAds = (Array.isArray(d.gads) ? d.gads : []).find(
-    (account) => !account?.error && account?.data
+    (account) => !account?.error && account?.data,
   );
   const metaAccounts = (Array.isArray(d.metaAds) ? d.metaAds : []).filter(
-    (account) => !account?.error && account?.data
+    (account) => !account?.error && account?.data,
   );
 
   const matchedSeoBySite = new Map(
     gscSites.map((site) => [
       site.id,
       seoKeywords.filter((keyword) => keywordBelongsToSite(keyword, site.id)),
-    ])
+    ]),
   );
-  const matchedSeoKeywords = new Set(
-    [...matchedSeoBySite.values()].flat()
+  const matchedSeoKeywords = new Set([...matchedSeoBySite.values()].flat());
+  const unmatchedSeo = seoKeywords.filter(
+    (keyword) => !matchedSeoKeywords.has(keyword),
   );
-  const unmatchedSeo = seoKeywords.filter((keyword) => !matchedSeoKeywords.has(keyword));
   const unmatchedSeoGroups = groupUnmatchedSeoKeywords(unmatchedSeo);
 
   return (
@@ -494,12 +536,16 @@ export function ReportPDF({ report }) {
         </View>
 
         {gscSites.length === 0 ? (
-          <Text style={s.emptyText}>No Google Search Console data was found.</Text>
+          <Text style={s.emptyText}>
+            No Google Search Console data was found.
+          </Text>
         ) : (
           gscSites.map((site) => {
             const t = site.data?.totals || {};
             const p = site.data?.prevTotals || {};
-            const daily = Array.isArray(site.data?.daily) ? site.data.daily : [];
+            const daily = Array.isArray(site.data?.daily)
+              ? site.data.daily
+              : [];
             const siteSeo = matchedSeoBySite.get(site.id) || [];
 
             return (
@@ -507,13 +553,22 @@ export function ReportPDF({ report }) {
                 <Text style={s.siteHeader}>{displayWebsite(site.id)}</Text>
                 <Text style={s.sectionTitle}>Search Console Overview</Text>
                 <View style={s.grid}>
-                  <MetricBox label="Clicks" current={t.clicks} previous={p.clicks} />
+                  <MetricBox
+                    label="Clicks"
+                    current={t.clicks}
+                    previous={p.clicks}
+                  />
                   <MetricBox
                     label="Impressions"
                     current={t.impressions}
                     previous={p.impressions}
                   />
-                  <MetricBox label="Average CTR" current={t.ctr} previous={p.ctr} format="percent" />
+                  <MetricBox
+                    label="Average CTR"
+                    current={t.ctr}
+                    previous={p.ctr}
+                    format="percent"
+                  />
                   <MetricBox
                     label="Average Position"
                     current={t.position}
@@ -522,7 +577,11 @@ export function ReportPDF({ report }) {
                 </View>
 
                 <View style={s.chartBox}>
-                  <SmoothChart data={daily} color="#3182ce" title="Daily clicks" />
+                  <SmoothChart
+                    data={daily}
+                    color="#3182ce"
+                    title="Daily clicks"
+                  />
                 </View>
 
                 {/* Manual SEO rows now appear directly after this website's graph. */}
@@ -536,7 +595,8 @@ export function ReportPDF({ report }) {
           <View>
             <Text style={s.sectionTitle}>Additional SEO Keywords</Text>
             <Text style={s.emptyText}>
-              These manually entered keywords could not be matched to a Search Console website.
+              These manually entered keywords could not be matched to a Search
+              Console website.
             </Text>
             {unmatchedSeoGroups.map(([website, keywords]) => (
               <View key={website} style={{ marginBottom: 12 }}>
@@ -614,13 +674,31 @@ export function ReportPDF({ report }) {
             return (
               <View key={account.id} style={{ marginBottom: 20 }}>
                 <Text style={s.siteHeader}>
-                  Meta Ads Account {String(account.id || "").replace(/^act_/i, "")}
+                  Meta Ads Account{" "}
+                  {String(account.id || "").replace(/^act_/i, "")}
                 </Text>
                 <View style={s.grid}>
-                  <MetricBox label="Spend (INR)" current={t.spend} previous={p.spend} format="money" />
-                  <MetricBox label="Clicks" current={t.clicks} previous={p.clicks} />
-                  <MetricBox label="Reach" current={t.reach} previous={p.reach} />
-                  <MetricBox label="Impressions" current={t.impressions} previous={p.impressions} />
+                  <MetricBox
+                    label="Spend (INR)"
+                    current={t.spend}
+                    previous={p.spend}
+                    format="money"
+                  />
+                  <MetricBox
+                    label="Clicks"
+                    current={t.clicks}
+                    previous={p.clicks}
+                  />
+                  <MetricBox
+                    label="Reach"
+                    current={t.reach}
+                    previous={p.reach}
+                  />
+                  <MetricBox
+                    label="Impressions"
+                    current={t.impressions}
+                    previous={p.impressions}
+                  />
                 </View>
 
                 <View style={s.chartBox}>

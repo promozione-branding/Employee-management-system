@@ -1,6 +1,5 @@
 // components/reports/CoverPage.jsx
 
-
 import { Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
 import fs from "fs";
 import path from "path";
@@ -10,7 +9,7 @@ let logoBuffer = null;
 try {
   const logoPath = path.join(
     process.cwd(),
-    "public/blog/inquiry-bazaar-logo.png"
+    "public/blog/inquiry-bazaar-logo.png",
   );
 
   if (fs.existsSync(logoPath)) {
@@ -235,10 +234,7 @@ export function CoverPage({ report }) {
       <View style={s.content}>
         <View style={s.logoWrap}>
           {logoBuffer ? (
-            <Image
-              src={{ data: logoBuffer, format: "png" }}
-              style={s.logo}
-            />
+            <Image src={{ data: logoBuffer, format: "png" }} style={s.logo} />
           ) : (
             <Text style={s.brandFallback}>
               INQUIRY <Text style={s.brandAccent}>BAZAAR</Text>
@@ -246,9 +242,7 @@ export function CoverPage({ report }) {
           )}
         </View>
 
-        <Text style={s.eyebrow}>
-          DIGITAL GROWTH & ANALYTICS
-        </Text>
+        <Text style={s.eyebrow}>DIGITAL GROWTH & ANALYTICS</Text>
 
         <Text style={s.title}>
           PERFORMANCE{"\n"}
@@ -256,24 +250,18 @@ export function CoverPage({ report }) {
         </Text>
 
         <Text style={s.subtitle}>
-          A comprehensive overview of your digital
-          performance, marketing results, and SEO progress.
+          A comprehensive overview of your digital performance, marketing
+          results, and SEO progress.
         </Text>
 
         <View style={s.divider} />
 
-        <Text style={s.clientLabel}>
-          PREPARED EXCLUSIVELY FOR
-        </Text>
+        <Text style={s.clientLabel}>PREPARED EXCLUSIVELY FOR</Text>
 
-        <Text style={s.clientName}>
-          {c.name || "Valued Client"}
-        </Text>
+        <Text style={s.clientName}>{c.name || "Valued Client"}</Text>
 
         <View style={s.periodBox}>
-          <Text style={s.periodLabel}>
-            REPORTING PERIOD
-          </Text>
+          <Text style={s.periodLabel}>REPORTING PERIOD</Text>
 
           <Text style={s.periodDate}>
             {startDate} — {endDate}
@@ -284,13 +272,9 @@ export function CoverPage({ report }) {
       </View>
 
       <View style={s.footer}>
-        <Text style={s.footerBrand}>
-          INQUIRY BAZAAR
-        </Text>
+        <Text style={s.footerBrand}>INQUIRY BAZAAR</Text>
 
-        <Text style={s.footerText}>
-          CONFIDENTIAL BUSINESS REPORT
-        </Text>
+        <Text style={s.footerText}>CONFIDENTIAL BUSINESS REPORT</Text>
       </View>
     </Page>
   );

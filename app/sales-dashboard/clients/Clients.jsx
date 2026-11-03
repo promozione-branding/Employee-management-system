@@ -1,17 +1,11 @@
 // app/sales-dashboard/clients/Clients.jsx
 
-
 "use client";
 
 import ExecutiveClientList from "@/components/sales-dashboard/auth-role/executive/client/ExecutiveClientList";
 import SrClientList from "@/components/sales-dashboard/auth-role/sr-manager/client/SrClientList";
 
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 import { Users, UsersRound, LoaderCircle } from "lucide-react";
@@ -23,10 +17,7 @@ const Clients = () => {
     return (
       <main className="min-h-screen bg-[#F2F4F9] p-4 sm:p-6 lg:p-8">
         <div className="flex min-h-[300px] flex-col items-center justify-center rounded-[22px] border border-[#E3E7F0] bg-white">
-          <LoaderCircle
-            size={34}
-            className="animate-spin text-[#F27B1E]"
-          />
+          <LoaderCircle size={34} className="animate-spin text-[#F27B1E]" />
           <p className="mt-4 text-sm font-medium text-[#5B6478]">
             Loading your clients...
           </p>
@@ -45,11 +36,9 @@ const Clients = () => {
     .map((role) => String(role).toUpperCase());
 
   // Sales users, SR Managers, and Executives can view all clients.
-  const canViewAllClients = [
-    "SALES",
-    "SR_MANAGER",
-    "EXECUTIVE",
-  ].some((role) => roles.includes(role));
+  const canViewAllClients = ["SALES", "SR_MANAGER", "EXECUTIVE"].some((role) =>
+    roles.includes(role),
+  );
 
   return (
     <main className="min-h-screen space-y-6 bg-[#bbd0ff] p-3 sm:p-5 lg:p-7">
@@ -87,9 +76,7 @@ const Clients = () => {
 
             <TabsList
               className={`grid h-12 w-full rounded-xl border border-[#E3E7F0] bg-[#F7F8FC] p-1 sm:w-fit ${
-                canViewAllClients
-                  ? "grid-cols-2"
-                  : "grid-cols-1"
+                canViewAllClients ? "grid-cols-2" : "grid-cols-1"
               }`}
             >
               <TabsTrigger

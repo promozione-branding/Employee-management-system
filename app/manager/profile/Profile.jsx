@@ -82,7 +82,10 @@ const Profile = () => {
             </span>
           </div>
 
-          <Link href={`/manager/profile/edit/${employeeId}`} className="absolute right-10 top-5 h-10 w-10 flex items-center justify-center rounded-2xl border">
+          <Link
+            href={`/manager/profile/edit/${employeeId}`}
+            className="absolute right-10 top-5 h-10 w-10 flex items-center justify-center rounded-2xl border"
+          >
             <UserRoundPen />
           </Link>
         </div>

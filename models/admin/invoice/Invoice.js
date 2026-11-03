@@ -37,10 +37,10 @@ const InvoiceSchema = new mongoose.Schema(
       },
     ],
     invoiceType: {
-  type: String,
-  enum: ["normal", "tds"],
-  default: "normal",
-},
+      type: String,
+      enum: ["normal", "tds"],
+      default: "normal",
+    },
     taxType: {
       type: String,
       enum: ["IGST", "SGST/CGST"],
@@ -79,7 +79,7 @@ InvoiceSchema.pre("save", async function (next) {
     if (lastInvoice?.invoiceNo) {
       const lastNumber = parseInt(
         lastInvoice.invoiceNo.replace(prefix, ""),
-        10
+        10,
       );
 
       if (!isNaN(lastNumber)) {

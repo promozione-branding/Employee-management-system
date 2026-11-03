@@ -13,7 +13,7 @@ const ProposalItemSchema = new mongoose.Schema(
     amount: { type: Number, required: true },
     custom: { type: Boolean, default: false },
   },
-  { _id: true }
+  { _id: true },
 );
 
 const PartialPaymentSchema = new mongoose.Schema(
@@ -21,7 +21,7 @@ const PartialPaymentSchema = new mongoose.Schema(
     paymentDuration: { type: String, required: true },
     paymentAmount: { type: Number, required: true, min: 0 },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const DeliveredMetricSchema = new mongoose.Schema(
@@ -29,7 +29,7 @@ const DeliveredMetricSchema = new mongoose.Schema(
     label: { type: String, required: true },
     count: { type: Number, default: 0, min: 0 },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const ChecklistSectionSchema = new mongoose.Schema(
@@ -37,17 +37,25 @@ const ChecklistSectionSchema = new mongoose.Schema(
     section: { type: String, required: true },
     items: [{ type: String }],
   },
-  { _id: false }
+  { _id: false },
 );
 
 const ProposalNewSchema = new mongoose.Schema(
   {
     proposalNumber: { type: String, unique: true, index: true },
-    clientId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
+    clientId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Customer",
+      required: true,
+    },
     salesExecutive: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
     items: [ProposalItemSchema],
     partialPayments: [PartialPaymentSchema],
-    deliveryPeriod: { type: String, enum: ["weekly", "monthly"], default: "weekly" },
+    deliveryPeriod: {
+      type: String,
+      enum: ["weekly", "monthly"],
+      default: "weekly",
+    },
     deliveredMetrics: [DeliveredMetricSchema],
     checklist: [ChecklistSectionSchema],
     subtotal: { type: Number, default: 0 },
@@ -56,15 +64,23 @@ const ProposalNewSchema = new mongoose.Schema(
     tdsApplicable: { type: Boolean, default: false },
     tdsRate: { type: Number, default: 0.02 },
     tdsAmount: { type: Number, default: 0 },
-    discountType: { type: String, enum: ["amount", "percentage"], default: "amount" },
+    discountType: {
+      type: String,
+      enum: ["amount", "percentage"],
+      default: "amount",
+    },
     discountInput: { type: Number, default: 0 },
     discountAmount: { type: Number, default: 0 },
     grandTotal: { type: Number, default: 0 },
     notes: { type: String, default: "" },
     validTill: { type: Date },
     paymentMethod: { type: String, default: "" },
-    status: { type: String, enum: ["draft", "sent", "accepted", "rejected"], default: "draft" },
-    
+    status: {
+      type: String,
+      enum: ["draft", "sent", "accepted", "rejected"],
+      default: "draft",
+    },
+
     acceptToken: { type: String, index: true },
     sentAt: { type: Date },
     sentToEmail: { type: String }, // ✅ Added
@@ -72,7 +88,7 @@ const ProposalNewSchema = new mongoose.Schema(
     acceptedByEmail: { type: String },
     acceptedIp: { type: String },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 ProposalNewSchema.pre("save", async function (next) {
@@ -84,4 +100,5 @@ ProposalNewSchema.pre("save", async function (next) {
   next();
 });
 
-export default mongoose.models.ProposalNew || mongoose.model("ProposalNew", ProposalNewSchema);
+export default mongoose.models.ProposalNew ||
+  mongoose.model("ProposalNew", ProposalNewSchema);

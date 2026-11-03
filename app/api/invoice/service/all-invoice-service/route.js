@@ -17,7 +17,7 @@ export async function GET(req) {
         message: "Successfully retrieved all invoice services.",
         data: allInvoiceServices,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     return Response.json(
@@ -26,7 +26,7 @@ export async function GET(req) {
         message: "An error occurred while fetching invoice services.",
         error: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

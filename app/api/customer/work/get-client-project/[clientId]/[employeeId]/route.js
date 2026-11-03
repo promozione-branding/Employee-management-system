@@ -20,7 +20,7 @@ export async function GET(req, { params }) {
           success: false,
           message: "Invalid clientId or employeeId",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -40,7 +40,7 @@ export async function GET(req, { params }) {
       .populate({
         path: "checklist.completedBy",
         select: "_id basicDetails.name basicDetails.profileImage employeeId",
-      });;
+      });
 
     const result = [];
 
@@ -57,7 +57,7 @@ export async function GET(req, { params }) {
               _id: work.projectId,
             },
           },
-        }
+        },
       );
 
       const project = cycle?.projectDuration?.[0];
@@ -105,7 +105,7 @@ export async function GET(req, { params }) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

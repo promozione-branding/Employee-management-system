@@ -10,7 +10,9 @@ export async function GET(req) {
   try {
     await connectDB();
 
-    const teamMember = await Employee.find({"basicDetails.resignedEmployee": false}).select(
+    const teamMember = await Employee.find({
+      "basicDetails.resignedEmployee": false,
+    }).select(
       "basicDetails.name basicDetails.profileImage basicDetails.designation  _id",
     );
     // const AdminMember = await AdminBasicDetail.find().populate({path:"userId",select:"username"});

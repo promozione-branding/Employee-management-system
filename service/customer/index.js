@@ -3,14 +3,14 @@
 import axiosInstance from "../axiosInstance";
 
 export async function getAllCustomerServices(page, limit, isPaid) {
-  const params = { page, limit, };
+  const params = { page, limit };
   if (isPaid) {
     params.isPaid = true;
   }
 
-  const { data } = await axiosInstance.get("/api/customer/get-all-customer",
-    { params, }
-  );
+  const { data } = await axiosInstance.get("/api/customer/get-all-customer", {
+    params,
+  });
 
   return data;
 }
@@ -156,10 +156,17 @@ export async function getAllSalesService() {
   return data;
 }
 
-export const removeEmployee = async (projectCycleId, projectDurationId, employeeId) => {
-  const { data } = await axiosInstance.delete("/api/customer/project-cycle/remove-employee", {
-    data: { projectCycleId, projectDurationId, employeeId, },
-  });
+export const removeEmployee = async (
+  projectCycleId,
+  projectDurationId,
+  employeeId,
+) => {
+  const { data } = await axiosInstance.delete(
+    "/api/customer/project-cycle/remove-employee",
+    {
+      data: { projectCycleId, projectDurationId, employeeId },
+    },
+  );
 
   return data;
 };

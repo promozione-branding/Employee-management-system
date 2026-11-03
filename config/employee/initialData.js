@@ -17,6 +17,3 @@ export const initialCheckListData = {
   completed: true,
   completedAt: new Date().toISOString(),
 };
-
-
-

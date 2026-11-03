@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
@@ -62,10 +61,7 @@ const TodaySalesReminder = () => {
         if (to) params.to = to;
       }
 
-      const res = await todayReminderService(
-        employee.user._id,
-        params
-      );
+      const res = await todayReminderService(employee.user._id, params);
 
       if (res.success) {
         setReminders(res?.data || []);
@@ -73,10 +69,7 @@ const TodaySalesReminder = () => {
     } catch (error) {
       console.error("Error fetching reminders:", error);
 
-      toast.error(
-        error?.response?.data?.message ||
-          "Error fetching reminders"
-      );
+      toast.error(error?.response?.data?.message || "Error fetching reminders");
     } finally {
       setLoading(false);
     }
@@ -254,7 +247,7 @@ const TodaySalesReminder = () => {
           <div className="flex flex-col gap-3">
             {reminders.map((reminder) => {
               const updateType = String(
-                reminder.updateType || "general"
+                reminder.updateType || "general",
               ).toLowerCase();
 
               const Icon = getReminderIcon(updateType);

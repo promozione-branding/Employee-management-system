@@ -75,9 +75,7 @@ export async function POST(req) {
       ]);
 
       const origin =
-        req.headers.get("origin") ||
-        process.env.NEXT_PUBLIC_APP_URL ||
-        "";
+        req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "";
       const link = origin
         ? `${origin}/dashboard/customer/${body.customerId}`
         : undefined;
@@ -144,9 +142,7 @@ export async function PUT(req) {
         ]);
 
         const origin =
-          req.headers.get("origin") ||
-          process.env.NEXT_PUBLIC_APP_URL ||
-          "";
+          req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "";
         const link = origin
           ? `${origin}/dashboard/customer/${updated.customerId}`
           : undefined;

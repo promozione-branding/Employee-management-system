@@ -18,9 +18,8 @@ const CreateCustomer = ({
   customerDetails,
 }) => {
   const [formData, setFormData] = useState(
-    customerDetails || initalCustomerFormData
+    customerDetails || initalCustomerFormData,
   );
-
 
   const handleCustomer = async (e) => {
     e.preventDefault();
@@ -36,7 +35,6 @@ const CreateCustomer = ({
         return;
       }
     }
-
 
     try {
       const createdCustomer = await createCustomerServices(formData);
@@ -58,7 +56,7 @@ const CreateCustomer = ({
     try {
       const editedResponse = await editCustomerServices(
         customerDetails?._id,
-        formData
+        formData,
       );
       console.log(editedResponse, "editedResponse");
       if (editedResponse.success) {

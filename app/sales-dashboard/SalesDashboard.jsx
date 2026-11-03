@@ -7,7 +7,6 @@ import { CalendarDays, Clock3 } from "lucide-react";
 
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 
-
 import EmployeeCalendar from "@/components/employee-dashboard/common/EmployeeCalendar";
 import EmployeeTodo from "@/components/employee-dashboard/common/EmployeeTodo";
 import EmployeeReminder from "@/components/employee-dashboard/common/EmployeeReminder";
@@ -96,8 +95,8 @@ const SalesDashboard = () => {
 
               <p className="mt-3 max-w-[570px] text-sm font-medium leading-[1.7] text-[#C6D3E8] sm:text-base lg:text-[17px]">
                 Welcome back to your workspace. Here&apos;s your sales
-                performance overview. Monitor your calls, track proposals,
-                and stay on top of today&apos;s targets.
+                performance overview. Monitor your calls, track proposals, and
+                stay on top of today&apos;s targets.
               </p>
             </div>
 
@@ -121,37 +120,28 @@ const SalesDashboard = () => {
         </div>
       </section>
 
-   
-
       {/* Daily calls: the two-column layout lives inside DailyCall */}
-      <section
-        aria-label="Daily call activity"
-        className="min-w-0"
-      >
+      <section aria-label="Daily call activity" className="min-w-0">
         <DailyCall />
-
-
       </section>
-         
 
-         {/* Monthly Sales Performance */}
-<section
-  aria-label="Monthly sales performance"
-  className="grid min-w-0 grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-5"
->
-  <div className="min-w-0">
-    <CurrentMonthDealValue />
-  </div>
+      {/* Monthly Sales Performance */}
+      <section
+        aria-label="Monthly sales performance"
+        className="grid min-w-0 grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-5"
+      >
+        <div className="min-w-0">
+          <CurrentMonthDealValue />
+        </div>
 
-  <div className="min-w-0">
-    <CurrentMonthRevenue />
-  </div>
+        <div className="min-w-0">
+          <CurrentMonthRevenue />
+        </div>
 
-  <div className="min-w-0">
-    <ClientAcquisition />
-  </div>
-</section>
-      
+        <div className="min-w-0">
+          <ClientAcquisition />
+        </div>
+      </section>
 
       {/* Meetings, Recent Activity and Proposals */}
       <section

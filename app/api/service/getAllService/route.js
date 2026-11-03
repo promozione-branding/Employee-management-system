@@ -7,7 +7,7 @@ export async function GET() {
   try {
     await connectDB();
 
-    const items = await Service.find()
+    const items = await Service.find();
 
     return Response.json(
       {

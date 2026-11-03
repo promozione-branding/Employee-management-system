@@ -33,7 +33,7 @@ const UpdateTab = ({ userId }) => {
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          "Error while fetching the updates"
+          "Error while fetching the updates",
       );
     } finally {
       setLoading(false);
@@ -71,9 +71,7 @@ const UpdateTab = ({ userId }) => {
     const clientId = item?.client?._id || item?.clientId;
 
     const salesPersonId =
-      item?.salesPersonId?._id ||
-      item?.salesPersonId ||
-      userId;
+      item?.salesPersonId?._id || item?.salesPersonId || userId;
 
     if (!clientId) {
       toast.error("Customer ID not found");
@@ -86,8 +84,8 @@ const UpdateTab = ({ userId }) => {
     }
 
     router.push(
-  `/sales-dashboard/clients/${clientId}/${salesPersonId}?tab=meeting`
-);
+      `/sales-dashboard/clients/${clientId}/${salesPersonId}?tab=meeting`,
+    );
   };
 
   const handleCardKeyDown = (event, item) => {
@@ -101,10 +99,7 @@ const UpdateTab = ({ userId }) => {
     return (
       <div className="mt-4 space-y-4">
         {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="rounded-lg border bg-white p-4 shadow-sm"
-          >
+          <div key={i} className="rounded-lg border bg-white p-4 shadow-sm">
             <Skeleton count={3} />
           </div>
         ))}
@@ -154,9 +149,7 @@ const UpdateTab = ({ userId }) => {
                 </h3>
 
                 <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span>
-                    {item?.client?.company || "No Company"}
-                  </span>
+                  <span>{item?.client?.company || "No Company"}</span>
                   <span>•</span>
                   <span className="capitalize">
                     {item?.updateType || "Update"}
@@ -168,8 +161,7 @@ const UpdateTab = ({ userId }) => {
             <div className="flex flex-col items-end gap-1">
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
-                  item.status === "talk" ||
-                  item.status === "interested"
+                  item.status === "talk" || item.status === "interested"
                     ? "bg-green-100 text-green-700"
                     : item.status === "not-interested" ||
                         item.status === "no-talk"
@@ -197,24 +189,18 @@ const UpdateTab = ({ userId }) => {
               {item?.meetingAt && (
                 <div className="flex items-center gap-1.5 rounded-md bg-purple-50 px-2.5 py-1.5 text-xs font-medium text-purple-600">
                   <Calendar size={14} />
-                  <span>
-                    Meeting: {formatDate(item.meetingAt)}
-                  </span>
+                  <span>Meeting: {formatDate(item.meetingAt)}</span>
                 </div>
               )}
 
               {item?.reminderAt && (
                 <div className="flex items-center gap-1.5 rounded-md bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-600">
                   <Clock size={14} />
-                  <span>
-                    Reminder: {formatDate(item.reminderAt)}
-                  </span>
+                  <span>Reminder: {formatDate(item.reminderAt)}</span>
 
                   <span
                     className={`ml-1 ${
-                      item.reminderSent
-                        ? "text-green-600"
-                        : "text-gray-500"
+                      item.reminderSent ? "text-green-600" : "text-gray-500"
                     }`}
                   >
                     {item.reminderSent ? "(Sent)" : "(Pending)"}

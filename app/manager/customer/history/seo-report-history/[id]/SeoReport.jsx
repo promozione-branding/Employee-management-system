@@ -2,7 +2,13 @@
 
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { seoReportHistoryService } from "@/service/customer/history";
@@ -151,41 +157,54 @@ const SeoSheetAdmin = ({ clientId }) => {
   ))
 } */}
 
-          {Object.entries(groupedData).map(
-            ([projectId, projectData]) => (
-              <React.Fragment key={projectId}>
-                <tr className="bg-gray-100">
-                  <td colSpan={dates.length + 3}
-                    className="px-4 py-3 font-bold text-gray-800"
-                  >
-                    {projectData.projectName}
-                  </td>
-                </tr>
+          {Object.entries(groupedData).map(([projectId, projectData]) => (
+            <React.Fragment key={projectId}>
+              <tr className="bg-gray-100">
+                <td
+                  colSpan={dates.length + 3}
+                  className="px-4 py-3 font-bold text-gray-800"
+                >
+                  {projectData.projectName}
+                </td>
+              </tr>
 
-                {/* PROJECT KEYWORDS */}
-                {projectData.keywords.map((kw, index) => {
-                  return (
-                    <tr key={kw._id} className="border px-5">
-                      <td className="border-r px-2">
-                        {index + 1}
-                      </td>
+              {/* PROJECT KEYWORDS */}
+              {projectData.keywords.map((kw, index) => {
+                return (
+                  <tr key={kw._id} className="border px-5">
+                    <td className="border-r px-2">{index + 1}</td>
 
-                      <td className={`border-r px-5 py-2 capitalize cursor-pointer ${kw.type === "primary" ? "font-bold text-blue-600" : ""}`}>
-                        {kw.keyword}
-                      </td>
+                    <td
+                      className={`border-r px-5 py-2 capitalize cursor-pointer ${kw.type === "primary" ? "font-bold text-blue-600" : ""}`}
+                    >
+                      {kw.keyword}
+                    </td>
 
-                      {dates.map((date, i) => {
-                        const found = kw.rankings.find((r) => new Date(r.date).toDateString() === date);
+                    {dates.map((date, i) => {
+                      const found = kw.rankings.find(
+                        (r) => new Date(r.date).toDateString() === date,
+                      );
 
-                        return (
-                          <td key={i} className={`px-3 py-3 text-center border-r transition-colors ${found ? "bg-red-50" : ""}`}>
-                            {found ? (<Dialog
+                      return (
+                        <td
+                          key={i}
+                          className={`px-3 py-3 text-center border-r transition-colors ${found ? "bg-red-50" : ""}`}
+                        >
+                          {found ? (
+                            <Dialog
                               onOpenChange={(open) => {
                                 if (open) {
-                                  setSelected({ keywordId: kw._id, rankingId: found._id, });
-                                  setForm({ page: found.page, position: found.position, });
+                                  setSelected({
+                                    keywordId: kw._id,
+                                    rankingId: found._id,
+                                  });
+                                  setForm({
+                                    page: found.page,
+                                    position: found.position,
+                                  });
                                 }
-                              }}>
+                              }}
+                            >
                               <DialogTrigger>
                                 <div className="flex flex-col items-center gap-2">
                                   {/* Page + Position */}
@@ -216,28 +235,35 @@ const SeoSheetAdmin = ({ clientId }) => {
                                 </DialogHeader>
                                 <div className="flex flex-col gap-5 pt-5 border-t">
                                   <div className="gap-3 flex flex-col">
-                                    <Label className="">
-                                      Page
-                                    </Label>
+                                    <Label className="">Page</Label>
                                     <Input
                                       type="number"
                                       value={form.page}
-                                      onChange={(e) => setForm((prev) => ({ ...prev, page: e.target.value, }))}
+                                      onChange={(e) =>
+                                        setForm((prev) => ({
+                                          ...prev,
+                                          page: e.target.value,
+                                        }))
+                                      }
                                     />
                                   </div>
                                   <div className="gap-3 flex flex-col">
-                                    <Label className="">
-                                      Postion
-                                    </Label>
+                                    <Label className="">Postion</Label>
                                     <Input
                                       type="number"
                                       value={form.position}
-                                      onChange={(e) => setForm((prev) => ({ ...prev, position: e.target.value, }))}
+                                      onChange={(e) =>
+                                        setForm((prev) => ({
+                                          ...prev,
+                                          position: e.target.value,
+                                        }))
+                                      }
                                     />
                                   </div>
 
                                   <div className="flex gap-2 items-center justify-end">
-                                    <button onClick={handleUpdate}
+                                    <button
+                                      onClick={handleUpdate}
                                       className="bg-black text-white rounded px-3 py-2"
                                     >
                                       Update
@@ -249,20 +275,20 @@ const SeoSheetAdmin = ({ clientId }) => {
                                 </div>
                               </DialogContent>
                             </Dialog>
-                            ) : (
-                              <span className="text-gray-400">—</span>
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-              </React.Fragment>
-            ))}
-        </tbody >
-      </table >
-    </div >
+                          ) : (
+                            <span className="text-gray-400">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </React.Fragment>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 

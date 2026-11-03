@@ -1,6 +1,5 @@
 // components/admin-dashboard/tabs/Createworkflow.jsx
 
-
 "use client";
 import { createWorkflowService } from "@/service/workflow";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -50,16 +49,12 @@ const addMonthsToDate = (dateString, months) => {
   const lastDayOfTargetMonth = new Date(
     targetYear,
     normalizedMonth + 1,
-    0
+    0,
   ).getDate();
 
   const targetDay = Math.min(day, lastDayOfTargetMonth);
 
-  const result = new Date(
-    targetYear,
-    normalizedMonth,
-    targetDay
-  );
+  const result = new Date(targetYear, normalizedMonth, targetDay);
 
   const resultYear = result.getFullYear();
   const resultMonth = String(result.getMonth() + 1).padStart(2, "0");
@@ -80,9 +75,7 @@ const formatDate = (dateString) => {
   });
 };
 
-const getProposalId = (proposal) =>
-  proposal?._id || proposal?.id || "";
-
+const getProposalId = (proposal) => proposal?._id || proposal?.id || "";
 
 const getProposalLabel = (proposal) => {
   const number =
@@ -96,7 +89,7 @@ const getProposalLabel = (proposal) => {
     ...new Set(
       (Array.isArray(proposal?.items) ? proposal.items : [])
         .map((item) => item.categoryLabel || item.category || item.label)
-        .filter(Boolean)
+        .filter(Boolean),
     ),
   ];
 
@@ -108,15 +101,8 @@ const getProposalLabel = (proposal) => {
     ? formatDate(String(proposal.createdAt).slice(0, 10))
     : "";
 
-  return [
-    number,
-    serviceText,
-    date,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  return [number, serviceText, date].filter(Boolean).join(" · ");
 };
-
 
 const getResponseData = (response) => {
   if (response?.success === false) {
@@ -141,8 +127,7 @@ export default function Createworkflow({ customerId, onSave }) {
   const [description, setDescription] = useState("");
 
   const [loadingProposals, setLoadingProposals] = useState(true);
-  const [loadingProposalDetails, setLoadingProposalDetails] =
-    useState(false);
+  const [loadingProposalDetails, setLoadingProposalDetails] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -179,7 +164,7 @@ export default function Createworkflow({ customerId, onSave }) {
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          "Failed to load proposal history."
+          "Failed to load proposal history.",
       );
     } finally {
       setLoadingProposals(false);
@@ -209,7 +194,7 @@ export default function Createworkflow({ customerId, onSave }) {
 
       if (!proposal || !Array.isArray(proposal.items)) {
         throw new Error(
-          "The selected proposal does not contain valid proposal items."
+          "The selected proposal does not contain valid proposal items.",
         );
       }
 
@@ -220,7 +205,7 @@ export default function Createworkflow({ customerId, onSave }) {
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          "Failed to load the selected proposal."
+          "Failed to load the selected proposal.",
       );
 
       toast.error("Could not load proposal details.");
@@ -240,10 +225,7 @@ export default function Createworkflow({ customerId, onSave }) {
       if (!uniqueCategories.has(item.category)) {
         uniqueCategories.set(item.category, {
           value: item.category,
-          label:
-            item.categoryLabel ||
-            item.label ||
-            item.category,
+          label: item.categoryLabel || item.label || item.category,
         });
       }
     });
@@ -260,7 +242,7 @@ export default function Createworkflow({ customerId, onSave }) {
     }
 
     const selectedDuration = DURATION_OPTIONS.find(
-      (option) => option.value === duration
+      (option) => option.value === duration,
     );
 
     if (!selectedDuration?.months) return "";
@@ -328,13 +310,13 @@ export default function Createworkflow({ customerId, onSave }) {
 
     if (typeof onSave !== "function") {
       toast.error(
-        "Workflow save API is not connected yet. Please connect onSave."
+        "Workflow save API is not connected yet. Please connect onSave.",
       );
       return;
     }
 
     const selectedCategoryDetails = categories.find(
-      (category) => category.value === selectedCategory
+      (category) => category.value === selectedCategory,
     );
 
     const payload = {
@@ -342,8 +324,7 @@ export default function Createworkflow({ customerId, onSave }) {
       proposalId: getProposalId(selectedProposal),
       proposalNumber: selectedProposal.proposalNumber || "",
       category: selectedCategory,
-      categoryLabel:
-        selectedCategoryDetails?.label || selectedCategory,
+      categoryLabel: selectedCategoryDetails?.label || selectedCategory,
       description: description.trim(),
       startDate,
       duration,
@@ -363,7 +344,7 @@ export default function Createworkflow({ customerId, onSave }) {
       toast.error(
         err?.response?.data?.message ||
           err?.message ||
-          "Failed to create workflow."
+          "Failed to create workflow.",
       );
     } finally {
       setSaving(false);
@@ -373,8 +354,7 @@ export default function Createworkflow({ customerId, onSave }) {
   const inputClassName =
     "w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:ring-1 focus:ring-gray-400 disabled:cursor-not-allowed disabled:bg-gray-50";
 
-  const labelClassName =
-    "mb-1.5 block text-sm font-medium text-gray-700";
+  const labelClassName = "mb-1.5 block text-sm font-medium text-gray-700";
 
   return (
     <div className="mb-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
@@ -413,9 +393,7 @@ export default function Createworkflow({ customerId, onSave }) {
               <select
                 id="workflow-proposal"
                 value={selectedProposalId}
-                onChange={(event) =>
-                  handleProposalChange(event.target.value)
-                }
+                onChange={(event) => handleProposalChange(event.target.value)}
                 disabled={loadingProposals || saving}
                 className={`${inputClassName} appearance-none pr-9`}
                 required
@@ -466,14 +444,13 @@ export default function Createworkflow({ customerId, onSave }) {
 
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-emerald-900">
-                    {selectedProposal.proposalNumber ||
-                      "Selected proposal"}
+                    {selectedProposal.proposalNumber || "Selected proposal"}
                   </p>
 
                   <p className="mt-0.5 text-xs text-emerald-800">
                     {categories.length}{" "}
-                    {categories.length === 1 ? "service" : "services"}{" "}
-                    available in this proposal.
+                    {categories.length === 1 ? "service" : "services"} available
+                    in this proposal.
                   </p>
                 </div>
               </div>
@@ -501,9 +478,7 @@ export default function Createworkflow({ customerId, onSave }) {
               <select
                 id="workflow-category"
                 value={selectedCategory}
-                onChange={(event) =>
-                  setSelectedCategory(event.target.value)
-                }
+                onChange={(event) => setSelectedCategory(event.target.value)}
                 disabled={
                   !selectedProposal ||
                   loadingProposalDetails ||
@@ -537,7 +512,7 @@ export default function Createworkflow({ customerId, onSave }) {
               <Check className="h-4 w-4 shrink-0 text-emerald-600" />
               <span className="text-sm font-medium text-emerald-900">
                 {categories.find(
-                  (category) => category.value === selectedCategory
+                  (category) => category.value === selectedCategory,
                 )?.label || selectedCategory}
               </span>
             </div>
@@ -551,9 +526,7 @@ export default function Createworkflow({ customerId, onSave }) {
             className="block text-sm font-semibold text-gray-800"
           >
             Description
-            <span className="ml-1 font-normal text-gray-400">
-              (Optional)
-            </span>
+            <span className="ml-1 font-normal text-gray-400">(Optional)</span>
           </label>
 
           <textarea
@@ -575,18 +548,13 @@ export default function Createworkflow({ customerId, onSave }) {
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-gray-500" />
-            <h3 className="text-sm font-semibold text-gray-800">
-              Timeline
-            </h3>
+            <h3 className="text-sm font-semibold text-gray-800">Timeline</h3>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Start date */}
             <div>
-              <label
-                htmlFor="workflow-start-date"
-                className={labelClassName}
-              >
+              <label htmlFor="workflow-start-date" className={labelClassName}>
                 Start Date <span className="text-red-500">*</span>
               </label>
 
@@ -594,9 +562,7 @@ export default function Createworkflow({ customerId, onSave }) {
                 id="workflow-start-date"
                 type="date"
                 value={startDate}
-                onChange={(event) =>
-                  handleStartDateChange(event.target.value)
-                }
+                onChange={(event) => handleStartDateChange(event.target.value)}
                 disabled={saving}
                 className={inputClassName}
                 required
@@ -605,10 +571,7 @@ export default function Createworkflow({ customerId, onSave }) {
 
             {/* Duration */}
             <div>
-              <label
-                htmlFor="workflow-duration"
-                className={labelClassName}
-              >
+              <label htmlFor="workflow-duration" className={labelClassName}>
                 Duration <span className="text-red-500">*</span>
               </label>
 
@@ -616,9 +579,7 @@ export default function Createworkflow({ customerId, onSave }) {
                 <select
                   id="workflow-duration"
                   value={duration}
-                  onChange={(event) =>
-                    handleDurationChange(event.target.value)
-                  }
+                  onChange={(event) => handleDurationChange(event.target.value)}
                   disabled={saving}
                   className={`${inputClassName} appearance-none pr-9`}
                 >
@@ -640,8 +601,7 @@ export default function Createworkflow({ customerId, onSave }) {
                   htmlFor="workflow-custom-end-date"
                   className={labelClassName}
                 >
-                  Custom End Date{" "}
-                  <span className="text-red-500">*</span>
+                  Custom End Date <span className="text-red-500">*</span>
                 </label>
 
                 <input
@@ -649,9 +609,7 @@ export default function Createworkflow({ customerId, onSave }) {
                   type="date"
                   value={customEndDate}
                   min={startDate || undefined}
-                  onChange={(event) =>
-                    setCustomEndDate(event.target.value)
-                  }
+                  onChange={(event) => setCustomEndDate(event.target.value)}
                   disabled={saving}
                   className={inputClassName}
                   required
@@ -661,10 +619,7 @@ export default function Createworkflow({ customerId, onSave }) {
 
             {/* Calculated end date */}
             <div className={duration === "custom" ? "sm:col-span-2" : ""}>
-              <label
-                htmlFor="workflow-end-date"
-                className={labelClassName}
-              >
+              <label htmlFor="workflow-end-date" className={labelClassName}>
                 End Date
               </label>
 

@@ -53,7 +53,7 @@ const EditPropsal = ({ id }) => {
     initalServiceFormData,
   );
   const [serviceFormData, setServiceFormData] = useState(initalServiceFormData);
-  const router = useRouter()
+  const router = useRouter();
 
   // this is the main form
   async function handleEditForm(e) {
@@ -75,7 +75,7 @@ const EditPropsal = ({ id }) => {
       const res = await editProposalService(id, filledItems);
       if (res.success) {
         toast.success(res.message || "Proposal Edit successfully");
-        router.push("/dashboard/customer")
+        router.push("/dashboard/customer");
       }
     } catch (error) {
       console.log(error);

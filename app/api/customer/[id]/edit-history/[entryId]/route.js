@@ -18,7 +18,7 @@ export async function GET(req, { params }) {
     if (!doc) {
       return NextResponse.json(
         { success: false, message: "Not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -26,7 +26,7 @@ export async function GET(req, { params }) {
   } catch (err) {
     return NextResponse.json(
       { success: false, message: err.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

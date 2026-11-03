@@ -8,7 +8,7 @@ const ChangeSchema = new mongoose.Schema(
     oldValue: { type: mongoose.Schema.Types.Mixed },
     newValue: { type: mongoose.Schema.Types.Mixed },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const EditHistorySchema = new mongoose.Schema(
@@ -80,7 +80,7 @@ const EditHistorySchema = new mongoose.Schema(
     ipAddress: { type: String, default: "" },
     userAgent: { type: String, default: "" },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 EditHistorySchema.index({ clientId: 1, createdAt: -1 });

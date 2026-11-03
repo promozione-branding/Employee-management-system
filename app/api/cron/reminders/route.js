@@ -163,9 +163,7 @@ export async function GET(req) {
     });
 
     for (const [meetingId, indices] of byMeeting.entries()) {
-      const meeting = await Meeting.findById(meetingId).select(
-        "meetingUpdate",
-      );
+      const meeting = await Meeting.findById(meetingId).select("meetingUpdate");
       if (!meeting) continue;
 
       indices.forEach((i) => {

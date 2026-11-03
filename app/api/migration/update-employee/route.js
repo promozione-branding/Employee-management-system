@@ -20,7 +20,7 @@ export async function GET() {
           "basicDetails.resignedEmployee": false,
           "basicDetails.resignedDate": null,
         },
-      }
+      },
     );
 
     return NextResponse.json({
@@ -35,7 +35,7 @@ export async function GET() {
         success: false,
         message: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

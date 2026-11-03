@@ -14,40 +14,70 @@ export async function POST(req, { params }) {
   try {
     await connectDB();
     const authUser = await getAuthUser(req);
-    if (!authUser) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    if (!authUser)
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
+      );
 
     const { id } = await params;
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ success: false, message: "Invalid id" }, { status: 400 });
+    if (!id || !mongoose.Types.ObjectId.isValid(id))
+      return NextResponse.json(
+        { success: false, message: "Invalid id" },
+        { status: 400 },
+      );
 
     let body;
     try {
       body = await req.json();
     } catch (e) {
-      return NextResponse.json({ success: false, message: "Invalid request payload" }, { status: 400 });
-    }
-    
-    const targetEmail = body.email;
-    if (!targetEmail) return NextResponse.json({ success: false, message: "Target email required" }, { status: 400 });
-    
-    // ✅ Backend validation
-    if (!isValidEmail(targetEmail)) {
-      return NextResponse.json({ success: false, message: "Invalid email format" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Invalid request payload" },
+        { status: 400 },
+      );
     }
 
-    const proposal = await ProposalNew.findById(id).populate({ path: "clientId", select: "name company email phone" });
-    if (!proposal) return NextResponse.json({ success: false, message: "Proposal not found" }, { status: 404 });
-    
-    if (!proposal.clientId) {
-      return NextResponse.json({ success: false, message: "Client data missing" }, { status: 400 });
+    const targetEmail = body.email;
+    if (!targetEmail)
+      return NextResponse.json(
+        { success: false, message: "Target email required" },
+        { status: 400 },
+      );
+
+    // ✅ Backend validation
+    if (!isValidEmail(targetEmail)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid email format" },
+        { status: 400 },
+      );
     }
-    
-    if (!proposal.acceptToken) proposal.acceptToken = crypto.randomBytes(24).toString("hex");
+
+    const proposal = await ProposalNew.findById(id).populate({
+      path: "clientId",
+      select: "name company email phone",
+    });
+    if (!proposal)
+      return NextResponse.json(
+        { success: false, message: "Proposal not found" },
+        { status: 404 },
+      );
+
+    if (!proposal.clientId) {
+      return NextResponse.json(
+        { success: false, message: "Client data missing" },
+        { status: 400 },
+      );
+    }
+
+    if (!proposal.acceptToken)
+      proposal.acceptToken = crypto.randomBytes(24).toString("hex");
     proposal.status = "sent";
     proposal.sentAt = new Date();
     proposal.sentToEmail = targetEmail;
     await proposal.save();
 
-    const baseUrl = process.env.APP_URL || process.env.BACKEND_URL || "http://localhost:3000";
+    const baseUrl =
+      process.env.APP_URL || process.env.BACKEND_URL || "http://localhost:3000";
     const acceptUrl = `${baseUrl}/proposal/accept-new/${proposal.acceptToken}`;
 
     const html = `
@@ -93,9 +123,15 @@ export async function POST(req, { params }) {
       html,
     });
 
-    return NextResponse.json({ success: true, message: "Proposal mail sent" }, { status: 200 });
+    return NextResponse.json(
+      { success: true, message: "Proposal mail sent" },
+      { status: 200 },
+    );
   } catch (error) {
     console.log("sendProposalMail error:", error);
-    return NextResponse.json({ success: false, message: error.message || "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: error.message || "Server error" },
+      { status: 500 },
+    );
   }
 }

@@ -10,7 +10,7 @@ export async function POST(req) {
     if (!authUser) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -18,7 +18,7 @@ export async function POST(req) {
     if (!["admin", "manager"].includes(authUser.role)) {
       return NextResponse.json(
         { success: false, message: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -29,7 +29,7 @@ export async function POST(req) {
     if (!file || typeof file === "string") {
       return NextResponse.json(
         { success: false, message: "file is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -40,7 +40,7 @@ export async function POST(req) {
     console.error("BRAND ASSET UPLOAD ERROR:", error);
     return NextResponse.json(
       { success: false, message: error?.message || "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

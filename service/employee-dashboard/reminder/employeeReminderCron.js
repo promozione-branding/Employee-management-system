@@ -60,8 +60,7 @@ async function checkEmployeeReminders() {
         reminderDoc.employeeId?.basicDetails?.name || "Employee";
 
       // ✅ Clean & validate email (CRITICAL FIX)
-      const cleanEmail =
-        typeof rawEmail === "string" ? rawEmail.trim() : "";
+      const cleanEmail = typeof rawEmail === "string" ? rawEmail.trim() : "";
 
       if (!cleanEmail) {
         console.log("❌ Invalid employee email:", rawEmail);
@@ -71,7 +70,9 @@ async function checkEmployeeReminders() {
       for (const reminder of reminderDoc.reminder) {
         if (!reminder.reminderAt) continue;
 
-        const reminderDate = new Date(reminder.reminderAt).toLocaleDateString("en-CA");
+        const reminderDate = new Date(reminder.reminderAt).toLocaleDateString(
+          "en-CA",
+        );
         const reminderTime = new Date(reminder.reminderAt)
           .toTimeString()
           .slice(0, 5);
@@ -107,7 +108,7 @@ async function checkEmployeeReminders() {
             cleanEmail,
             "⏰ Reminder Notification",
             html,
-            ccEmails
+            ccEmails,
           );
 
           reminder.reminderSend = true;
@@ -116,7 +117,7 @@ async function checkEmployeeReminders() {
           console.log(
             `📨 Sent → To: ${cleanEmail} | CC: ${
               ccEmails.length ? ccEmails.join(", ") : "None"
-            }`
+            }`,
           );
         }
       }

@@ -95,8 +95,6 @@ const Profile = () => {
     }
   }
 
-
-
   useEffect(() => {
     if (!adminDetail?._id) return;
     fetchAdminBasicDetail();

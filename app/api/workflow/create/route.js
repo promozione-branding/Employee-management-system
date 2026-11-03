@@ -20,15 +20,17 @@ export async function POST(req) {
     if (!authUser?._id) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    const me = await User.findById(authUser._id).select("role username email").lean();
+    const me = await User.findById(authUser._id)
+      .select("role username email")
+      .lean();
     if (!me || me.role !== "admin") {
       return NextResponse.json(
         { success: false, message: "Admins only" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -49,13 +51,13 @@ export async function POST(req) {
     if (!customerId || !proposalId || !category || !startDate || !endDate) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (new Date(endDate) < new Date(startDate)) {
       return NextResponse.json(
         { success: false, message: "End date cannot be before start date" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -65,7 +67,7 @@ export async function POST(req) {
     if (!customer) {
       return NextResponse.json(
         { success: false, message: "Customer not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -100,13 +102,13 @@ export async function POST(req) {
 
     return NextResponse.json(
       { success: true, message: "Workflow created", data: workflow },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("[workflow-create]", error);
     return NextResponse.json(
       { success: false, message: error.message || "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

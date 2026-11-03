@@ -47,7 +47,7 @@ export async function getWorkDetailByIdService(id) {
 
 export async function getProjectsByEmployeeIdService(clientId, employeeId) {
   const { data } = await axiosInstance.get(
-    `/api/customer/work/get-client-project/${clientId}/${employeeId}`
+    `/api/customer/work/get-client-project/${clientId}/${employeeId}`,
   );
 
   return data;
@@ -89,4 +89,3 @@ export async function newEmployeeListService() {
   const { data } = await axiosInstance.get("/api/employee/new-employee");
   return data;
 }
-

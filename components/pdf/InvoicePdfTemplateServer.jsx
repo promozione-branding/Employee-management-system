@@ -72,24 +72,24 @@ const InvoicePdfTemplateServer = ({ data }) => {
 
         {/* logo and title */}
         <View style={styles.header}>
-  <Image src="/pdf/logo.png" style={styles.logo} />
+          <Image src="/pdf/logo.png" style={styles.logo} />
 
-  <Text style={styles.title}>
-    {invoiceType === "tds"
-      ? "SUPPLEMENTARY TAX INVOICE(TDS)"
-      : "TAX INVOICE"}
-  </Text>
+          <Text style={styles.title}>
+            {invoiceType === "tds"
+              ? "SUPPLEMENTARY TAX INVOICE(TDS)"
+              : "TAX INVOICE"}
+          </Text>
 
-  <View style={styles.topCompanyDetails}>
-    <Text style={styles.topCompanyName}>
-      Inquiry Bazaar Private Limited
-    </Text>
-    <Text>606, Best Business Park, NSP, New Delhi</Text>
-    <Text>Call us - 011 4260 3232</Text>
-    <Text>Website: www.inquirybazaar.com</Text>
-    <Text>Email - care@inquirybazaar.com</Text>
-  </View>
-</View>
+          <View style={styles.topCompanyDetails}>
+            <Text style={styles.topCompanyName}>
+              Inquiry Bazaar Private Limited
+            </Text>
+            <Text>606, Best Business Park, NSP, New Delhi</Text>
+            <Text>Call us - 011 4260 3232</Text>
+            <Text>Website: www.inquirybazaar.com</Text>
+            <Text>Email - care@inquirybazaar.com</Text>
+          </View>
+        </View>
 
         {/* watermark */}
         <Image src={"/blog/logo2.png"} style={styles.watermark} />
@@ -342,9 +342,7 @@ const InvoicePdfTemplateServer = ({ data }) => {
             governed as per the agreement between the Customer and
           </Text>
 
-          <Text style={{ marginLeft: 6 }}>
-            Inquiry Bazaar Private Limited.
-          </Text>
+          <Text style={{ marginLeft: 6 }}>Inquiry Bazaar Private Limited.</Text>
 
           <Text>
             • This invoice is valid, subject to realization of due payments, as
@@ -360,11 +358,10 @@ const InvoicePdfTemplateServer = ({ data }) => {
           </Text>
 
           <View style={styles.companyDetails}>
-            <Text style={{ fontWeight: "bold" }}>
-              Inquiry Bazaar Pvt Ltd.
-            </Text>
+            <Text style={{ fontWeight: "bold" }}>Inquiry Bazaar Pvt Ltd.</Text>
             <Text>
-              Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi, 110034,
+              Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi,
+              110034,
             </Text>
             <Text>Ph no: +91 - 011 42603232</Text>
             <Text>
@@ -404,7 +401,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     objectFit: "cover",
-    borderRadius: 20
+    borderRadius: 20,
   },
   title: {
     top: 20, // vertically center relative to logo
@@ -480,5 +477,3 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
 });
-
-

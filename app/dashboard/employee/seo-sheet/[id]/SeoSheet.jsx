@@ -34,37 +34,37 @@ const SeoSheet = ({ clientId }) => {
   const [keyLoading, setKeyLoading] = useState(true);
 
   async function createKeywordHandle(e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!keywordFormData.projectId) {
-    return toast.error("Please select a project");
-  }
-  if (!keywordFormData.keyword?.trim()) {
-    return toast.error("Please enter a keyword");
-  }
-  if (!keywordFormData.type) {
-    return toast.error("Please select a type (primary / secondary)");
-  }
-
-  try {
-    const res = await createKeyService(keywordFormData);
-    if (res.success) {
-      setKeywordFormData({
-        projectId: "",
-        keyword: "",
-        type: "",
-        clientId: clientId || "",
-      });
-      toast.success("Keyword create success");
-      fetchKeyHandler();
+    if (!keywordFormData.projectId) {
+      return toast.error("Please select a project");
     }
-  } catch (error) {
-    console.log(error);
-    toast.error(
-      error?.response?.data?.message || "error while creating the keyword",
-    );
+    if (!keywordFormData.keyword?.trim()) {
+      return toast.error("Please enter a keyword");
+    }
+    if (!keywordFormData.type) {
+      return toast.error("Please select a type (primary / secondary)");
+    }
+
+    try {
+      const res = await createKeyService(keywordFormData);
+      if (res.success) {
+        setKeywordFormData({
+          projectId: "",
+          keyword: "",
+          type: "",
+          clientId: clientId || "",
+        });
+        toast.success("Keyword create success");
+        fetchKeyHandler();
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message || "error while creating the keyword",
+      );
+    }
   }
-}
 
   async function fetchKeyHandler() {
     setKeyLoading(true);
@@ -97,7 +97,7 @@ const SeoSheet = ({ clientId }) => {
 
   async function handleDeleteKeyword(id) {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this keyword?"
+      "Are you sure you want to delete this keyword?",
     );
 
     if (!confirmed) return;
@@ -111,9 +111,7 @@ const SeoSheet = ({ clientId }) => {
     } catch (error) {
       console.log(error);
 
-      toast.error(
-        error?.response?.data?.message || "Failed to delete keyword"
-      );
+      toast.error(error?.response?.data?.message || "Failed to delete keyword");
     }
   }
 
@@ -255,7 +253,7 @@ const SeoSheet = ({ clientId }) => {
                             ranking.createdAt ||
                               ranking.updatedAt ||
                               ranking.date ||
-                              item.updatedAt
+                              item.updatedAt,
                           ).toLocaleDateString();
                           return `${ranking.page ?? "N/A"} - ${
                             ranking.position ?? "N/A"
@@ -297,7 +295,7 @@ const SeoSheet = ({ clientId }) => {
                         );
                       })}
                     </React.Fragment>
-                  )
+                  ),
                 )}
               </tbody>
             </table>

@@ -1,53 +1,52 @@
 // service/admin-dashboard/dashboard-api/index.js
 
-
 import axiosInstance from "@/service/axiosInstance";
 
 export async function myClientService() {
   const { data } = await axiosInstance.get(
-    "/api/admin-dashboard-api/my-clients"
+    "/api/admin-dashboard-api/my-clients",
   );
   return data;
 }
 
 export async function allClientCountService() {
   const { data } = await axiosInstance.get(
-    "/api/admin-dashboard-api/all-client-count"
+    "/api/admin-dashboard-api/all-client-count",
   );
   return data;
 }
 
 export async function allEmployeeService() {
   const { data } = await axiosInstance.get(
-    "/api/admin-dashboard-api/total-employee"
+    "/api/admin-dashboard-api/total-employee",
   );
   return data;
 }
 
 export async function teamMemberService() {
   const { data } = await axiosInstance.get(
-    "/api/admin-dashboard-api/team-members"
+    "/api/admin-dashboard-api/team-members",
   );
   return data;
 }
 
 export async function currentMonthDealValueService() {
   const { data } = await axiosInstance.get(
-    "/api/admin-dashboard-api/current-month-deal-value"
+    "/api/admin-dashboard-api/current-month-deal-value",
   );
   return data;
 }
 
 export async function currentMonthRevenueService() {
   const { data } = await axiosInstance.get(
-    "/api/admin-dashboard-api/current-month-revenue"
+    "/api/admin-dashboard-api/current-month-revenue",
   );
   return data;
 }
 
 export async function recentActivityService() {
   const { data } = await axiosInstance.get(
-    "/api/admin-dashboard-api/recent-activity"
+    "/api/admin-dashboard-api/recent-activity",
   );
   return data;
 }
@@ -76,7 +75,7 @@ export async function getTodayMeetingService(params = {}) {
 
 export async function getAdminDetailService() {
   const { data } = await axiosInstance.get(
-    "/api/admin-dashboard-api/get-admin-detail"
+    "/api/admin-dashboard-api/get-admin-detail",
   );
   return data;
 }
@@ -85,14 +84,14 @@ export async function getAdminDetailService() {
 export async function createAdminReminderService(formData) {
   const { data } = await axiosInstance.post(
     "/api/admin-dashboard-api/admin/reminder/create",
-    formData
+    formData,
   );
   return data;
 }
 
 export async function getAdminReminderService(id) {
   const { data } = await axiosInstance.get(
-    `/api/admin-dashboard-api/admin/reminder/get/${id}`
+    `/api/admin-dashboard-api/admin/reminder/get/${id}`,
   );
   return data;
 }
@@ -101,14 +100,14 @@ export async function getAdminReminderService(id) {
 export async function createAdminCalenderService(formData) {
   const { data } = await axiosInstance.post(
     "/api/admin-dashboard-api/admin/calender/create",
-    formData
+    formData,
   );
   return data;
 }
 
 export async function getAdminCalenderService(id) {
   const { data } = await axiosInstance.get(
-    `/api/admin-dashboard-api/admin/calender/get/${id}`
+    `/api/admin-dashboard-api/admin/calender/get/${id}`,
   );
   return data;
 }
@@ -138,7 +137,7 @@ export async function getManagerReminderService(params = {}) {
 export async function createManagerReminderService(payload) {
   const { data } = await axiosInstance.post(
     "/api/manager-dashboard-api/reminder",
-    payload
+    payload,
   );
   return data;
 }

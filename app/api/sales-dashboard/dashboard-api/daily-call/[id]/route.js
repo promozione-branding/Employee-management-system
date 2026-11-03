@@ -17,13 +17,13 @@ export async function GET(req, { params }) {
     const startOfDay = new Date(
       today.getFullYear(),
       today.getMonth(),
-      today.getDate()
+      today.getDate(),
     );
 
     const endOfDay = new Date(
       today.getFullYear(),
       today.getMonth(),
-      today.getDate() + 1
+      today.getDate() + 1,
     );
 
     // ---- AGGREGATION ----
@@ -32,14 +32,13 @@ export async function GET(req, { params }) {
 
       {
         $match: {
-          "meetingUpdate.salesPersonId":
-            new mongoose.Types.ObjectId(id),
+          "meetingUpdate.salesPersonId": new mongoose.Types.ObjectId(id),
 
           "meetingUpdate.updateType": "call",
 
           "meetingUpdate.createdAt": {
             $gte: startOfDay,
-            $lt: endOfDay, 
+            $lt: endOfDay,
           },
         },
       },
@@ -57,7 +56,7 @@ export async function GET(req, { params }) {
         message: "Today's call count",
         totalCalls,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error(error);
@@ -66,7 +65,7 @@ export async function GET(req, { params }) {
         success: false,
         message: "Server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

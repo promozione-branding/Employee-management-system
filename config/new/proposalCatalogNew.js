@@ -782,9 +782,17 @@ export const PROPOSAL_CATALOG = {
     ],
     checklist: ADS_MANAGEMENT_CHECKLIST,
     packages: [
-      { key: "google", label: "Google Ads", prices: { "6m": 60000, "1y": 80000 } },
+      {
+        key: "google",
+        label: "Google Ads",
+        prices: { "6m": 60000, "1y": 80000 },
+      },
       { key: "meta", label: "Meta Ads", prices: { "6m": 30000, "1y": 50000 } },
-      { key: "both", label: "Google + Meta Ads", prices: { "6m": 70000, "1y": 120000 } },
+      {
+        key: "both",
+        label: "Google + Meta Ads",
+        prices: { "6m": 70000, "1y": 120000 },
+      },
       { key: "custom", label: "Custom", custom: true },
     ],
   },
@@ -801,8 +809,16 @@ export const PROPOSAL_CATALOG = {
     ],
     checklist: SOCIAL_MEDIA_CHECKLIST,
     packages: [
-      { key: "basic", label: "Basic", prices: { "1m": 15000, "3m": 40000, "6m": 75000, "1y": 140000 } },
-      { key: "growth", label: "Growth", prices: { "1m": 25000, "3m": 65000, "6m": 120000, "1y": 220000 } },
+      {
+        key: "basic",
+        label: "Basic",
+        prices: { "1m": 15000, "3m": 40000, "6m": 75000, "1y": 140000 },
+      },
+      {
+        key: "growth",
+        label: "Growth",
+        prices: { "1m": 25000, "3m": 65000, "6m": 120000, "1y": 220000 },
+      },
       { key: "custom", label: "Custom", custom: true },
     ],
   },
@@ -818,9 +834,21 @@ export const PROPOSAL_CATALOG = {
     ],
     checklist: SEO_CHECKLIST,
     packages: [
-      { key: "starter", label: "SEO Starter", prices: { "3m": 30000, "6m": 55000, "1y": 100000 } },
-      { key: "growth", label: "SEO Growth", prices: { "3m": 50000, "6m": 90000, "1y": 170000 } },
-      { key: "premium", label: "SEO Premium", prices: { "3m": 80000, "6m": 150000, "1y": 280000 } },
+      {
+        key: "starter",
+        label: "SEO Starter",
+        prices: { "3m": 30000, "6m": 55000, "1y": 100000 },
+      },
+      {
+        key: "growth",
+        label: "SEO Growth",
+        prices: { "3m": 50000, "6m": 90000, "1y": 170000 },
+      },
+      {
+        key: "premium",
+        label: "SEO Premium",
+        prices: { "3m": 80000, "6m": 150000, "1y": 280000 },
+      },
       { key: "custom", label: "Custom", custom: true },
     ],
   },

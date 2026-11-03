@@ -31,9 +31,7 @@ const CallPanel = ({
   const [removing, setRemoving] = useState("");
 
   const [displayName, setDisplayName] = useState(customerName || "Customer");
-  const [primaryPhone, setPrimaryPhone] = useState(
-    digits(customerPhone) || "",
-  );
+  const [primaryPhone, setPrimaryPhone] = useState(digits(customerPhone) || "");
   const [alternates, setAlternates] = useState([]);
 
   // ── load name + phones for this customer ──

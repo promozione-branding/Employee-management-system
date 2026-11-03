@@ -94,8 +94,6 @@
 
 // export default UpdateProposalHistory;
 
-
-
 "use client";
 
 import { getClientProposalUpdateHistory } from "@/service/customer/history";
@@ -135,10 +133,7 @@ const UpdateProposalHistory = ({ proposalId }) => {
       </h2>
 
       {history.changes.map((change) => (
-        <div
-          key={change._id}
-          className="border rounded-xl p-4 bg-gray-50"
-        >
+        <div key={change._id} className="border rounded-xl p-4 bg-gray-50">
           <p className="font-semibold text-gray-700 mb-2">
             Field: {change.field}
           </p>
@@ -151,10 +146,7 @@ const UpdateProposalHistory = ({ proposalId }) => {
                   Old Services
                 </p>
                 {change.oldValue.map((s) => (
-                  <div
-                    key={s._id}
-                    className="p-3 border rounded-lg mb-2"
-                  >
+                  <div key={s._id} className="p-3 border rounded-lg mb-2">
                     <p>{s.serviceTitle}</p>
                     <p className="text-xs">₹{s.finalAmount}</p>
                   </div>
@@ -166,10 +158,7 @@ const UpdateProposalHistory = ({ proposalId }) => {
                   New Services
                 </p>
                 {change.newValue.map((s) => (
-                  <div
-                    key={s._id}
-                    className="p-3 border rounded-lg mb-2"
-                  >
+                  <div key={s._id} className="p-3 border rounded-lg mb-2">
                     <p>{s.serviceTitle}</p>
                     <p className="text-xs">₹{s.finalAmount}</p>
                   </div>
@@ -184,10 +173,7 @@ const UpdateProposalHistory = ({ proposalId }) => {
                 </p>
                 {change.oldValue?.length ? (
                   change.oldValue.map((p) => (
-                    <div
-                      key={p._id}
-                      className="p-3 border rounded-lg mb-2"
-                    >
+                    <div key={p._id} className="p-3 border rounded-lg mb-2">
                       <p className="font-medium">{p.paymentDuration}</p>
                       <p className="text-sm">Amount: ₹{p.paymentAmount}</p>
                     </div>
@@ -203,10 +189,7 @@ const UpdateProposalHistory = ({ proposalId }) => {
                 </p>
                 {change.newValue?.length ? (
                   change.newValue.map((p) => (
-                    <div
-                      key={p._id}
-                      className="p-3 border rounded-lg mb-2"
-                    >
+                    <div key={p._id} className="p-3 border rounded-lg mb-2">
                       <p className="font-medium">{p.paymentDuration}</p>
                       <p className="text-sm">Amount: ₹{p.paymentAmount}</p>
                     </div>
@@ -238,4 +221,3 @@ const UpdateProposalHistory = ({ proposalId }) => {
 };
 
 export default UpdateProposalHistory;
-

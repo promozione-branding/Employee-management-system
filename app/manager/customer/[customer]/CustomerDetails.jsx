@@ -8,12 +8,7 @@ import Link from "next/link";
 import { getCustomerServices } from "@/service/customer";
 import { useActiveCustomerStore } from "@/lib/store/ActiveCustomerStore";
 
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
   UserRound,
@@ -58,11 +53,11 @@ function CustomerDetailsContent({
   });
 
   const [customerLoading, setCustomerLoading] = useState(
-    !customerName || !companyName
+    !customerName || !companyName,
   );
 
   const [activeTab, setActiveTab] = useState(() =>
-    VALID_TABS.includes(requestedTab) ? requestedTab : "Customer"
+    VALID_TABS.includes(requestedTab) ? requestedTab : "Customer",
   );
 
   // Fetch customer information.
@@ -130,11 +125,9 @@ function CustomerDetailsContent({
     });
   };
 
-  const displayedCustomerName =
-    customerDetails?.name || customerName || "";
+  const displayedCustomerName = customerDetails?.name || customerName || "";
 
-  const displayedCompanyName =
-    customerDetails?.company || companyName || "";
+  const displayedCompanyName = customerDetails?.company || companyName || "";
 
   return (
     <div className="min-h-screen w-full bg-[#F2F4F9] p-1 sm:p-1 lg:p-1">
@@ -211,12 +204,11 @@ function CustomerDetailsContent({
                   [scrollbar-width:thin]
                 "
               >
-                {CUSTOMER_TABS.map(
-                  ({ value, label, icon: Icon }) => (
-                    <TabsTrigger
-                      key={value}
-                      value={value}
-                      className="
+                {CUSTOMER_TABS.map(({ value, label, icon: Icon }) => (
+                  <TabsTrigger
+                    key={value}
+                    value={value}
+                    className="
                         relative flex min-h-9 flex-none
                         items-center justify-center gap-1.5
                         whitespace-nowrap rounded-md
@@ -229,17 +221,16 @@ function CustomerDetailsContent({
                         data-[state=active]:text-[#0A2E66]
                         data-[state=active]:shadow-sm
                       "
-                    >
-                      <Icon size={14} className="shrink-0" />
+                  >
+                    <Icon size={14} className="shrink-0" />
 
-                      <span>{label}</span>
+                    <span>{label}</span>
 
-                      {activeTab === value && (
-                        <span className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full bg-[#F27B1E]" />
-                      )}
-                    </TabsTrigger>
-                  )
-                )}
+                    {activeTab === value && (
+                      <span className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full bg-[#F27B1E]" />
+                    )}
+                  </TabsTrigger>
+                ))}
               </TabsList>
             </div>
 

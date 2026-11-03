@@ -44,7 +44,7 @@ const SalesCustomerTab = ({ employeeId }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {clients.map((client) => (
             <Link
-            href={`/dashboard/customer/${client._id}`}
+              href={`/dashboard/customer/${client._id}`}
               key={client._id}
               className="p-4 border rounded-lg shadow-sm bg-white"
             >

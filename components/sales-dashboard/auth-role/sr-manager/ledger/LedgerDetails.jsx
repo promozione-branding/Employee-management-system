@@ -29,7 +29,7 @@ const LedgerDetails = ({ customerId }) => {
   const { entries, openingBalance, _id } = data;
 
   const isDisableManualBtn = entries.filter((item) =>
-    ["upi", "card", "net banking", "cheque"].includes(item?.voucher)
+    ["upi", "card", "net banking", "cheque"].includes(item?.voucher),
   ).length
     ? false
     : true;
@@ -149,7 +149,7 @@ const LedgerDetails = ({ customerId }) => {
                     _id,
                     proposalId,
                   },
-                  idx
+                  idx,
                 ) => (
                   <div key={_id} className="flex  border-b border-black">
                     <div className="w-[5vw] border-l-2 border-black pl-2 pt-2">
@@ -183,7 +183,7 @@ const LedgerDetails = ({ customerId }) => {
                                 ₹ {price?.toLocaleString("en-IN")}
                               </div>
                             </div>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
@@ -200,7 +200,7 @@ const LedgerDetails = ({ customerId }) => {
                       {balance?.toLocaleString("en-IN")}
                     </div>
                   </div>
-                )
+                ),
               )}
             </div>
           </div>

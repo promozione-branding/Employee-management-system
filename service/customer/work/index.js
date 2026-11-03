@@ -49,7 +49,7 @@ export async function getSeoSheetService(id) {
   const { data } = await axiosInstance.get(
     `/api/customer/work/seo-sheet/get-sheet/${id}`,
   );
-  return data; 
+  return data;
 }
 
 // edit ranking key word
@@ -62,7 +62,9 @@ export async function editRankingService(formData) {
 }
 
 export async function deleteKeywordService(id) {
-  const { data } = await axiosInstance.delete(`/api/customer/work/seo-sheet/delete-keyword/${id}`);
+  const { data } = await axiosInstance.delete(
+    `/api/customer/work/seo-sheet/delete-keyword/${id}`,
+  );
 
   return data;
 }

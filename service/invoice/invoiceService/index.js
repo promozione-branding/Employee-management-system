@@ -21,7 +21,7 @@ export async function editInvoiceServiceById(id, formData) {
   try {
     const { data } = await axiosInstance.put(
       `/api/invoice/service/${id}`,
-      formData
+      formData,
     );
 
     if (data?.success) {
@@ -36,8 +36,7 @@ export async function editInvoiceServiceById(id, formData) {
 
 export async function deleteInvoiceServiceById(id) {
   try {
-    const { data } = await axiosInstance.delete(
-      `/api/invoice/service/${id}`);
+    const { data } = await axiosInstance.delete(`/api/invoice/service/${id}`);
 
     if (data?.success) {
       toast.success(data.message || "Invoice Service delete Successfully");

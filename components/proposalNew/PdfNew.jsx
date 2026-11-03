@@ -391,9 +391,7 @@ const HeaderContent = () => (
       </div>
       <div>
         Email:{" "}
-        <a href={`mailto:${COMPANY_DETAILS.email}`}>
-          {COMPANY_DETAILS.email}
-        </a>
+        <a href={`mailto:${COMPANY_DETAILS.email}`}>{COMPANY_DETAILS.email}</a>
       </div>
       <div>
         Website:{" "}
@@ -483,7 +481,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
 
   const totalPaid = partialPayments.reduce(
     (s, p) => s + Number(p.paymentAmount || 0),
-    0
+    0,
   );
 
   const clientAddress = [
@@ -497,13 +495,13 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
     .join(", ");
 
   const usedCategories = [...new Set(items.map((it) => it.category))].filter(
-    (c) => PROPOSAL_CATALOG[c]
+    (c) => PROPOSAL_CATALOG[c],
   );
 
   const hasDeliverables = usedCategories.some((catKey) => {
     const cat = PROPOSAL_CATALOG[catKey];
     return checklist.some((c) =>
-      cat.checklist?.some((s) => s.title === c.section)
+      cat.checklist?.some((s) => s.title === c.section),
     );
   });
 
@@ -767,7 +765,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
               const cat = PROPOSAL_CATALOG[catKey];
               const sectionTitle = DELIVERABLE_SECTION_MAP[catKey] || cat.label;
               const tickedSections = checklist.filter((c) =>
-                cat.checklist?.some((s) => s.title === c.section)
+                cat.checklist?.some((s) => s.title === c.section),
               );
 
               if (!tickedSections.length) return null;

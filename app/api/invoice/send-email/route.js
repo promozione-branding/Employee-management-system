@@ -29,13 +29,13 @@ export async function POST(req) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
     // 2. Generate PDF buffer
     const pdfBuffer = await renderToBuffer(
-      <InvoicePdfTemplateServer data={invoiceFromDb} />
+      <InvoicePdfTemplateServer data={invoiceFromDb} />,
     );
 
     // 3. Nodemailer transporter
@@ -88,7 +88,7 @@ export async function POST(req) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

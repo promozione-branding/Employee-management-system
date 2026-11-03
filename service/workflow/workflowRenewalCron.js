@@ -30,15 +30,15 @@ const DAY = 24 * 60 * 60 * 1000;
 // Each: { key, whenDaysLeft(daysLeft) -> boolean }
 const MILESTONES = [
   // ~3 months before end (90 days window → fire once when crossing 90d)
-  { key: "3m",   match: (d) => d <= 90 && d > 75 },
+  { key: "3m", match: (d) => d <= 90 && d > 75 },
   // 2 months remaining → every 15 days  (~60d → 30d)
   { key: "2m_1", match: (d) => d <= 60 && d > 45 },
   { key: "2m_2", match: (d) => d <= 45 && d > 30 },
   // 1 month remaining → every 7 days  (~30d → 0)
   { key: "1m_1", match: (d) => d <= 30 && d > 23 },
   { key: "1m_2", match: (d) => d <= 23 && d > 16 },
-  { key: "1m_3", match: (d) => d <= 16 && d > 9  },
-  { key: "1m_4", match: (d) => d <= 9  && d >= 0 },
+  { key: "1m_3", match: (d) => d <= 16 && d > 9 },
+  { key: "1m_4", match: (d) => d <= 9 && d >= 0 },
 ];
 
 async function checkWorkflowRenewals() {

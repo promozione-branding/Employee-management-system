@@ -15,7 +15,7 @@ export async function GET(req) {
     if (!token) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -24,13 +24,15 @@ export async function GET(req) {
     await connectDB();
 
     // ✅ FIND EMPLOYEE BY USER ID (CORRECT)
-    const employee = await Employee.findOne({ user: payload.id })
-      .populate("user", "username email role");
+    const employee = await Employee.findOne({ user: payload.id }).populate(
+      "user",
+      "username email role",
+    );
 
     if (!employee) {
       return NextResponse.json(
         { success: false, message: "Employee not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -42,8 +44,7 @@ export async function GET(req) {
     console.error(error);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

@@ -1,11 +1,9 @@
 // app/manager/employee/employee-details/employee-task/sales/sales-task/[id]/SalesTask.jsx
 
-import React from 'react'
+import React from "react";
 
 const SalesTask = () => {
-  return (
-    <div>SalesTask</div>
-  )
-}
+  return <div>SalesTask</div>;
+};
 
-export default SalesTask
+export default SalesTask;

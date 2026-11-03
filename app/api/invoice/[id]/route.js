@@ -27,7 +27,7 @@ export async function PUT(req, { params }) {
           success: false,
           message: "Unauthorized",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -43,7 +43,7 @@ export async function PUT(req, { params }) {
           success: false,
           message: "Invoice does not exist",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -51,18 +51,15 @@ export async function PUT(req, { params }) {
     // FIND CUSTOMER
     // -----------------------------------------
 
-    const customer = await Customer.findById(
-      invoice.clientId
-    );
+    const customer = await Customer.findById(invoice.clientId);
 
     if (!customer) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Customer linked to this invoice was not found",
+          message: "Customer linked to this invoice was not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -76,15 +73,11 @@ export async function PUT(req, { params }) {
     // CHECK INVOICE NUMBER
     // -----------------------------------------
 
-    if (
-      body.invoiceNo &&
-      body.invoiceNo !== invoice.invoiceNo
-    ) {
-      const existingInvoice =
-        await Invoice.findOne({
-          invoiceNo: body.invoiceNo,
-          _id: { $ne: invoice._id },
-        });
+    if (body.invoiceNo && body.invoiceNo !== invoice.invoiceNo) {
+      const existingInvoice = await Invoice.findOne({
+        invoiceNo: body.invoiceNo,
+        _id: { $ne: invoice._id },
+      });
 
       if (existingInvoice) {
         return NextResponse.json(
@@ -92,7 +85,7 @@ export async function PUT(req, { params }) {
             success: false,
             message: `Invoice number ${body.invoiceNo} already exists.`,
           },
-          { status: 409 }
+          { status: 409 },
         );
       }
     }
@@ -102,30 +95,23 @@ export async function PUT(req, { params }) {
     // -----------------------------------------
 
     let serviceSnapshot = invoice.services;
-    let totalAmount = Number(
-      invoice.totalAmount || 0
-    );
+    let totalAmount = Number(invoice.totalAmount || 0);
 
     if (Array.isArray(body.services)) {
       if (body.services.length === 0) {
         return NextResponse.json(
           {
             success: false,
-            message:
-              "Please select at least one service.",
+            message: "Please select at least one service.",
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       // Remove empty and duplicate IDs
       const serviceIds = [
         ...new Set(
-          body.services
-            .filter(Boolean)
-            .map((serviceId) =>
-              String(serviceId)
-            )
+          body.services.filter(Boolean).map((serviceId) => String(serviceId)),
         ),
       ];
 
@@ -133,10 +119,9 @@ export async function PUT(req, { params }) {
         return NextResponse.json(
           {
             success: false,
-            message:
-              "Please select at least one service.",
+            message: "Please select at least one service.",
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -144,28 +129,23 @@ export async function PUT(req, { params }) {
       // FIND ACTUAL INVOICE SERVICES
       // -----------------------------------------
 
-      const services =
-        await InvoiceService.find({
-          _id: {
-            $in: serviceIds,
-          },
-        });
+      const services = await InvoiceService.find({
+        _id: {
+          $in: serviceIds,
+        },
+      });
 
       // -----------------------------------------
       // CHECK ALL SERVICES EXIST
       // -----------------------------------------
 
-      if (
-        services.length !==
-        serviceIds.length
-      ) {
+      if (services.length !== serviceIds.length) {
         return NextResponse.json(
           {
             success: false,
-            message:
-              "One or more selected services were not found.",
+            message: "One or more selected services were not found.",
           },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -173,108 +153,78 @@ export async function PUT(req, { params }) {
       // CREATE SNAPSHOT
       // -----------------------------------------
 
-      serviceSnapshot = services.map(
-        (service) => ({
-          serviceName:
-            service.serviceName,
+      serviceSnapshot = services.map((service) => ({
+        serviceName: service.serviceName,
 
-          HSN: service.HSN,
+        HSN: service.HSN,
 
-          price: Number(
-            service.price || 0
-          ),
-        })
-      );
+        price: Number(service.price || 0),
+      }));
 
       // -----------------------------------------
       // CALCULATE TOTAL
       // -----------------------------------------
 
-      const serviceTotal =
-        serviceSnapshot.reduce(
-          (total, service) =>
-            total +
-            Number(service.price || 0),
-          0
-        );
+      const serviceTotal = serviceSnapshot.reduce(
+        (total, service) => total + Number(service.price || 0),
+        0,
+      );
 
       // 18% GST
-      const taxAmount =
-        serviceTotal * 0.18;
+      const taxAmount = serviceTotal * 0.18;
 
-      totalAmount =
-        serviceTotal + taxAmount;
+      totalAmount = serviceTotal + taxAmount;
     }
 
     // -----------------------------------------
     // UPDATE INVOICE
     // -----------------------------------------
 
-    invoice.clientName =
-      body.clientName ??
-      invoice.clientName;
+    invoice.clientName = body.clientName ?? invoice.clientName;
 
-    invoice.clientCompany =
-      body.clientCompany ??
-      invoice.clientCompany;
+    invoice.clientCompany = body.clientCompany ?? invoice.clientCompany;
 
-    invoice.clientAddress =
-      body.clientAddress ??
-      invoice.clientAddress;
+    invoice.clientAddress = body.clientAddress ?? invoice.clientAddress;
 
-    invoice.GSTIN =
-      body.GSTIN ?? invoice.GSTIN;
+    invoice.GSTIN = body.GSTIN ?? invoice.GSTIN;
 
-    invoice.tanNo =
-      body.tanNo ?? invoice.tanNo;
+    invoice.tanNo = body.tanNo ?? invoice.tanNo;
 
-    invoice.taxType =
-      body.taxType ?? invoice.taxType;
+    invoice.taxType = body.taxType ?? invoice.taxType;
 
-    invoice.invoiceDate =
-      body.invoiceDate ??
-      invoice.invoiceDate;
+    invoice.invoiceDate = body.invoiceDate ?? invoice.invoiceDate;
 
-    invoice.invoiceNo =
-      body.invoiceNo ??
-      invoice.invoiceNo;
+    invoice.invoiceNo = body.invoiceNo ?? invoice.invoiceNo;
 
-    invoice.services =
-      serviceSnapshot;
+    invoice.services = serviceSnapshot;
 
-    invoice.totalAmount =
-      totalAmount;
+    invoice.totalAmount = totalAmount;
 
     // -----------------------------------------
     // SAVE
     // -----------------------------------------
 
-    const editedInvoice =
-      await invoice.save();
+    const editedInvoice = await invoice.save();
 
     // -----------------------------------------
     // AUDIT LOG
     // -----------------------------------------
 
-    const { _id: auditId } =
-      await createAuditLog({
-        clientId:
-          editedInvoice.clientId,
+    const { _id: auditId } = await createAuditLog({
+      clientId: editedInvoice.clientId,
 
-        entityType: "Invoice",
+      entityType: "Invoice",
 
-        entityId:
-          editedInvoice._id,
+      entityId: editedInvoice._id,
 
-        action: "UPDATE",
+      action: "UPDATE",
 
-        oldData,
+      oldData,
 
-        newData:
-          editedInvoice.toObject(),
+      newData: editedInvoice.toObject(),
 
-        userId: authUser._id,
-      });
+      userId: authUser._id,
+    });
 
     // -----------------------------------------
     // CUSTOMER HISTORY
@@ -291,42 +241,31 @@ export async function PUT(req, { params }) {
     return NextResponse.json(
       {
         success: true,
-        message:
-          "Invoice updated successfully",
+        message: "Invoice updated successfully",
         data: editedInvoice,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
-    console.error(
-      "UPDATE INVOICE API ERROR:",
-      error
-    );
+    console.error("UPDATE INVOICE API ERROR:", error);
 
-    if (
-      error.code === 11000 &&
-      error.keyPattern?.invoiceNo
-    ) {
+    if (error.code === 11000 && error.keyPattern?.invoiceNo) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Invoice number already exists.",
+          message: "Invoice number already exists.",
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
-    if (
-      error.name === "CastError"
-    ) {
+    if (error.name === "CastError") {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Invalid invoice ID.",
+          message: "Invalid invoice ID.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -336,7 +275,7 @@ export async function PUT(req, { params }) {
         message: "Server error",
         error: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -355,7 +294,7 @@ export async function GET(req, context) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -373,7 +312,7 @@ export async function GET(req, context) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
@@ -390,7 +329,7 @@ export async function DELETE(request, { params }) {
           success: false,
           message: "Invoice ID is required.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -406,7 +345,7 @@ export async function DELETE(request, { params }) {
           success: false,
           message: "Invoice not found.",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -421,14 +360,11 @@ export async function DELETE(request, { params }) {
     // -----------------------------------------
 
     if (invoice.clientId) {
-      await Customer.findByIdAndUpdate(
-        invoice.clientId,
-        {
-          $pull: {
-            invoices: invoice._id,
-          },
-        }
-      );
+      await Customer.findByIdAndUpdate(invoice.clientId, {
+        $pull: {
+          invoices: invoice._id,
+        },
+      });
     }
 
     return NextResponse.json(
@@ -439,7 +375,7 @@ export async function DELETE(request, { params }) {
           invoiceId: invoice._id,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("DELETE INVOICE ERROR:", error);
@@ -447,11 +383,9 @@ export async function DELETE(request, { params }) {
     return NextResponse.json(
       {
         success: false,
-        message:
-          error?.message ||
-          "Failed to delete invoice.",
+        message: error?.message || "Failed to delete invoice.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

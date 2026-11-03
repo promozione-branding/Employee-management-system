@@ -1,6 +1,5 @@
 // components/employee-dashboard/authRole/executive/client/ClientListExecutive.jsx
 
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -59,7 +58,7 @@ const ClientListExecutive = () => {
         setClients([]);
         toast.error(
           error?.response?.data?.message ||
-            "Error while getting the client list"
+            "Error while getting the client list",
         );
       } finally {
         if (isMounted) setLoading(false);
@@ -119,11 +118,11 @@ const ClientListExecutive = () => {
 
     if (!query) return true;
 
-    return [
-      client?.name,
-      client?.company,
-      client?.website,
-    ].some((value) => String(value || "").toLowerCase().includes(query));
+    return [client?.name, client?.company, client?.website].some((value) =>
+      String(value || "")
+        .toLowerCase()
+        .includes(query),
+    );
   });
 
   if (loading) {
@@ -396,10 +395,7 @@ const ClientListExecutive = () => {
                       </div>
 
                       <div className="flex items-center gap-2.5">
-                        <Clock
-                          size={16}
-                          className="shrink-0 text-[#8A92A6]"
-                        />
+                        <Clock size={16} className="shrink-0 text-[#8A92A6]" />
                         <div>
                           <p className="text-xs font-medium text-[#8A92A6]">
                             Last updated

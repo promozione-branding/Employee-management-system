@@ -126,7 +126,7 @@ const ProposalTabNew = ({ customerId }) => {
     if (amt <= 0) return toast.error("Amount must be greater than 0");
     if (amt > balance)
       return toast.error(
-        `Amount cannot exceed balance ₹ ${balance.toLocaleString("en-IN")}`
+        `Amount cannot exceed balance ₹ ${balance.toLocaleString("en-IN")}`,
       );
     setField("partialPayments", [
       ...partialPayments,
@@ -143,7 +143,7 @@ const ProposalTabNew = ({ customerId }) => {
   const handleRemovePayment = (idx) => {
     setField(
       "partialPayments",
-      partialPayments.filter((_, i) => i !== idx)
+      partialPayments.filter((_, i) => i !== idx),
     );
   };
 
@@ -152,7 +152,7 @@ const ProposalTabNew = ({ customerId }) => {
     if (exists) {
       setField(
         "deliveredMetrics",
-        deliveredMetrics.filter((m) => m.label !== label)
+        deliveredMetrics.filter((m) => m.label !== label),
       );
     } else {
       setField("deliveredMetrics", [...deliveredMetrics, { label, count: 0 }]);
@@ -163,9 +163,7 @@ const ProposalTabNew = ({ customerId }) => {
     const n = Math.max(0, Number(value) || 0);
     setField(
       "deliveredMetrics",
-      deliveredMetrics.map((m) =>
-        m.label === label ? { ...m, count: n } : m
-      )
+      deliveredMetrics.map((m) => (m.label === label ? { ...m, count: n } : m)),
     );
   };
 
@@ -203,8 +201,8 @@ const ProposalTabNew = ({ customerId }) => {
     if (grandTotal > 0 && Math.abs(totalPaid - grandTotal) > 0.01)
       return toast.error(
         `Partial payments must total ₹${grandTotal.toLocaleString(
-          "en-IN"
-        )}. Remaining: ₹${balance.toLocaleString("en-IN")}`
+          "en-IN",
+        )}. Remaining: ₹${balance.toLocaleString("en-IN")}`,
       );
 
     try {
@@ -231,14 +229,14 @@ const ProposalTabNew = ({ customerId }) => {
 
       if (res.success) {
         toast.success(
-          editingProposal ? "Proposal updated" : "Proposal created"
+          editingProposal ? "Proposal updated" : "Proposal created",
         );
         resetForm();
         setRefreshKey((k) => k + 1);
       } else {
         toast.error(
           res.message ||
-            (editingProposal ? "Failed to update" : "Failed to create")
+            (editingProposal ? "Failed to update" : "Failed to create"),
         );
       }
     } catch (err) {
@@ -357,7 +355,7 @@ const ProposalTabNew = ({ customerId }) => {
                     <option key={d} value={d}>
                       {d}
                     </option>
-                  )
+                  ),
                 )}
                 <option value="__custom_text__">Custom (enter days)</option>
                 <option value="__custom_date__">Custom Date</option>
@@ -531,11 +529,7 @@ const ProposalTabNew = ({ customerId }) => {
           size="lg"
           className="min-w-[240px]"
         >
-          {saving
-            ? "Saving…"
-            : isEditing
-            ? "Update Proposal"
-            : "Save Proposal"}
+          {saving ? "Saving…" : isEditing ? "Update Proposal" : "Save Proposal"}
         </Button>
         {isEditing && (
           <Button variant="outline" onClick={resetForm}>

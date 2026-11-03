@@ -17,7 +17,7 @@ const invoiceServiceSchema = new Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const InvoiceService =

@@ -18,7 +18,6 @@ export async function GET(req, { params }) {
       action: "DELETE",
     }).select("changes");
 
-
     return NextResponse.json(
       {
         success: true,

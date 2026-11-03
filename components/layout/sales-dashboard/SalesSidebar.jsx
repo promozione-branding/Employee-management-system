@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -95,9 +94,7 @@ const SalesSidebar = () => {
       setMobileOpen(false);
       router.push("/login");
     } catch (error) {
-      toast.error(
-        error?.response?.data?.message || "Logout failed"
-      );
+      toast.error(error?.response?.data?.message || "Logout failed");
     } finally {
       setLoggingOut(false);
     }
@@ -121,9 +118,7 @@ const SalesSidebar = () => {
         aria-label="Close navigation"
         onClick={() => setMobileOpen(false)}
         className={`fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-[2px] transition-opacity duration-300 md:hidden ${
-          mobileOpen
-            ? "visible opacity-100"
-            : "invisible opacity-0"
+          mobileOpen ? "visible opacity-100" : "invisible opacity-0"
         }`}
       />
 
@@ -147,9 +142,7 @@ const SalesSidebar = () => {
         {/* Brand */}
         <div
           className={`flex h-[66px] shrink-0 items-center border-b border-white/10 ${
-            showLabels
-              ? "justify-between px-5"
-              : "justify-center px-2"
+            showLabels ? "justify-between px-5" : "justify-center px-2"
           }`}
         >
           <Link
@@ -208,11 +201,7 @@ const SalesSidebar = () => {
                 key={link.href}
                 href={link.href}
                 target={link.external ? "_blank" : undefined}
-                rel={
-                  link.external
-                    ? "noopener noreferrer"
-                    : undefined
-                }
+                rel={link.external ? "noopener noreferrer" : undefined}
                 title={!showLabels ? link.label : undefined}
                 aria-current={active ? "page" : undefined}
                 onClick={() => setMobileOpen(false)}
@@ -246,16 +235,11 @@ const SalesSidebar = () => {
                     }
                   `}
                 >
-                  <Icon
-                    size={20}
-                    strokeWidth={active ? 2.3 : 1.8}
-                  />
+                  <Icon size={20} strokeWidth={active ? 2.3 : 1.8} />
                 </span>
 
                 {showLabels && (
-                  <span className="min-w-0 flex-1 truncate">
-                    {link.label}
-                  </span>
+                  <span className="min-w-0 flex-1 truncate">{link.label}</span>
                 )}
 
                 {showLabels && active && (
@@ -307,9 +291,7 @@ const SalesSidebar = () => {
             </span>
 
             {showLabels && (
-              <span>
-                {loggingOut ? "Logging out..." : "Sign out"}
-              </span>
+              <span>{loggingOut ? "Logging out..." : "Sign out"}</span>
             )}
           </button>
 

@@ -1,6 +1,5 @@
 // config/employeeDesignation.js
 
-
 export const EMPLOYEE_DESIGNATION_OPTIONS = [
   { id: "SEO", label: "SEO" },
   { id: "ADS_MANAGER", label: "Ads Manager" },
@@ -33,9 +32,7 @@ export const EMPLOYEE_SUB_DESIGNATION_MAP = {
     { id: "META_ADS", label: "Meta Ads" },
     { id: "PERFORMANCE_MARKETER", label: "Performance Marketer" },
   ],
-  SALES: [
-    { id: "BUSINESS_DEVELOPMENT", label: "Business Development" },
-  ],
+  SALES: [{ id: "BUSINESS_DEVELOPMENT", label: "Business Development" }],
   OTHER: [{ id: "OTHER", label: "Other" }],
 };
 
