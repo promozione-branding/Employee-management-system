@@ -6,9 +6,10 @@ import GridForm from "@/components/layout/GridForm";
 import Loading from "@/components/layout/Loading";
 import {
   createEmployeeProfile,
+  deleteNewEmployeeService,
   newEmployeeListService,
 } from "@/service/employee-dashboard/employee";
-import { SmilePlus } from "lucide-react";
+import { SmilePlus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import {
@@ -27,6 +28,7 @@ const NewEmployee = () => {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState("");
   const [newEmployeeList, setNewEmployeeList] = useState([]);
+  const [deletingId, setDeletingId] = useState("");
   const [formData, setFormData] = useState(initialEmployeesBasicDetails);
   const employeeBasicDetailsFormControl = getEmployeeBasicDetailsFormControl(
     formData.designation,
@@ -60,6 +62,35 @@ const NewEmployee = () => {
     } catch (error) {
       console.log(error);
       toast.error("Error while fetch new employee");
+    }
+  }
+
+  async function handleDelete(item) {
+    const name = item.username?.split("@")[0] || item.email || "this employee";
+
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${name}? This will permanently delete the employee and cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    setDeletingId(item._id);
+
+    try {
+      const res = await deleteNewEmployeeService(item._id);
+      if (res.success) {
+        toast.success(res?.message || "Employee deleted successfully");
+        fetchNewEmployee();
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message || "Error while deleting the employee",
+      );
+    } finally {
+      setDeletingId("");
     }
   }
 
@@ -160,6 +191,16 @@ const NewEmployee = () => {
                   </DialogContent>
                 </Dialog>
               </span>
+              <button
+                type="button"
+                onClick={() => handleDelete(item)}
+                disabled={deletingId === item._id}
+                title="Delete employee"
+                aria-label={`Delete ${item.username || item.email || "employee"}`}
+                className="p-2 rounded-full bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Trash2 size={20} />
+              </button>
             </div>
           </div>
         ))

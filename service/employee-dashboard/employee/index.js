@@ -89,3 +89,8 @@ export async function newEmployeeListService() {
   const { data } = await axiosInstance.get("/api/employee/new-employee");
   return data;
 }
+
+export async function deleteNewEmployeeService(id) {
+  const { data } = await axiosInstance.delete(`/api/user/${id}`);
+  return data;
+}

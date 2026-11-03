@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import axiosInstance from "@/service/axiosInstance";
+import ThemeToggle from "@/components/layout/ThemeToggle";
 import { useAdminStore } from "@/lib/store/AdminStore";
 import { useActiveCustomerStore } from "@/lib/store/ActiveCustomerStore";
 
@@ -428,6 +429,9 @@ const SideBar = ({ children }) => {
           </div>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+            {/* Theme toggle */}
+            <ThemeToggle />
+
             {/* Search placeholder for future integration */}
             <button
               type="button"

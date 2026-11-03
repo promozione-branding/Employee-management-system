@@ -10,6 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/service/axiosInstance";
+import ThemeToggle from "@/components/layout/ThemeToggle";
 import { useEmployeeStore } from "@/lib/store/EmployeeStore";
 import { noticationAnnouncementService } from "@/service/employee-dashboard/announcement";
 
@@ -70,6 +71,8 @@ const EmployeeNavbar = () => {
       </div>
 
       <div className="flex items-center gap-4">
+        <ThemeToggle />
+
         <div className="relative hidden md:block">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
           <input

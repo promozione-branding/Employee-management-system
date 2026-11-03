@@ -22,6 +22,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import axiosInstance from "@/service/axiosInstance";
+import ThemeToggle, { useTheme } from "@/components/layout/ThemeToggle";
 import { useSalesEmployeeStore } from "@/lib/store/salesEmployeeStore";
 import { useActiveCustomerStore } from "@/lib/store/ActiveCustomerStore";
 
@@ -32,7 +33,8 @@ const SalesNavbar = () => {
 
   const { employee, clearEmployee } = useSalesEmployeeStore();
   const { activeCustomer, clearActiveCustomer } = useActiveCustomerStore();
-  const [lightMode, setLightMode] = useState(true);
+  const { theme, toggleTheme } = useTheme();
+  const lightMode = theme !== "dark";
 
   // Clear active customer when not on a client detail page
   useEffect(() => {
@@ -114,6 +116,9 @@ const SalesNavbar = () => {
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+        {/* Theme toggle */}
+        <ThemeToggle />
+
         {/* Search */}
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
@@ -216,7 +221,7 @@ const SalesNavbar = () => {
 
                   <div
                     className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm text-slate-700 transition hover:bg-blue-50 hover:text-[#0A2E66] cursor-pointer"
-                    onClick={() => setLightMode((prev) => !prev)}
+                    onClick={toggleTheme}
                   >
                     <div className="flex items-center gap-3">
                       <div className="relative h-5 w-5 flex items-center justify-center">

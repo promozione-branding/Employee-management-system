@@ -1,4 +1,3 @@
-// components/admin-dashboard/dashboard/KPI.jsx
 
 "use client";
 
@@ -37,7 +36,8 @@ const KPI_CARDS = [
     chartPath:
       "M0 45 L32 31 L64 39 L96 42 L128 24 L160 17 L192 28 L224 23 L256 5 L288 5 L320 14 L352 2",
     key: "dealValue",
-    getValue: (data) => `₹${data.dealValue.toLocaleString("en-IN")}`,
+    getValue: (data) =>
+      `₹${Number(data.dealValue || 0).toLocaleString("en-IN")}`,
   },
   {
     title: "Total customers",
@@ -50,7 +50,8 @@ const KPI_CARDS = [
     chartPath:
       "M0 40 L32 36 L64 45 L96 37 L128 21 L160 24 L192 32 L224 19 L256 7 L288 14 L320 16 L352 0",
     key: "clientCount",
-    getValue: (data) => data.clientCount.toLocaleString("en-IN"),
+    getValue: (data) =>
+      Number(data.clientCount || 0).toLocaleString("en-IN"),
     href: "/dashboard/customer",
   },
   {
@@ -64,7 +65,8 @@ const KPI_CARDS = [
     chartPath:
       "M0 36 L32 40 L64 45 L96 32 L128 23 L160 31 L192 30 L224 14 L256 11 L288 20 L320 12 L352 0",
     key: "revenue",
-    getValue: (data) => `₹${data.revenue.toLocaleString("en-IN")}`,
+    getValue: (data) =>
+      `₹${Number(data.revenue || 0).toLocaleString("en-IN")}`,
   },
   {
     title: "Total employees",
@@ -77,7 +79,8 @@ const KPI_CARDS = [
     chartPath:
       "M0 0 L32 16 L64 20 L96 9 L128 17 L160 33 L192 30 L224 21 L256 35 L288 48 L320 38 L352 36",
     key: "employeeCount",
-    getValue: (data) => data.employeeCount.toLocaleString("en-IN"),
+    getValue: (data) =>
+      Number(data.employeeCount || 0).toLocaleString("en-IN"),
     href: "/dashboard/employee",
   },
 ];
@@ -112,7 +115,10 @@ function Sparkline({ path, color, id }) {
         </defs>
 
         {/* Gradient area */}
-        <path d={`${path} L352 52 L0 52 Z`} fill={`url(#gradient-${id})`} />
+        <path
+          d={`${path} L352 52 L0 52 Z`}
+          fill={`url(#gradient-${id})`}
+        />
 
         {/* Chart line */}
         <path
@@ -141,19 +147,20 @@ function KpiCard({ card, value }) {
         group relative flex h-full min-h-[277px]
         flex-col overflow-hidden
         rounded-[25px]
-        border border-[#E1E7F0]
-        bg-white
-        p-5
+        border border-[#E1E7F0] dark:border-slate-700
+        bg-white dark:bg-slate-900
+        p-5 sm:p-6
         shadow-[0_3px_10px_rgba(10,46,102,0.055)]
+        dark:shadow-[0_4px_16px_rgba(0,0,0,0.16)]
         transition-all duration-300 ease-out
         hover:-translate-y-1
-        hover:border-[#D4DEEC]
+        hover:border-[#D4DEEC] dark:hover:border-slate-600
         hover:shadow-[0_12px_28px_rgba(10,46,102,0.10)]
-        sm:p-6
+        dark:hover:shadow-[0_12px_28px_rgba(0,0,0,0.30)]
       "
     >
       {/* Top row: Icon and trend */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between gap-3">
         {/* Icon */}
         <div
           className="
@@ -161,16 +168,12 @@ function KpiCard({ card, value }) {
             items-center justify-center
             rounded-[16px]
           "
-          style={{
-            backgroundColor: card.iconBg,
-          }}
+          style={{ backgroundColor: card.iconBg }}
         >
           <Icon
             size={24}
             strokeWidth={2}
-            style={{
-              color: card.iconColor,
-            }}
+            style={{ color: card.iconColor }}
           />
         </div>
 
@@ -183,7 +186,7 @@ function KpiCard({ card, value }) {
             ${
               card.trendType === "up"
                 ? "bg-[#E4F5EC] text-[#078451]"
-                : "bg-[#FDEAEA] text-[#E53935]"
+                : "bg-[#FDEAEA] text-[#C92D2D]"
             }
           `}
         >
@@ -198,18 +201,18 @@ function KpiCard({ card, value }) {
       </div>
 
       {/* Card title */}
-      <p className="mb-1.5 text-[16px] font-medium tracking-tight text-[#56647D]">
+      <p className="mb-1.5 text-[16px] font-medium tracking-tight text-[#56647D] dark:text-slate-300">
         {card.title}
       </p>
 
-      {/* KPI Value */}
+      {/* KPI value */}
       <h3
         className="
           break-words
           text-[34px] font-bold
           leading-[1.2]
           tracking-[-1.2px]
-          text-[#0C1B35]
+          text-[#0C1B35] dark:text-white
           sm:text-[38px]
         "
       >
@@ -217,16 +220,20 @@ function KpiCard({ card, value }) {
       </h3>
 
       {/* Comparison text */}
-      <p className="mt-1 text-[14px] font-normal text-[#8491A8]">
+      <p className="mt-1 text-[14px] font-normal text-[#8491A8] dark:text-slate-400">
         vs last month
       </p>
 
       {/* Bottom chart */}
-      <Sparkline path={card.chartPath} color={card.chartColor} id={card.key} />
+      <Sparkline
+        path={card.chartPath}
+        color={card.chartColor}
+        id={card.key}
+      />
     </div>
   );
 
-  // Preserve existing navigation functionality
+  // Preserve existing navigation functionality.
   if (card.href) {
     return (
       <Link
@@ -238,6 +245,8 @@ function KpiCard({ card, value }) {
           focus-visible:ring-2
           focus-visible:ring-[#F27B1E]
           focus-visible:ring-offset-2
+          focus-visible:ring-offset-white
+          dark:focus-visible:ring-offset-slate-950
         "
       >
         {content}
@@ -258,7 +267,7 @@ export default function KPI() {
   const [totalDealValue, setTotalDealValue] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
 
-  // Existing API functionality preserved
+  // Existing API functionality preserved.
   useEffect(() => {
     let active = true;
 
@@ -326,7 +335,11 @@ export default function KPI() {
       "
     >
       {KPI_CARDS.map((card) => (
-        <KpiCard key={card.key} card={card} value={card.getValue(data)} />
+        <KpiCard
+          key={card.key}
+          card={card}
+          value={card.getValue(data)}
+        />
       ))}
     </section>
   );

@@ -4,15 +4,8 @@
 
 import { teamMemberService } from "@/service/admin-dashboard/dashboard-api";
 
-import {
-  UsersRound,
-  UserRound,
-  ArrowUpRight,
-  Users,
-  Search,
-} from "lucide-react";
+import { UsersRound, ArrowUpRight, Search } from "lucide-react";
 
-import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -52,21 +45,6 @@ const DEPARTMENTS = {
 };
 
 // ========================================
-// AVATAR COLORS
-// ========================================
-
-const AVATAR_COLORS = [
-  "#C93608",
-  "#F47B20",
-  "#087C99",
-  "#BD4F00",
-  "#0A2E66",
-  "#2C528B",
-  "#16865D",
-  "#7050A8",
-];
-
-// ========================================
 // HELPERS
 // ========================================
 
@@ -86,16 +64,6 @@ const getDepartment = (designation = "") => {
   }
 
   return "other";
-};
-
-const getInitials = (name = "Employee") => {
-  return name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word.charAt(0).toUpperCase())
-    .join("");
 };
 
 // ========================================
@@ -118,20 +86,16 @@ const Employees = () => {
       const res = await teamMemberService();
 
       if (res?.success) {
-        const formattedEmployees = (res?.data || []).map((employee, index) => ({
+        const formattedEmployees = (res?.data || []).map((employee) => ({
           _id: employee?._id,
 
           name: employee?.basicDetails?.name || "Employee",
 
           designation: employee?.basicDetails?.designation || "Employee",
 
-          profileImage: employee?.basicDetails?.profileImage || null,
-
           // Use online status only if the API provides it.
           isOnline:
             employee?.isOnline ?? employee?.basicDetails?.isOnline ?? false,
-
-          avatarColor: AVATAR_COLORS[index % AVATAR_COLORS.length],
         }));
 
         setEmployees(formattedEmployees);
@@ -283,9 +247,7 @@ const Employees = () => {
                 p-3
               "
             >
-              <Skeleton circle height={52} width={52} />
-
-              <Skeleton height={13} width={85} className="mt-3" />
+              <Skeleton height={13} width={85} />
 
               <Skeleton
                 height={21}
@@ -539,7 +501,7 @@ const Employees = () => {
                 className="
                   group relative
                   flex min-w-0
-                  min-h-[137px]
+                  min-h-[84px]
                   flex-col
                   items-center
                   justify-center
@@ -571,53 +533,6 @@ const Employees = () => {
                   `}
                   title={employee.isOnline ? "Online" : "Offline"}
                 />
-
-                {/* Avatar */}
-                <div
-                  className="
-                    relative
-                    mb-2.5
-                    flex h-[52px]
-                    w-[52px]
-                    shrink-0
-                    items-center
-                    justify-center
-                    overflow-hidden
-                    rounded-full
-                    text-white
-                    transition-transform duration-300
-                    group-hover:scale-105
-                  "
-                  style={{
-                    backgroundColor: employee.avatarColor,
-                  }}
-                >
-                  {employee.profileImage ? (
-                    <Image
-                      src={employee.profileImage}
-                      alt={employee.name}
-                      fill
-                      sizes="52px"
-                      className="
-                        object-cover
-                        transition-transform
-                        duration-300
-                        group-hover:scale-110
-                      "
-                    />
-                  ) : (
-                    <span
-                      className="
-                      text-[17px]
-                      font-bold
-                      tracking-tight
-                      text-white
-                    "
-                    >
-                      {getInitials(employee.name)}
-                    </span>
-                  )}
-                </div>
 
                 {/* Employee name */}
                 <h3

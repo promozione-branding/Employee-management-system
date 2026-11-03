@@ -201,6 +201,165 @@
 }
 
 /* =========================================
+   DARK REMAP — HARDCODED LIGHT SURFACES
+   Most ERP screens use fixed light utilities
+   (bg-white, bg-gray-50, text-slate-800...).
+   Remap the common ones under .dark so the
+   theme toggle restyles the whole app.
+========================================= */
+
+/* Page + card surfaces (white / near-white) */
+.dark .bg-white,
+.dark .bg-\[\#FAFBFD\],
+.dark .bg-\[\#F9FAFD\],
+.dark .bg-\[\#F8FAFD\] {
+  background-color: var(--card);
+}
+
+.dark .bg-white\/95 {
+  background-color: rgb(13 33 64 / 95%);
+}
+
+.dark .bg-\[\#F2F4F9\],
+.dark .bg-\[\#F7F8FC\],
+.dark .bg-\[\#F7F9FC\] {
+  background-color: var(--background);
+}
+
+/* Muted surfaces: chips, table headers, inputs, icon tiles */
+.dark .bg-gray-50,
+.dark .bg-slate-50,
+.dark .bg-blue-50,
+.dark .bg-gray-50\/50,
+.dark .bg-slate-50\/80,
+.dark .bg-\[\#F0F3F8\],
+.dark .bg-\[\#E9EFF9\],
+.dark .bg-\[\#EAF0FA\] {
+  background-color: var(--muted);
+}
+
+.dark .bg-gray-100,
+.dark .bg-slate-100,
+.dark .bg-gray-200,
+.dark .bg-slate-200 {
+  background-color: var(--secondary);
+}
+
+/* Borders + dividers */
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300,
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-300,
+.dark .border-blue-100,
+.dark .border-blue-200,
+.dark .border-\[\#E1E7F0\],
+.dark .border-\[\#E1E7F1\],
+.dark .border-\[\#E3E7F0\],
+.dark .border-\[\#E3E8F0\],
+.dark .border-\[\#E8EDF5\],
+.dark .border-\[\#E9EDF4\],
+.dark .border-\[\#EDF0F5\],
+.dark .border-\[\#E0E5EF\],
+.dark .border-\[\#D5DEEF\],
+.dark .border-\[\#DCE5F5\],
+.dark .border-\[\#DCE3EF\],
+.dark .border-\[\#DDE3ED\],
+.dark .border-\[\#C8D6EA\],
+.dark .border-\[\#C8D3E5\] {
+  border-color: var(--border);
+}
+
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--border);
+}
+
+.dark .ring-blue-100 {
+  --tw-ring-color: var(--border);
+}
+
+/* Primary ink: headings + strong text must stay readable on dark */
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-\[\#0F1B33\],
+.dark .text-\[\#0A2E66\],
+.dark .text-\[\#10346b\],
+.dark .text-\[\#14213D\],
+.dark .text-\[\#172B4D\],
+.dark .text-\[\#26344D\],
+.dark .text-\[\#34445F\] {
+  color: var(--foreground);
+}
+
+.dark .text-gray-700,
+.dark .text-slate-700 {
+  color: #dbe3f0;
+}
+
+/* Secondary ink: labels, captions, meta text */
+.dark .text-gray-600,
+.dark .text-gray-500,
+.dark .text-gray-400,
+.dark .text-slate-600,
+.dark .text-slate-500,
+.dark .text-slate-400,
+.dark .text-\[\#5B6478\],
+.dark .text-\[\#56647D\],
+.dark .text-\[\#68738A\],
+.dark .text-\[\#64748B\],
+.dark .text-\[\#8491A8\],
+.dark .text-\[\#8793AA\],
+.dark .text-\[\#8792A5\],
+.dark .text-\[\#8A92A6\],
+.dark .text-\[\#8A95AC\],
+.dark .text-\[\#929BAD\],
+.dark .text-\[\#929DB0\],
+.dark .text-\[\#A5ADBD\],
+.dark .text-\[\#526078\],
+.dark .text-\[\#596579\] {
+  color: var(--muted-foreground);
+}
+
+/* Mid-blue links/icons are too dark on navy; lift them */
+.dark .text-\[\#376BB5\],
+.dark .text-\[\#315F9F\],
+.dark .text-\[\#4779C5\] {
+  color: #6f9de5;
+}
+
+/* Hovers on rows/buttons */
+.dark .hover\:bg-white:hover,
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-100:hover,
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover,
+.dark .hover\:bg-blue-50:hover,
+.dark .hover\:bg-\[\#F0F3F8\]:hover,
+.dark .hover\:bg-\[\#F2F4F9\]:hover,
+.dark .hover\:bg-\[\#F4F6F9\]:hover,
+.dark .hover\:bg-\[\#F7F8FC\]:hover,
+.dark .hover\:bg-\[\#E9EFF9\]:hover,
+.dark .hover\:bg-\[\#F9FAFD\]:hover {
+  background-color: var(--secondary);
+}
+
+.dark .hover\:text-gray-900:hover,
+.dark .hover\:text-slate-900:hover,
+.dark .hover\:text-\[\#0A2E66\]:hover {
+  color: var(--foreground);
+}
+
+.dark .hover\:border-\[\#D5DEEF\]:hover,
+.dark .hover\:border-\[\#C8D6EA\]:hover {
+  border-color: var(--input);
+}
+
+/* =========================================
    BASE STYLES
 ========================================= */
 
@@ -443,6 +602,65 @@
 
 /* Calendar height is controlled by the component's FullCalendar options.
    Avoid fixed width utilities such as w-96 here. */
+
+/* FullCalendar — dark surfaces + readable ink */
+.dark .calendar-wrapper,
+.dark .calendar-wrapper :where(.fc) {
+  color: var(--foreground);
+}
+
+.dark .calendar-wrapper :where(.fc .fc-toolbar-title) {
+  color: var(--foreground);
+}
+
+.dark .calendar-wrapper :where(.fc .fc-scrollgrid) {
+  border-color: var(--border);
+}
+
+.dark .calendar-wrapper :where(.fc th),
+.dark .calendar-wrapper :where(.fc td) {
+  border-color: var(--border);
+}
+
+.dark .calendar-wrapper :where(.fc th) {
+  background-color: var(--muted);
+}
+
+.dark .calendar-wrapper :where(.fc .fc-col-header-cell-cushion) {
+  color: var(--muted-foreground);
+}
+
+.dark .calendar-wrapper :where(.fc .fc-daygrid-day) {
+  background-color: var(--card);
+}
+
+.dark .calendar-wrapper :where(.fc .fc-daygrid-day:hover) {
+  background-color: var(--muted);
+}
+
+.dark .calendar-wrapper :where(.fc .fc-daygrid-day-number) {
+  color: var(--muted-foreground);
+}
+
+.dark .calendar-wrapper :where(.fc .fc-day-other .fc-daygrid-day-number) {
+  color: #6b7791;
+}
+
+.dark .calendar-wrapper :where(.fc .fc-day-today) {
+  background-color: rgb(242 123 30 / 14%) !important;
+}
+
+.dark .calendar-wrapper :where(.fc .fc-day-today .fc-daygrid-day-number) {
+  color: var(--foreground);
+}
+
+.dark .calendar-wrapper :where(.fc .fc-list-day-cushion) {
+  background-color: var(--muted);
+}
+
+.dark .calendar-wrapper :where(.fc .fc-list-event:hover td) {
+  background-color: var(--muted);
+}
 
 /* =========================================
    SCROLLBARS

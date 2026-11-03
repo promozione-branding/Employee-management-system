@@ -7,14 +7,12 @@ import { allEmployeeContactService } from "@/service/employee-dashboard/dashboar
 import {
   Mail,
   Phone,
-  UserRound,
   UsersRound,
   ArrowUpRight,
   ContactRound,
 } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import Image from "next/image";
 
 const AllEmployeeContact = () => {
   const [contacts, setContacts] = useState([]);
@@ -82,8 +80,6 @@ const AllEmployeeContact = () => {
                 className="rounded-xl border border-[#E9EDF4] p-4"
               >
                 <div className="flex items-start gap-3">
-                  <Skeleton circle height={44} width={44} />
-
                   <div className="min-w-0 flex-1">
                     <Skeleton height={16} width="65%" />
                     <Skeleton height={12} width="42%" className="mt-2" />
@@ -115,7 +111,6 @@ const AllEmployeeContact = () => {
               const name = details.name || "Unnamed employee";
               const email = details.email;
               const phone = details.phone;
-              const imageUrl = details.profileImage;
 
               return (
                 <article
@@ -123,21 +118,6 @@ const AllEmployeeContact = () => {
                   className="group rounded-xl border border-[#E9EDF4] bg-white p-3.5 transition-all duration-200 hover:border-[#D5DEEF] hover:bg-[#FAFBFD] hover:shadow-[0_4px_14px_rgba(15,27,51,0.04)] sm:p-4"
                 >
                   <div className="flex min-w-0 items-start gap-3">
-                    {/* Avatar */}
-                    <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F0F3F8] text-[#0A2E66] ring-1 ring-[#E3E7F0]">
-                      {imageUrl ? (
-                        <Image
-                          src={imageUrl}
-                          height={44}
-                          width={44}
-                          alt={`${name}'s profile`}
-                          className="h-11 w-11 object-cover"
-                        />
-                      ) : (
-                        <UserRound size={21} />
-                      )}
-                    </div>
-
                     {/* Employee details */}
                     <div className="min-w-0 flex-1">
                       <div className="flex min-w-0 items-start justify-between gap-2">
