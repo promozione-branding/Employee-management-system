@@ -1,5 +1,4 @@
-// components/layout/GridForm.jsx  
-
+// components/layout/GridForm.jsx
 
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";

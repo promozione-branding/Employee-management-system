@@ -1,3 +1,5 @@
+// app/api/proposalNew/route.js
+
 import { connectDB } from "@/lib/db";
 import ProposalNew from "@/models/admin/proposalNew/ProposalNew";
 import { getAuthUser } from "@/lib/getAuthUser";

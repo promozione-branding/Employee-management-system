@@ -1,3 +1,5 @@
+// config/new/proposalCatalogNew.js
+
 export const GST_RATE = 0.18;
 
 export const WEBSITE_CHECKLIST = [

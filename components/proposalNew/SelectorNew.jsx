@@ -1,3 +1,5 @@
+// components/proposalNew/SelectorNew.jsx
+
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { PROPOSAL_CATALOG } from "@/config/new/proposalCatalogNew";
