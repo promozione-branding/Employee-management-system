@@ -1,10 +1,7 @@
-// components/proposalNew/SummaryNew.jsx
-
 "use client";
 import React from "react";
 
 const fmt = (n) => `₹ ${Number(n || 0).toLocaleString("en-IN")}`;
-
 const round0 = (n) => Math.round(Number(n) || 0);
 
 export const computeTotals = ({
@@ -15,41 +12,40 @@ export const computeTotals = ({
   gstRate = 0.18,
   tdsRate = 0.02,
 }) => {
-  const subtotal = round0(
-    items.reduce((s, it) => s + Number(it.amount || 0), 0),
-  );
+  // 1. Calculate sub-total (Base Amounts)
+  const subtotal = round0(items.reduce((s, it) => s + Number(it.amount || 0), 0));
 
-  const discountAmount =
+  // 2. Calculate total Service Discount (from items)
+  const totalServiceDiscount = round0(items.reduce((s, it) => s + Number(it.serviceDiscount || 0), 0));
+  
+  // 3. Calculate the global discount
+  const globalDiscountAmount =
     discountType === "percentage"
       ? round0((subtotal * Number(discountInput || 0)) / 100)
       : round0(discountInput || 0);
 
+  // 4. Combined Discount
+  const discountAmount = round0(totalServiceDiscount + globalDiscountAmount);
   const baseAfterDiscount = round0(subtotal - discountAmount);
 
-  // ✅ GST on base-after-discount (NOT reduced by TDS)
+  // 5. Taxes
   const gstAmount = round0(baseAfterDiscount * gstRate);
-
-  // ✅ TDS on base-after-discount
   const tdsAmount = tdsApplicable ? round0(baseAfterDiscount * tdsRate) : 0;
-
-  // ✅ Grand = baseAfterDiscount + GST − TDS
   const grandTotal = round0(baseAfterDiscount + gstAmount - tdsAmount);
 
   return {
     subtotal,
-    discountAmount,
+    serviceDiscountAmount: totalServiceDiscount, // ✅ Expose this for PDF
+    discountAmount: globalDiscountAmount, // ✅ Global discount for PDF
     baseAfterDiscount,
     gstAmount,
     tdsAmount,
-    taxableBase: baseAfterDiscount,
     grandTotal,
   };
 };
 
 export const isPartialPaymentsValid = (partialPayments, grandTotal) => {
-  const total = round0(
-    partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0),
-  );
+  const total = round0(partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0));
   return total === round0(grandTotal);
 };
 
@@ -57,8 +53,7 @@ export const sumPartials = (partialPayments) =>
   round0(partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0));
 
 const SummaryNew = (props) => {
-  const { subtotal, discountAmount, gstAmount, tdsAmount, grandTotal } =
-    computeTotals(props);
+  const { subtotal, serviceDiscountAmount, discountAmount, gstAmount, tdsAmount, grandTotal } = computeTotals(props);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -70,13 +65,20 @@ const SummaryNew = (props) => {
           <span>Subtotal</span>
           <span>{fmt(subtotal)}</span>
         </div>
+        
+        {serviceDiscountAmount > 0 && (
+          <div className="flex justify-between text-gray-600">
+            <span>Service Discounts</span>
+            <span>- {fmt(serviceDiscountAmount)}</span>
+          </div>
+        )}
+
         {discountAmount > 0 && (
           <div className="flex justify-between text-gray-600">
             <span>
-              Discount
-              {props.discountType === "percentage" &&
-              Number(props.discountInput) > 0
-                ? ` (${Number(props.discountInput)}%)`
+              Global Discount
+              {props.discountType === "percentage" && props.discountInput > 0
+                ? ` (${props.discountInput}%)`
                 : ""}
             </span>
             <span>- {fmt(discountAmount)}</span>

@@ -1,5 +1,3 @@
-// config/new/proposalCatalogNew.js
-
 export const GST_RATE = 0.18;
 
 export const WEBSITE_CHECKLIST = [
@@ -768,6 +766,7 @@ export const PROPOSAL_CATALOG = {
       { key: "starter", label: "Starter", prices: { "1y": 99500 } },
       { key: "business", label: "Business Website", prices: { "1y": 160000 } },
       { key: "advance", label: "Advance Website", prices: { "1y": 240000 } },
+      { key: "city-page", label: "City Page Development", custom: true },
       { key: "custom", label: "Custom", custom: true },
     ],
   },

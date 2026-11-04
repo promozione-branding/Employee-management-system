@@ -1,5 +1,3 @@
-// models/admin/proposalNew/ProposalNew.js
-
 import mongoose from "mongoose";
 
 const ProposalItemSchema = new mongoose.Schema(
@@ -11,7 +9,14 @@ const ProposalItemSchema = new mongoose.Schema(
     duration: { type: String },
     durationLabel: { type: String },
     amount: { type: Number, required: true },
+    serviceDiscount: { type: Number, default: 0 },
     custom: { type: Boolean, default: false },
+    
+    // ✅ NEW FIELDS FOR CITY PAGE DEVELOPMENT
+    cityName: { type: String, default: "" },
+    cityCount: { type: String, default: "" },
+    keywordName: { type: String, default: "" },
+    keywordCount: { type: String, default: "" },
   },
   { _id: true }
 );
@@ -66,7 +71,6 @@ const ProposalNewSchema = new mongoose.Schema(
     deliveryPeriod: { type: String, enum: ["weekly", "monthly"], default: "weekly" },
     deliveredMetrics: [DeliveredMetricSchema],
     checklist: [ChecklistSectionSchema],
-    
     categoryNotes: [CategoryNoteSchema],
     cityPages: [CityPageSchema],
 
@@ -94,27 +98,16 @@ const ProposalNewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ FIXED: Generate proposal number based on the LATEST proposal, not total count
 ProposalNewSchema.pre("save", async function (next) {
   if (this.proposalNumber) return next();
-
   const year = new Date().getFullYear();
-  
-  // Find the most recently created proposal to get the highest sequence
-  const lastProposal = await mongoose
-    .model("ProposalNew")
-    .findOne({ proposalNumber: new RegExp(`^PROP-${year}-`) })
-    .sort({ createdAt: -1 });
-
+  const lastProposal = await mongoose.model("ProposalNew").findOne({ proposalNumber: new RegExp(`^PROP-${year}-`) }).sort({ createdAt: -1 });
   let nextSeq = 1;
   if (lastProposal && lastProposal.proposalNumber) {
     const parts = lastProposal.proposalNumber.split("-");
     const lastSeq = parseInt(parts[2], 10);
-    if (!isNaN(lastSeq)) {
-      nextSeq = lastSeq + 1;
-    }
+    if (!isNaN(lastSeq)) nextSeq = lastSeq + 1;
   }
-
   this.proposalNumber = `PROP-${year}-${String(nextSeq).padStart(4, "0")}`;
   next();
 });

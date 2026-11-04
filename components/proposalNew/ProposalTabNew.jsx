@@ -1,5 +1,3 @@
-// components/proposalNew/ProposalTabNew.jsx
-
 "use client";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -18,8 +16,8 @@ const METRIC_LABELS = [{ key: "posts", label: "Posts" }, { key: "reels", label: 
 
 const emptyForm = {
   items: [],
-  categoryNotes: [], // ✅ New
-  cityPages: [], // ✅ New
+  categoryNotes: [],
+  cityPages: [],
   discountType: "amount",
   discountInput: 0,
   tdsApplicable: false,
@@ -97,8 +95,8 @@ const ProposalTabNew = ({ customerId }) => {
     setEditingProposal(proposal);
     setForm({
       items: proposal.items || [],
-      categoryNotes: proposal.categoryNotes || [], // ✅ Load
-      cityPages: proposal.cityPages || [], // ✅ Load
+      categoryNotes: proposal.categoryNotes || [],
+      cityPages: proposal.cityPages || [],
       discountType: proposal.discountType || "amount",
       discountInput: proposal.discountInput || 0,
       tdsApplicable: !!proposal.tdsApplicable,
@@ -126,8 +124,8 @@ const ProposalTabNew = ({ customerId }) => {
       const payload = {
         clientId: customerId,
         items,
-        categoryNotes, // ✅ Save
-        cityPages, // ✅ Save
+        categoryNotes,
+        cityPages,
         discountType,
         discountInput: Number(discountInput || 0),
         tdsApplicable,
