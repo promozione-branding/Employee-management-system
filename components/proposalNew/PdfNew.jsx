@@ -288,7 +288,20 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                 {tickedSections.map((sec) => (
                   <div key={sec.section} className="deliverable-row">
                     <div className="row-title">{sec.section}</div>
-                    <div className="row-items"><ul>{sec.items.map((it) => <li key={it}>{it}</li>)}</ul></div>
+                    <div className="row-items">
+                      <ul
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                          columnGap: "24px",
+                          rowGap: "6px",
+                        }}
+                      >
+                        {sec.items.map((it) => (
+                          <li key={it}>{it}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 ))}
               </div>
