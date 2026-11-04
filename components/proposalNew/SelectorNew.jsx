@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { PROPOSAL_CATALOG } from "@/config/new/proposalCatalogNew";
 import { Check, Plus, X, ChevronDown } from "lucide-react";
 
@@ -38,7 +38,7 @@ const SelectorNew = ({
         amount: Number(amount),
         serviceDiscount: 0,
         custom: !!pkg.custom,
-        ...(customData || {}), // ✅ Save extra data (city, keyword, etc)
+        ...(customData || {}),
       },
     ]);
   };
@@ -263,16 +263,30 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
   const [customDuration, setCustomDuration] = useState("");
   const [customAmount, setCustomAmount] = useState("");
   
-  // ✅ NEW STATE FOR CITY PAGE
-  const [cityData, setCityData] = useState({ cityName: "", cityCount: "", keywordName: "", keywordCount: "" });
-
   const effectiveDurationKey = useCustomDuration ? `custom::${customDuration.trim() || "N/A"}` : durationKey;
   const effectiveDurationLabel = useCustomDuration ? customDuration.trim() || "Custom" : category.durations.find((d) => d.key === durationKey)?.label || durationKey;
   const price = pkg.custom ? Number(customAmount || 0) : useCustomDuration ? Number(customAmount || 0) : pkg.prices?.[durationKey] || 0;
   const selected = isSelected(category.key, pkg.key, effectiveDurationKey);
   const canAdd = !selected && price > 0 && (!useCustomDuration || customDuration.trim().length > 0);
 
-  // If this is the City Page package, we pass the cityData
+  const existingItem = selectedItems.find((it) => it.category === category.key && it.packageKey === pkg.key && it.duration === effectiveDurationKey);
+  
+  const [cityData, setCityData] = useState({
+    cityName: "", cityCount: "", keywordName: "", keywordCount: "",
+  });
+
+  // ✅ FIX: Autofill the city data fields when editing
+  useEffect(() => {
+    if (existingItem) {
+      setCityData({
+        cityName: existingItem.cityName || "",
+        cityCount: existingItem.cityCount || "",
+        keywordName: existingItem.keywordName || "",
+        keywordCount: existingItem.keywordCount || "",
+      });
+    }
+  }, [existingItem]);
+
   const handleAdd = () => {
     onAdd(category, pkg, effectiveDurationKey, effectiveDurationLabel, price, cityData);
   };
@@ -301,16 +315,15 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
         <p className="text-lg font-semibold text-gray-900">{fmt(price)}</p>
       )}
 
-      {/* ✅ NEW FIELDS FOR CITY PAGE DEVELOPMENT */}
       {pkg.key === "city-page" && (
         <div className="flex flex-col gap-2 mt-2 p-2 bg-gray-50 border rounded-md">
           <div className="flex gap-2">
-            <input type="text" placeholder="City Name (e.g. Delhi)" value={cityData.cityName} onChange={(e) => setCityData({...cityData, cityName: e.target.value})} className="w-2/3 border rounded px-2 py-1 text-xs" />
-            <input type="number" placeholder="No. of Cities" value={cityData.cityCount} onChange={(e) => setCityData({...cityData, cityCount: e.target.value})} className="w-1/3 border rounded px-2 py-1 text-xs" />
+            <input type="text" placeholder="City Name" value={cityData.cityName} onChange={(e) => setCityData({...cityData, cityName: e.target.value})} className="w-2/3 border rounded px-2 py-1 text-xs" />
+            <input type="number" placeholder="No. Cities" value={cityData.cityCount} onChange={(e) => setCityData({...cityData, cityCount: e.target.value})} className="w-1/3 border rounded px-2 py-1 text-xs" />
           </div>
           <div className="flex gap-2">
-            <input type="text" placeholder="Keyword (e.g. horse)" value={cityData.keywordName} onChange={(e) => setCityData({...cityData, keywordName: e.target.value})} className="w-2/3 border rounded px-2 py-1 text-xs" />
-            <input type="number" placeholder="No. of Keywords" value={cityData.keywordCount} onChange={(e) => setCityData({...cityData, keywordCount: e.target.value})} className="w-1/3 border rounded px-2 py-1 text-xs" />
+            <input type="text" placeholder="Keyword" value={cityData.keywordName} onChange={(e) => setCityData({...cityData, keywordName: e.target.value})} className="w-2/3 border rounded px-2 py-1 text-xs" />
+            <input type="number" placeholder="No. Keywords" value={cityData.keywordCount} onChange={(e) => setCityData({...cityData, keywordCount: e.target.value})} className="w-1/3 border rounded px-2 py-1 text-xs" />
           </div>
         </div>
       )}

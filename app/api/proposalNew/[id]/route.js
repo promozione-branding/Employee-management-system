@@ -29,36 +29,22 @@ export async function PUT(req, { params }) {
 
     const { id } = await params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ success: false, message: "Invalid id" }, { status: 400 });
-
     const existing = await ProposalNew.findById(id);
     if (!existing) return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
 
     const body = await req.json();
     const { items = [], discountType = "amount", discountInput = 0, tdsApplicable = false, partialPayments = [], deliveryPeriod = "weekly", deliveredMetrics = [], checklist = [], categoryNotes = [], cityPages = [], notes, validTill, paymentMethod } = body;
 
-    if (!items.length) return NextResponse.json({ success: false, message: "At least one item required" }, { status: 400 });
-    if (Number(discountInput) < 0) return NextResponse.json({ success: false, message: "Discount cannot be negative" }, { status: 400 });
-
-    for (const p of partialPayments) {
-      if (Number(p.paymentAmount) < 0) return NextResponse.json({ success: false, message: "Partial payment cannot be negative" }, { status: 400 });
-    }
-
     const subtotal = round0(items.reduce((s, it) => s + Number(it.amount || 0), 0));
     const totalServiceDiscount = round0(items.reduce((s, it) => s + Number(it.serviceDiscount || 0), 0));
     const globalDiscountAmount = discountType === "percentage" ? round0((subtotal * Number(discountInput || 0)) / 100) : round0(discountInput || 0);
-    
     const discountAmount = round0(totalServiceDiscount + globalDiscountAmount);
-    
-    if (discountAmount > subtotal) return NextResponse.json({ success: false, message: "Discount cannot exceed subtotal" }, { status: 400 });
-
     const baseAfterDiscount = round0(subtotal - discountAmount);
     const gstAmount = round0(baseAfterDiscount * 0.18);
     const tdsAmount = tdsApplicable ? round0(baseAfterDiscount * 0.02) : 0;
     const grandTotal = round0(baseAfterDiscount + gstAmount - tdsAmount);
 
     const totalPartial = round0(partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0));
-    
-    if (totalPartial > grandTotal) return NextResponse.json({ success: false, message: `Partial payments (₹${totalPartial}) exceed grand total (₹${grandTotal})` }, { status: 400 });
     if (grandTotal > 0 && totalPartial !== grandTotal) return NextResponse.json({ success: false, message: `Partial payments must sum to ₹${grandTotal}. Remaining: ₹${grandTotal - totalPartial}` }, { status: 400 });
 
     existing.items = items;
@@ -69,10 +55,8 @@ export async function PUT(req, { params }) {
     existing.categoryNotes = categoryNotes;
     existing.cityPages = cityPages;
     existing.subtotal = subtotal;
-    existing.gstRate = 0.18;
     existing.gstAmount = gstAmount;
     existing.tdsApplicable = tdsApplicable;
-    existing.tdsRate = 0.02;
     existing.tdsAmount = tdsAmount;
     existing.discountType = discountType;
     existing.discountInput = Number(discountInput || 0);
@@ -85,7 +69,6 @@ export async function PUT(req, { params }) {
     const updated = await existing.save();
     return NextResponse.json({ success: true, data: updated }, { status: 200 });
   } catch (error) {
-    console.error("❌ UPDATE PROPOSAL ERROR:", error);
     return NextResponse.json({ success: false, message: error.message || "Server error" }, { status: 500 });
   }
 }
@@ -96,7 +79,6 @@ export async function DELETE(req, { params }) {
     const authUser = await getAuthUser(req);
     if (!authUser) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     const { id } = await params;
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ success: false, message: "Invalid id" }, { status: 400 });
     await ProposalNew.findByIdAndDelete(id);
     return NextResponse.json({ success: true, message: "Deleted" }, { status: 200 });
   } catch (error) {

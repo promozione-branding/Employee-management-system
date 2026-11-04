@@ -167,7 +167,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
   const totalPages = 3 + (showDeliverablesPage ? 1 : 0) + 1;
   let pageCounter = 1;
 
-  // ✅ FIX: Subtotal after service discount to show at bottom
   const subtotalAfterServiceDiscount = subtotal - serviceDiscountAmount;
 
   return (
@@ -258,7 +257,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           <table>
             <tbody>
               <tr>
-                {/* ✅ FIX: Uses subtotal AFTER service discounts */}
                 <td style={{ border: 0, padding: "3px 4px" }}>Amount</td>
                 <td style={{ border: 0, padding: "3px 4px", textAlign: "right" }}>{fmt(subtotalAfterServiceDiscount)}</td>
               </tr>

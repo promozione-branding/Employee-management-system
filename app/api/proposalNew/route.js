@@ -31,51 +31,23 @@ export async function POST(req) {
 
     if (!clientId) return NextResponse.json({ success: false, message: "clientId required" }, { status: 400 });
     if (!items.length) return NextResponse.json({ success: false, message: "At least one item required" }, { status: 400 });
-    if (Number(discountInput) < 0) return NextResponse.json({ success: false, message: "Discount cannot be negative" }, { status: 400 });
 
-    for (const p of partialPayments) {
-      if (Number(p.paymentAmount) < 0) return NextResponse.json({ success: false, message: "Partial payment cannot be negative" }, { status: 400 });
-    }
-
-    // ✅ SAVE ITEMS WITH CITY DATA
-    const parsedItems = items.map(it => ({
-      category: it.category,
-      categoryLabel: it.categoryLabel,
-      packageKey: it.packageKey,
-      label: it.label,
-      duration: it.duration,
-      durationLabel: it.durationLabel,
-      amount: Number(it.amount),
-      serviceDiscount: Number(it.serviceDiscount || 0),
-      custom: !!it.custom,
-      cityName: it.cityName || "",
-      cityCount: it.cityCount || "",
-      keywordName: it.keywordName || "",
-      keywordCount: it.keywordCount || "",
-    }));
-
-    const subtotal = round0(parsedItems.reduce((s, it) => s + it.amount, 0));
-    const totalServiceDiscount = round0(parsedItems.reduce((s, it) => s + it.serviceDiscount, 0));
+    const subtotal = round0(items.reduce((s, it) => s + Number(it.amount || 0), 0));
+    const totalServiceDiscount = round0(items.reduce((s, it) => s + Number(it.serviceDiscount || 0), 0));
     const globalDiscountAmount = discountType === "percentage" ? round0((subtotal * Number(discountInput || 0)) / 100) : round0(discountInput || 0);
-    
     const discountAmount = round0(totalServiceDiscount + globalDiscountAmount);
-    
-    if (discountAmount > subtotal) return NextResponse.json({ success: false, message: "Discount cannot exceed subtotal" }, { status: 400 });
-
     const baseAfterDiscount = round0(subtotal - discountAmount);
     const gstAmount = round0(baseAfterDiscount * 0.18);
     const tdsAmount = tdsApplicable ? round0(baseAfterDiscount * 0.02) : 0;
     const grandTotal = round0(baseAfterDiscount + gstAmount - tdsAmount);
 
     const totalPartial = round0(partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0));
-    
-    if (totalPartial > grandTotal) return NextResponse.json({ success: false, message: `Partial payments (₹${totalPartial}) exceed grand total (₹${grandTotal})` }, { status: 400 });
     if (grandTotal > 0 && totalPartial !== grandTotal) return NextResponse.json({ success: false, message: `Partial payments must sum to ₹${grandTotal}. Remaining: ₹${grandTotal - totalPartial}` }, { status: 400 });
 
     const doc = await ProposalNew.create({
       clientId,
       salesExecutive: authUser._id,
-      items: parsedItems,
+      items,
       partialPayments,
       deliveryPeriod,
       deliveredMetrics,
@@ -100,7 +72,6 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true, data: doc }, { status: 201 });
   } catch (error) {
-    console.error("❌ CREATE PROPOSAL ERROR:", error);
     return NextResponse.json({ success: false, message: error.message || "Server error" }, { status: 500 });
   }
 }
