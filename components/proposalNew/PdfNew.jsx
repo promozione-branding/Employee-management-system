@@ -615,22 +615,58 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
       </ScreenPage>
 
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
-        <h1 style={{ textAlign: "center" }}>Terms &amp; Conditions</h1>
-        <ol style={{ paddingLeft: "18px", margin: 0 }}>
-          {TERMS_AND_CONDITIONS.map((t, i) => (
-            <li
-              key={i}
-              style={{
-                fontSize: "11.5px",
-                lineHeight: 1.5,
-                marginBottom: "5px",
-              }}
-            >
-              {t}
-            </li>
-          ))}
-        </ol>
-      </ScreenPage>
+  <h1 style={{ textAlign: "center" }}>Terms &amp; Conditions</h1>
+
+  <ol style={{ paddingLeft: "18px", margin: 0 }}>
+    {TERMS_AND_CONDITIONS.map((t, i) => {
+      const termsUrl =
+        "https://www.inquirybazaar.com/terms-conditions";
+
+      if (!t.includes(termsUrl)) {
+        return (
+          <li
+            key={i}
+            style={{
+              fontSize: "11.5px",
+              lineHeight: 1.5,
+              marginBottom: "5px",
+            }}
+          >
+            {t}
+          </li>
+        );
+      }
+
+      const [beforeUrl, afterUrl] = t.split(termsUrl);
+
+      return (
+        <li
+          key={i}
+          style={{
+            fontSize: "11.5px",
+            lineHeight: 1.5,
+            marginBottom: "5px",
+          }}
+        >
+          {beforeUrl}
+          <a
+            href={termsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "#2563eb",
+              textDecoration: "underline",
+              cursor: "pointer",
+            }}
+          >
+            {termsUrl}
+          </a>
+          {afterUrl}
+        </li>
+      );
+    })}
+  </ol>
+</ScreenPage>
     </div>
   );
 });
