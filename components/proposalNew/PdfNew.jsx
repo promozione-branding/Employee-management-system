@@ -179,13 +179,64 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
 
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
         <h1>Proposal</h1>
-        <div className="to-block">
-          <div style={{ fontWeight: 700, marginBottom: "2px" }}>To,</div>
-          <div className="row"><span className="label">Client Name:</span><span>{client.name || "—"}</span><span style={{ marginLeft: "16px" }} className="label">Company:</span><span>{client.company || "—"}</span></div>
-          {clientAddress && <div className="row"><span className="label">Address:</span><span>{clientAddress}</span></div>}
-          {client.GSTIN && <div className="row"><span className="label">GST No.:</span><span>{client.GSTIN}</span></div>}
-          <div className="row"><span className="label">Date:</span><span>{fmtDate(proposal.createdAt)}</span><span style={{ marginLeft: "16px" }} className="label">Proposal No.:</span><span>{proposal.proposalNumber || "—"}</span></div>
-          {proposal.validTill && <div className="row"><span className="label">Valid Till:</span><span>{fmtDate(proposal.validTill)}</span></div>}
+        <div
+          className="to-block"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: "20px",
+          }}
+        >
+          {/* Client details - Left */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 700, marginBottom: "2px" }}>To,</div>
+            <div className="row">
+              <span className="label">Client Name:</span>
+              <span>{client.name || "—"}</span>
+            </div>
+            <div className="row">
+              <span className="label">Company:</span>
+              <span>{client.company || "—"}</span>
+            </div>
+            {clientAddress && (
+              <div className="row">
+                <span className="label">Address:</span>
+                <span>{clientAddress}</span>
+              </div>
+            )}
+            {client.GSTIN && (
+              <div className="row">
+                <span className="label">GST No.:</span>
+                <span>{client.GSTIN}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Proposal details - Right */}
+          <div
+            style={{
+              flex: "0 0 auto",
+              minWidth: "150px",
+              textAlign: "right",
+            }}
+          >
+            <div style={{ marginBottom: "5px" }}>
+              <span className="label">Date: </span>
+              <span>{fmtDate(proposal.createdAt)}</span>
+            </div>
+            
+            {proposal.validTill && (
+              <div>
+                <span className="label">Valid Till: </span>
+                <span>{fmtDate(proposal.validTill)}</span>
+              </div>
+            )}
+            <div style={{ marginBottom: "5px" }}>
+              <span className="label">Proposal No.: </span>
+              <span>{proposal.proposalNumber || "—"}</span>
+            </div>
+          </div>
         </div>
 
         <table>
