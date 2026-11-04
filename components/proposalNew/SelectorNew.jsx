@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import { PROPOSAL_CATALOG } from "@/config/new/proposalCatalogNew";
-import { Check, Plus, X, ChevronDown, Trash } from "lucide-react";
+import { Check, Plus, X, ChevronDown } from "lucide-react";
 
 const fmt = (n) => `₹ ${Number(n || 0).toLocaleString("en-IN")}`;
 
@@ -54,7 +54,6 @@ const SelectorNew = ({
         const catSections = cat?.checklist?.map((s) => s.title) || [];
         onChecklistChange(checklist.filter((c) => !catSections.includes(c.section)));
         
-        // Also clear the note for this category
         if (onNotesChange) {
           onNotesChange(categoryNotes.filter(n => n.category !== it.category));
         }
@@ -100,8 +99,7 @@ const SelectorNew = ({
         const hasSelected = selectedItems.some((it) => it.category === cat.key);
         const currentNote = categoryNotes.find(n => n.category === cat.key)?.note || "";
         
-        // Show City Pages for SEO and Ads
-        const showCityPages = ["seo", "adsManagement"].includes(cat.key) && hasSelected;
+        const showCityPages = ["seo", "adsManagement"].includes(cat.key);
 
         return (
           <div key={cat.key} className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -126,12 +124,59 @@ const SelectorNew = ({
 
             {isOpen && (
               <>
+                {/* 1. Packages Grid */}
                 <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {cat.packages.map((pkg) => (
                     <PackageCard key={pkg.key} category={cat} pkg={pkg} selectedItems={selectedItems} onAdd={addItem} isSelected={isSelected} />
                   ))}
                 </div>
 
+                {/* 2. ✅ NOTES & CITY PAGES (Moved right below packages) */}
+                <div className="border-t border-gray-100 p-4 bg-blue-50/20">
+                  <div className="flex flex-col gap-4">
+                    {/* Notes Field */}
+                    <div>
+                      <label className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-2 block">
+                        Notes for {cat.label} (Optional)
+                      </label>
+                      <textarea
+                        value={currentNote}
+                        onChange={(e) => handleNoteChange(cat.key, e.target.value)}
+                        placeholder="Enter specific notes or scope to be shown in the PDF..."
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                        rows={2}
+                      />
+                    </div>
+
+                    {/* City Pages (Only for SEO and Ads) */}
+                    {showCityPages && (
+                      <div>
+                        <label className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-2 block">
+                          City Pages (Optional)
+                        </label>
+                        
+                        <div className="flex gap-2 mb-2">
+                          <input type="text" value={cityForm.city} onChange={(e) => setCityForm({...cityForm, city: e.target.value})} placeholder="City (e.g. Mumbai)" className="flex-1 border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white" />
+                          <input type="text" value={cityForm.keyword} onChange={(e) => setCityForm({...cityForm, keyword: e.target.value})} placeholder="Keyword" className="flex-1 border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white" />
+                          <button type="button" onClick={addCityPage} className="bg-indigo-600 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-indigo-700">Add</button>
+                        </div>
+
+                        {cityPages.length > 0 && (
+                          <ul className="flex flex-wrap gap-2">
+                            {cityPages.map((cp, idx) => (
+                              <li key={idx} className="flex items-center gap-2 bg-white border border-indigo-100 shadow-sm px-3 py-1 rounded-full text-xs text-indigo-900">
+                                <span><b>{cp.city}:</b> {cp.keyword}</span>
+                                <button type="button" onClick={() => removeCityPage(idx)} className="text-red-500 hover:text-red-700"><X className="h-3 w-3" /></button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 3. Checklist (Only if selected) */}
                 {hasSelected && cat.checklist?.length > 0 && (
                   <div className="border-t border-gray-100 bg-gray-50/60 p-4">
                     <p className="text-xs uppercase tracking-wide text-gray-500 mb-3">
@@ -140,48 +185,6 @@ const SelectorNew = ({
                     {cat.checklist.map((section) => (
                       <ChecklistSection key={section.title} section={section} checklist={checklist} onChange={onChecklistChange} />
                     ))}
-                  </div>
-                )}
-
-                {/* ✅ CATEGORY NOTES */}
-                {hasSelected && (
-                  <div className="border-t border-gray-100 p-4 bg-blue-50/30">
-                    <label className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-2 block">
-                      Notes for {cat.label}
-                    </label>
-                    <textarea
-                      value={currentNote}
-                      onChange={(e) => handleNoteChange(cat.key, e.target.value)}
-                      placeholder="Enter any specific notes or scope to be shown in the PDF..."
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      rows={2}
-                    />
-                  </div>
-                )}
-
-                {/* ✅ CITY PAGES (SEO & ADS) */}
-                {showCityPages && (
-                  <div className="border-t border-gray-100 p-4 bg-indigo-50/30">
-                    <label className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-2 block">
-                      City Pages (Optional)
-                    </label>
-                    
-                    <div className="flex gap-2 mb-3">
-                      <input type="text" value={cityForm.city} onChange={(e) => setCityForm({...cityForm, city: e.target.value})} placeholder="City" className="flex-1 border border-gray-300 rounded-md px-3 py-1.5 text-sm" />
-                      <input type="text" value={cityForm.keyword} onChange={(e) => setCityForm({...cityForm, keyword: e.target.value})} placeholder="Keyword" className="flex-1 border border-gray-300 rounded-md px-3 py-1.5 text-sm" />
-                      <button type="button" onClick={addCityPage} className="bg-indigo-600 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-indigo-700">Add</button>
-                    </div>
-
-                    {cityPages.length > 0 && (
-                      <ul className="flex flex-wrap gap-2">
-                        {cityPages.map((cp, idx) => (
-                          <li key={idx} className="flex items-center gap-2 bg-white border border-indigo-100 shadow-sm px-3 py-1 rounded-full text-xs text-indigo-900">
-                            <span><b>{cp.city}:</b> {cp.keyword}</span>
-                            <button type="button" onClick={() => removeCityPage(idx)} className="text-red-500 hover:text-red-700"><X className="h-3 w-3" /></button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
                   </div>
                 )}
               </>

@@ -242,7 +242,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         {/* ✅ GENERAL NOTES (Below TDS, Before Payment Schedule) */}
         {proposal.notes && (
           <div className="general-notes-box">
-            <strong>Terms & Additional Notes</strong>
+            <strong>Additional Notes</strong>
             <p style={{ margin: 0 }}>{proposal.notes}</p>
           </div>
         )}
