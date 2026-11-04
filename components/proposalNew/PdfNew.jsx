@@ -68,11 +68,13 @@ a { color: #111827; text-decoration: none; }
 .services-items-grid .svc-item::before { content: "▪"; position: absolute; left: 0; top: 0; color: #2563eb; font-size: 10px; }
 .industries-new-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
 .industry-card { border: 1px solid #d1d5db; border-left: 4px solid #1e3a5f; border-radius: 6px; padding: 14px 16px; background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%); font-size: 12px; font-weight: 600; color: #1e3a5f; text-align: center; break-inside: avoid; }
-/* ✅ NEW: Notes and City Pages CSS */
-.notes-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; margin-top: 12px; font-size: 11px; line-height: 1.6; }
-.notes-box strong { color: #1e3a5f; display: block; margin-bottom: 4px; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
-.city-pages-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-.city-badge { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 8px; border-radius: 4px; font-size: 10.5px; }
+
+/* ✅ NEW CSS FOR INLINE NOTES */
+.item-note { font-size: 10.5px; color: #4b5563; margin-top: 4px; font-style: italic; }
+.city-tags-inline { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.city-tag-inline { background: #eff6ff; color: #1e40af; padding: 2px 6px; border-radius: 4px; font-size: 9.5px; font-weight: 600; border: 1px solid #bfdbfe; }
+.general-notes-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; margin-top: 14px; font-size: 11px; line-height: 1.6; }
+.general-notes-box strong { color: #1e3a5f; display: block; margin-bottom: 4px; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
 
 @media print {
   body { margin: 0; }
@@ -88,7 +90,7 @@ a { color: #111827; text-decoration: none; }
   .pdf-screen-page { width: 210mm !important; min-height: 297mm !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; padding: 30mm 12mm 22mm 12mm !important; page-break-after: always; page-break-inside: auto; overflow: visible !important; }
   .pdf-screen-page:last-child { page-break-after: auto; }
   .pdf-watermark-inline { display: none !important; }
-  .deliverable-row, .industry-card, .svc-item, .schedule-grid, .delivery-grid, .delivery-item, .legal-notes li, .bank-block, .notes-box { break-inside: avoid; }
+  .deliverable-row, .industry-card, .svc-item, .schedule-grid, .delivery-grid, .delivery-item, .legal-notes li, .bank-block, .general-notes-box { break-inside: avoid; }
 }
 `;
 
@@ -146,7 +148,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
   const deliveredMetrics = proposal.deliveredMetrics || [];
   const deliveryPeriod = proposal.deliveryPeriod || "weekly";
   
-  // ✅ New data
   const categoryNotes = proposal.categoryNotes || [];
   const cityPages = proposal.cityPages || [];
 
@@ -192,17 +193,35 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
             <tr><th style={{ width: "30px" }}>S.No</th><th>Description</th><th style={{ width: "80px" }}>Tenure</th><th style={{ width: "100px", textAlign: "right" }}>Amount (INR)</th></tr>
           </thead>
           <tbody>
-            {items.map((it, i) => (
-              <tr key={i}>
-                <td>{i + 1}.</td>
-                <td>
-                  <div style={{ fontWeight: 600 }}>{it.label}</div>
-                  {it.categoryLabel && <div style={{ color: "#6b7280", fontSize: "11px" }}>{it.categoryLabel}</div>}
-                </td>
-                <td>{it.durationLabel || it.duration || "—"}</td>
-                <td style={{ textAlign: "right", fontWeight: 600 }}>{fmt(it.amount)}</td>
-              </tr>
-            ))}
+            {items.map((it, i) => {
+              // ✅ Get note and city pages for this specific category
+              const note = categoryNotes.find(n => n.category === it.category)?.note;
+              const hasCityPages = ["seo", "adsManagement"].includes(it.category) && cityPages.length > 0;
+
+              return (
+                <tr key={i}>
+                  <td>{i + 1}.</td>
+                  <td>
+                    <div style={{ fontWeight: 600 }}>{it.label}</div>
+                    {it.categoryLabel && <div style={{ color: "#6b7280", fontSize: "11px" }}>{it.categoryLabel}</div>}
+                    
+                    {/* ✅ INLINE NOTE */}
+                    {note && <div className="item-note">{note}</div>}
+                    
+                    {/* ✅ INLINE CITY PAGES (Only for SEO / Ads) */}
+                    {hasCityPages && (
+                      <div className="city-tags-inline">
+                        {cityPages.map((cp, idx) => (
+                          <span key={idx} className="city-tag-inline">{cp.city}: {cp.keyword}</span>
+                        ))}
+                      </div>
+                    )}
+                  </td>
+                  <td>{it.durationLabel || it.duration || "—"}</td>
+                  <td style={{ textAlign: "right", fontWeight: 600 }}>{fmt(it.amount)}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
@@ -220,28 +239,11 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
 
         <div style={{ marginTop: "10px", fontSize: "11.5px" }}><b>In Words:</b> {numberToWords(grandTotal)}</div>
 
-        {/* ✅ NOTES AND CITY PAGES SECTION */}
-        {categoryNotes.filter(n => n.note).length > 0 && (
-          <div className="notes-box">
-            <strong>Scope & Notes</strong>
-            <ul style={{ listStyle: "disc", margin: 0, paddingLeft: "16px" }}>
-              {categoryNotes.filter(n => n.note).map((n, idx) => (
-                <li key={idx} style={{ marginBottom: "4px" }}>
-                  <b>{PROPOSAL_CATALOG[n.category]?.label}:</b> {n.note}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {cityPages.length > 0 && (
-          <div className="notes-box">
-            <strong>Target City Pages</strong>
-            <div className="city-pages-grid">
-              {cityPages.map((cp, idx) => (
-                <span key={idx} className="city-badge"><b>{cp.city}:</b> {cp.keyword}</span>
-              ))}
-            </div>
+        {/* ✅ GENERAL NOTES (Below TDS, Before Payment Schedule) */}
+        {proposal.notes && (
+          <div className="general-notes-box">
+            <strong>Terms & Additional Notes</strong>
+            <p style={{ margin: 0 }}>{proposal.notes}</p>
           </div>
         )}
 
