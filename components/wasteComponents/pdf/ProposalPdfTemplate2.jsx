@@ -356,8 +356,8 @@ const ProposalPdfTemplate = ({ data }) => {
           }}
         >
           <Text style={{ marginTop: 8 }}>
-            Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi,
-            110034, India
+            Regd. Office: 605-606 Best Business Park, Netaji Subhash Place,
+            Delhi, 110034, India
           </Text>
           <Text>CIN: U92112DL2024PTC432424</Text>
           <Text>011 42603232 • info@inquirybazaar.com</Text>

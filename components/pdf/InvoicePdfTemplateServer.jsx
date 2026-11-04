@@ -84,7 +84,7 @@ const InvoicePdfTemplateServer = ({ data }) => {
             <Text style={styles.topCompanyName}>
               Inquiry Bazaar Private Limited
             </Text>
-            <Text>606, Best Business Park, NSP, New Delhi</Text>
+            <Text>605-606, Best Business Park, NSP, New Delhi</Text>
             <Text>Call us - 011 4260 3232</Text>
             <Text>Website: www.inquirybazaar.com</Text>
             <Text>Email - care@inquirybazaar.com</Text>
@@ -360,8 +360,8 @@ const InvoicePdfTemplateServer = ({ data }) => {
           <View style={styles.companyDetails}>
             <Text style={{ fontWeight: "bold" }}>Inquiry Bazaar Pvt Ltd.</Text>
             <Text>
-              Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi,
-              110034,
+              Regd. Office: 605-606 Best Business Park, Netaji Subhash Place,
+              Delhi, 110034,
             </Text>
             <Text>Ph no: +91 - 011 42603232</Text>
             <Text>

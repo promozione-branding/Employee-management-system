@@ -116,7 +116,7 @@ const ProposalPdfTemplate = ({ data }) => {
 
       <View style={{ fontSize: 8, marginTop: 4 }}>
         <Text>
-          Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi,
+          Regd. Office: 605-606 Best Business Park, Netaji Subhash Place, Delhi,
           110034,
         </Text>
         <Text>CIN: U92112DL2024PTC432424</Text>
