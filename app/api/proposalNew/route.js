@@ -1,5 +1,3 @@
-// app/api/proposalNew/route.js
-
 import { connectDB } from "@/lib/db";
 import ProposalNew from "@/models/admin/proposalNew/ProposalNew";
 import { getAuthUser } from "@/lib/getAuthUser";
@@ -11,36 +9,14 @@ export async function GET(req) {
   try {
     await connectDB();
     const authUser = await getAuthUser(req);
-    if (!authUser)
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 },
-      );
-
+    if (!authUser) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     const { searchParams } = new URL(req.url);
     const clientId = searchParams.get("clientId");
-    if (!clientId)
-      return NextResponse.json(
-        { success: false, message: "clientId required" },
-        { status: 400 },
-      );
-
-    const list = await ProposalNew.find({ clientId })
-      .populate({ path: "salesExecutive", select: "basicDetails.name" })
-      .populate({
-        path: "clientId",
-        select:
-          "name company phone email GSTIN tanNo Address city state country pincode",
-      })
-      .sort({ createdAt: -1 });
-
+    if (!clientId) return NextResponse.json({ success: false, message: "clientId required" }, { status: 400 });
+    const list = await ProposalNew.find({ clientId }).populate({ path: "salesExecutive", select: "basicDetails.name" }).populate({ path: "clientId", select: "name company phone email GSTIN tanNo Address city state country pincode" }).sort({ createdAt: -1 });
     return NextResponse.json({ success: true, data: list }, { status: 200 });
   } catch (error) {
-    console.log("listProposalNew error:", error);
-    return NextResponse.json(
-      { success: false, message: "Server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, message: error.message || "Server error" }, { status: 500 });
   }
 }
 
@@ -48,105 +24,32 @@ export async function POST(req) {
   try {
     await connectDB();
     const authUser = await getAuthUser(req);
-    if (!authUser)
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 },
-      );
+    if (!authUser) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    const {
-      clientId,
-      items = [],
-      discountType = "amount",
-      discountInput = 0,
-      tdsApplicable = false,
-      partialPayments = [],
-      deliveryPeriod = "weekly",
-      deliveredMetrics = [],
-      checklist = [],
-      notes,
-      validTill,
-      paymentMethod,
-    } = body;
+    const { clientId, items = [], discountType = "amount", discountInput = 0, tdsApplicable = false, partialPayments = [], deliveryPeriod = "weekly", deliveredMetrics = [], checklist = [], categoryNotes = [], cityPages = [], notes, validTill, paymentMethod } = body;
 
-    if (!clientId)
-      return NextResponse.json(
-        { success: false, message: "clientId required" },
-        { status: 400 },
-      );
-    if (!items.length)
-      return NextResponse.json(
-        { success: false, message: "At least one item required" },
-        { status: 400 },
-      );
-
-    if (Number(discountInput) < 0)
-      return NextResponse.json(
-        { success: false, message: "Discount cannot be negative" },
-        { status: 400 },
-      );
+    if (!clientId) return NextResponse.json({ success: false, message: "clientId required" }, { status: 400 });
+    if (!items.length) return NextResponse.json({ success: false, message: "At least one item required" }, { status: 400 });
+    if (Number(discountInput) < 0) return NextResponse.json({ success: false, message: "Discount cannot be negative" }, { status: 400 });
 
     for (const p of partialPayments) {
-      if (Number(p.paymentAmount) < 0)
-        return NextResponse.json(
-          { success: false, message: "Partial payment cannot be negative" },
-          { status: 400 },
-        );
+      if (Number(p.paymentAmount) < 0) return NextResponse.json({ success: false, message: "Partial payment cannot be negative" }, { status: 400 });
     }
 
-    const subtotal = round0(
-      items.reduce((s, it) => s + Number(it.amount || 0), 0),
-    );
-
-    const discountAmount =
-      discountType === "percentage"
-        ? round0((subtotal * Number(discountInput || 0)) / 100)
-        : round0(discountInput || 0);
-
-    if (discountAmount > subtotal) {
-      return NextResponse.json(
-        { success: false, message: "Discount cannot exceed subtotal" },
-        { status: 400 },
-      );
-    }
+    const subtotal = round0(items.reduce((s, it) => s + Number(it.amount || 0), 0));
+    const discountAmount = discountType === "percentage" ? round0((subtotal * Number(discountInput || 0)) / 100) : round0(discountInput || 0);
+    
+    if (discountAmount > subtotal) return NextResponse.json({ success: false, message: "Discount cannot exceed subtotal" }, { status: 400 });
 
     const baseAfterDiscount = round0(subtotal - discountAmount);
-
-    // ✅ GST on base-after-discount
     const gstAmount = round0(baseAfterDiscount * 0.18);
-
-    // ✅ TDS on base-after-discount
     const tdsAmount = tdsApplicable ? round0(baseAfterDiscount * 0.02) : 0;
-
-    // ✅ Grand = baseAfterDiscount + GST − TDS
     const grandTotal = round0(baseAfterDiscount + gstAmount - tdsAmount);
 
-    const totalPartial = round0(
-      partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0),
-    );
-
-    if (totalPartial > grandTotal) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `Partial payments (₹${totalPartial}) exceed grand total (₹${grandTotal})`,
-        },
-        { status: 400 },
-      );
-    }
-
-    if (grandTotal > 0 && totalPartial !== grandTotal) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `Partial payments must sum to ₹${grandTotal}. Remaining: ₹${
-            grandTotal - totalPartial
-          }`,
-        },
-        { status: 400 },
-      );
-    }
+    const totalPartial = round0(partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0));
+    if (totalPartial > grandTotal) return NextResponse.json({ success: false, message: `Partial payments (₹${totalPartial}) exceed grand total (₹${grandTotal})` }, { status: 400 });
+    if (grandTotal > 0 && totalPartial !== grandTotal) return NextResponse.json({ success: false, message: `Partial payments must sum to ₹${grandTotal}. Remaining: ₹${grandTotal - totalPartial}` }, { status: 400 });
 
     const doc = await ProposalNew.create({
       clientId,
@@ -156,6 +59,8 @@ export async function POST(req) {
       deliveryPeriod,
       deliveredMetrics,
       checklist,
+      categoryNotes,
+      cityPages,
       subtotal,
       gstRate: 0.18,
       gstAmount,
@@ -174,10 +79,11 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true, data: doc }, { status: 201 });
   } catch (error) {
-    console.log("createProposalNew error:", error);
+    // ✅ Log the exact error to terminal and return to frontend
+    console.error("❌ CREATE PROPOSAL ERROR:", error);
     return NextResponse.json(
-      { success: false, message: "Server error" },
-      { status: 500 },
+      { success: false, message: error.message || "Server error" }, 
+      { status: 500 }
     );
   }
 }
