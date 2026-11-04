@@ -265,8 +265,8 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
         </div>
 
         <div className="bank-block">
-          <div><b>Cheque/Draft to be made in favor:</b> <b>Inquiry Bazaar PRIVATE LIMITED</b></div>
-          <div><b>PAN No.:</b> {BANK_DETAILS.pan} &nbsp;&nbsp; <b>CIN:</b> {BANK_DETAILS.cin}</div>
+          <div><b>Cheque/Draft to be made in favor:</b> <b>Inquiry Bazaar Private Limited</b></div>
+          <div><b>PAN No.:</b> {BANK_DETAILS.pan} &nbsp;&nbsp; </div>
           <div><b>BANK ACCOUNT NO :</b> {BANK_DETAILS.account} &nbsp;&nbsp; <b>BANK NAME :</b> {BANK_DETAILS.bank}</div>
           <div><b>IFSC CODE :</b> {BANK_DETAILS.ifsc}</div>
           <div style={{ marginTop: "2px" }}><b>Regd. Office:</b> 606 Best Business Park, Netaji Subhash Place, Delhi, 110034</div>

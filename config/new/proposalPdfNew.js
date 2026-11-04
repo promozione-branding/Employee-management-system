@@ -24,15 +24,16 @@ export const LEGAL_NOTES = [
   "All services are offered without any performance guarantee in terms of number of enquiries, confirmed orders etc.",
 ];
 
+
 export const BANK_DETAILS = {
-  payee: "Cheque/Draft to be made in favor Inquiry Bazaar PRIVATE LIMITED",
-  pan: "AAMCP6194C",
-  cin: "U92112DL2024PTC432424",
+  payee: "Cheque/Draft to be made in favor Inquiry Bazaar Private Limited",
+  pan: "AAOCP9163C",
+  cin: "U63112DL2024PTC434224",
   account: "777705997170",
   bank: "ICICI BANK",
-  ifsc: "ICIC0000254",
-  regdOffice:
-    "Regd. Office: 606 Best Business Park, Netaji Subhash Place, Delhi, 110034",
+  ifsc: "ICIC0004254",
+   regdOffice:
+    "Regd. Office: 605-606 Best Business Park, Netaji Subhash Place, Delhi, 110034",
 };
 
 export const TERMS_AND_CONDITIONS = [
