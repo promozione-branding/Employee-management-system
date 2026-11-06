@@ -1,5 +1,3 @@
-// app/api/proposalNew/[id]/route.js
-
 import { connectDB } from "@/lib/db";
 import ProposalNew from "@/models/admin/proposalNew/ProposalNew";
 import { getAuthUser } from "@/lib/getAuthUser";
@@ -37,8 +35,25 @@ export async function PUT(req, { params }) {
     const body = await req.json();
     const { items = [], discountType = "amount", discountInput = 0, tdsApplicable = false, partialPayments = [], deliveryPeriod = "weekly", deliveredMetrics = [], checklist = [], categoryNotes = [], cityPages = [], notes, validTill, paymentMethod } = body;
 
-    const subtotal = round0(items.reduce((s, it) => s + Number(it.amount || 0), 0));
-    const totalServiceDiscount = round0(items.reduce((s, it) => s + Number(it.serviceDiscount || 0), 0));
+    // ✅ Map every field to ensure nothing is lost
+    const parsedItems = items.map(it => ({
+      category: it.category,
+      categoryLabel: it.categoryLabel,
+      packageKey: it.packageKey,
+      label: it.label,
+      duration: it.duration,
+      durationLabel: it.durationLabel,
+      amount: Number(it.amount),
+      serviceDiscount: Number(it.serviceDiscount || 0),
+      custom: !!it.custom,
+      cityName: it.cityName || "",
+      cityCount: it.cityCount || "",
+      keywordName: it.keywordName || "",
+      keywordCount: it.keywordCount || "",
+    }));
+
+    const subtotal = round0(parsedItems.reduce((s, it) => s + it.amount, 0));
+    const totalServiceDiscount = round0(parsedItems.reduce((s, it) => s + it.serviceDiscount, 0));
     const globalDiscountAmount = discountType === "percentage" ? round0((subtotal * Number(discountInput || 0)) / 100) : round0(discountInput || 0);
     const discountAmount = round0(totalServiceDiscount + globalDiscountAmount);
     const baseAfterDiscount = round0(subtotal - discountAmount);
@@ -49,7 +64,7 @@ export async function PUT(req, { params }) {
     const totalPartial = round0(partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0));
     if (grandTotal > 0 && totalPartial !== grandTotal) return NextResponse.json({ success: false, message: `Partial payments must sum to ₹${grandTotal}. Remaining: ₹${grandTotal - totalPartial}` }, { status: 400 });
 
-    existing.items = items;
+    existing.items = parsedItems;
     existing.partialPayments = partialPayments;
     existing.deliveryPeriod = deliveryPeriod;
     existing.deliveredMetrics = deliveredMetrics;

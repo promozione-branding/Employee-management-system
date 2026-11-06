@@ -1,5 +1,3 @@
-// components/proposalNew/PdfNew.jsx
-
 "use client";
 import React, { forwardRef } from "react";
 import { computeTotals } from "./SummaryNew";
@@ -71,8 +69,11 @@ a { color: #111827; text-decoration: none; }
 .industries-new-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
 .industry-card { border: 1px solid #d1d5db; border-left: 4px solid #1e3a5f; border-radius: 6px; padding: 14px 16px; background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%); font-size: 12px; font-weight: 600; color: #1e3a5f; text-align: center; break-inside: avoid; }
 .item-note { font-size: 10.5px; color: #4b5563; margin-top: 4px; font-style: italic; }
-.city-data-inline { font-size: 10.5px; color: #374151; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; }
-.city-data-inline span { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; border: 1px solid #e5e7eb; }
+
+/* ✅ FIX: Forces vertical stacking for city data */
+.city-data-inline { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; font-size: 10.5px; color: #374151; }
+.city-data-inline span { display: block; background: #f3f4f6; padding: 3px 8px; border-radius: 4px; border: 1px solid #e5e7eb; width: fit-content; }
+
 .general-notes-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; margin-top: 14px; font-size: 11px; line-height: 1.6; }
 .general-notes-box strong { color: #1e3a5f; display: block; margin-bottom: 4px; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
 
@@ -201,9 +202,10 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
             <tr>
               <th style={{ width: "30px" }}>S.No</th>
               <th>Description</th>
-              <th style={{ width: "100px", textAlign: "right" }}>Discount (INR)</th>
-              <th style={{ width: "80px" }}>Tenure</th>
-              <th style={{ width: "100px", textAlign: "right" }}>Amount (INR)</th>
+              <th style={{ width: "90px", textAlign: "right" }}>Price</th>
+              <th style={{ width: "90px", textAlign: "right" }}>Discount</th>
+              <th style={{ width: "60px" }}>Tenure</th>
+              <th style={{ width: "90px", textAlign: "right" }}>Amount (INR)</th>
             </tr>
           </thead>
           <tbody>
@@ -211,7 +213,8 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
               const note = categoryNotes.find((n) => n.category === it.category)?.note;
               const hasCityPages = ["seo", "adsManagement"].includes(it.category) && cityPages.length > 0;
               
-              const finalAmount = Number(it.amount) - Number(it.serviceDiscount || 0);
+              const baseAmount = Number(it.amount) || 0;
+              const finalAmount = baseAmount - Number(it.serviceDiscount || 0);
 
               return (
                 <tr key={i}>
@@ -220,12 +223,12 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                     <div style={{ fontWeight: 600 }}>{it.label}</div>
                     {it.categoryLabel && <div style={{ color: "#6b7280", fontSize: "11px" }}>{it.categoryLabel}</div>}
                     
-                    {/* ✅ CITY DATA INLINE */}
-                    {it.packageKey === "city-page" && (it.cityName || it.cityCount || it.keywordName || it.keywordCount) && (
+                    {/* ✅ CITY DATA INLINE (Stacked) */}
+                    {it.packageKey === "city-page" && (
                       <div className="city-data-inline">
-                        {it.cityName && <span>{it.cityName}</span>}
+                        {it.cityName && <span>City: {it.cityName}</span>}
                         {it.cityCount && <span>{it.cityCount} Cities</span>}
-                        {it.keywordName && <span>{it.keywordName}</span>}
+                        {it.keywordName && <span>Keyword: {it.keywordName}</span>}
                         {it.keywordCount && <span>{it.keywordCount} Keywords</span>}
                       </div>
                     )}
@@ -239,14 +242,18 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                       </div>
                     )}
                   </td>
+
+                  <td style={{ textAlign: "right", fontWeight: 600 }}>
+                    {fmt(baseAmount)}
+                  </td>
                   
-                  <td style={{ textAlign: "right", color: it.serviceDiscount > 0 ? "#dc2626" : "inherit" }}>
-                    {it.serviceDiscount > 0 ? `- ${fmt(it.serviceDiscount)}` : "-"}
+                  <td style={{ textAlign: "right", color: "#111827" }}>
+                    {it.serviceDiscount > 0 ? fmt(it.serviceDiscount) : "-"}
                   </td>
 
                   <td>{it.durationLabel || it.duration || "—"}</td>
                   
-                  <td style={{ textAlign: "right", fontWeight: 600 }}>
+                  <td style={{ textAlign: "right", fontWeight: 700 }}>
                     {fmt(finalAmount)}
                   </td>
                 </tr>

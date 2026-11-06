@@ -1,5 +1,3 @@
-// components/proposalNew/SelectorNew.jsx
-
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { PROPOSAL_CATALOG } from "@/config/new/proposalCatalogNew";
@@ -277,7 +275,6 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
     cityName: "", cityCount: "", keywordName: "", keywordCount: "",
   });
 
-  // ✅ FIX: Autofill the city data fields when editing
   useEffect(() => {
     if (existingItem) {
       setCityData({
@@ -286,6 +283,8 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
         keywordName: existingItem.keywordName || "",
         keywordCount: existingItem.keywordCount || "",
       });
+    } else {
+      setCityData({ cityName: "", cityCount: "", keywordName: "", keywordCount: "" });
     }
   }, [existingItem]);
 
@@ -321,11 +320,11 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
         <div className="flex flex-col gap-2 mt-2 p-2 bg-gray-50 border rounded-md">
           <div className="flex gap-2">
             <input type="text" placeholder="City Name" value={cityData.cityName} onChange={(e) => setCityData({...cityData, cityName: e.target.value})} className="w-2/3 border rounded px-2 py-1 text-xs" />
-            <input type="number" placeholder="No. Cities" value={cityData.cityCount} onChange={(e) => setCityData({...cityData, cityCount: e.target.value})} className="w-1/3 border rounded px-2 py-1 text-xs" />
+            <input type="text" placeholder="No. Cities" value={cityData.cityCount} onChange={(e) => setCityData({...cityData, cityCount: e.target.value})} className="w-1/3 border rounded px-2 py-1 text-xs" />
           </div>
           <div className="flex gap-2">
             <input type="text" placeholder="Keyword" value={cityData.keywordName} onChange={(e) => setCityData({...cityData, keywordName: e.target.value})} className="w-2/3 border rounded px-2 py-1 text-xs" />
-            <input type="number" placeholder="No. Keywords" value={cityData.keywordCount} onChange={(e) => setCityData({...cityData, keywordCount: e.target.value})} className="w-1/3 border rounded px-2 py-1 text-xs" />
+            <input type="text" placeholder="No. Keywords" value={cityData.keywordCount} onChange={(e) => setCityData({...cityData, keywordCount: e.target.value})} className="w-1/3 border rounded px-2 py-1 text-xs" />
           </div>
         </div>
       )}
