@@ -29,6 +29,7 @@ export async function POST(req) {
     if (!authUser) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
+       console.log("🟢 [API] Received items from frontend:", body.items); 
     const { clientId, items = [], discountType = "amount", discountInput = 0, tdsApplicable = false, partialPayments = [], deliveryPeriod = "weekly", deliveredMetrics = [], checklist = [], categoryNotes = [], cityPages = [], notes, validTill, paymentMethod } = body;
 
     if (!clientId) return NextResponse.json({ success: false, message: "clientId required" }, { status: 400 });

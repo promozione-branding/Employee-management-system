@@ -291,6 +291,7 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
   }, [existingItem]);
 
   const handleAdd = () => {
+      console.log("🟢 [UI] Data being sent on Add:", cityData);
     onAdd(category, pkg, effectiveDurationKey, effectiveDurationLabel, price, cityData);
   };
 

@@ -1,5 +1,3 @@
-// app/api/proposalNew/[id]/route.js
-
 import { connectDB } from "@/lib/db";
 import ProposalNew from "@/models/admin/proposalNew/ProposalNew";
 import { getAuthUser } from "@/lib/getAuthUser";
@@ -37,7 +35,6 @@ export async function PUT(req, { params }) {
     const body = await req.json();
     const { items = [], discountType = "amount", discountInput = 0, tdsApplicable = false, partialPayments = [], deliveryPeriod = "weekly", deliveredMetrics = [], checklist = [], categoryNotes = [], cityPages = [], notes, validTill, paymentMethod } = body;
 
-    // ✅ Map every field to ensure nothing is lost
     const parsedItems = items.map(it => ({
       category: it.category,
       categoryLabel: it.categoryLabel,
@@ -84,6 +81,9 @@ export async function PUT(req, { params }) {
     existing.notes = notes;
     existing.validTill = validTill;
     existing.paymentMethod = paymentMethod;
+
+    // ✅ FORCE MONGOOSE TO SAVE NESTED ARRAYS
+    existing.markModified("items");
 
     const updated = await existing.save();
     return NextResponse.json({ success: true, data: updated }, { status: 200 });

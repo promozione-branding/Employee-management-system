@@ -123,6 +123,7 @@ const ProposalTabNew = ({ customerId }) => {
 
     try {
       setSaving(true);
+        console.log("🟢 [UI] Items being sent to API:", items);
       const payload = {
         clientId: customerId,
         items,

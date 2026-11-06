@@ -212,6 +212,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
           </thead>
           <tbody>
             {items.map((it, i) => {
+              console.log("🟢 [PDF] Rendering item:", it.label, "City:", it.cityName);
               const note = categoryNotes.find((n) => n.category === it.category)?.note;
               const hasCityPages = ["seo", "adsManagement"].includes(it.category) && cityPages.length > 0;
               
