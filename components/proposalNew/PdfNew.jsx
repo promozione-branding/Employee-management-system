@@ -1,3 +1,5 @@
+// components/proposalNew/PdfNew.jsx
+
 "use client";
 import React, { forwardRef } from "react";
 import { computeTotals } from "./SummaryNew";
