@@ -1,7 +1,7 @@
 // components/proposalNew/HistoryNew.jsx
 
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FileText, Eye, Trash2, Pencil, Download, Mail, X } from "lucide-react";
 import toast from "react-hot-toast";
 import PreviewNew from "./PreviewNew";
@@ -27,6 +27,7 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
+  const pendingDownloadRef = useRef(false);
 
   const [mailModalOpen, setMailModalOpen] = useState(false);
   const [mailTargetId, setMailTargetId] = useState(null);
@@ -72,7 +73,7 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
       const res = await deleteProposalNewService(id);
       if (res.success) {
         toast.success("Deleted");
-        fetchList();
+        fetchList(); 
       }
     } catch (err) {
       toast.error("Failed to delete");
@@ -84,14 +85,27 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
       const res = await getProposalNewByIdService(id);
       if (!res.success || !res.data)
         return toast.error("Failed to load proposal");
+      // Render exactly what will be downloaded, then download it from the
+      // committed preview DOM in the effect below — never on a timer guess.
+      pendingDownloadRef.current = true;
       setPreview(res.data);
-      setTimeout(() => {
-        downloadProposalPdf(res.data);
-      }, 350);
     } catch (err) {
       toast.error("Failed to download");
     }
   };
+
+  useEffect(() => {
+    if (!preview || !pendingDownloadRef.current) return;
+    pendingDownloadRef.current = false;
+    // Double rAF: preview state is committed and PdfNew has painted.
+    const raf = requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const node = document.getElementById("proposal-print-root");
+        if (node) downloadProposalPdf(preview, node);
+      }),
+    );
+    return () => cancelAnimationFrame(raf);
+  }, [preview]);
 
   const openMailModal = async (id) => {
     try {
@@ -249,7 +263,7 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
                   />
                   <div>
                     <p className="text-sm font-medium text-gray-800">
-                      Send to Client's Email
+                      Send to Client&apos;s Email
                     </p>
                     <p className="text-xs text-gray-500">
                       {defaultEmail || "No email on record"}

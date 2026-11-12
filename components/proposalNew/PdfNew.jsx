@@ -33,7 +33,7 @@ table { width: 100%; border-collapse: collapse; }
 th, td { padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 12px; vertical-align: top; }
 th { background: #f3f4f6; font-weight: 600; }
 h1 { font-size: 20px; margin: 0 0 10px 0; }
-.proposal-title { text-align: center; }
+.proposal-title { display: block; visibility: visible; color: #111827; text-align: center; }
 h3 { font-size: 14px; margin: 18px 0 6px 0; }
 ul { list-style: disc; padding-left: 18px; margin: 0; }
 li { font-size: 12px; margin-bottom: 2px; line-height: 1.45; }
@@ -91,11 +91,26 @@ a { color: #111827; text-decoration: none; }
   .pdf-footer-fixed .left, .pdf-footer-fixed .right { flex: 1; } .pdf-footer-fixed .right { text-align: right; } .pdf-footer-fixed .center { flex: 0 0 auto; text-align: center; }
   .pdf-watermark-fixed { display: flex !important; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 0; }
   .pdf-watermark-fixed img { width: 480px; height: auto; opacity: 0.08; }
-  .pdf-screen-page { width: 210mm !important; min-height: 297mm !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; padding: 30mm 12mm 22mm 12mm !important; page-break-after: always; page-break-inside: auto; overflow: visible !important; }
+  /* Top padding must clear the fixed header (top:8mm + 110px logo ~29mm + padding/border ~38mm), otherwise its opaque white background paints over the centered Proposal title on page 1. */
+  .pdf-screen-page { width: 210mm !important; min-height: 297mm !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; padding: 40mm 12mm 22mm 12mm !important; page-break-after: always; page-break-inside: auto; overflow: visible !important; }
   .pdf-screen-page:last-child { page-break-after: auto; }
   .pdf-watermark-inline { display: none !important; }
-  /* Downloaded PDF: keep Proposal at the top-left. */
-  .proposal-title { text-align: left !important; }
+  .pdf-page-body { position: relative !important; z-index: 20 !important; }
+  /* Keep the Proposal heading visible and centered in Chrome print/PDF output. */
+  .proposal-title {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #111827 !important;
+    text-align: center !important;
+    position: relative !important;
+    z-index: 20 !important;
+    margin: 0 0 10px 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
   .deliverable-row, .industry-card, .svc-item, .schedule-grid, .delivery-grid, .delivery-item, .legal-notes li, .bank-block, .general-notes-box { break-inside: avoid; }
 }
 `;
@@ -121,16 +136,41 @@ const FooterContent = ({ pageNumber, totalPages }) => (
   </>
 );
 
-export const downloadProposalPdf = (proposal) => {
-  const node = document.getElementById("proposal-print-root");
+export const downloadProposalPdf = (proposal, sourceNode = null) => {
+  const node = sourceNode || document.getElementById("proposal-print-root");
   if (!node) return;
   const html = node.outerHTML;
   const win = window.open("", "_blank", "width=900,height=650");
   if (!win) return;
   win.document.open();
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8" /><title>${proposal?.proposalNumber || "Proposal"}</title><style>${CSS_RESET}</style></head><body>${html}</body></html>`);
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8" /><base href="${window.location.origin}/" /><title>${proposal?.proposalNumber || "Proposal"}</title><style>${CSS_RESET}</style></head><body>${html}</body></html>`);
   win.document.close();
-  setTimeout(() => { win.focus(); win.print(); }, 500);
+
+  // Print only after the cloned document and its logo/watermark images have
+  // loaded — a blind timeout can snapshot the page before layout settles.
+  let printed = false;
+  const printWhenReady = () => {
+    if (printed) return;
+    printed = true;
+    win.focus();
+    win.print();
+  };
+  const waitForImages = () => {
+    const pending = [...win.document.images].filter((img) => !img.complete);
+    if (!pending.length) return printWhenReady();
+    let remaining = pending.length;
+    const done = () => {
+      remaining -= 1;
+      if (remaining <= 0) printWhenReady();
+    };
+    pending.forEach((img) => {
+      img.addEventListener("load", done, { once: true });
+      img.addEventListener("error", done, { once: true });
+    });
+    setTimeout(printWhenReady, 3000);
+  };
+  if (win.document.readyState === "complete") waitForImages();
+  else win.addEventListener("load", waitForImages, { once: true });
 };
 
 const ScreenPage = ({ children, pageNumber, totalPages }) => (
@@ -421,6 +461,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
   );
 });
 
-PdfNew.displayName = "PdfNew"; 7   
+PdfNew.displayName = "PdfNew";   
  
 export default PdfNew;
