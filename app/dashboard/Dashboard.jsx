@@ -83,6 +83,7 @@ const Dashboard = () => {
               <h1 className="font-serif text-[34px] font-bold leading-[1.15] tracking-tight text-white sm:text-[40px] lg:text-[46px]">
                 {greeting}, {userName}
               </h1>
+              
 
               {/* Description */}
               <p className="mt-3 max-w-[570px] text-[16px] font-medium leading-[1.7] text-[#C6D3E8] sm:text-[17px]">
