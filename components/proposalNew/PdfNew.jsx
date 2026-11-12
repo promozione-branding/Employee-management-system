@@ -33,6 +33,7 @@ table { width: 100%; border-collapse: collapse; }
 th, td { padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 12px; vertical-align: top; }
 th { background: #f3f4f6; font-weight: 600; }
 h1 { font-size: 20px; margin: 0 0 10px 0; }
+.proposal-title { text-align: center; }
 h3 { font-size: 14px; margin: 18px 0 6px 0; }
 ul { list-style: disc; padding-left: 18px; margin: 0; }
 li { font-size: 12px; margin-bottom: 2px; line-height: 1.45; }
@@ -93,6 +94,8 @@ a { color: #111827; text-decoration: none; }
   .pdf-screen-page { width: 210mm !important; min-height: 297mm !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; padding: 30mm 12mm 22mm 12mm !important; page-break-after: always; page-break-inside: auto; overflow: visible !important; }
   .pdf-screen-page:last-child { page-break-after: auto; }
   .pdf-watermark-inline { display: none !important; }
+  /* Downloaded PDF: keep Proposal at the top-left. */
+  .proposal-title { text-align: left !important; }
   .deliverable-row, .industry-card, .svc-item, .schedule-grid, .delivery-grid, .delivery-item, .legal-notes li, .bank-block, .general-notes-box { break-inside: avoid; }
 }
 `;
@@ -146,6 +149,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
 
   const client = proposal.clientId || {};
   const items = proposal.items || [];
+  const hasSectionWiseDiscount = items.some((item) => Number(item.serviceDiscount || 0) > 0);
   const checklist = proposal.checklist || [];
   const partialPayments = proposal.partialPayments || [];
   const deliveredMetrics = proposal.deliveredMetrics || [];
@@ -183,7 +187,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
       <div className="pdf-watermark-fixed"><img src={PDF_LOGO_PATH} alt="" /></div>
 
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
-        <h1>Proposal</h1>
+        <h1 className="proposal-title">Proposal</h1>
         <div className="to-block" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "20px" }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 700, marginBottom: "2px" }}>To,</div>
@@ -192,10 +196,21 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
             {clientAddress && <div className="row"><span className="label">Address:</span><span>{clientAddress}</span></div>}
             {client.GSTIN && <div className="row"><span className="label">GST No.:</span><span>{client.GSTIN}</span></div>}
           </div>
-          <div style={{ flex: "0 0 auto", minWidth: "150px", textAlign: "right" }}>
-            <div style={{ marginBottom: "5px" }}><span className="label">Date: </span><span>{fmtDate(proposal.createdAt)}</span></div>
-            {proposal.validTill && <div><span className="label">Valid Till: </span><span>{fmtDate(proposal.validTill)}</span></div>}
-            <div style={{ marginBottom: "5px" }}><span className="label">Proposal No.: </span><span>{proposal.proposalNumber || "—"}</span></div>
+          <div style={{ flex: "0 0 220px", minWidth: "220px", textAlign: "left" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "90px minmax(0, 1fr)", columnGap: "8px", alignItems: "baseline", marginBottom: "5px" }}>
+              <span className="label" style={{ fontWeight: 700 }}>Date:</span>
+              <span>{fmtDate(proposal.createdAt)}</span>
+            </div>
+            {proposal.validTill && (
+              <div style={{ display: "grid", gridTemplateColumns: "90px minmax(0, 1fr)", columnGap: "8px", alignItems: "baseline", marginBottom: "5px" }}>
+                <span className="label" style={{ fontWeight: 700 }}>Valid Till:</span>
+                <span>{fmtDate(proposal.validTill)}</span>
+              </div>
+            )}
+            <div style={{ display: "grid", gridTemplateColumns: "90px minmax(0, 1fr)", columnGap: "8px", alignItems: "baseline" }}>
+              <span className="label" style={{ fontWeight: 700 }}>Proposal No.:</span>
+              <span>{proposal.proposalNumber || "—"}</span>
+            </div>
           </div>
         </div>
 
@@ -205,7 +220,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
               <th style={{ width: "30px" }}>S.No</th>
               <th>Description</th>
               <th style={{ width: "90px", textAlign: "right" }}>Price</th>
-              <th style={{ width: "90px", textAlign: "right" }}>Discount</th>
+              {hasSectionWiseDiscount && <th style={{ width: "90px", textAlign: "right" }}>Discount</th>}
               <th style={{ width: "60px" }}>Tenure</th>
               <th style={{ width: "90px", textAlign: "right" }}>Amount (INR)</th>
             </tr>
@@ -250,9 +265,11 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                     {fmt(baseAmount)}
                   </td>
                   
-                  <td style={{ textAlign: "right", color: "#111827" }}>
-                    {it.serviceDiscount > 0 ? fmt(it.serviceDiscount) : "-"}
-                  </td>
+                  {hasSectionWiseDiscount && (
+                    <td style={{ textAlign: "right", color: "#111827" }}>
+                      {Number(it.serviceDiscount || 0) > 0 ? fmt(it.serviceDiscount) : "-"}
+                    </td>
+                  )}
 
                   <td>{it.durationLabel || it.duration || "—"}</td>
                   
@@ -404,5 +421,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
   );
 });
 
-PdfNew.displayName = "PdfNew";
+PdfNew.displayName = "PdfNew"; 7   
+ 
 export default PdfNew;
