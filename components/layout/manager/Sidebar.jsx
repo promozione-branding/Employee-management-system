@@ -1,4 +1,3 @@
-// components/layout/manager/Sidebar.jsx
 
 "use client";
 
@@ -58,19 +57,21 @@ const SideBar = ({ children }) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const { employee } = useManagerEmployeeStore();
-  const { activeCustomer, clearActiveCustomer } = useActiveCustomerStore();
+  const { activeCustomer, clearActiveCustomer } =
+    useActiveCustomerStore();
+
   const router = useRouter();
   const pathname = usePathname();
 
   const username = employee?.basicDetails?.name || "Manager";
   const email =
-    employee?.basicDetails?.email || "admin2@promozionebranding.com";
+    employee?.basicDetails?.email ||
+    "admin2@promozionebranding.com";
 
   useEffect(() => {
     setMobileOpen(false);
     setUserMenuOpen(false);
 
-    // Clear active customer if we navigate away from customer detail pages
     if (!pathname.includes("/manager/customer/")) {
       clearActiveCustomer();
     }
@@ -102,7 +103,9 @@ const SideBar = ({ children }) => {
       toast.success("Logged out successfully");
       router.push("/login");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Logout failed.");
+      toast.error(
+        error.response?.data?.message || "Logout failed."
+      );
       console.error(error);
     }
   };
@@ -112,23 +115,32 @@ const SideBar = ({ children }) => {
       return pathname === "/manager";
     }
 
-    return pathname === href || pathname.startsWith(`${href}/`);
+    return (
+      pathname === href ||
+      pathname.startsWith(`${href}/`)
+    );
   };
 
-  // The mobile drawer always displays labels.
   const showLabels = open || mobileOpen;
 
   return (
     <div
       className="flex min-h-screen bg-[#F2F4F9] text-slate-800"
-      style={{ "--brand-navy": NAVY, "--brand-orange": ORANGE }}
+      style={{
+        "--brand-navy": NAVY,
+        "--brand-orange": ORANGE,
+      }}
     >
       {/* Mobile backdrop */}
       <div
         aria-hidden="true"
         className={`fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-[2px]
           transition-opacity duration-300 md:hidden
-          ${mobileOpen ? "visible opacity-100" : "invisible opacity-0"}`}
+          ${
+            mobileOpen
+              ? "visible opacity-100"
+              : "invisible opacity-0"
+          }`}
         onClick={() => setMobileOpen(false)}
       />
 
@@ -151,7 +163,9 @@ const SideBar = ({ children }) => {
         <div
           className={`flex h-[66px] shrink-0 items-center border-b
             border-white/10 ${
-              showLabels ? "justify-between px-5" : "justify-center px-2"
+              showLabels
+                ? "justify-between px-5"
+                : "justify-center px-2"
             }`}
         >
           <Link
@@ -235,7 +249,6 @@ const SideBar = ({ children }) => {
                   ${!showLabels ? "justify-center px-0" : ""}
                 `}
               >
-                {/* Active indicator */}
                 {active && (
                   <span
                     className="absolute bottom-2 left-0 top-2 w-[3px]
@@ -252,11 +265,16 @@ const SideBar = ({ children }) => {
                         : "text-blue-100/80 group-hover:bg-white/10 group-hover:text-white"
                     }`}
                 >
-                  <Icon size={20} strokeWidth={active ? 2.3 : 1.8} />
+                  <Icon
+                    size={20}
+                    strokeWidth={active ? 2.3 : 1.8}
+                  />
                 </span>
 
                 {showLabels && (
-                  <span className="min-w-0 flex-1 truncate">{link.label}</span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {link.label}
+                  </span>
                 )}
 
                 {showLabels && active && (
@@ -281,6 +299,7 @@ const SideBar = ({ children }) => {
                 >
                   <Building2 size={16} />
                 </div>
+
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-white">
                     Manager Workspace
@@ -309,13 +328,16 @@ const SideBar = ({ children }) => {
             >
               <LogOut size={20} strokeWidth={1.9} />
             </span>
+
             {showLabels && <span>Sign out</span>}
           </button>
 
           {/* Desktop collapse control */}
           <button
             type="button"
-            aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+            aria-label={
+              open ? "Collapse sidebar" : "Expand sidebar"
+            }
             onClick={() => setOpen((previous) => !previous)}
             className="mt-2 hidden min-h-[42px] w-full items-center
               justify-center gap-2 rounded-xl border border-white/10
@@ -336,14 +358,16 @@ const SideBar = ({ children }) => {
 
       {/* Main application area */}
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
-        {/* Topbar */}
+
+        {/* TOP HEADER - HIGH PRIORITY */}
         <header
-          className="sticky top-0 z-30 flex h-[68px]
+          className="sticky top-0 z-[10000] isolate flex h-[68px]
           shrink-0 items-center justify-between border-b
           border-slate-200/80 bg-white/95 px-3 shadow-sm
           backdrop-blur-xl sm:px-5 lg:px-8"
         >
           <div className="flex min-w-0 items-center gap-3">
+
             {/* Mobile menu */}
             <Button
               type="button"
@@ -368,6 +392,7 @@ const SideBar = ({ children }) => {
                 >
                   <ArrowLeft size={22} />
                 </button>
+
                 <p className="truncate text-sm font-semibold text-slate-800">
                   {navLinks.find((link) => isActive(link.href))?.label ||
                     "Workspace"}
@@ -376,7 +401,10 @@ const SideBar = ({ children }) => {
 
               {activeCustomer ? (
                 <p className="mt-0.5 truncate text-xs font-medium text-[#0A2E66]">
-                  <span className="font-semibold">{activeCustomer.name}</span>
+                  <span className="font-semibold">
+                    {activeCustomer.name}
+                  </span>
+
                   {activeCustomer.company && (
                     <span className="text-slate-500">
                       {" "}
@@ -403,14 +431,18 @@ const SideBar = ({ children }) => {
                 >
                   <ArrowLeft size={15} />
                 </button>
+
                 <p className="truncate text-sm font-bold text-[#0A2E66]">
                   Inquiry Bazaar
                 </p>
               </div>
+
               {activeCustomer ? (
                 <p className="truncate text-[11px] font-medium text-slate-600">
                   {activeCustomer.name}{" "}
-                  {activeCustomer.company ? `- ${activeCustomer.company}` : ""}
+                  {activeCustomer.company
+                    ? `- ${activeCustomer.company}`
+                    : ""}
                 </p>
               ) : (
                 <p className="truncate text-[11px] text-slate-500">
@@ -421,10 +453,11 @@ const SideBar = ({ children }) => {
           </div>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+
             {/* Theme toggle */}
             <ThemeToggle />
 
-            {/* Search placeholder */}
+            {/* Search */}
             <button
               type="button"
               aria-label="Search (coming soon)"
@@ -436,7 +469,7 @@ const SideBar = ({ children }) => {
               <Search size={19} />
             </button>
 
-            {/* Notification placeholder */}
+            {/* Notifications */}
             <button
               type="button"
               aria-label="Notifications (coming soon)"
@@ -450,13 +483,16 @@ const SideBar = ({ children }) => {
 
             <div className="mx-0.5 hidden h-8 w-px bg-slate-200 sm:block" />
 
-            {/* User menu */}
-            <div className="relative">
+            {/* USER MENU */}
+            <div className="relative z-[10001]">
+
               <button
                 type="button"
                 aria-expanded={userMenuOpen}
                 aria-label="Toggle user menu"
-                onClick={() => setUserMenuOpen((previous) => !previous)}
+                onClick={() =>
+                  setUserMenuOpen((previous) => !previous)
+                }
                 className={`flex items-center gap-2 rounded-xl p-1.5
                   transition hover:bg-slate-50 sm:gap-3 sm:pl-2 ${
                     userMenuOpen ? "bg-slate-50" : ""
@@ -477,7 +513,10 @@ const SideBar = ({ children }) => {
                   >
                     {username}
                   </p>
-                  <p className="text-[11px] text-slate-500">Manager</p>
+
+                  <p className="text-[11px] text-slate-500">
+                    Manager
+                  </p>
                 </div>
 
                 <ChevronDown
@@ -487,21 +526,25 @@ const SideBar = ({ children }) => {
                 />
               </button>
 
+              {/* PROFILE DROPDOWN */}
               {userMenuOpen && (
                 <>
+                  {/* Click outside to close */}
                   <button
                     type="button"
                     aria-label="Close user menu"
-                    className="fixed inset-0 z-40 cursor-default"
+                    className="fixed inset-0 z-[10001] cursor-default"
                     onClick={() => setUserMenuOpen(false)}
                   />
 
+                  {/* Dropdown always above page content */}
                   <div
                     className="absolute right-0 top-[calc(100%+12px)]
-                    z-50 w-[min(18rem,calc(100vw-1.5rem))]
+                    z-[10002] w-[min(18rem,calc(100vw-1.5rem))]
                     overflow-hidden rounded-2xl border border-slate-200
-                    bg-white shadow-xl shadow-slate-900/10"
+                    bg-white shadow-2xl shadow-slate-900/20"
                   >
+                    {/* User information */}
                     <div className="bg-[#F2F4F9] p-4">
                       <div className="flex items-center gap-3">
                         <div
@@ -511,6 +554,7 @@ const SideBar = ({ children }) => {
                         >
                           <UserCircle size={25} />
                         </div>
+
                         <div className="min-w-0">
                           <p
                             className="truncate text-sm font-semibold
@@ -518,6 +562,7 @@ const SideBar = ({ children }) => {
                           >
                             {username}
                           </p>
+
                           <p className="mt-0.5 truncate text-xs text-slate-500">
                             {email}
                           </p>
@@ -525,6 +570,7 @@ const SideBar = ({ children }) => {
                       </div>
                     </div>
 
+                    {/* My Profile */}
                     <div className="p-2">
                       <Link
                         href="/manager/profile"
@@ -538,11 +584,12 @@ const SideBar = ({ children }) => {
                       </Link>
                     </div>
 
+                    {/* Sign out */}
                     <div className="border-t border-slate-100 p-2">
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3
+                        className="flex w-full items-center gap-3
                           rounded-xl px-3 py-2.5 text-sm font-medium
                           text-red-600 transition hover:bg-red-50"
                       >
@@ -559,7 +606,7 @@ const SideBar = ({ children }) => {
 
         {/* Page content */}
         <main
-          className="min-w-0 flex-1 bg-[#F2F4F9] p-1.5
+          className="relative z-0 min-w-0 flex-1 bg-[#F2F4F9] p-1.5
           sm:p-1.5 lg:p-1.5"
         >
           {children}

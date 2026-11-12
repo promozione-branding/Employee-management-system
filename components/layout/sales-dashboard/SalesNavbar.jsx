@@ -1,4 +1,3 @@
-// components/layout/sales-dashboard/SalesNavbar.jsx
 
 "use client";
 
@@ -29,11 +28,13 @@ import { useActiveCustomerStore } from "@/lib/store/ActiveCustomerStore";
 const SalesNavbar = () => {
   const router = useRouter();
   const pathname = usePathname();
+
   const [openEmployeeDetails, setOpenEmployeeDetails] = useState(false);
 
   const { employee, clearEmployee } = useSalesEmployeeStore();
   const { activeCustomer, clearActiveCustomer } = useActiveCustomerStore();
   const { theme, toggleTheme } = useTheme();
+
   const lightMode = theme !== "dark";
 
   // Clear active customer when not on a client detail page
@@ -43,6 +44,11 @@ const SalesNavbar = () => {
     }
   }, [pathname, clearActiveCustomer]);
 
+  // Close dropdown when navigating
+  useEffect(() => {
+    setOpenEmployeeDetails(false);
+  }, [pathname]);
+
   const username =
     employee?.basicDetails?.name ||
     employee?.basicDetails?.email?.split("@")[0] ||
@@ -50,7 +56,8 @@ const SalesNavbar = () => {
 
   const email = Array.isArray(employee?.basicDetails?.email)
     ? employee?.basicDetails?.email[0]
-    : employee?.basicDetails?.email || "admin2@promozionebranding.com";
+    : employee?.basicDetails?.email ||
+      "admin2@promozionebranding.com";
 
   const handleLogout = async () => {
     try {
@@ -70,7 +77,7 @@ const SalesNavbar = () => {
   const showBackButton = pathname !== "/sales-dashboard";
 
   return (
-    <header className="sticky top-0 z-30 flex h-[68px] shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 px-3 shadow-sm backdrop-blur-xl sm:px-5 lg:px-8">
+    <header className="sticky top-0 z-[10000] isolate flex h-[68px] shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 px-3 shadow-sm backdrop-blur-xl sm:px-5 lg:px-8">
       <div className="flex min-w-0 items-center gap-3">
         {/* Conditional Back Button */}
         {showBackButton && (
@@ -84,24 +91,28 @@ const SalesNavbar = () => {
             >
               <ArrowLeft size={18} strokeWidth={2.2} />
             </button>
+
             <span className="hidden h-5 w-px bg-slate-200 sm:block" />
           </>
         )}
 
-        <h2 className="text-base font-bold tracking-tight text-[#0A2E66] sm:text-lg shrink-0">
+        <h2 className="shrink-0 text-base font-bold tracking-tight text-[#0A2E66] sm:text-lg">
           Sales Workspace
         </h2>
 
         {activeCustomer && (
           <>
             <span className="hidden h-5 w-px bg-slate-300 sm:block" />
+
             <div className="hidden min-w-0 items-center gap-2 sm:flex">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#FFF1E4] text-[#F27B1E]">
                 <UserRound size={14} />
               </span>
+
               <div className="min-w-0">
                 <p className="truncate text-xs font-semibold text-[#0A2E66] sm:text-sm">
                   {activeCustomer.name}
+
                   {activeCustomer.company && (
                     <span className="font-normal text-slate-500">
                       {" "}
@@ -116,12 +127,13 @@ const SalesNavbar = () => {
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-4">
-        {/* Theme toggle */}
+        {/* Theme Toggle */}
         <ThemeToggle />
 
         {/* Search */}
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+
           <input
             type="search"
             placeholder="Search pipeline..."
@@ -136,13 +148,13 @@ const SalesNavbar = () => {
           className="relative hidden h-10 w-10 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-[#0A2E66] sm:flex"
         >
           <Bell size={19} />
-          <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
+          <span className="absolute right-2.5 top-2.5 h-2 w-2 animate-pulse rounded-full bg-orange-500" />
         </button>
 
         <div className="mx-0.5 hidden h-8 w-px bg-slate-200 sm:block" />
 
         {/* User Profile Dropdown Toggle */}
-        <div className="relative">
+        <div className="relative z-[10001]">
           <button
             type="button"
             aria-expanded={openEmployeeDetails}
@@ -171,7 +183,10 @@ const SalesNavbar = () => {
               <p className="truncate text-sm font-semibold capitalize text-slate-800">
                 {username}
               </p>
-              <p className="text-[11px] text-slate-500">Sales Representative</p>
+
+              <p className="text-[11px] text-slate-500">
+                Sales Representative
+              </p>
             </div>
 
             <ChevronDown
@@ -185,23 +200,27 @@ const SalesNavbar = () => {
           {/* Dropdown Menu */}
           {openEmployeeDetails && (
             <>
+              {/* Click Outside Overlay */}
               <button
                 type="button"
                 aria-label="Close menu"
-                className="fixed inset-0 z-40 cursor-default"
+                className="fixed inset-0 z-[10001] cursor-default"
                 onClick={() => setOpenEmployeeDetails(false)}
               />
 
-              <div className="absolute right-0 top-[calc(100%+12px)] z-50 w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
+              {/* Profile Dropdown */}
+              <div className="absolute right-0 top-[calc(100%+12px)] z-[10002] w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
                 <div className="bg-[#F2F4F9] p-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#0A2E66] shadow-sm">
                       <UserCircle size={25} />
                     </div>
+
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold capitalize text-slate-800">
                         {username}
                       </p>
+
                       <p className="mt-0.5 truncate text-xs text-slate-500">
                         {email}
                       </p>
@@ -209,7 +228,7 @@ const SalesNavbar = () => {
                   </div>
                 </div>
 
-                <div className="p-2 space-y-1">
+                <div className="space-y-1 p-2">
                   <Link
                     href="/sales-dashboard/profile"
                     onClick={() => setOpenEmployeeDetails(false)}
@@ -219,38 +238,44 @@ const SalesNavbar = () => {
                     <span>My Profile</span>
                   </Link>
 
+                  {/* Theme Toggle */}
                   <div
-                    className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm text-slate-700 transition hover:bg-blue-50 hover:text-[#0A2E66] cursor-pointer"
+                    className="flex cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-sm text-slate-700 transition hover:bg-blue-50 hover:text-[#0A2E66]"
                     onClick={toggleTheme}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="relative h-5 w-5 flex items-center justify-center">
+                      <div className="relative flex h-5 w-5 items-center justify-center">
                         <Sun
                           size={18}
                           className={`absolute transition-all duration-300 ease-in-out ${
                             lightMode
-                              ? "opacity-100 transform rotate-0 scale-100"
-                              : "opacity-0 transform -rotate-90 scale-50"
+                              ? "rotate-0 scale-100 opacity-100"
+                              : "-rotate-90 scale-50 opacity-0"
                           }`}
                         />
+
                         <Moon
                           size={18}
                           className={`absolute transition-all duration-300 ease-in-out ${
                             lightMode
-                              ? "opacity-0 transform rotate-90 scale-50"
-                              : "opacity-100 transform rotate-0 scale-100"
+                              ? "rotate-90 scale-50 opacity-0"
+                              : "rotate-0 scale-100 opacity-100"
                           }`}
                         />
                       </div>
-                      <span>{lightMode ? "Light Mode" : "Dark Mode"}</span>
+
+                      <span>
+                        {lightMode ? "Light Mode" : "Dark Mode"}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="border-t border-slate-100 p-2">
                   <button
+                    type="button"
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
                   >
                     <LogOut size={18} />
                     <span>Sign out</span>
