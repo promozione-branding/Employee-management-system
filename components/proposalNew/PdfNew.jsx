@@ -271,6 +271,13 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
               const note = categoryNotes.find((n) => n.category === it.category)?.note;
               const hasCityPages = ["seo", "adsManagement"].includes(it.category) && cityPages.length > 0;
               
+              const cities = String(it.cityName || "").split(",").map((s) => s.trim()).filter(Boolean);
+              const keywords = String(it.keywordName || "").split(",").map((s) => s.trim()).filter(Boolean);
+              const cityCount = it.cityCount || cities.length;
+              const keywordCount = it.keywordCount || keywords.length;
+              const cityWord = Number(cityCount) === 1 ? "City" : "Cities";
+              const keywordWord = Number(keywordCount) === 1 ? "Keyword" : "Keywords";
+
               const baseAmount = Number(it.amount) || 0;
               const finalAmount = baseAmount - Number(it.serviceDiscount || 0);
 
@@ -281,13 +288,25 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                     <div style={{ fontWeight: 600 }}>{it.label}</div>
                     {it.categoryLabel && <div style={{ color: "#6b7280", fontSize: "11px" }}>{it.categoryLabel}</div>}
                     
-                    {/* ✅ CITY DATA INLINE (Stacked) */}
-                    {it.packageKey === "city-page" && (
+                    {/* City/keyword: count header row, then one value per row */}
+                    {it.packageKey === "city-page" && (cities.length > 0 || keywords.length > 0 || it.cityCount || it.keywordCount) && (
                       <div className="city-data-inline">
-                        {it.cityName && <span>City: {it.cityName}</span>}
-                        {it.cityCount && <span>{it.cityCount} Cities</span>}
-                        {it.keywordName && <span>Keyword: {it.keywordName}</span>}
-                        {it.keywordCount && <span>{it.keywordCount} Keywords</span>}
+                        {(cities.length > 0 || it.cityCount) && (
+                          <>
+                            <span>City: {cityCount} {cityWord},</span>
+                            {cities.map((city, ci) => (
+                              <span key={ci}>{city}{ci < cities.length - 1 ? "," : ""}</span>
+                            ))}
+                          </>
+                        )}
+                        {(keywords.length > 0 || it.keywordCount) && (
+                          <>
+                            <span>Keywords: {keywordCount} {keywordWord}</span>
+                            {keywords.map((keyword, ki) => (
+                              <span key={ki}>{keyword}{ki < keywords.length - 1 ? "," : ""}</span>
+                            ))}
+                          </>
+                        )}
                       </div>
                     )}
 

@@ -37,6 +37,17 @@ test("History download is driven by the rendered preview, not a 350ms guess", ()
   assert.match(history, /useEffect/, "download must react to preview being committed to the DOM");
 });
 
+test("city-page cities/keywords are split into one row each, headed by their count", () => {
+  // cityName/keywordName are single comma-joined strings (SelectorNew inputs).
+  assert.match(pdf, /split\(","\)/, "cities/keywords must be split on commas, not printed as one comma-joined chip");
+  assert.match(pdf, /cities\.map\(/, "each city must render as its own row");
+  assert.match(pdf, /keywords\.map\(/, "each keyword must render as its own row");
+  assert.match(pdf, /City: \{[^}]*\} \{[^}]*\},/, 'first row must be "City: <count> Cities,"');
+  assert.match(pdf, /Keywords: \{[^}]*\} \{[^}]*\}/, 'header row must be "Keywords: <count> Keywords"');
+  assert.doesNotMatch(pdf, /<span>City: \{it\.cityName\}<\/span>/, "old single-chip city row must be gone");
+  assert.doesNotMatch(pdf, /<span>Keyword: \{it\.keywordName\}<\/span>/, "old single-chip keyword row must be gone");
+});
+
 test("Preview and History use the same downloadProposalPdf entry point", () => {
   assert.match(preview, /downloadProposalPdf\(proposal, printRef\.current\)/);
   assert.match(history, /downloadProposalPdf/);
