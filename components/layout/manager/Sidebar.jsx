@@ -1,3 +1,5 @@
+// components/layout/manager/Sidebar.jsx
+
 
 "use client";
 

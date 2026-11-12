@@ -1,3 +1,5 @@
+// app/dashboard/customer/history/seo-report-history/[id]/SeoReport.jsx
+
 
 "use client";
 

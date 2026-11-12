@@ -1,3 +1,5 @@
+// app/manager/Dashboard.jsx
+
 
 "use client";
 
