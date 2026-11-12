@@ -17,20 +17,20 @@ const EmployeeDashboard = () => {
   const { employee } = useEmployeeStore();
 
   return (
-    <div>
-      <div className="flex flex-col lg:flex-row gap-5 mb-5 lg:mb-0">
+    <div className="min-w-0">
+      <div className="mb-5 grid grid-cols-1 gap-5 lg:grid-cols-3 [&>*]:min-w-0">
         <EmployeeCalendar employeeId={employee?._id} />
         <EmployeeTodo employeeId={employee?._id} />
         <EmployeeClientsProgress employeeId={employee?._id} />
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 [&>*]:min-w-0">
         <EmployeeReminder employeeId={employee?._id} />
         <EmployeeAssigedClient employeeId={employee?._id} />
         <RecentActivity employeeId={employee?._id} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 mt-5 gap-6">
+      <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2 [&>*]:min-w-0">
         <EmployeeAnnouncements />
         <AllEmployeeContact />
       </div>

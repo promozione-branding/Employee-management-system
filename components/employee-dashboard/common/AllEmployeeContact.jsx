@@ -71,7 +71,7 @@ const AllEmployeeContact = () => {
       </div>
 
       {/* Contacts */}
-      <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:px-5">
+      <div className="max-h-[556px] min-h-0 flex-1 overflow-y-auto p-4 sm:px-5">
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4].map((item) => (

@@ -171,7 +171,7 @@ const EmployeeTodo = ({ employeeId }) => {
 
   if (loading) {
     return (
-      <div className="flex h-[420px] w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-[#E3E7F0] bg-white p-4 shadow-[0_4px_20px_rgba(15,27,51,0.04)] sm:p-5">
+      <div className="flex h-full w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-[#E3E7F0] bg-white p-4 shadow-[0_4px_20px_rgba(15,27,51,0.04)] sm:p-5">
         <div className="mb-5 flex items-center gap-3">
           <Skeleton
             width={44}
@@ -214,7 +214,7 @@ const EmployeeTodo = ({ employeeId }) => {
   }
 
   return (
-    <div className="flex h-[420px] w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-[#E3E7F0] bg-white p-4 shadow-[0_4px_20px_rgba(15,27,51,0.04)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(15,27,51,0.07)] sm:p-5">
+    <div className="flex h-full w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-[#E3E7F0] bg-white p-4 shadow-[0_4px_20px_rgba(15,27,51,0.04)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(15,27,51,0.07)] sm:p-5">
       {/* Header */}
       <div className="mb-5 flex shrink-0 items-center gap-3">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0A2E66] text-white">
@@ -258,7 +258,7 @@ const EmployeeTodo = ({ employeeId }) => {
       </form>
 
       {/* Task list */}
-      <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto pr-1">
+      <div className="custom-scrollbar max-h-[302px] min-h-0 flex-1 overflow-y-auto pr-1">
         {todos.length === 0 ? (
           <div className="flex h-full min-h-[150px] flex-col items-center justify-center rounded-xl border border-dashed border-[#DDE3ED] bg-[#FAFBFD] px-4 text-center">
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#F0F3F8] text-[#8A92A6]">

@@ -354,7 +354,7 @@ const EmployeeReminder = ({ employeeId }) => {
             </p>
           </div>
         ) : (
-          <ul className="min-h-0 flex-1 space-y-2.5 overflow-y-auto pr-1">
+          <ul className="max-h-[302px] min-h-0 flex-1 space-y-2.5 overflow-y-auto pr-1">
             {reminders.map((item) => (
               <li
                 key={item._id}
