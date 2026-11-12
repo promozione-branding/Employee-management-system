@@ -3,8 +3,8 @@
 export const PDF_LOGO_PATH = "/pdf/logo.png";
 
 export const COMPANY_DETAILS = {
-  name: "605-606 Inquiry Bazaar Pvt Ltd",
-  address: "Best Business Park, NSP, Delhi",
+  name: "Inquiry Bazaar Pvt Ltd",
+  address: "605-606, Best Business Park, NSP, Delhi",
   phone: "011 42603232",
   email: "customercare@inquirybazaar.com",
   website: "https://inquirybazaar.com",

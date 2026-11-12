@@ -34,6 +34,7 @@ const SeoSheetAdmin = ({ clientId }) => {
 
   const [updating, setUpdating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const tableRef = useRef(null);
 
@@ -90,10 +91,17 @@ const SeoSheetAdmin = ({ clientId }) => {
   // ==========================================
 
   const handleMouseDown = (e) => {
-    // Only left mouse button
     if (e.button !== 0) return;
 
     if (!tableRef.current) return;
+
+    // Avoid starting drag from interactive elements
+    if (
+      e.target.closest("button") ||
+      e.target.closest("input")
+    ) {
+      return;
+    }
 
     dragRef.current = {
       isDragging: true,
@@ -113,7 +121,6 @@ const SeoSheetAdmin = ({ clientId }) => {
 
       const distance = e.clientX - dragRef.current.startX;
 
-      // Prevent accidental clicks
       if (Math.abs(distance) > 4) {
         dragRef.current.moved = true;
       }
@@ -203,10 +210,20 @@ const SeoSheetAdmin = ({ clientId }) => {
   }
 
   // ==========================================
+  // KEYWORD SEARCH
+  // ==========================================
+
+  const filteredKeywords = data.keywords.filter((kw) =>
+    (kw.keyword || "")
+      .toLowerCase()
+      .includes(searchTerm.trim().toLowerCase())
+  );
+
+  // ==========================================
   // GROUP KEYWORDS BY PROJECT
   // ==========================================
 
-  const groupedData = data.keywords.reduce((acc, kw) => {
+  const groupedData = filteredKeywords.reduce((acc, kw) => {
     const projectId = kw.projectId || "unknown";
 
     if (!acc[projectId]) {
@@ -266,7 +283,7 @@ const SeoSheetAdmin = ({ clientId }) => {
           REPORT HEADER
       ====================================== */}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
 
         <div>
           <h2 className="text-base font-bold text-gray-900 dark:text-white">
@@ -277,6 +294,35 @@ const SeoSheetAdmin = ({ clientId }) => {
             Track keyword rankings across reporting dates.
           </p>
         </div>
+
+        {/* KEYWORD SEARCH */}
+
+        <div className="relative w-full sm:w-[260px]">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            🔍
+          </span>
+
+          <Input
+            type="search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search keywords..."
+            className="h-9 pl-9 pr-8 text-sm"
+          />
+
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 dark:hover:text-white"
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* LEGEND */}
 
         <div className="flex flex-wrap items-center gap-3 text-xs">
 
@@ -299,18 +345,24 @@ const SeoSheetAdmin = ({ clientId }) => {
         </div>
       </div>
 
+      {/* SEARCH RESULT COUNT */}
+
+      {searchTerm && (
+        <div className="px-1 text-xs text-gray-500 dark:text-gray-400">
+          Found {filteredKeywords.length} matching keyword
+          {filteredKeywords.length !== 1 ? "s" : ""}
+        </div>
+      )}
+
       {/* ======================================
           SCROLL INSTRUCTIONS
       ====================================== */}
 
       <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-gray-500 dark:text-gray-400">
 
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1">
-            <span>🖱️</span>
-            Hold left click and drag to scroll horizontally
-          </span>
-        </div>
+        <span>
+          🖱️ Hold left click and drag to scroll horizontally
+        </span>
 
         <span>
           Use mouse wheel to scroll vertically
@@ -408,18 +460,33 @@ const SeoSheetAdmin = ({ clientId }) => {
 
                 <React.Fragment key={projectId}>
 
-                  {/* PROJECT / WEBSITE HEADING */}
+                  {/* ==================================
+                      PROJECT / WEBSITE HEADING
+
+                      Sticky horizontally only.
+                      Normal vertical scrolling.
+                  ================================== */}
 
                   <tr>
 
+                    {/* FIXED WEBSITE NAME */}
+
                     <td
-                      colSpan={dates.length + 2}
-                      className="border-b border-gray-200 bg-gray-100 px-5 py-4 font-bold text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      colSpan={2}
+                      className="sticky left-0 z-30 border-b border-r border-gray-200 bg-gray-100 px-5 py-4 font-bold text-gray-800 shadow-[4px_0_6px_-4px_rgba(0,0,0,0.15)] dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      style={{
+                        position: "sticky",
+                        left: 0,
+                        zIndex: 25,
+                        width: "295px",
+                        minWidth: "295px",
+                        maxWidth: "295px",
+                      }}
                     >
 
                       <div className="flex items-center gap-3">
 
-                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-sm font-bold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-sm font-bold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
                           SEO
                         </span>
 
@@ -427,17 +494,28 @@ const SeoSheetAdmin = ({ clientId }) => {
                           {getProjectHeading(projectData.projectName)}
                         </span>
 
-                        <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-gray-500 dark:bg-gray-700 dark:text-gray-300">
-                          {projectData.keywords.length} Keywords
+                        <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-gray-500 dark:bg-gray-700 dark:text-gray-300">
+                          {projectData.keywords.length}
                         </span>
 
                       </div>
 
                     </td>
 
+                    {/* EMPTY DATE AREA */}
+
+                    {dates.length > 0 && (
+                      <td
+                        colSpan={dates.length}
+                        className="border-b border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800"
+                      />
+                    )}
+
                   </tr>
 
-                  {/* KEYWORD ROWS */}
+                  {/* ==================================
+                      KEYWORD ROWS
+                  ================================== */}
 
                   {projectData.keywords.map((kw, index) => (
 
@@ -446,9 +524,7 @@ const SeoSheetAdmin = ({ clientId }) => {
                       className="group"
                     >
 
-                      {/* ==================================
-                          STICKY S.NO
-                      ================================== */}
+                      {/* STICKY S.NO */}
 
                       <td
                         className="sticky left-0 z-20 w-[65px] min-w-[65px] border-b border-r border-gray-200 bg-white px-3 py-4 text-center font-medium text-gray-600 group-hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:group-hover:bg-gray-800"
@@ -456,9 +532,7 @@ const SeoSheetAdmin = ({ clientId }) => {
                         {index + 1}
                       </td>
 
-                      {/* ==================================
-                          STICKY KEYWORD
-                      ================================== */}
+                      {/* STICKY KEYWORD */}
 
                       <td
                         className={`sticky left-[65px] z-20 w-[230px] min-w-[230px] border-b border-r border-gray-200 bg-white px-5 py-4 capitalize group-hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:group-hover:bg-gray-800 ${
@@ -487,9 +561,7 @@ const SeoSheetAdmin = ({ clientId }) => {
 
                       </td>
 
-                      {/* ==================================
-                          RANKING DATE CELLS
-                      ================================== */}
+                      {/* RANKING DATE CELLS */}
 
                       {dates.map((date, i) => {
 
@@ -543,15 +615,11 @@ const SeoSheetAdmin = ({ clientId }) => {
                                     <div className="flex items-center justify-center gap-2">
 
                                       <span className="rounded-xl bg-red-100 px-3 py-2 text-xs font-bold text-red-700 dark:bg-red-900/50 dark:text-red-300">
-
                                         Page {found.page}
-
                                       </span>
 
                                       <span className="rounded-xl bg-blue-100 px-3 py-2 text-xs font-bold text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
-
                                         Pos {found.position}
-
                                       </span>
 
                                     </div>
@@ -576,9 +644,7 @@ const SeoSheetAdmin = ({ clientId }) => {
 
                                 </DialogTrigger>
 
-                                {/* ==================================
-                                    EDIT RANKING DIALOG
-                                ================================== */}
+                                {/* EDIT RANKING DIALOG */}
 
                                 <DialogContent className="sm:max-w-[425px]">
 
@@ -640,11 +706,9 @@ const SeoSheetAdmin = ({ clientId }) => {
                                         onClick={handleUpdate}
                                         className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                                       >
-
                                         {updating
                                           ? "Updating..."
                                           : "Update Ranking"}
-
                                       </button>
 
                                     </div>
@@ -679,16 +743,18 @@ const SeoSheetAdmin = ({ clientId }) => {
 
             )}
 
-            {/* NO DATA */}
+            {/* NO MATCHING KEYWORDS */}
 
-            {data.keywords.length === 0 && (
+            {filteredKeywords.length === 0 && (
 
               <tr>
                 <td
                   colSpan={dates.length + 2}
                   className="px-5 py-12 text-center text-gray-500 dark:text-gray-400"
                 >
-                  No SEO ranking history available.
+                  {searchTerm
+                    ? `No keywords found matching "${searchTerm}".`
+                    : "No SEO ranking history available."}
                 </td>
               </tr>
 
