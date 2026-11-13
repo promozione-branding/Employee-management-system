@@ -583,31 +583,32 @@ const SeoSheetAdmin = ({ clientId }) => {
                       {/* STICKY KEYWORD */}
 
                       <td
-                        className={`sticky left-[65px] z-20 w-[230px] min-w-[230px] border-b border-r border-gray-200 bg-white px-5 py-4 capitalize group-hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:group-hover:bg-gray-800 ${
-                          kw.type === "primary"
-                            ? "font-bold text-blue-600 dark:text-blue-400"
-                            : "font-medium text-gray-700 dark:text-gray-200"
-                        }`}
-                      >
+  className={`sticky left-[65px] z-20 w-[230px] min-w-[230px] border-b border-r border-gray-200 bg-white px-5 py-4 capitalize group-hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:group-hover:bg-gray-800 ${
+    kw.type === "primary"
+      ? "font-bold text-blue-600 dark:text-blue-400"
+      : "font-medium text-gray-700 dark:text-gray-200"
+  }`}
+>
+  <div className="flex items-center gap-2">
 
-                        <div className="flex items-center gap-2">
+    <span
+      className="max-w-[210px] truncate select-text cursor-text"
+      title={kw.keyword}
+      onMouseDown={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+    >
+      {kw.keyword}
+    </span>
 
-                          <span
-                            className="max-w-[210px] truncate"
-                            title={kw.keyword}
-                          >
-                            {kw.keyword}
-                          </span>
+    {kw.type === "primary" && (
+      <span className="shrink-0 rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+        Primary
+      </span>
+    )}
 
-                          {kw.type === "primary" && (
-                            <span className="shrink-0 rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                              Primary
-                            </span>
-                          )}
-
-                        </div>
-
-                      </td>
+  </div>
+</td>
 
                       {/* RANKING DATE CELLS   */}
 

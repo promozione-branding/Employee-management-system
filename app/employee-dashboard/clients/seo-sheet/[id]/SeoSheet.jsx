@@ -26,7 +26,7 @@ import {
   updateRankingService,
 } from "@/service/customer/work";
 
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, Pencil } from "lucide-react";
 
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -649,94 +649,105 @@ const SeoSheet = ({ clientId }) => {
                         {/* STICKY KEYWORD + UPDATE DIALOG */}
 
                         <Dialog
-                          open={
-                            updatekeywordId === kw._id
-                          }
-                          onOpenChange={(open) => {
-                            if (!open) {
-                              setUpdatekeywordId("");
-                            }
-                          }}
-                        >
-
-                          <DialogTrigger asChild>
-
-                            <td
-                              onClick={() => {
-                                setUpdatekeywordId(kw._id);
-
-                                setUpdateRankingFormData({
-                                  keywordId: kw._id,
-                                  position: null,
-                                  page: null,
-                                  date: "",
-                                  employeeID: employee?._id,
-                                });
-                              }}
-                              className={`sticky left-[65px] z-20 w-[230px] min-w-[230px] cursor-pointer border-b border-r border-gray-200 bg-white px-5 py-4 capitalize transition-colors group-hover:bg-gray-50 hover:text-blue-600 dark:border-gray-700 dark:bg-gray-900 dark:group-hover:bg-gray-800 dark:hover:text-blue-400 ${
-                                kw.type === "primary"
-                                  ? "font-bold text-blue-600 dark:text-blue-400"
-                                  : "font-medium text-gray-700 dark:text-gray-200"
-                              }`}
-                            >
-
-                              <div className="flex items-center gap-2">
-
-                                <span
-                                  className="max-w-[210px] truncate"
-                                  title={kw.keyword}
-                                >
-                                  {kw.keyword}
-                                </span>
-
-                                {kw.type === "primary" && (
-                                  <span className="shrink-0 rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                                    Primary
-                                  </span>
-                                )}
-
-                              </div>
-
-                            </td>
-
-                          </DialogTrigger>
-
-                          {/* UPDATE RANKING DIALOG */}
-
-                          <DialogContent className="sm:max-w-[425px]">
-
-                            <DialogHeader>
-
-                              <DialogTitle>
-                                Update Ranking
-                              </DialogTitle>
-
-                              <DialogDescription
-  onClick={(e) => e.stopPropagation()}
-  onMouseDown={(e) => e.stopPropagation()}
-  onDoubleClick={(e) => e.stopPropagation()}
-  onPointerDown={(e) => e.stopPropagation()}
-  className="select-text cursor-text !pointer-events-auto break-words"
+  open={updatekeywordId === kw._id}
+  onOpenChange={(open) => {
+    if (!open) {
+      setUpdatekeywordId("");
+    }
+  }}
 >
-  {kw.keyword}
-</DialogDescription>
+  {/* KEYWORD CELL */}
 
-                            </DialogHeader>
+  <td
+    className={`sticky left-[65px] z-20 w-[230px] min-w-[230px] border-b border-r border-gray-200 bg-white px-3 py-4 capitalize transition-colors group-hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:group-hover:bg-gray-800 ${
+      kw.type === "primary"
+        ? "font-bold text-blue-600 dark:text-blue-400"
+        : "font-medium text-gray-700 dark:text-gray-200"
+    }`}
+  >
+    <div className="flex items-center gap-2">
 
-                            <div className="pt-3">
+      {/* SELECTABLE KEYWORD */}
 
-                              <CommonForm
-                                formControls={updateRankingFormControls}
-                                formData={updateRankingFormData} 
-                                setFormData={setUpdateRankingFormData}
-                                onSubmit={updateRankingHandler}
-                              />
+      <span
+        className="min-w-0 flex-1 truncate cursor-text select-text"
+        title={kw.keyword}
+        onMouseDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+        onDoubleClick={(e) => e.stopPropagation()}
+      >
+        {kw.keyword}
+      </span>
 
-                            </div>
+      {/* PRIMARY BADGE */}
 
-                          </DialogContent>
+      {kw.type === "primary" && (
+        <span className="shrink-0 rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+          Primary
+        </span>
+      )}
 
-                        </Dialog>
+      {/* EDIT BUTTON */}
+
+      <button
+        type="button"
+        title="Update Ranking"
+        aria-label={`Update ranking for ${kw.keyword}`}
+        onMouseDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+
+          setUpdatekeywordId(kw._id);
+
+          setUpdateRankingFormData({
+            keywordId: kw._id,
+            position: null,
+            page: null,
+            date: "",
+            employeeID: employee?._id,
+          });
+        }}
+        className="shrink-0 rounded-md p-1.5 text-gray-400 transition-colors hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/40 dark:hover:text-blue-400"
+      >
+        <Pencil size={14} />
+      </button>
+
+    </div>
+  </td>
+
+  {/* UPDATE RANKING DIALOG */}
+
+  <DialogContent className="sm:max-w-[425px]">
+
+    <DialogHeader>
+
+      <DialogTitle>
+        Update Ranking
+      </DialogTitle>
+
+      <DialogDescription
+        className="select-text cursor-text break-words"
+      >
+        {kw.keyword}
+      </DialogDescription>
+
+    </DialogHeader>
+
+    <div className="pt-3">
+
+      <CommonForm
+        formControls={updateRankingFormControls}
+        formData={updateRankingFormData}
+        setFormData={setUpdateRankingFormData}
+        onSubmit={updateRankingHandler}
+      />
+
+    </div>
+
+  </DialogContent>
+
+</Dialog>
 
                         {/* RANKING DATE CELLS */}
 
