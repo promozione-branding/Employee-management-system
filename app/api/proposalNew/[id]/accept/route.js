@@ -9,9 +9,7 @@ export async function POST(req, { params }) {
   try {
     await connectDB();
     const { id } = await params;
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ success: false, message: "Invalid id" }, { status: 400 });
-    }
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ success: false, message: "Invalid id" }, { status: 400 });
 
     const { token } = await req.json();
     const proposal = await ProposalNew.findOne({ _id: id, acceptToken: token }).populate({ path: "clientId", select: "name email" });
@@ -51,7 +49,6 @@ export async function POST(req, { params }) {
     try {
       const transporter = getTransporter();
       const mainRecipient = proposal.sentToEmail || proposal.clientId?.email;
-      
       if (!mainRecipient) throw new Error("No recipient email found.");
 
       const ccEmails = new Set();
@@ -59,19 +56,13 @@ export async function POST(req, { params }) {
       if (proposal.clientId?.email && proposal.clientId.email !== mainRecipient) ccEmails.add(proposal.clientId.email);
 
       const mailOptions = {
-        from: MAIL_FROM,
-        to: mainRecipient,
-        cc: ccEmails.size > 0 ? Array.from(ccEmails).join(", ") : undefined,
+        from: MAIL_FROM, to: mainRecipient, cc: ccEmails.size > 0 ? Array.from(ccEmails).join(", ") : undefined,
         subject: `Welcome to Inquiry Bazaar — Proposal Accepted`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; color: #111827;">
+        html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
             <p>Dear ${proposal.clientId?.name || "Client"},</p>
-            <p>Thank you for accepting proposal <strong>${proposal.proposalNumber}</strong>. We're delighted to welcome you to <strong>Inquiry Bazaar Pvt Ltd</strong>.</p>
-            <p><strong>Please find your officially accepted proposal PDF attached to this email for your records.</strong></p>
-            <p>Our team will reach out shortly to kick off your project.</p>
-            <p>Best regards,<br/><strong>The Inquiry Bazaar</strong><br/>011 4260 3232</p>
-          </div>
-        `,
+            <p>Thank you for accepting proposal <strong>${proposal.proposalNumber}</strong>.</p>
+            <p><strong>Please find your accepted proposal PDF attached.</strong></p>
+            <p>Best regards,<br/>The Inquiry Bazaar</p></div>`,
       };
 
       if (pdfBuffer) {

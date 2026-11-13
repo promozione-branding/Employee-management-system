@@ -1,5 +1,3 @@
-// middleware.js
-
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
@@ -17,11 +15,13 @@ export async function middleware(req) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
 
-  // ✅ ALLOW PUBLIC PROPOSAL PAGES AND API ROUTES
+  // ✅ BULLETPROOF PUBLIC ROUTES
+  // If the path contains 'proposal/accept-new' or 'proposal/pdf-print-new' or the API,
+  // let it through immediately. No token required.
   if (
-    pathname.startsWith("/proposal/accept-new") ||
-    pathname.startsWith("/proposal/pdf-print-new") ||
-    pathname.startsWith("/api/proposalNew")
+    pathname.includes("/proposal/accept-new") ||
+    pathname.includes("/proposal/pdf-print-new") ||
+    pathname.includes("/api/proposalNew")
   ) {
     return NextResponse.next();
   }
@@ -61,6 +61,8 @@ export async function middleware(req) {
 }
 
 export const config = {
-  // ✅ Exclude all proposal API routes and pages
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|proposal).*)"],
+  // ✅ Match everything, BUT explicitly ignore API routes, Next.js internals, and the proposal routes.
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|proposal).*)",
+  ],
 };

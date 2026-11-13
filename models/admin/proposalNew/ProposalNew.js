@@ -1,5 +1,3 @@
-// models/admin/proposalNew/ProposalNew.js
-
 import mongoose from "mongoose";
 
 const ProposalItemSchema = new mongoose.Schema(
@@ -13,8 +11,6 @@ const ProposalItemSchema = new mongoose.Schema(
     amount: { type: Number, required: true },
     serviceDiscount: { type: Number, default: 0 },
     custom: { type: Boolean, default: false },
-    
-    // ✅ NEW FIELDS FOR CITY PAGE DEVELOPMENT
     cityName: { type: String, default: "" },
     cityCount: { type: String, default: "" },
     keywordName: { type: String, default: "" },
@@ -24,42 +20,27 @@ const ProposalItemSchema = new mongoose.Schema(
 );
 
 const PartialPaymentSchema = new mongoose.Schema(
-  {
-    paymentDuration: { type: String, required: true },
-    paymentAmount: { type: Number, required: true, min: 0 },
-  },
+  { paymentDuration: { type: String, required: true }, paymentAmount: { type: Number, required: true, min: 0 } },
   { _id: false }
 );
 
 const DeliveredMetricSchema = new mongoose.Schema(
-  {
-    label: { type: String, required: true },
-    count: { type: Number, default: 0, min: 0 },
-  },
+  { label: { type: String, required: true }, count: { type: Number, default: 0, min: 0 } },
   { _id: false }
 );
 
 const ChecklistSectionSchema = new mongoose.Schema(
-  {
-    section: { type: String, required: true },
-    items: [{ type: String }],
-  },
+  { section: { type: String, required: true }, items: [{ type: String }] },
   { _id: false }
 );
 
 const CategoryNoteSchema = new mongoose.Schema(
-  {
-    category: { type: String, required: true },
-    note: { type: String, default: "" },
-  },
+  { category: { type: String, required: true }, note: { type: String, default: "" } },
   { _id: false }
 );
 
 const CityPageSchema = new mongoose.Schema(
-  {
-    city: { type: String, required: true },
-    keyword: { type: String, required: true },
-  },
+  { city: { type: String, required: true }, keyword: { type: String, required: true } },
   { _id: false }
 );
 
@@ -75,7 +56,6 @@ const ProposalNewSchema = new mongoose.Schema(
     checklist: [ChecklistSectionSchema],
     categoryNotes: [CategoryNoteSchema],
     cityPages: [CityPageSchema],
-
     subtotal: { type: Number, default: 0 },
     gstRate: { type: Number, default: 0.18 },
     gstAmount: { type: Number, default: 0 },
