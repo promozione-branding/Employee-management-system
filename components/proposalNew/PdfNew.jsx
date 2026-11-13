@@ -5,9 +5,12 @@ import React, { forwardRef } from "react";
 import { computeTotals } from "./SummaryNew";
 import { numberToWords } from "@/utils/numberToWordsNew";
 import {
-  PDF_LOGO_PATH, COMPANY_DETAILS, FOOTER_LEFT, FOOTER_RIGHT, LEGAL_NOTES, BANK_DETAILS, TERMS_AND_CONDITIONS, DELIVERABLE_SECTION_MAP, SERVICES_CATALOG, INDUSTRIES_SERVED,
+  PDF_LOGO_PATH, LEGAL_NOTES, BANK_DETAILS, TERMS_AND_CONDITIONS,
+  DELIVERABLE_SECTION_MAP, SERVICES_CATALOG, INDUSTRIES_SERVED,
 } from "@/config/new/proposalPdfNew";
 import { PROPOSAL_CATALOG } from "@/config/new/proposalCatalogNew";
+import ProposalPdfHeaderNew from "./ProposalPdfHeaderNew";
+import ProposalPdfFooterNew from "./ProposalPdfFooterNew";
 
 const fmt = (n) => Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("en-IN") : "—");
@@ -17,13 +20,13 @@ const CSS_RESET = `
 html, body { margin: 0; padding: 0; background: #fff; color: #111827; font-family: Arial, sans-serif; }
 @page { size: A4; margin: 0; }
 .pdf-header-fixed, .pdf-footer-fixed, .pdf-watermark-fixed { display: none; }
-.pdf-screen-page { width: 210mm; min-height: 297mm; padding: 2mm 12mm 28mm 12mm; background: #fff; margin: 0 auto 12px auto; position: relative; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: visible; }
-.pdf-page-body { position: relative; z-index: 1; }
+.pdf-screen-page { width: 210mm; min-height: 297mm; max-width: 100%; padding: 2mm 12mm 8mm 12mm; background: #fff; margin: 0 auto 12px auto; position: relative; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: visible; display: flex; flex-direction: column; }
+.pdf-page-body { position: relative; z-index: 1; flex: 1 0 auto; }
 .pdf-header-inline { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 10px; position: relative; z-index: 2; background: #fff; }
 .pdf-header-inline img { height: 110px; width: auto; }
 .pdf-header-inline .info { text-align: right; font-size: 10.5px; line-height: 1.35; color: #374151; }
 .pdf-header-inline .info b { color: #111827; font-size: 11.5px; }
-.pdf-footer-inline { position: absolute; bottom: 5mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #6b7280; padding-top: 6px; border-top: 1px solid #e5e7eb; z-index: 2; background: #fff; }
+.pdf-footer-inline { position: relative; margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #6b7280; padding-top: 6px; border-top: 1px solid #e5e7eb; z-index: 2; background: #fff; flex: 0 0 auto; }
 .pdf-footer-inline .left, .pdf-footer-inline .right { flex: 1; }
 .pdf-footer-inline .right { text-align: right; }
 .pdf-footer-inline .center { flex: 0 0 auto; text-align: center; }
@@ -92,8 +95,24 @@ a { color: #111827; text-decoration: none; }
   .pdf-watermark-fixed { display: flex !important; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 0; }
   .pdf-watermark-fixed img { width: 480px; height: auto; opacity: 0.08; }
   /* Top padding must clear the fixed header (top:8mm + 110px logo ~29mm + padding/border ~38mm), otherwise its opaque white background paints over the centered Proposal title on page 1. */
-  .pdf-screen-page { width: 210mm !important; min-height: 297mm !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; padding: 40mm 12mm 22mm 12mm !important; page-break-after: always; page-break-inside: auto; overflow: visible !important; }
-  .pdf-screen-page:last-child { page-break-after: auto; }
+  .pdf-screen-page {
+    display: block !important;
+    width: 210mm !important;
+    max-width: none !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 40mm 12mm 32mm 12mm !important;
+    page-break-after: always;
+    break-after: page;
+    page-break-inside: auto;
+    break-inside: auto;
+    overflow: visible !important;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .pdf-screen-page:last-child { page-break-after: auto; break-after: auto; }
   .pdf-watermark-inline { display: none !important; }
   .pdf-page-body { position: relative !important; z-index: 20 !important; }
   /* Keep the Proposal heading visible and centered in Chrome print/PDF output. */
@@ -111,30 +130,12 @@ a { color: #111827; text-decoration: none; }
     break-after: avoid !important;
     page-break-after: avoid !important;
   }
-  .deliverable-row, .industry-card, .svc-item, .schedule-grid, .delivery-grid, .delivery-item, .legal-notes li, .bank-block, .general-notes-box { break-inside: avoid; }
+  .deliverable-row { break-inside: auto; page-break-inside: auto; }
+  .deliverable-row .row-title { break-after: avoid; page-break-after: avoid; }
+  .section-title-bar, .delivery-title-bar, .services-section-title { break-after: avoid; page-break-after: avoid; }
+  .industry-card, .svc-item, .schedule-grid, .delivery-grid, .delivery-item, .legal-notes li, .bank-block, .general-notes-box { break-inside: avoid; page-break-inside: avoid; }
 }
 `;
-
-const HeaderContent = () => (
-  <>
-    <img src={PDF_LOGO_PATH} alt="Inquiry Bazaar" style={{ height: 110, width: "auto" }} />
-    <div style={{ textAlign: "right", fontSize: "10.5px", lineHeight: 1.35, color: "#374151" }}>
-      <div><b style={{ color: "#111827", fontSize: "11.5px" }}>{COMPANY_DETAILS.name}</b></div>
-      <div>{COMPANY_DETAILS.address}</div>
-      <div>Call us : <a href={`tel:${COMPANY_DETAILS.phone.replace(/\s+/g, "")}`}>{COMPANY_DETAILS.phone}</a></div>
-      <div>Email: <a href={`mailto:${COMPANY_DETAILS.email}`}>{COMPANY_DETAILS.email}</a></div>
-      <div>Website: <a href={COMPANY_DETAILS.website} target="_blank" rel="noreferrer">{COMPANY_DETAILS.website}</a></div>
-    </div>
-  </>
-);
-
-const FooterContent = ({ pageNumber, totalPages }) => (
-  <>
-    <span className="left"><a href={`mailto:${FOOTER_LEFT}`}>{FOOTER_LEFT}</a></span>
-    <span className="center">Page {pageNumber} of {totalPages}</span>
-    <span className="right"><a href="tel:01142603232">011 - 42603232</a></span>
-  </>
-);
 
 export const downloadProposalPdf = (proposal, sourceNode = null) => {
   const node = sourceNode || document.getElementById("proposal-print-root");
@@ -177,10 +178,10 @@ const ScreenPage = ({ children, pageNumber, totalPages }) => (
   <div className="pdf-screen-page">
     <div className="pdf-watermark-inline"><img src={PDF_LOGO_PATH} alt="" /></div>
     <div className="pdf-page-body">
-      <div className="pdf-header-inline"><HeaderContent /></div>
+      <div className="pdf-header-inline"><ProposalPdfHeaderNew /></div>
       {children}
     </div>
-    <div className="pdf-footer-inline"><FooterContent pageNumber={pageNumber} totalPages={totalPages} /></div>
+    <div className="pdf-footer-inline"><ProposalPdfFooterNew pageNumber={pageNumber} totalPages={totalPages} /></div>
   </div>
 );
 
@@ -222,8 +223,8 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
     <div ref={ref} id="proposal-print-root">
       <style>{CSS_RESET}</style>
 
-      <div className="pdf-header-fixed"><HeaderContent /></div>
-      <div className="pdf-footer-fixed"><FooterContent /></div>
+      <div className="pdf-header-fixed"><ProposalPdfHeaderNew /></div>
+      <div className="pdf-footer-fixed"><ProposalPdfFooterNew /></div>
       <div className="pdf-watermark-fixed"><img src={PDF_LOGO_PATH} alt="" /></div>
 
       <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
