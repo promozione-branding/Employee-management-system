@@ -609,7 +609,7 @@ const SeoSheetAdmin = ({ clientId }) => {
 
                       </td>
 
-                      {/* RANKING DATE CELLS */}
+                      {/* RANKING DATE CELLS   */}
 
                       {dates.map((date, i) => {
 
