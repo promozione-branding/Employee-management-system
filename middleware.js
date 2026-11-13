@@ -104,5 +104,6 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  // ✅ Exclude proposal routes from middleware completely so they never redirect
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|proposal).*)"],
 };

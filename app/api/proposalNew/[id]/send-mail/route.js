@@ -1,5 +1,3 @@
-// app/api/proposalNew/[id]/send-mail/route.js
-
 import { connectDB } from "@/lib/db";
 import ProposalNew from "@/models/admin/proposalNew/ProposalNew";
 import { getAuthUser } from "@/lib/getAuthUser";
@@ -76,8 +74,9 @@ export async function POST(req, { params }) {
     proposal.sentToEmail = targetEmail;
     await proposal.save();
 
+    // ✅ CHANGED: Prioritize Proposal_mail_URL
     const baseUrl =
-      process.env.APP_URL || process.env.BACKEND_URL || "http://localhost:3000";
+      process.env.Proposal_mail_URL || process.env.APP_URL || "http://localhost:3000";
     const acceptUrl = `${baseUrl}/proposal/accept-new/${proposal.acceptToken}`;
 
     const html = `
