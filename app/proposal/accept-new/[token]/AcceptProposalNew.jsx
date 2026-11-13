@@ -1,9 +1,6 @@
-// app/proposal/accept-new/[token]/AcceptProposalNew.jsx
-
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
-import axios from "axios";
 import PdfNew from "@/components/proposalNew/PdfNew";
 
 export default function AcceptProposalNew({ token }) {
@@ -24,13 +21,11 @@ export default function AcceptProposalNew({ token }) {
   useEffect(() => {
     const updateScale = () => {
       if (!containerRef.current) return;
-      // The PDF is 210mm wide (approx 794px at 96dpi)
       const pdfWidth = 794;
       const containerWidth = containerRef.current.clientWidth;
       const newScale = containerWidth / pdfWidth;
       setScale(newScale);
 
-      // The PDF is 297mm tall (approx 1123px at 96dpi)
       const pdfHeight = 1123;
       const scaledHeight = pdfHeight * newScale;
       setContainerHeight(`${scaledHeight}px`);
@@ -39,7 +34,7 @@ export default function AcceptProposalNew({ token }) {
     updateScale();
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
-  }, [step]); // Recalculate when step changes to "terms"
+  }, [step]);
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -47,30 +42,47 @@ export default function AcceptProposalNew({ token }) {
       return toast.error("Enter exactly 7 digits");
     try {
       setLoading(true);
-      const resolveRes = await axios.post("/api/proposalNew/resolve-token", {
-        token,
+      
+      // ✅ Use native fetch instead of axiosInstance to bypass interceptors
+      const resolveRes = await fetch("/api/proposalNew/resolve-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
       });
-      if (!resolveRes.data?.success) return toast.error("Invalid link");
-      const id = resolveRes.data.data._id;
+      const resolveData = await resolveRes.json();
+      
+      if (!resolveData?.success) {
+        toast.error(resolveData?.message || "Invalid link");
+        return;
+      }
+      
+      const id = resolveData.data._id;
       setProposalId(id);
 
-      const res = await axios.post(`/api/proposalNew/${id}/verify`, {
-        email,
-        phoneLast7,
-        token,
+      // ✅ Use native fetch for verify
+      const verifyRes = await fetch(`/api/proposalNew/${id}/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, phoneLast7, token }),
       });
-      if (res.data?.success) {
-        const fullPropRes = await axios.get(`/api/proposalNew/${id}`);
-        if (fullPropRes.data?.success) {
-          setProposalData(fullPropRes.data.data);
+      const verifyData = await verifyRes.json();
+
+      if (verifyData?.success) {
+        // ✅ Use native fetch for getting full proposal data
+        const fullPropRes = await fetch(`/api/proposalNew/${id}`);
+        const fullPropData = await fullPropRes.json();
+        
+        if (fullPropData?.success) {
+          setProposalData(fullPropData.data);
           toast.success("Verified");
           setStep("terms");
         }
       } else {
-        toast.error(res.data?.message || "Verification failed");
+        toast.error(verifyData?.message || "Verification failed");
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Verification failed");
+      console.error(err);
+      toast.error("Verification failed. Please check your network.");
     } finally {
       setLoading(false);
     }
@@ -80,17 +92,21 @@ export default function AcceptProposalNew({ token }) {
     if (!agreed) return toast.error("Please tick the box to agree");
     setLoading(true);
 
-    // 100ms delay ensures the loading spinner renders before the API call starts
     setTimeout(async () => {
       try {
-        const res = await axios.post(`/api/proposalNew/${proposalId}/accept`, {
-          token,
+        // ✅ Use native fetch for accept
+        const res = await fetch(`/api/proposalNew/${proposalId}/accept`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
         });
-        if (res.data?.success) {
+        const data = await res.json();
+        
+        if (data?.success) {
           toast.success("Accepted!");
           setStep("done");
         } else {
-          toast.error(res.data?.message || "Failed");
+          toast.error(data?.message || "Failed to accept");
         }
       } catch (err) {
         toast.error("Failed to accept");
@@ -156,7 +172,6 @@ export default function AcceptProposalNew({ token }) {
                 Proposal Preview
               </h2>
 
-              {/* ✅ PERFECT MOBILE PDF VIEWER */}
               <div
                 ref={containerRef}
                 className="w-full bg-gray-200 rounded-lg overflow-y-auto overflow-x-hidden border relative"
@@ -167,10 +182,10 @@ export default function AcceptProposalNew({ token }) {
               >
                 <div
                   style={{
-                    width: "210mm", // A4 fixed width
+                    width: "210mm",
                     transform: `scale(${scale})`,
                     transformOrigin: "top left",
-                    height: containerHeight, // Fixes the bottom blank space
+                    height: containerHeight,
                   }}
                 >
                   <PdfNew proposal={proposalData} />
@@ -234,7 +249,6 @@ export default function AcceptProposalNew({ token }) {
         )}
       </div>
 
-      {/* Full-Screen Loading Overlay */}
       {loading && step === "terms" && (
         <div className="fixed inset-0 z-50 bg-gray-900/80 flex items-center justify-center backdrop-blur-sm transition-opacity duration-300">
           <div className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full mx-4 flex flex-col items-center text-center">
