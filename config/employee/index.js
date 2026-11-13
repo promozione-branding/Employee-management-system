@@ -634,7 +634,7 @@ export const createKeyWordFormControls = [
 ];
 
 export const updateRankingFormControls = [
-  {
+  { 
     name: "position",
     label: "Position",
     componentType: "input",

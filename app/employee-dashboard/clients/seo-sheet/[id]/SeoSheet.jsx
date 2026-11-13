@@ -711,9 +711,15 @@ const SeoSheet = ({ clientId }) => {
                                 Update Ranking
                               </DialogTitle>
 
-                              <DialogDescription>
-                                {kw.keyword}
-                              </DialogDescription>
+                              <DialogDescription
+  onClick={(e) => e.stopPropagation()}
+  onMouseDown={(e) => e.stopPropagation()}
+  onDoubleClick={(e) => e.stopPropagation()}
+  onPointerDown={(e) => e.stopPropagation()}
+  className="select-text cursor-text !pointer-events-auto break-words"
+>
+  {kw.keyword}
+</DialogDescription>
 
                             </DialogHeader>
 
@@ -721,7 +727,7 @@ const SeoSheet = ({ clientId }) => {
 
                               <CommonForm
                                 formControls={updateRankingFormControls}
-                                formData={updateRankingFormData}
+                                formData={updateRankingFormData} 
                                 setFormData={setUpdateRankingFormData}
                                 onSubmit={updateRankingHandler}
                               />
