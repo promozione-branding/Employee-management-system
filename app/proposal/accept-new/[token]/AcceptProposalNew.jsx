@@ -12,12 +12,10 @@ export default function AcceptProposalNew({ token }) {
   const [proposalId, setProposalId] = useState("");
   const [proposalData, setProposalData] = useState(null);
 
-  // ✅ PDF Scaling State
   const containerRef = useRef(null);
   const [scale, setScale] = useState(1);
   const [containerHeight, setContainerHeight] = useState("auto");
 
-  // Calculate exact scale on mount/resize
   useEffect(() => {
     const updateScale = () => {
       if (!containerRef.current) return;
@@ -40,16 +38,24 @@ export default function AcceptProposalNew({ token }) {
     e.preventDefault();
     if (phoneLast7.replace(/\D/g, "").length !== 7)
       return toast.error("Enter exactly 7 digits");
+    
     try {
       setLoading(true);
+      console.log("🟢 1. Fetching resolve-token...");
       
-      // ✅ Use native fetch instead of axiosInstance to bypass interceptors
       const resolveRes = await fetch("/api/proposalNew/resolve-token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
       });
+      
+      if (!resolveRes.ok) {
+        console.log("🔴 Resolve failed with status:", resolveRes.status);
+        throw new Error(`Resolve failed: ${resolveRes.statusText}`);
+      }
+      
       const resolveData = await resolveRes.json();
+      console.log("🟢 2. Resolve data:", resolveData);
       
       if (!resolveData?.success) {
         toast.error(resolveData?.message || "Invalid link");
@@ -59,18 +65,32 @@ export default function AcceptProposalNew({ token }) {
       const id = resolveData.data._id;
       setProposalId(id);
 
-      // ✅ Use native fetch for verify
+      console.log("🟢 3. Fetching verify...");
       const verifyRes = await fetch(`/api/proposalNew/${id}/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, phoneLast7, token }),
       });
+      
+      if (!verifyRes.ok) {
+        console.log("🔴 Verify failed with status:", verifyRes.status);
+        throw new Error(`Verify failed: ${verifyRes.statusText}`);
+      }
+
       const verifyData = await verifyRes.json();
+      console.log("🟢 4. Verify data:", verifyData);
 
       if (verifyData?.success) {
-        // ✅ Use native fetch for getting full proposal data
+        console.log("🟢 5. Fetching full proposal...");
         const fullPropRes = await fetch(`/api/proposalNew/${id}`);
+        
+        if (!fullPropRes.ok) {
+          console.log("🔴 Full proposal failed with status:", fullPropRes.status);
+          throw new Error(`Full prop failed: ${fullPropRes.statusText}`);
+        }
+        
         const fullPropData = await fullPropRes.json();
+        console.log("🟢 6. Full prop data:", fullPropData);
         
         if (fullPropData?.success) {
           setProposalData(fullPropData.data);
@@ -81,8 +101,8 @@ export default function AcceptProposalNew({ token }) {
         toast.error(verifyData?.message || "Verification failed");
       }
     } catch (err) {
-      console.error(err);
-      toast.error("Verification failed. Please check your network.");
+      console.error("🔴 Verification error:", err);
+      toast.error(err.message || "Verification failed. Please check your network.");
     } finally {
       setLoading(false);
     }
@@ -94,12 +114,14 @@ export default function AcceptProposalNew({ token }) {
 
     setTimeout(async () => {
       try {
-        // ✅ Use native fetch for accept
         const res = await fetch(`/api/proposalNew/${proposalId}/accept`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
         });
+        
+        if (!res.ok) throw new Error(`Accept failed: ${res.statusText}`);
+        
         const data = await res.json();
         
         if (data?.success) {
@@ -109,7 +131,8 @@ export default function AcceptProposalNew({ token }) {
           toast.error(data?.message || "Failed to accept");
         }
       } catch (err) {
-        toast.error("Failed to accept");
+        console.error(err);
+        toast.error(err.message || "Failed to accept");
       } finally {
         setLoading(false);
       }
