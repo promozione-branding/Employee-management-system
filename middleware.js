@@ -1,11 +1,9 @@
 // middleware.js
 
-
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 const PUBLIC_ROUTES = ["/login", "/register", "/login-otp", "/forgot-password"];
-
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const ROLE_REDIRECT = {
@@ -19,39 +17,28 @@ export async function middleware(req) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
 
-  /* =======================
-     🔓 PUBLIC ROUTES
-  ======================== */
-  // Allow proposal accept and print pages without login (for clients and Puppeteer)
+  // ✅ ALLOW PUBLIC PROPOSAL PAGES AND API ROUTES
   if (
     pathname.startsWith("/proposal/accept-new") ||
-    pathname.startsWith("/proposal/pdf-print-new")
+    pathname.startsWith("/proposal/pdf-print-new") ||
+    pathname.startsWith("/api/proposalNew")
   ) {
     return NextResponse.next();
   }
 
   const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
-
   if (isPublicRoute) {
     if (!token) return NextResponse.next();
-
     try {
       const { payload } = await jwtVerify(token, JWT_SECRET);
       const redirectPath = ROLE_REDIRECT[payload.role];
-
-      if (redirectPath) {
-        return NextResponse.redirect(new URL(redirectPath, req.url));
-      }
-
+      if (redirectPath) return NextResponse.redirect(new URL(redirectPath, req.url));
       return NextResponse.next();
     } catch {
       return NextResponse.next();
     }
   }
 
-  /* =======================
-     🔒 PROTECTED ROUTES
-  ======================== */
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
@@ -60,43 +47,12 @@ export async function middleware(req) {
     const { payload } = await jwtVerify(token, JWT_SECRET);
     const role = payload.role;
 
-    // Root redirect
-    if (pathname === "/") {
-      return NextResponse.redirect(
-        new URL(ROLE_REDIRECT[role] || "/login", req.url),
-      );
-    }
-
-    // Admin-only
-    if (pathname.startsWith("/dashboard") && role !== "admin") {
-      return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
-    }
-
-    // Employee-only
-    if (pathname.startsWith("/employee-dashboard") && role !== "employee") {
-      return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
-    }
-
-    // Sales-only
-    if (pathname.startsWith("/sales-dashboard") && role !== "sales") {
-      return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
-    }
-
-    // Manager-only
-    if (pathname.startsWith("/manager") && role !== "manager") {
-      return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
-    }
-
-    // 👇👇👇 NEW BLOCK: Reports module - Admin & Manager only 👇👇👇
-    if (
-      pathname.startsWith("/reports") &&
-      !["admin", "manager"].includes(role)
-    ) {
-      return NextResponse.redirect(
-        new URL(ROLE_REDIRECT[role] || "/login", req.url),
-      );
-    }
-    // 👆👆👆 END NEW BLOCK 👆👆👆
+    if (pathname === "/") return NextResponse.redirect(new URL(ROLE_REDIRECT[role] || "/login", req.url));
+    if (pathname.startsWith("/dashboard") && role !== "admin") return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
+    if (pathname.startsWith("/employee-dashboard") && role !== "employee") return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
+    if (pathname.startsWith("/sales-dashboard") && role !== "sales") return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
+    if (pathname.startsWith("/manager") && role !== "manager") return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
+    if (pathname.startsWith("/reports") && !["admin", "manager"].includes(role)) return NextResponse.redirect(new URL(ROLE_REDIRECT[role] || "/login", req.url));
 
     return NextResponse.next();
   } catch {
@@ -105,6 +61,6 @@ export async function middleware(req) {
 }
 
 export const config = {
-  // ✅ Exclude proposal routes from middleware completely so they never redirect
+  // ✅ Exclude all proposal API routes and pages
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|proposal).*)"],
 };
