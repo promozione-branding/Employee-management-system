@@ -67,7 +67,7 @@ const InvoicePdfTemplateServer = ({ data }) => {
       <Page size="A4" style={styles.page}>
         {/* original text */}
         <View style={styles.originalInvoice}>
-          <Text>(Original Invoice)</Text>
+          {/* <Text>(Original Invoice)</Text> */}
         </View>
 
         {/* logo and title */}

@@ -103,7 +103,7 @@ const Invoice = ({ data }) => {
             ORIGINAL INVOICE
         ========================== */}
         <View style={styles.originalInvoice}>
-          <Text>(Original Invoice)</Text>
+          {/* <Text>(Original Invoice)</Text> */}
         </View>
 
         {/* =========================
@@ -172,7 +172,7 @@ const Invoice = ({ data }) => {
 
           <Text>
             <Text style={styles.bold}>Address: </Text>
-            {clientAddress || "-"}
+            {clientAddress || " "}
           </Text>
         </View>
 
