@@ -5,7 +5,7 @@ import PdfNew from "@/components/proposalNew/PdfNew";
 
 export default function AcceptProposalNew({ token }) {
   const [step, setStep] = useState("verify");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(""); 
   const [phoneLast7, setPhoneLast7] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
