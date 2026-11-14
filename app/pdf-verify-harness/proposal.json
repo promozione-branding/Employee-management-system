@@ -1,0 +1,69 @@
+{
+  "_id": "6af6ae4bd216364b54645480",
+  "proposalNumber": "PROP-2026-0019",
+  "status": "draft",
+  "createdAt": "2026-11-13T10:00:00.000Z",
+  "validTill": "2026-12-01T00:00:00.000Z",
+  "paymentMethod": "upi",
+  "discountType": "amount",
+  "discountInput": 0,
+  "tdsApplicable": false,
+  "notes": "",
+  "deliveryPeriod": "weekly",
+  "deliveredMetrics": [],
+  "categoryNotes": [],
+  "cityPages": [],
+  "clientId": {
+    "_id": "6ad0ce02c072d3d449578e36",
+    "name": "Test Bijay ib",
+    "company": "Test Bijay Company",
+    "email": "test@example.com",
+    "phone": "9999999999",
+    "Address": "Delhi",
+    "city": "Delhi",
+    "state": "Delhi",
+    "country": "India",
+    "pincode": "110001",
+    "GSTIN": ""
+  },
+  "items": [
+    {
+      "category": "custom-service:branding",
+      "categoryLabel": "Branding",
+      "packageKey": "custom-offering-1",
+      "label": "Logo Design",
+      "duration": "custom::2 Months",
+      "durationLabel": "2 Months",
+      "amount": 10000,
+      "serviceDiscount": 0,
+      "custom": true,
+      "customOfferings": ["Logo concepts", "Brand guidelines"],
+      "cityName": "",
+      "cityCount": "",
+      "keywordName": "",
+      "keywordCount": ""
+    },
+    {
+      "category": "custom-service:branding",
+      "categoryLabel": "Branding",
+      "packageKey": "custom-offering-2",
+      "label": "Social Kit",
+      "duration": "custom::1 Month",
+      "durationLabel": "1 Month",
+      "amount": 5000,
+      "serviceDiscount": 0,
+      "custom": true,
+      "customOfferings": ["Post templates"],
+      "cityName": "",
+      "cityCount": "",
+      "keywordName": "",
+      "keywordCount": ""
+    }
+  ],
+  "checklist": [
+    { "category": "custom-service:branding", "section": "Logo Design", "items": ["Logo concepts", "Brand guidelines"] },
+    { "category": "custom-service:branding", "section": "Social Kit", "items": ["Post templates"] }
+  ],
+  "partialPayments": [{ "paymentDuration": "Advance Payment", "paymentAmount": 17700 }],
+  "grandTotal": 17700
+}

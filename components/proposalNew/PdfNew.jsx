@@ -8,7 +8,7 @@ import {
   PDF_LOGO_PATH, LEGAL_NOTES, BANK_DETAILS, TERMS_AND_CONDITIONS,
   DELIVERABLE_SECTION_MAP, SERVICES_CATALOG, INDUSTRIES_SERVED,
 } from "@/config/new/proposalPdfNew";
-import { PROPOSAL_CATALOG } from "@/config/new/proposalCatalogNew";
+import { PROPOSAL_CATALOG, getCustomServiceGroupsNew } from "@/config/new/proposalCatalogNew";
 import ProposalPdfHeaderNew from "./ProposalPdfHeaderNew";
 import ProposalPdfFooterNew from "./ProposalPdfFooterNew";
 
@@ -211,8 +211,9 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
     const cat = PROPOSAL_CATALOG[catKey];
     return checklist.some((c) => cat.checklist?.some((s) => s.title === c.section));
   });
+  const customServiceGroups = getCustomServiceGroupsNew(items, checklist);
   const hasDeliveryReport = deliveredMetrics.length > 0;
-  const showDeliverablesPage = hasDeliverables || hasDeliveryReport;
+  const showDeliverablesPage = hasDeliverables || customServiceGroups.length > 0 || hasDeliveryReport;
 
   const totalPages = 3 + (showDeliverablesPage ? 1 : 0) + 1;
   let pageCounter = 1;
@@ -436,6 +437,21 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
               </div>
             );
           })}
+          {customServiceGroups.map((group) => (
+            <div key={group.key}>
+              <div className="section-title-bar">{group.label}</div>
+              {group.sections.map((sec) => (
+                <div key={sec.section} className="deliverable-row">
+                  <div className="row-title">{sec.section}</div>
+                  <div className="row-items">
+                    <ul style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", columnGap: "24px", rowGap: "6px" }}>
+                      {sec.items.map((it) => <li key={it}>{it}</li>)}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
           {hasDeliveryReport && (
             <div>
               <div className="delivery-title-bar">Delivery Report ({deliveryPeriod})</div>

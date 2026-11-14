@@ -11,6 +11,7 @@ const ProposalItemSchema = new mongoose.Schema(
     amount: { type: Number, required: true },
     serviceDiscount: { type: Number, default: 0 },
     custom: { type: Boolean, default: false },
+    customOfferings: { type: [String], default: [] },
     cityName: { type: String, default: "" },
     cityCount: { type: String, default: "" },
     keywordName: { type: String, default: "" },
@@ -30,7 +31,11 @@ const DeliveredMetricSchema = new mongoose.Schema(
 );
 
 const ChecklistSectionSchema = new mongoose.Schema(
-  { section: { type: String, required: true }, items: [{ type: String }] },
+  {
+    category: { type: String, default: "" },
+    section: { type: String, required: true },
+    items: [{ type: String }],
+  },
   { _id: false }
 );
 

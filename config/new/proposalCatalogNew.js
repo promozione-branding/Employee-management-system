@@ -856,3 +856,76 @@ export const PROPOSAL_CATALOG = {
 };
 
 export const getCategoryList = () => Object.values(PROPOSAL_CATALOG);
+
+// ---- Custom services (New Proposal only) ---------------------------------
+// A user-added service is stored as a normal proposal item whose category
+// is "custom-service:<slugified-heading>", plus its deliverable offerings
+// on item.customOfferings and the ticked subset in proposal.checklist
+// ({ category, section: <offering name>, items: [...] }).
+export const CUSTOM_SERVICE_CATEGORY_PREFIX_NEW = "custom-service:";
+
+export const makeCustomServiceCategoryKeyNew = (heading = "") => {
+  const slug = String(heading)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `${CUSTOM_SERVICE_CATEGORY_PREFIX_NEW}${slug || "custom-service"}`;
+};
+
+export const isCustomServiceCategoryNew = (categoryKey) =>
+  typeof categoryKey === "string" &&
+  categoryKey.startsWith(CUSTOM_SERVICE_CATEGORY_PREFIX_NEW);
+
+const findCustomChecklistEntryNew = (checklist, item) =>
+  (checklist || []).find(
+    (c) => (c.category ? c.category === item.category : c.section === item.label),
+  );
+
+export const getCustomServiceChecklistCategoriesNew = (items = []) => {
+  const byCategory = new Map();
+  for (const item of items || []) {
+    if (!isCustomServiceCategoryNew(item.category)) continue;
+    const offerings = [...new Set((item.customOfferings || []).map((o) => String(o).trim()).filter(Boolean))];
+    if (!item.label || !offerings.length) continue;
+    if (!byCategory.has(item.category)) {
+      byCategory.set(item.category, {
+        key: item.category,
+        label: item.categoryLabel || item.category,
+        checklist: [],
+      });
+    }
+    const category = byCategory.get(item.category);
+    const existing = category.checklist.find((s) => s.title === item.label);
+    if (existing) {
+      existing.items = [...new Set([...existing.items, ...offerings])];
+    } else {
+      category.checklist.push({ title: item.label, items: offerings });
+    }
+  }
+  return [...byCategory.values()].filter((c) => c.checklist.length);
+};
+
+export const getCustomServiceGroupsNew = (items = [], checklist = []) => {
+  const byCategory = new Map();
+  for (const item of items || []) {
+    if (!isCustomServiceCategoryNew(item.category)) continue;
+    const entry = findCustomChecklistEntryNew(checklist, item);
+    if (!entry?.items?.length) continue;
+    if (!byCategory.has(item.category)) {
+      byCategory.set(item.category, {
+        key: item.category,
+        label: item.categoryLabel || item.category,
+        sections: [],
+      });
+    }
+    const group = byCategory.get(item.category);
+    const existing = group.sections.find((s) => s.section === entry.section);
+    if (existing) {
+      existing.items = [...new Set([...existing.items, ...entry.items])];
+    } else {
+      group.sections.push({ section: entry.section, items: [...entry.items] });
+    }
+  }
+  return [...byCategory.values()].filter((g) => g.sections.length);
+};

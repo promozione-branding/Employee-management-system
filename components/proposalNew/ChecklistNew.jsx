@@ -3,16 +3,17 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { PROPOSAL_CATALOG } from "@/config/new/proposalCatalogNew";
+import { PROPOSAL_CATALOG, getCustomServiceChecklistCategoriesNew } from "@/config/new/proposalCatalogNew";
 
-const ChecklistNew = ({ items = [], checklist = [], onChange }) => {
+const ChecklistNew = ({ items = [], checklist = [], onChange }) => { 
   const [closed, setClosed] = useState({});
 
   const activeCategories = useMemo(() => {
     const keys = [...new Set(items.map((it) => it.category))];
-    return keys
+    const catalogCategories = keys
       .map((k) => PROPOSAL_CATALOG[k])
       .filter((c) => c && Array.isArray(c.checklist) && c.checklist.length);
+    return [...catalogCategories, ...getCustomServiceChecklistCategoriesNew(items)];
   }, [items]);
 
   if (!activeCategories.length) return null;

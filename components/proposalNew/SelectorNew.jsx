@@ -1,8 +1,9 @@
 // components/proposalNew/SelectorNew.jsx
 
 "use client";
-import React, { useMemo, useState, useEffect } from "react";
-import { PROPOSAL_CATALOG } from "@/config/new/proposalCatalogNew";
+import React, { useMemo, useState } from "react";
+import { PROPOSAL_CATALOG, isCustomServiceCategoryNew } from "@/config/new/proposalCatalogNew";
+import CustomServiceNew from "./CustomServiceNew";
 import { Check, Plus, X, ChevronDown } from "lucide-react";
 
 const fmt = (n) => `₹ ${Number(n || 0).toLocaleString("en-IN")}`;
@@ -51,6 +52,52 @@ const SelectorNew = ({
     onChange(next);
   };
 
+  const customItems = selectedItems
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => isCustomServiceCategoryNew(item.category));
+
+  const updateCustomService = (index, oldItem, newItem, checklistEntry) => {
+    onChange(selectedItems.map((it, i) => (i === index ? newItem : it)));
+    if (onChecklistChange) {
+      let next = checklist.filter(
+        (c) => !(c.category === oldItem.category && c.section === oldItem.label),
+      );
+      if (checklistEntry) {
+        const existing = next.find(
+          (c) => c.category === checklistEntry.category && c.section === checklistEntry.section,
+        );
+        next = existing
+          ? next.map((c) =>
+              c === existing
+                ? { ...c, items: [...new Set([...c.items, ...checklistEntry.items])] }
+                : c,
+            )
+          : [...next, checklistEntry];
+      }
+      onChecklistChange(next);
+    }
+  };
+
+  const addCustomService = (item, checklistEntry) => {
+    onChange([...selectedItems, item]);
+    if (checklistEntry && onChecklistChange) {
+      const existing = checklist.find(
+        (c) => c.category === checklistEntry.category && c.section === checklistEntry.section,
+      );
+      if (existing) {
+        onChecklistChange(
+          checklist.map((c) =>
+            c === existing
+              ? { ...c, items: [...new Set([...c.items, ...checklistEntry.items])] }
+              : c,
+          ),
+        );
+      } else {
+        onChecklistChange([...checklist, checklistEntry]);
+      }
+    }
+  };
+
   const removeItem = (index) => {
     const it = selectedItems[index];
     onChange(selectedItems.filter((_, i) => i !== index));
@@ -59,8 +106,12 @@ const SelectorNew = ({
       const stillHasCategory = selectedItems.some((s, i) => i !== index && s.category === it.category);
       if (!stillHasCategory) {
         const cat = PROPOSAL_CATALOG[it.category];
-        const catSections = cat?.checklist?.map((s) => s.title) || [];
-        onChecklistChange(checklist.filter((c) => !catSections.includes(c.section)));
+        const catSections = isCustomServiceCategoryNew(it.category)
+          ? selectedItems.filter((s) => s.category === it.category).map((s) => s.label)
+          : cat?.checklist?.map((s) => s.title) || [];
+        onChecklistChange(
+          checklist.filter((c) => c.category !== it.category && !catSections.includes(c.section)),
+        );
         if (onNotesChange) onNotesChange(categoryNotes.filter(n => n.category !== it.category));
       }
     }
@@ -167,6 +218,8 @@ const SelectorNew = ({
           </div>
         );
       })}
+
+      <CustomServiceNew onAdd={addCustomService} customItems={customItems} onUpdate={updateCustomService} />
 
       {selectedItems.length > 0 && (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
@@ -277,18 +330,25 @@ const PackageCard = ({ category, pkg, selectedItems, onAdd, isSelected }) => {
     cityName: "", cityCount: "", keywordName: "", keywordCount: "",
   });
 
-  useEffect(() => {
-    if (existingItem) {
-      setCityData({
-        cityName: existingItem.cityName || "",
-        cityCount: existingItem.cityCount || "",
-        keywordName: existingItem.keywordName || "",
-        keywordCount: existingItem.keywordCount || "",
-      });
-    } else {
-      setCityData({ cityName: "", cityCount: "", keywordName: "", keywordCount: "" });
-    }
-  }, [existingItem]);
+  // Refill city inputs when the saved item changes (edit load): adjust
+  // state during render instead of an effect.
+  const [syncedCityKey, setSyncedCityKey] = useState(null);
+  const cityKey = existingItem
+    ? `${existingItem.cityName || ""}|${existingItem.cityCount || ""}|${existingItem.keywordName || ""}|${existingItem.keywordCount || ""}`
+    : "";
+  if (cityKey !== syncedCityKey) {
+    setSyncedCityKey(cityKey);
+    setCityData(
+      existingItem
+        ? {
+            cityName: existingItem.cityName || "",
+            cityCount: existingItem.cityCount || "",
+            keywordName: existingItem.keywordName || "",
+            keywordCount: existingItem.keywordCount || "",
+          }
+        : { cityName: "", cityCount: "", keywordName: "", keywordCount: "" },
+    );
+  }
 
   const handleAdd = () => {
       console.log("🟢 [UI] Data being sent on Add:", cityData);

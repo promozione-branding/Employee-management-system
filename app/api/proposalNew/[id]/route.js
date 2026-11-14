@@ -44,6 +44,7 @@ export async function PUT(req, { params }) {
       category: it.category, categoryLabel: it.categoryLabel, packageKey: it.packageKey, label: it.label,
       duration: it.duration, durationLabel: it.durationLabel, amount: Number(it.amount),
       serviceDiscount: Number(it.serviceDiscount || 0), custom: !!it.custom,
+      customOfferings: it.customOfferings ? it.customOfferings.map((o) => String(o)) : [],
       cityName: it.cityName || "", cityCount: it.cityCount || "", keywordName: it.keywordName || "", keywordCount: it.keywordCount || "",
     }));
 
