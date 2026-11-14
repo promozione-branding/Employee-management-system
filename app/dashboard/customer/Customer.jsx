@@ -42,12 +42,18 @@ import {
 import Link from "next/link";
 import toast from "react-hot-toast";
 
+const OTHERS = "others";
+
 const INITIAL_PROJECT_FORM = {
   projectName: "",
   proposalId: "",
   proposalNumber: "",
+  proposalIsCustom: false,
+  customProposalNumber: "",
   category: "",
   categoryLabel: "",
+  categoryIsCustom: false,
+  customServiceName: "",
   service: "",
   serviceName: "",
   serviceType: "",
@@ -307,7 +313,6 @@ function ProjectLiveCard({
       toast.error("End date cannot be before start date");
       return;
     }
-
     if (nextStatus === "live") {
       const ok = window.confirm(
         "Start client renewal reminders for this project?",
@@ -378,7 +383,6 @@ function ProjectLiveCard({
           </div>
         </div>
 
-        {/* Proposal view icon — only if mapped */}
         {hasProposal && (
           <button
             type="button"
@@ -391,7 +395,6 @@ function ProjectLiveCard({
         )}
       </div>
 
-      {/* Two timelines */}
       <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="rounded-lg border border-[#E6ECF5] bg-[#F7F9FC] p-2.5">
           <p className="text-[10px] font-bold uppercase tracking-wider text-[#8190A6]">
@@ -442,7 +445,6 @@ function ProjectLiveCard({
         </div>
       </div>
 
-      {/* Live controls */}
       <div className="mt-3 rounded-lg border border-[#EEF1F6] bg-[#FAFBFD] p-2.5">
         <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#8190A6]">
           Renewal setup
@@ -593,7 +595,16 @@ const Customer = ({ customerId }) => {
     loading: false,
   });
 
-  const projectDurations = projectCycleData?.projectCycle?.projectDuration || [];
+  // Ascending by startDate (oldest first); rows without startDate sink last.
+  const projectDurations = useMemo(() => {
+    const list = projectCycleData?.projectCycle?.projectDuration || [];
+    return [...list].sort((a, b) => {
+      const ta = a?.startDate ? new Date(a.startDate).getTime() : Infinity;
+      const tb = b?.startDate ? new Date(b.startDate).getTime() : Infinity;
+      return ta - tb;
+    });
+  }, [projectCycleData]);
+
   const projectCycleId = projectCycleData?.projectCycle?._id;
 
   const fetchCustomerProjectCycle = useCallback(async () => {
@@ -665,17 +676,42 @@ const Customer = ({ customerId }) => {
     setSelectedProposal(null);
   };
 
-  const handleProposalChange = async (proposalId) => {
-    updateProjectField("proposalId", proposalId);
-    updateProjectField("category", "");
-    updateProjectField("categoryLabel", "");
-    updateProjectField("proposalNumber", "");
+  const handleProposalChange = async (value) => {
+    // "Others" path
+    if (value === OTHERS) {
+      setSelectedProposal(null);
+      setProjectFormData((prev) => ({
+        ...prev,
+        proposalId: "",
+        proposalIsCustom: true,
+        proposalNumber: "",
+        category: "",
+        categoryLabel: "",
+        categoryIsCustom: false,
+        customServiceName: "",
+        service: "",
+      }));
+      return;
+    }
+
+    // Normal proposal path
+    setProjectFormData((prev) => ({
+      ...prev,
+      proposalId: value,
+      proposalIsCustom: false,
+      customProposalNumber: "",
+      category: "",
+      categoryLabel: "",
+      categoryIsCustom: false,
+      customServiceName: "",
+      proposalNumber: "",
+    }));
     setSelectedProposal(null);
 
-    if (!proposalId) return;
+    if (!value) return;
     setLoadingProposalDetails(true);
     try {
-      const response = await getProposalNewByIdService(proposalId);
+      const response = await getProposalNewByIdService(value);
       const data = getResponseData(response);
       const proposal = data?.proposal || data;
       if (!proposal || !Array.isArray(proposal.items)) {
@@ -710,21 +746,100 @@ const Customer = ({ customerId }) => {
     return Array.from(map.values());
   }, [selectedProposal]);
 
+  // Categories already created for this proposal in existing projects
+  const usedCategoriesForProposal = useMemo(() => {
+    if (!projectFormData.proposalId) return new Set();
+    const set = new Set();
+    projectDurations.forEach((d) => {
+      if (
+        d?.proposalId &&
+        String(d.proposalId) === String(projectFormData.proposalId) &&
+        d?.category
+      ) {
+        set.add(String(d.category));
+      }
+    });
+    // Exclude the item currently being edited so it can still be re-selected
+    if (currentEditedId) {
+      const current = projectDurations.find(
+        (d) => String(d?._id) === String(currentEditedId),
+      );
+      if (current?.category) set.delete(String(current.category));
+    }
+    return set;
+  }, [projectDurations, projectFormData.proposalId, currentEditedId]);
+
+  const handleCategoryChange = (value) => {
+    if (value === OTHERS) {
+      setProjectFormData((prev) => ({
+        ...prev,
+        category: OTHERS,
+        categoryIsCustom: true,
+        categoryLabel: prev.customServiceName || "",
+        service: OTHERS,
+      }));
+      return;
+    }
+    const found = categories.find((c) => c.value === value);
+    setProjectFormData((prev) => ({
+      ...prev,
+      category: value,
+      categoryIsCustom: false,
+      customServiceName: "",
+      categoryLabel: found?.label || value,
+      service: value,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (submitting) return;
 
     try {
       setSubmitting(true);
-      const serviceValue =
-        projectFormData.service === "other"
-          ? projectFormData.serviceName.trim()
-          : projectFormData.category || projectFormData.service;
 
-      if (!serviceValue) {
-        toast.error("Please select a proposal & service");
-        return;
+      // Resolve final service + category
+      let serviceValue = "";
+      let categoryValue = "";
+      let categoryLabelValue = "";
+      let proposalNumberValue = "";
+
+      if (projectFormData.proposalIsCustom) {
+        proposalNumberValue = (
+          projectFormData.customProposalNumber || ""
+        ).trim();
+        if (!proposalNumberValue) {
+          toast.error("Please enter a custom proposal number");
+          return;
+        }
+      } else {
+        proposalNumberValue = projectFormData.proposalNumber || "";
+        if (!projectFormData.proposalId) {
+          toast.error("Please select a proposal");
+          return;
+        }
       }
+
+      if (projectFormData.categoryIsCustom) {
+        const custom = (projectFormData.customServiceName || "").trim();
+        if (!custom) {
+          toast.error("Please enter a custom service name");
+          return;
+        }
+        serviceValue = custom;
+        categoryValue = custom;
+        categoryLabelValue = custom;
+      } else {
+        if (!projectFormData.category) {
+          toast.error("Please select a service/category");
+          return;
+        }
+        serviceValue = projectFormData.category;
+        categoryValue = projectFormData.category;
+        categoryLabelValue =
+          projectFormData.categoryLabel || projectFormData.category;
+      }
+
       if (
         projectFormData.startDate &&
         projectFormData.endDate &&
@@ -744,9 +859,9 @@ const Customer = ({ customerId }) => {
           startDate: projectFormData.startDate,
           endDate: projectFormData.endDate,
           proposalId: projectFormData.proposalId || undefined,
-          proposalNumber: projectFormData.proposalNumber || "",
-          category: projectFormData.category || "",
-          categoryLabel: projectFormData.categoryLabel || "",
+          proposalNumber: proposalNumberValue,
+          category: categoryValue,
+          categoryLabel: categoryLabelValue,
         };
         const res = await updateCustomerProjectPatchService(payload);
         if (res?.success) {
@@ -763,9 +878,9 @@ const Customer = ({ customerId }) => {
           "start-date": projectFormData.startDate,
           "end-date": projectFormData.endDate,
           proposalId: projectFormData.proposalId || undefined,
-          proposalNumber: projectFormData.proposalNumber || "",
-          category: projectFormData.category || "",
-          categoryLabel: projectFormData.categoryLabel || "",
+          proposalNumber: proposalNumberValue,
+          category: categoryValue,
+          categoryLabel: categoryLabelValue,
         };
         const res = await createCustomerProjectCycleService(formData);
         if (res?.success) {
@@ -786,12 +901,21 @@ const Customer = ({ customerId }) => {
   };
 
   const handleEditChange = (data) => {
+    const isCustomProposal = !data?.proposalId && Boolean(data?.proposalNumber);
+    const isCustomCategory = !data?.proposalId && Boolean(data?.service);
+
     setProjectFormData({
       projectName: data?.projectName || "",
       proposalId: data?.proposalId || "",
       proposalNumber: data?.proposalNumber || "",
-      category: data?.category || "",
+      proposalIsCustom: isCustomProposal,
+      customProposalNumber: isCustomProposal
+        ? data?.proposalNumber || ""
+        : "",
+      category: isCustomCategory ? OTHERS : data?.category || "",
       categoryLabel: data?.categoryLabel || "",
+      categoryIsCustom: isCustomCategory,
+      customServiceName: isCustomCategory ? data?.service || "" : "",
       service: data?.service || "",
       serviceName: data?.service || "",
       serviceType: data?.serviceType || "",
@@ -799,6 +923,7 @@ const Customer = ({ customerId }) => {
       endDate: toInputDate(data?.endDate),
     });
     setCurrentEditedId(data._id);
+
     if (data?.proposalId) {
       (async () => {
         try {
@@ -840,7 +965,7 @@ const Customer = ({ customerId }) => {
   };
 
   const openProposalView = async (proposalId) => {
-    if (!proposalId) return; // safety; button hidden anyway
+    if (!proposalId) return;
     setProposalModal({ open: true, proposal: null, loading: true });
     try {
       const response = await getProposalNewByIdService(proposalId);
@@ -1051,7 +1176,11 @@ const Customer = ({ customerId }) => {
               <select
                 id="proposalSelect"
                 required
-                value={projectFormData.proposalId}
+                value={
+                  projectFormData.proposalIsCustom
+                    ? OTHERS
+                    : projectFormData.proposalId
+                }
                 onChange={(e) => handleProposalChange(e.target.value)}
                 disabled={loadingProposals || submitting}
                 className={inputClassName}
@@ -1075,8 +1204,35 @@ const Customer = ({ customerId }) => {
                     </option>
                   );
                 })}
+                <option value={OTHERS}>Others (custom proposal)</option>
               </select>
             </div>
+
+            {projectFormData.proposalIsCustom && (
+              <div>
+                <label
+                  htmlFor="customProposalNumber"
+                  className={labelClassName}
+                >
+                  Custom Proposal Number{" "}
+                  <span className="text-[#E05B4B]">*</span>
+                </label>
+                <input
+                  id="customProposalNumber"
+                  type="text"
+                  value={projectFormData.customProposalNumber}
+                  onChange={(e) =>
+                    updateProjectField("customProposalNumber", e.target.value)
+                  }
+                  placeholder="e.g. PROP-2025-001"
+                  className={inputClassName}
+                />
+                <p className="mt-1 text-[11px] text-[#8792A5]">
+                  No proposal file is attached — this project will not show the
+                  Eye/proposal view.
+                </p>
+              </div>
+            )}
 
             {loadingProposalDetails && (
               <div className="flex items-center gap-2 text-xs text-[#718097]">
@@ -1093,28 +1249,66 @@ const Customer = ({ customerId }) => {
                 id="categorySelect"
                 required
                 value={projectFormData.category}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  updateProjectField("category", v);
-                  const found = categories.find((c) => c.value === v);
-                  updateProjectField("categoryLabel", found?.label || v);
-                  updateProjectField("service", v);
-                }}
-                disabled={!selectedProposal || categories.length === 0}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                disabled={
+                  submitting ||
+                  (!projectFormData.proposalIsCustom && !selectedProposal)
+                }
                 className={inputClassName}
               >
                 <option value="">
-                  {!selectedProposal
-                    ? "Select a proposal first"
-                    : "Choose a service"}
+                  {projectFormData.proposalIsCustom
+                    ? "Choose a service or Others"
+                    : !selectedProposal
+                      ? "Select a proposal first"
+                      : "Choose a service"}
                 </option>
-                {categories.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
+                {categories.map((c) => {
+                  const already = usedCategoriesForProposal.has(
+                    String(c.value),
+                  );
+                  return (
+                    <option
+                      key={c.value}
+                      value={c.value}
+                      disabled={already}
+                      className={
+                        already ? "font-semibold text-[#27834E]" : undefined
+                      }
+                    >
+                      {c.label}
+                      {already ? " • created" : ""}
+                    </option>
+                  );
+                })}
+                <option value={OTHERS}>Others (custom service)</option>
               </select>
+              {usedCategoriesForProposal.size > 0 && !projectFormData.categoryIsCustom && (
+                <p className="mt-1 text-[11px] text-[#27834E]">
+                  Green items are already created for this proposal.
+                </p>
+              )}
             </div>
+
+            {projectFormData.categoryIsCustom && (
+              <div>
+                <label htmlFor="customServiceName" className={labelClassName}>
+                  Custom Service Name{" "}
+                  <span className="text-[#E05B4B]">*</span>
+                </label>
+                <input
+                  id="customServiceName"
+                  type="text"
+                  value={projectFormData.customServiceName}
+                  onChange={(e) => {
+                    updateProjectField("customServiceName", e.target.value);
+                    updateProjectField("categoryLabel", e.target.value);
+                  }}
+                  placeholder="e.g. Website maintenance"
+                  className={inputClassName}
+                />
+              </div>
+            )}
 
             {projectFormData.service === "web-dev" && (
               <div>
@@ -1217,7 +1411,7 @@ const Customer = ({ customerId }) => {
           <SectionHeader
             icon={Clock3}
             title="Project & Service History"
-            subtitle="Two timelines: build window and renewal (mailer) window."
+            subtitle="Oldest first — two timelines per project."
             action={
               <button
                 type="button"
