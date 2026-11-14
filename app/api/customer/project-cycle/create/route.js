@@ -9,7 +9,17 @@ export async function POST(req) {
   try {
     await connectDB();
     const body = await req.json();
-    const { clientId, service, serviceName, projectName, serviceType } = body;
+    const {
+      clientId,
+      service,
+      serviceName,
+      projectName,
+      serviceType,
+      proposalId,
+      proposalNumber,
+      category,
+      categoryLabel,
+    } = body;
     const startDate = body.startDate || body["start-date"] || undefined;
     const endDate = body.endDate || body["end-date"] || undefined;
 
@@ -30,6 +40,12 @@ export async function POST(req) {
       startDate,
       endDate,
       serviceType,
+      // New optional fields — omitted if not sent (old callers unaffected)
+      ...(proposalId ? { proposalId } : {}),
+      ...(proposalNumber ? { proposalNumber } : {}),
+      ...(category ? { category } : {}),
+      ...(categoryLabel ? { categoryLabel } : {}),
+      status: "in_build",
     };
 
     if (projectCycle) {

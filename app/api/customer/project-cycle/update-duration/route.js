@@ -5,6 +5,9 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import ProjectCycle from "@/models/admin/ProjectCycle";
 
+const ALLOWED_STATUS = ["in_build", "live", "completed"];
+const ALLOWED_RENEWAL = ["3m", "6m", "12m", "custom"];
+
 export async function PATCH(req) {
   try {
     await connectDB();
@@ -18,9 +21,17 @@ export async function PATCH(req) {
       endDate,
       projectName,
       serviceType,
+      proposalId,
+      proposalNumber,
+      category,
+      categoryLabel,
+      status,
+      activatedAt,
+      renewalDuration,
+      renewalEndDate,
+      resetRenewalMilestones,
     } = body;
-    console.log(projectName);
-    // ---- validations ----
+
     if (!projectCycleId || !durationId) {
       return NextResponse.json(
         {
@@ -41,7 +52,25 @@ export async function PATCH(req) {
       );
     }
 
-    // ---- build update object dynamically ----
+    // Enum guards — reject bad payloads
+    if (status !== undefined && !ALLOWED_STATUS.includes(status)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid status" },
+        { status: 400 },
+      );
+    }
+    if (
+      renewalDuration !== undefined &&
+      renewalDuration !== null &&
+      renewalDuration !== "" &&
+      !ALLOWED_RENEWAL.includes(renewalDuration)
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Invalid renewalDuration" },
+        { status: 400 },
+      );
+    }
+
     const updateFields = {};
     if (service) updateFields["projectDuration.$.service"] = service;
     if (startDate) updateFields["projectDuration.$.startDate"] = startDate;
@@ -50,26 +79,41 @@ export async function PATCH(req) {
       updateFields["projectDuration.$.projectName"] = projectName;
     if (serviceType)
       updateFields["projectDuration.$.serviceType"] = serviceType;
+    if (proposalId)
+      updateFields["projectDuration.$.proposalId"] = proposalId;
+    if (proposalNumber !== undefined)
+      updateFields["projectDuration.$.proposalNumber"] = proposalNumber;
+    if (category) updateFields["projectDuration.$.category"] = category;
+    if (categoryLabel)
+      updateFields["projectDuration.$.categoryLabel"] = categoryLabel;
+    if (status) updateFields["projectDuration.$.status"] = status;
+    if (activatedAt !== undefined)
+      updateFields["projectDuration.$.activatedAt"] = activatedAt;
+    if (renewalDuration !== undefined)
+      updateFields["projectDuration.$.renewalDuration"] = renewalDuration;
+    if (renewalEndDate !== undefined)
+      updateFields["projectDuration.$.renewalEndDate"] = renewalEndDate;
 
-    if (Object.keys(updateFields).length === 0) {
+    if (Object.keys(updateFields).length === 0 && !resetRenewalMilestones) {
       return NextResponse.json(
         { success: false, message: "No fields provided to update" },
         { status: 400 },
       );
     }
 
-    // ---- update subdocument ----
+    const update = { $set: updateFields };
+    if (resetRenewalMilestones) {
+      update.$set["projectDuration.$.renewal.sentMilestones"] = [];
+      update.$set["projectDuration.$.renewal.lastReminderAt"] = null;
+    }
+
     const updatedProject = await ProjectCycle.findOneAndUpdate(
       {
         _id: projectCycleId,
         "projectDuration._id": durationId,
       },
-      {
-        $set: updateFields,
-      },
-      {
-        new: true,
-      },
+      update,
+      { new: true },
     );
 
     if (!updatedProject) {
