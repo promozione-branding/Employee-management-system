@@ -3,12 +3,16 @@
 // Renewal reminders anchored on ProjectCycle.projectDuration.$.renewalEndDate.
 // Only rows with status === "live" and a renewalEndDate are considered.
 // Milestones fire once per subdoc via renewal.sentMilestones.
+// Both INTERNAL and CLIENT mails are fired per milestone.
 // Never throws. Runs every 1 hour.
 
 import { connectDB } from "../../lib/db.js";
 import ProjectCycle from "../../models/admin/ProjectCycle.js";
 import Customer from "../../models/admin/Customer.js";
-import { sendRenewalReminderMail } from "../../lib/mail/workflowMailer.js";
+import {
+  sendRenewalReminderMail,
+  sendRenewalReminderClientMail,
+} from "../../lib/mail/workflowMailer.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -66,7 +70,7 @@ async function checkProjectCycleRenewals() {
         );
         if (!due) continue;
 
-        // Map subdoc → workflow-shaped object for the existing mailer
+        // Map subdoc → workflow-shaped object for the mailers
         const workflow = {
           _id: dur._id,
           customerId: cycle.clientId,
@@ -86,7 +90,14 @@ async function checkProjectCycleRenewals() {
         );
 
         try {
-          await sendRenewalReminderMail({ workflow, milestone: due.key });
+          // Fire both. allSettled so one failure doesn't stop the other.
+          await Promise.allSettled([
+            sendRenewalReminderMail({ workflow, milestone: due.key }),
+            sendRenewalReminderClientMail({
+              workflow,
+              milestone: due.key,
+            }),
+          ]);
 
           await ProjectCycle.updateOne(
             { _id: cycle._id, "projectDuration._id": dur._id },
