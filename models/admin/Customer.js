@@ -1,6 +1,6 @@
 // models/admin/Customer.js
 
-import { auditPlugin } from "@/lib/auditPlugin";
+import { auditPlugin } from "../../lib/auditPlugin.js";
 // models/admin/Customer.js
 
 import mongoose from "mongoose";
