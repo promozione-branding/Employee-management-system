@@ -1,3 +1,5 @@
+// app/pdf-verify-harness/page.jsx
+
 // Temporary verification harness — deleted after browser verification.
 "use client";
 import React from "react";

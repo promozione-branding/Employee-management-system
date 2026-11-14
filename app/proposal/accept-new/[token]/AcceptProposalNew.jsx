@@ -1,3 +1,5 @@
+// app/proposal/accept-new/[token]/AcceptProposalNew.jsx
+
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";

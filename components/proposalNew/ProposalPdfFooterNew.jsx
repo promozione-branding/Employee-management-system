@@ -1,3 +1,5 @@
+// components/proposalNew/ProposalPdfFooterNew.jsx
+
 "use client";
 
 import React from "react";
