@@ -2,7 +2,7 @@
 
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   CalendarDays,
   CheckCircle2,
@@ -38,7 +38,23 @@ export default function AddProjectTab({
   onReset,
   submitting,
   isEditing,
+  projects = [], // ← parent passes all project durations so we can flag proposals already in use
+  currentEditedId,
 }) {
+  // Map: proposalId -> Set of already-created category values
+  const usedByProposal = useMemo(() => {
+    const map = new Map();
+    (projects || []).forEach((d) => {
+      if (!d?.proposalId || !d?.category) return;
+      // ignore the row being edited so its own category is not counted
+      if (currentEditedId && String(d?._id) === String(currentEditedId)) return;
+      const key = String(d.proposalId);
+      if (!map.has(key)) map.set(key, new Set());
+      map.get(key).add(String(d.category));
+    });
+    return map;
+  }, [projects, currentEditedId]);
+
   return (
     <section className="min-w-0 overflow-hidden rounded-xl border border-[#E3E8F0] bg-white shadow-sm">
       <div className="flex items-start justify-between gap-3 border-b border-[#E9EDF4] px-4 py-4 sm:px-5">
@@ -84,6 +100,7 @@ export default function AddProjectTab({
           />
         </div>
 
+        {/* ── PROPOSAL SELECT ── */}
         <div>
           <label htmlFor="proposalSelect" className={labelClassName}>
             Proposal <span className="text-[#E05B4B]">*</span>
@@ -106,19 +123,55 @@ export default function AddProjectTab({
             {proposals.map((p) => {
               const id = getProposalId(p);
               if (!id) return null;
+
+              const items = Array.isArray(p.items) ? p.items : [];
+              const total = items.filter((i) => i?.category).length;
+              const used = usedByProposal.get(String(id))?.size || 0;
+              const anyUsed = used > 0;
+              const allUsed = total > 0 && used >= total;
+
+              // Build label: PROP-XXXX · svc1, svc2, svc3 (used/total)
+              const svcList =
+                items
+                  .map((i) => i.categoryLabel || i.category)
+                  .filter(Boolean)
+                  .slice(0, 4)
+                  .join(", ") || "Services";
+
               return (
-                <option key={id} value={id}>
-                  {getProposalNumber(p)} ·{" "}
-                  {(p.items || [])
-                    .map((i) => i.categoryLabel || i.category)
-                    .filter(Boolean)
-                    .slice(0, 3)
-                    .join(", ") || "Services"}
+                <option
+                  key={id}
+                  value={id}
+                  className={
+                    allUsed
+                      ? "bg-[#EAF7EF] font-semibold text-[#1F6B3E]"
+                      : anyUsed
+                        ? "bg-[#FFF7E6] font-medium text-[#8A5A00]"
+                        : undefined
+                  }
+                >
+                  {getProposalNumber(p)} · {svcList}
+                  {total > 0
+                    ? ` (${used}/${total} selected)`
+                    : ""}
+                  {allUsed ? " ✓ all selected" : ""}
                 </option>
               );
             })}
             <option value={OTHERS}>Others (custom proposal)</option>
           </select>
+
+          {/* Legend */}
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-[#8792A5]">
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-sm bg-[#FFF7E6] ring-1 ring-[#E5C98A]" />
+              Partly selected
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-sm bg-[#EAF7EF] ring-1 ring-[#B9E1C6]" />
+              All selected
+            </span>
+          </div>
         </div>
 
         {projectFormData.proposalIsCustom && (
@@ -151,6 +204,7 @@ export default function AddProjectTab({
           </div>
         )}
 
+        {/* ── CATEGORY SELECT ── */}
         <div>
           <label htmlFor="categorySelect" className={labelClassName}>
             Service / Category <span className="text-[#E05B4B]">*</span>
@@ -181,11 +235,13 @@ export default function AddProjectTab({
                   value={c.value}
                   disabled={already}
                   className={
-                    already ? "font-semibold text-[#27834E]" : undefined
+                    already
+                      ? "bg-[#EAF7EF] font-semibold text-[#1F6B3E]"
+                      : undefined
                   }
                 >
                   {c.label}
-                  {already ? " • created" : ""}
+                  {already ? " (selected)" : ""}
                 </option>
               );
             })}
@@ -193,7 +249,7 @@ export default function AddProjectTab({
           </select>
           {usedCategoriesForProposal?.size > 0 &&
             !projectFormData.categoryIsCustom && (
-              <p className="mt-1 text-[11px] text-[#27834E]">
+              <p className="mt-1 text-[11px] text-[#1F6B3E]">
                 Green items are already created for this proposal.
               </p>
             )}

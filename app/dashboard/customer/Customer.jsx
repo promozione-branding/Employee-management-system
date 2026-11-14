@@ -600,6 +600,8 @@ export default function Customer({ customerId }) {
               onReset={resetProjectForm}
               submitting={submitting}
               isEditing={Boolean(currentEditedId)}
+              projects={projectDurations}
+              currentEditedId={currentEditedId}
             />
           </div>
 
