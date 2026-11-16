@@ -7,6 +7,11 @@ import { listProposalNewService } from "@/service/proposalNew";
 import { Search, Plus, Pencil, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import LedgerModalNew from "./LedgerModalNew";
+import {
+  filterLedgerEntries,
+  computeLedger,
+  isConfidentialEntry,
+} from "@/lib/ledgerNewMath";
 
 export default function LedgerTabNew({ customerId }) {
   const [entries, setEntries] = useState([]);
@@ -46,14 +51,30 @@ export default function LedgerTabNew({ customerId }) {
 
   const isSecretUnlocked = searchQuery.trim() === "2-2=1";
 
-  const displayedEntries = entries.filter((entry) => {
-    if (selectedProposal) {
-      const matchesProposal =
-        entry.proposalId === selectedProposal._id || !entry.proposalId;
-      if (!matchesProposal) return false;
-    }
-    if (isSecretUnlocked) return true;
-    return !entry.isConfidential;
+  // Switching ledger clears the selection: a project lives in one ledger only.
+  useEffect(() => {
+    setSelectedProposal(null);
+  }, [isSecretUnlocked]);
+
+  // Never mix: genuine view = genuine entries only, confidential view =
+  // confidential entries only, and only for the selected proposal.
+  const displayedEntries = selectedProposal
+    ? filterLedgerEntries(entries, {
+        proposalId: selectedProposal._id,
+        confidential: isSecretUnlocked,
+      })
+    : [];
+
+  // A proposal that already has entries in the other ledger stays there.
+  const proposalsForLedger = proposals.filter((p) => {
+    const forProposal = entries.filter(
+      (e) => e.proposalId && String(e.proposalId) === String(p._id),
+    );
+    if (forProposal.some((e) => isConfidentialEntry(e) === isSecretUnlocked))
+      return true;
+    if (forProposal.some((e) => isConfidentialEntry(e) !== isSecretUnlocked))
+      return false;
+    return true;
   });
 
   const openEdit = (entry) => {
@@ -66,26 +87,17 @@ export default function LedgerTabNew({ customerId }) {
     setIsModalOpen(true);
   };
 
-  // ✅ TALLY MATH
+  // Tally for this ledger only (genuine XOR confidential, this proposal only).
   const proposalBaseValue = selectedProposal
-    ? Number(selectedProposal.grandTotal)
+    ? Number(selectedProposal.grandTotal) || 0
     : 0;
-  const totalAddon = displayedEntries.reduce(
-    (sum, e) => sum + (e.extraAmount || 0),
-    0,
-  );
-
-  // Total Service Used = Proposal Value + Total Add-on
-  const totalServiceUsed = proposalBaseValue + totalAddon;
-
-  // Total Paid = Sum of Credits (Payments)
-  const totalCredit = displayedEntries.reduce(
-    (sum, e) => sum + (e.credit || 0),
-    0,
-  );
-
-  // Remaining Balance = Service Used - Paid
-  const remainingBalance = totalServiceUsed - totalCredit;
+  const {
+    rows: ledgerRows,
+    totalAddon,
+    totalCredit,
+    totalServiceUsed,
+    remainingBalance,
+  } = computeLedger(displayedEntries, proposalBaseValue);
 
   return (
     <div className="w-full bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
@@ -123,7 +135,7 @@ export default function LedgerTabNew({ customerId }) {
             value=""
           >
             <option value="">-- Choose a Proposal --</option>
-            {proposals.map((p) => (
+            {proposalsForLedger.map((p) => (
               <option key={p._id} value={p._id}>
                 {p.proposalNumber} - ₹{p.grandTotal}
               </option>
@@ -210,14 +222,15 @@ export default function LedgerTabNew({ customerId }) {
                       Loading...
                     </td>
                   </tr>
-                ) : displayedEntries.length === 0 ? (
+                ) : ledgerRows.length === 0 ? (
                   <tr>
                     <td colSpan="8" className="text-center py-6 text-gray-500">
-                      No payments recorded yet.
+                      No payments recorded yet in the{" "}
+                      {isSecretUnlocked ? "confidential" : "genuine"} ledger.
                     </td>
                   </tr>
                 ) : (
-                  displayedEntries.map((entry, idx) => (
+                  ledgerRows.map((entry, idx) => (
                     <tr key={entry._id} className="hover:bg-gray-50">
                       <td className="px-4 py-3">{idx + 1}.</td>
                       <td className="px-4 py-3">

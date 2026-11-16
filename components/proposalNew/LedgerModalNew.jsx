@@ -43,7 +43,11 @@ export default function LedgerModalNew({
           initialData.particulars.replace(" (Service Used)", "") || "",
         transactionId: initialData.transactionId || "",
         transactionDate: new Date(initialData.date).toISOString().split("T")[0],
-        amount: initialData.credit || initialData.debit || "",
+        // credit already includes the add-on; show only the base amount
+        // here so re-saving an edit does not add the add-on again.
+        amount: initialData.credit
+          ? initialData.credit - (initialData.extraAmount || 0)
+          : initialData.debit || "",
         addonAmount: initialData.extraAmount || "",
         isConfidential: initialData.isConfidential || false,
       });
@@ -85,7 +89,11 @@ export default function LedgerModalNew({
         credit: totalCredit, // ✅ Payment goes to Credit
         extraAmount: addonAmt,
         transactionId: form.transactionId,
-        isConfidential: form.isConfidential,
+        // Ledger is fixed at creation: new entries go to the ledger
+        // currently open, edits never move an entry between ledgers.
+        isConfidential: isEditing
+          ? Boolean(initialData.isConfidential)
+          : Boolean(isSecretUnlocked),
       };
 
       if (isEditing) {
@@ -239,18 +247,13 @@ export default function LedgerModalNew({
           </div>
 
           {isSecretUnlocked && !isEditing && (
-            <div className="bg-red-50 border border-red-200 p-3 rounded-md mt-2">
-              <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-red-700">
-                <input
-                  type="checkbox"
-                  checked={form.isConfidential}
-                  onChange={(e) =>
-                    setForm({ ...form, isConfidential: e.target.checked })
-                  }
-                  className="h-4 w-4 accent-red-600"
-                />
-                Mark as Confidential (Unaccountable Cash)
-              </label>
+            <div className="bg-red-50 border border-red-200 p-3 rounded-md mt-2 text-sm font-semibold text-red-700">
+              This entry will be saved in the Confidential Ledger only.
+            </div>
+          )}
+          {isEditing && form.isConfidential && (
+            <div className="bg-red-50 border border-red-200 p-3 rounded-md mt-2 text-sm font-semibold text-red-700">
+              Confidential Ledger entry — it stays in this ledger.
             </div>
           )}
 

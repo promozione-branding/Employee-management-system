@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Workflow from "@/models/admin/Workflow";
+import LedgerNew from "@/models/admin/proposalNew/LedgerNew";
 import Customer from "@/models/admin/Customer";
 import User from "@/models/admin/User";
 import { getAuthUser } from "@/lib/getAuthUser";
@@ -57,6 +58,16 @@ export async function POST(req) {
     if (new Date(endDate) < new Date(startDate)) {
       return NextResponse.json(
         { success: false, message: "End date cannot be before start date" },
+        { status: 400 },
+      );
+    }
+
+    // Ledger gate: a workflow needs a ledger entry for this proposal,
+    // in either the genuine or the confidential ledger.
+    const ledgerEntry = await LedgerNew.exists({ customerId, proposalId });
+    if (!ledgerEntry) {
+      return NextResponse.json(
+        { success: false, message: "Kindly make entry on ledger to continue" },
         { status: 400 },
       );
     }

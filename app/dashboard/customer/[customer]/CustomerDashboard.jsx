@@ -288,6 +288,7 @@ function DashboardContent({
               >
                 <Createworkflow
                   customerId={customerId}
+                  onGoToLedger={() => handleTabChange("newledger")}
                   onSave={async (payload) => {
                     const res = await createWorkflowService(payload);
                     return res.data;

@@ -23,10 +23,32 @@ export async function GET(req) {
       createdAt: 1,
     });
 
-    let runningBalance = 0;
+    // Balance is per proposal AND per ledger (genuine/confidential are
+    // never summed together), starting from that proposal's value.
+    const proposalIds = [
+      ...new Set(entries.map((e) => e.proposalId).filter(Boolean).map(String)),
+    ];
+    const proposals = proposalIds.length
+      ? await ProposalNew.find({ _id: { $in: proposalIds } })
+          .select("grandTotal")
+          .lean()
+      : [];
+    const baseByProposal = new Map(
+      proposals.map((p) => [String(p._id), Number(p.grandTotal) || 0]),
+    );
+    const runningByLedger = new Map();
     const calculatedEntries = entries.map((entry) => {
-      runningBalance += (entry.debit || 0) - (entry.credit || 0);
-      return { ...entry.toObject(), balance: runningBalance };
+      const key = `${entry.proposalId || ""}|${Boolean(entry.isConfidential)}`;
+      if (!runningByLedger.has(key)) {
+        runningByLedger.set(key, baseByProposal.get(String(entry.proposalId)) || 0);
+      }
+      const balance =
+        runningByLedger.get(key) +
+        (entry.debit || 0) +
+        (entry.extraAmount || 0) -
+        (entry.credit || 0);
+      runningByLedger.set(key, balance);
+      return { ...entry.toObject(), balance };
     });
 
     return NextResponse.json(
@@ -107,6 +129,15 @@ export async function PUT(req) {
     await connectDB();
     const body = await req.json();
 
+    const existing = await LedgerNew.findById(body.entryId).lean();
+    if (!existing) {
+      return NextResponse.json(
+        { success: false, message: "Entry not found" },
+        { status: 404 },
+      );
+    }
+
+    // An edit never moves an entry between ledgers or proposals.
     const updated = await LedgerNew.findByIdAndUpdate(
       body.entryId,
       {
@@ -117,6 +148,8 @@ export async function PUT(req) {
         credit: Number(body.credit) || 0,
         extraAmount: Number(body.extraAmount) || 0,
         transactionId: body.transactionId,
+        isConfidential: Boolean(existing.isConfidential),
+        proposalId: existing.proposalId || null,
       },
       { new: true },
     );

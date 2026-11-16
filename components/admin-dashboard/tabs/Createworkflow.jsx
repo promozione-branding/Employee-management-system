@@ -18,6 +18,8 @@ import {
   listProposalNewService,
   getProposalNewByIdService,
 } from "@/service/proposalNew";
+import { getLedgerNewService } from "@/service/proposalNew/ledgerNew";
+import { hasLedgerEntryForProposal } from "@/lib/ledgerNewMath";
 
 const DURATION_OPTIONS = [
   { value: "3m", label: "3 Months", months: 3 },
@@ -115,7 +117,7 @@ const getResponseData = (response) => {
 const getProposalItems = (proposal) =>
   Array.isArray(proposal?.items) ? proposal.items : [];
 
-export default function Createworkflow({ customerId, onSave }) {
+export default function Createworkflow({ customerId, onSave, onGoToLedger }) {
   const [proposals, setProposals] = useState([]);
   const [selectedProposalId, setSelectedProposalId] = useState("");
   const [selectedProposal, setSelectedProposal] = useState(null);
@@ -125,6 +127,9 @@ export default function Createworkflow({ customerId, onSave }) {
   const [duration, setDuration] = useState("3m");
   const [customEndDate, setCustomEndDate] = useState("");
   const [description, setDescription] = useState("");
+
+  const [ledgerEntries, setLedgerEntries] = useState([]);
+  const [loadingLedger, setLoadingLedger] = useState(true);
 
   const [loadingProposals, setLoadingProposals] = useState(true);
   const [loadingProposalDetails, setLoadingProposalDetails] = useState(false);
@@ -174,6 +179,36 @@ export default function Createworkflow({ customerId, onSave }) {
   useEffect(() => {
     fetchProposals();
   }, [fetchProposals]);
+
+  // Ledger gate: workflow needs a ledger entry for the selected proposal.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!customerId) {
+        setLoadingLedger(false);
+        return;
+      }
+      setLoadingLedger(true);
+      try {
+        const res = await getLedgerNewService(customerId);
+        if (!cancelled) setLedgerEntries(res?.success ? res.data || [] : []);
+      } catch {
+        if (!cancelled) setLedgerEntries([]);
+      } finally {
+        if (!cancelled) setLoadingLedger(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [customerId]);
+
+  const hasLedgerEntry = selectedProposalId
+    ? hasLedgerEntryForProposal(ledgerEntries, selectedProposalId)
+    : false;
+  const ledgerBlocked = Boolean(
+    selectedProposalId && !loadingLedger && !hasLedgerEntry,
+  );
 
   // Load full proposal details whenever a proposal is selected.
   const handleProposalChange = async (proposalId) => {
@@ -285,6 +320,11 @@ export default function Createworkflow({ customerId, onSave }) {
 
     if (!selectedProposalId || !selectedProposal) {
       toast.error("Please select a proposal.");
+      return;
+    }
+
+    if (loadingLedger || !hasLedgerEntryForProposal(ledgerEntries, selectedProposalId)) {
+      toast.error("Kindly make entry on ledger to continue");
       return;
     }
 
@@ -431,6 +471,24 @@ export default function Createworkflow({ customerId, onSave }) {
             <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-600">
               <LoaderCircle className="h-4 w-4 animate-spin" />
               Loading proposal details...
+            </div>
+          )}
+
+          {ledgerBlocked && (
+            <div
+              role="alert"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+            >
+              <span>Kindly make entry on ledger to continue</span>
+              {typeof onGoToLedger === "function" && (
+                <button
+                  type="button"
+                  onClick={onGoToLedger}
+                  className="rounded-md bg-amber-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-800"
+                >
+                  Go to New Ledger
+                </button>
+              )}
             </div>
           )}
 
@@ -686,6 +744,8 @@ export default function Createworkflow({ customerId, onSave }) {
             type="submit"
             disabled={
               saving ||
+              loadingLedger ||
+              ledgerBlocked ||
               loadingProposals ||
               loadingProposalDetails ||
               !selectedProposal ||
