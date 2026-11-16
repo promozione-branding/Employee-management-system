@@ -2,7 +2,7 @@
 
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import PdfNew from '@/components/proposalNew/PdfNew';
+import PdfNew, { downloadProposalPdf } from '@/components/proposalNew/PdfNew';
 
 export default function ViewProposalNew({ token }) {
     const [loading, setLoading] = useState(true);
@@ -12,6 +12,7 @@ export default function ViewProposalNew({ token }) {
     const [containerHeight, setContainerHeight] = useState('auto');
 
     const containerRef = useRef(null);
+    const pdfRootRef = useRef(null);
 
     useEffect(() => {
         let mounted = true;
@@ -63,6 +64,14 @@ export default function ViewProposalNew({ token }) {
         return () => window.removeEventListener('resize', updateScale);
     }, [proposalData]);
 
+    const handleDownload = () => {
+        if (!proposalData) return;
+        // Reuse the exact same helper that the admin-side download uses.
+        // It clones #proposal-print-root into a fresh window with the A4 print CSS,
+        // so the layout matches what's on screen (unscaled, one page per .pdf-screen-page).
+        downloadProposalPdf(proposalData, pdfRootRef.current);
+    };
+
     if (loading) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -91,11 +100,20 @@ export default function ViewProposalNew({ token }) {
     return (
         <div className="flex min-h-screen flex-col items-center bg-gray-100 px-2 py-6 md:px-4 md:py-10">
             <div className="w-full max-w-4xl">
-                <div className="mb-6 text-center md:mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">Inquiry Bazaar Pvt Ltd</h1>
-                    <p className="mt-1 text-xs text-gray-600 md:text-sm">
-                        Proposal {proposalData.proposalNumber || ''} · View Only
-                    </p>
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3 md:mb-8">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">Inquiry Bazaar Pvt Ltd</h1>
+                        <p className="mt-1 text-xs text-gray-600 md:text-sm">
+                            Proposal {proposalData.proposalNumber || ''}
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleDownload}
+                        className="inline-flex items-center gap-2 rounded-md bg-blue-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-800"
+                    >
+                        ⬇ Download PDF
+                    </button>
                 </div>
 
                 <div className="rounded-2xl bg-white p-2 shadow-lg md:p-4">
@@ -115,7 +133,16 @@ export default function ViewProposalNew({ token }) {
                                 height: containerHeight,
                             }}
                         >
-                            <PdfNew proposal={proposalData} />
+                            {/*
+                              NOTE: the ref is on a wrapper *inside* the scaled div.
+                              downloadProposalPdf clones this node's outerHTML — but PdfNew
+                              itself already sets id="proposal-print-root" on its own root,
+                              so passing `null` (or this ref) both work. Passing the ref keeps
+                              the getElementById fallback from picking up anything unexpected.
+                            */}
+                            <div ref={pdfRootRef}>
+                                <PdfNew proposal={proposalData} />
+                            </div>
                         </div>
                     </div>
                 </div>
