@@ -5,7 +5,6 @@ import ProposalNew from '@/models/admin/proposalNew/ProposalNew';
 import { NextResponse } from 'next/server';
 import { getTransporter, MAIL_FROM } from '@/lib/mailerNew';
 import mongoose from 'mongoose';
-import puppeteer from 'puppeteer';
 
 export async function POST(req, { params }) {
     try {
@@ -25,28 +24,7 @@ export async function POST(req, { params }) {
         await proposal.save();
 
         const baseUrl = process.env.Proposal_mail_URL || process.env.APP_URL || 'http://localhost:3000';
-        let pdfBuffer = null;
-
-        try {
-            const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-            const page = await browser.newPage();
-            const cookies = req.headers.get('cookie');
-
-            if (cookies) {
-                const cookieParams = cookies.split(';').map((c) => {
-                    const [name, ...rest] = c.trim().split('=');
-                    return { name, value: rest.join('='), domain: new URL(baseUrl).hostname, path: '/' };
-                });
-                await page.setCookie(...cookieParams);
-            }
-
-            await page.goto(`${baseUrl}/proposal/pdf-print-new/${id}`, { waitUntil: 'networkidle0' });
-            await new Promise((resolve) => setTimeout(resolve, 2500));
-            pdfBuffer = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '0', right: '0', bottom: '0', left: '0' } });
-            await browser.close();
-        } catch (pdfErr) {
-            console.log('PDF generation failed:', pdfErr);
-        }
+        const viewUrl = `${baseUrl}/proposal/view-new/${token}`;
 
         try {
             const transporter = getTransporter();
@@ -65,13 +43,18 @@ export async function POST(req, { params }) {
                 html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
             <p>Dear ${proposal.clientId?.name || 'Client'},</p>
             <p>Thank you for accepting proposal <strong>${proposal.proposalNumber}</strong>.</p>
-            <p><strong>Please find your accepted proposal PDF attached.</strong></p>
+            <p>You can view your accepted proposal anytime using the link below:</p>
+            <p style="margin: 18px 0;">
+                <a href="${viewUrl}"
+                   style="display: inline-block; background: #1e3a5f; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: 600;">
+                    View Proposal PDF
+                </a>
+            </p>
+            <p style="font-size: 12px; color: #6b7280;">Or copy this link into your browser:<br/>
+                <a href="${viewUrl}" style="color: #2563eb;">${viewUrl}</a>
+            </p>
             <p>Best regards,<br/>The Inquiry Bazaar</p></div>`,
             };
-
-            if (pdfBuffer) {
-                mailOptions.attachments = [{ filename: `${proposal.proposalNumber}.pdf`, content: pdfBuffer, contentType: 'application/pdf' }];
-            }
 
             await transporter.sendMail(mailOptions);
         } catch (mailErr) {
