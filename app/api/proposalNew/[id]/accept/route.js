@@ -41,19 +41,26 @@ export async function POST(req, { params }) {
                 cc: ccEmails.size > 0 ? Array.from(ccEmails).join(', ') : undefined,
                 subject: `Welcome to Inquiry Bazaar — Proposal Accepted`,
                 html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
-            <p>Dear ${proposal.clientId?.name || 'Client'},</p>
-            <p>Thank you for accepting proposal <strong>${proposal.proposalNumber}</strong>.</p>
-            <p>You can view your accepted proposal anytime using the link below:</p>
-            <p style="margin: 18px 0;">
-                <a href="${viewUrl}"
-                   style="display: inline-block; background: #1e3a5f; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: 600;">
-                    View Proposal PDF
-                </a>
-            </p>
-            <p style="font-size: 12px; color: #6b7280;">Or copy this link into your browser:<br/>
-                <a href="${viewUrl}" style="color: #2563eb;">${viewUrl}</a>
-            </p>
-            <p>Best regards,<br/>The Inquiry Bazaar</p></div>`,
+    <p>Dear ${proposal.clientId?.name || 'Client'},</p>
+    <p>Thank you for accepting proposal <strong>${proposal.proposalNumber}</strong>.</p>
+    <p>You can view your accepted proposal anytime using the link below:</p>
+    <p style="margin: 18px 0;">
+        <a href="${baseUrl}/proposal/view-new/${token}"
+           style="display: inline-block; background: #1e3a5f; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: 600;">
+            View Proposal PDF
+        </a>
+    </p>
+    <p style="margin: 18px 0;">
+        <a href="https://pay.inquirybazaar.com/"
+           style="display: inline-block; background: #166534; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: 600;">
+            Proceed to Payment
+        </a>
+    </p>
+    <p style="font-size: 12px; color: #6b7280;">Or copy these links into your browser:<br/>
+        Proposal: <a href="${baseUrl}/proposal/view-new/${token}" style="color: #2563eb;">${baseUrl}/proposal/view-new/${token}</a><br/>
+        Payment: <a href="https://pay.inquirybazaar.com/" style="color: #2563eb;">https://pay.inquirybazaar.com/</a>
+    </p>
+    <p>Best regards,<br/>The Inquiry Bazaar</p></div>`,
             };
 
             await transporter.sendMail(mailOptions);

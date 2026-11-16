@@ -5,6 +5,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import PdfNew from '@/components/proposalNew/PdfNew';
 
+const PAYMENT_URL = 'https://pay.inquirybazaar.com/';
+
 export default function AcceptProposalNew({ token }) {
     const [step, setStep] = useState('verify');
     const [email, setEmail] = useState('');
@@ -190,11 +192,23 @@ export default function AcceptProposalNew({ token }) {
                 )}
 
                 {step === 'done' && (
-                    <div className="mx-auto flex max-w-lg flex-col gap-4 rounded-2xl bg-white p-10 text-center shadow-lg">
+                    <div className="mx-auto flex max-w-lg flex-col items-center gap-4 rounded-2xl bg-white p-10 text-center shadow-lg">
                         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-4xl text-emerald-600">✓</div>
                         <h2 className="text-2xl font-bold text-gray-900">Thank you!</h2>
+                        <p className="text-gray-600">Your proposal has been accepted. A confirmation email has been sent to your inbox.</p>
                         <p className="text-gray-600">
-                            Your proposal has been accepted. A confirmation email with the attached PDF has been sent to your inbox.
+                            Please proceed with the payment using the link below:
+                        </p>
+                        <a
+                            href={PAYMENT_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-2 inline-flex items-center gap-2 rounded-md bg-blue-900 px-6 py-3 text-lg font-semibold text-white shadow hover:bg-blue-800"
+                        >
+                            Proceed to Payment →
+                        </a>
+                        <p className="mt-1 text-xs text-gray-500 break-all">
+                            Or open: <a href={PAYMENT_URL} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{PAYMENT_URL}</a>
                         </p>
                     </div>
                 )}
@@ -205,7 +219,7 @@ export default function AcceptProposalNew({ token }) {
                     <div className="mx-4 flex w-full max-w-sm flex-col items-center rounded-xl bg-white p-8 text-center shadow-2xl">
                         <div className="mb-6 h-12 w-12 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600"></div>
                         <h3 className="mb-2 text-xl font-bold text-gray-900">Accepting Proposal</h3>
-                        <p className="text-sm text-gray-500">Please wait while we generate your official PDF receipt.</p>
+                        <p className="text-sm text-gray-500">Please wait while we finalise your acceptance.</p>
                     </div>
                 </div>
             )}
