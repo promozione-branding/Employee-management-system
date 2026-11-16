@@ -1,35 +1,35 @@
 // app/api/employee/work/sales-work/proposal/[id]/route.js
 
-import { connectDB } from "@/lib/db";
-import Proposal from "@/models/admin/proposal/Proposal";
-import { NextResponse } from "next/server";
+import { connectDB } from '@/lib/db';
+import Proposal from '@/models/admin/proposal/Proposal';
+import { NextResponse } from 'next/server';
 
 export async function GET(req, { params }) {
-  try {
-    await connectDB();
+    try {
+        await connectDB();
 
-    const { id } = await params;
+        const { id } = await params;
 
-    const proposal = await Proposal.find({ salesExecutive: id })
-      .select("clientId clientName clientCompany proposalNo")
-      .populate({ path: "clientId", select: "name company email website" });
+        const proposal = await Proposal.find({ salesExecutive: id })
+            .select('clientId clientName clientCompany proposalNo')
+            .populate({ path: 'clientId', select: 'name company email website' });
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Success",
-        data: proposal,
-      },
-      { status: 200 },
-    );
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Server error",
-      },
-      { status: 500 },
-    );
-  }
+        return NextResponse.json(
+            {
+                success: true,
+                message: 'Success',
+                data: proposal,
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: 'Server error',
+            },
+            { status: 500 }
+        );
+    }
 }

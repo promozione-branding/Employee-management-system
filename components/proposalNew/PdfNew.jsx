@@ -1,19 +1,24 @@
 // components/proposalNew/PdfNew.jsx
 
-"use client";
-import React, { forwardRef } from "react";
-import { computeTotals } from "./SummaryNew";
-import { numberToWords } from "@/utils/numberToWordsNew";
+'use client';
+import React, { forwardRef } from 'react';
+import { computeTotals } from './SummaryNew';
+import { numberToWords } from '@/utils/numberToWordsNew';
 import {
-  PDF_LOGO_PATH, LEGAL_NOTES, BANK_DETAILS, TERMS_AND_CONDITIONS,
-  DELIVERABLE_SECTION_MAP, SERVICES_CATALOG, INDUSTRIES_SERVED,
-} from "@/config/new/proposalPdfNew";
-import { PROPOSAL_CATALOG, getCustomServiceGroupsNew } from "@/config/new/proposalCatalogNew";
-import ProposalPdfHeaderNew from "./ProposalPdfHeaderNew";
-import ProposalPdfFooterNew from "./ProposalPdfFooterNew";
+    PDF_LOGO_PATH,
+    LEGAL_NOTES,
+    BANK_DETAILS,
+    TERMS_AND_CONDITIONS,
+    DELIVERABLE_SECTION_MAP,
+    SERVICES_CATALOG,
+    INDUSTRIES_SERVED,
+} from '@/config/new/proposalPdfNew';
+import { PROPOSAL_CATALOG, getCustomServiceGroupsNew } from '@/config/new/proposalCatalogNew';
+import ProposalPdfHeaderNew from './ProposalPdfHeaderNew';
+import ProposalPdfFooterNew from './ProposalPdfFooterNew';
 
-const fmt = (n) => Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("en-IN") : "—");
+const fmt = (n) => Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('en-IN') : '—');
 
 const CSS_RESET = `
 * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -138,365 +143,506 @@ a { color: #111827; text-decoration: none; }
 `;
 
 export const downloadProposalPdf = (proposal, sourceNode = null) => {
-  const node = sourceNode || document.getElementById("proposal-print-root");
-  if (!node) return;
-  const html = node.outerHTML;
-  const win = window.open("", "_blank", "width=900,height=650");
-  if (!win) return;
-  win.document.open();
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8" /><base href="${window.location.origin}/" /><title>${proposal?.proposalNumber || "Proposal"}</title><style>${CSS_RESET}</style></head><body>${html}</body></html>`);
-  win.document.close();
+    const node = sourceNode || document.getElementById('proposal-print-root');
+    if (!node) return;
+    const html = node.outerHTML;
+    const win = window.open('', '_blank', 'width=900,height=650');
+    if (!win) return;
+    win.document.open();
+    win.document.write(
+        `<!DOCTYPE html><html><head><meta charset="utf-8" /><base href="${window.location.origin}/" /><title>${proposal?.proposalNumber || 'Proposal'}</title><style>${CSS_RESET}</style></head><body>${html}</body></html>`
+    );
+    win.document.close();
 
-  // Print only after the cloned document and its logo/watermark images have
-  // loaded — a blind timeout can snapshot the page before layout settles.
-  let printed = false;
-  const printWhenReady = () => {
-    if (printed) return;
-    printed = true;
-    win.focus();
-    win.print();
-  };
-  const waitForImages = () => {
-    const pending = [...win.document.images].filter((img) => !img.complete);
-    if (!pending.length) return printWhenReady();
-    let remaining = pending.length;
-    const done = () => {
-      remaining -= 1;
-      if (remaining <= 0) printWhenReady();
+    // Print only after the cloned document and its logo/watermark images have
+    // loaded — a blind timeout can snapshot the page before layout settles.
+    let printed = false;
+    const printWhenReady = () => {
+        if (printed) return;
+        printed = true;
+        win.focus();
+        win.print();
     };
-    pending.forEach((img) => {
-      img.addEventListener("load", done, { once: true });
-      img.addEventListener("error", done, { once: true });
-    });
-    setTimeout(printWhenReady, 3000);
-  };
-  if (win.document.readyState === "complete") waitForImages();
-  else win.addEventListener("load", waitForImages, { once: true });
+    const waitForImages = () => {
+        const pending = [...win.document.images].filter((img) => !img.complete);
+        if (!pending.length) return printWhenReady();
+        let remaining = pending.length;
+        const done = () => {
+            remaining -= 1;
+            if (remaining <= 0) printWhenReady();
+        };
+        pending.forEach((img) => {
+            img.addEventListener('load', done, { once: true });
+            img.addEventListener('error', done, { once: true });
+        });
+        setTimeout(printWhenReady, 3000);
+    };
+    if (win.document.readyState === 'complete') waitForImages();
+    else win.addEventListener('load', waitForImages, { once: true });
 };
 
 const ScreenPage = ({ children, pageNumber, totalPages }) => (
-  <div className="pdf-screen-page">
-    <div className="pdf-watermark-inline"><img src={PDF_LOGO_PATH} alt="" /></div>
-    <div className="pdf-page-body">
-      <div className="pdf-header-inline"><ProposalPdfHeaderNew /></div>
-      {children}
+    <div className="pdf-screen-page">
+        <div className="pdf-watermark-inline">
+            <img src={PDF_LOGO_PATH} alt="" />
+        </div>
+        <div className="pdf-page-body">
+            <div className="pdf-header-inline">
+                <ProposalPdfHeaderNew />
+            </div>
+            {children}
+        </div>
+        <div className="pdf-footer-inline">
+            <ProposalPdfFooterNew pageNumber={pageNumber} totalPages={totalPages} />
+        </div>
     </div>
-    <div className="pdf-footer-inline"><ProposalPdfFooterNew pageNumber={pageNumber} totalPages={totalPages} /></div>
-  </div>
 );
 
 const PdfNew = forwardRef(({ proposal }, ref) => {
-  if (!proposal) return null;
+    if (!proposal) return null;
 
-  const client = proposal.clientId || {};
-  const items = proposal.items || [];
-  const hasSectionWiseDiscount = items.some((item) => Number(item.serviceDiscount || 0) > 0);
-  const checklist = proposal.checklist || [];
-  const partialPayments = proposal.partialPayments || [];
-  const deliveredMetrics = proposal.deliveredMetrics || [];
-  const deliveryPeriod = proposal.deliveryPeriod || "weekly";
-  
-  const categoryNotes = proposal.categoryNotes || [];
-  const cityPages = proposal.cityPages || [];
+    const client = proposal.clientId || {};
+    const items = proposal.items || [];
+    const hasSectionWiseDiscount = items.some((item) => Number(item.serviceDiscount || 0) > 0);
+    const checklist = proposal.checklist || [];
+    const partialPayments = proposal.partialPayments || [];
+    const deliveredMetrics = proposal.deliveredMetrics || [];
+    const deliveryPeriod = proposal.deliveryPeriod || 'weekly';
 
-  const { subtotal, serviceDiscountAmount, discountAmount, gstAmount, tdsAmount, grandTotal } = computeTotals({
-    items, discountType: proposal.discountType, discountInput: proposal.discountInput, tdsApplicable: proposal.tdsApplicable,
-  });
+    const categoryNotes = proposal.categoryNotes || [];
+    const cityPages = proposal.cityPages || [];
 
-  const totalPaid = partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0);
-  const clientAddress = [client.Address, client.city, client.state, client.country, client.pincode].filter(Boolean).join(", ");
+    const { subtotal, serviceDiscountAmount, discountAmount, gstAmount, tdsAmount, grandTotal } = computeTotals({
+        items,
+        discountType: proposal.discountType,
+        discountInput: proposal.discountInput,
+        tdsApplicable: proposal.tdsApplicable,
+    });
 
-  const usedCategories = [...new Set(items.map((it) => it.category))].filter((c) => PROPOSAL_CATALOG[c]);
-  const hasDeliverables = usedCategories.some((catKey) => {
-    const cat = PROPOSAL_CATALOG[catKey];
-    return checklist.some((c) => cat.checklist?.some((s) => s.title === c.section));
-  });
-  const customServiceGroups = getCustomServiceGroupsNew(items, checklist);
-  const hasDeliveryReport = deliveredMetrics.length > 0;
-  const showDeliverablesPage = hasDeliverables || customServiceGroups.length > 0 || hasDeliveryReport;
+    const totalPaid = partialPayments.reduce((s, p) => s + Number(p.paymentAmount || 0), 0);
+    const clientAddress = [client.Address, client.city, client.state, client.country, client.pincode].filter(Boolean).join(', ');
 
-  const totalPages = 3 + (showDeliverablesPage ? 1 : 0) + 1;
-  let pageCounter = 1;
+    const usedCategories = [...new Set(items.map((it) => it.category))].filter((c) => PROPOSAL_CATALOG[c]);
+    const hasDeliverables = usedCategories.some((catKey) => {
+        const cat = PROPOSAL_CATALOG[catKey];
+        return checklist.some((c) => cat.checklist?.some((s) => s.title === c.section));
+    });
+    const customServiceGroups = getCustomServiceGroupsNew(items, checklist);
+    const hasDeliveryReport = deliveredMetrics.length > 0;
+    const showDeliverablesPage = hasDeliverables || customServiceGroups.length > 0 || hasDeliveryReport;
 
-  const subtotalAfterServiceDiscount = subtotal - serviceDiscountAmount;
+    const totalPages = 3 + (showDeliverablesPage ? 1 : 0) + 1;
+    let pageCounter = 1;
 
-  return (
-    <div ref={ref} id="proposal-print-root">
-      <style>{CSS_RESET}</style>
+    const subtotalAfterServiceDiscount = subtotal - serviceDiscountAmount;
 
-      <div className="pdf-header-fixed"><ProposalPdfHeaderNew /></div>
-      <div className="pdf-footer-fixed"><ProposalPdfFooterNew /></div>
-      <div className="pdf-watermark-fixed"><img src={PDF_LOGO_PATH} alt="" /></div>
+    return (
+        <div ref={ref} id="proposal-print-root">
+            <style>{CSS_RESET}</style>
 
-      <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
-        <h1 className="proposal-title">Proposal</h1>
-        <div className="to-block" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "20px" }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 700, marginBottom: "2px" }}>To,</div>
-            <div className="row"><span className="label">Client Name:</span><span>{client.name || "—"}</span></div>
-            <div className="row"><span className="label">Company:</span><span>{client.company || "—"}</span></div>
-            {clientAddress && <div className="row"><span className="label">Address:</span><span>{clientAddress}</span></div>}
-            {client.GSTIN && <div className="row"><span className="label">GST No.:</span><span>{client.GSTIN}</span></div>}
-          </div>
-          <div style={{ flex: "0 0 220px", minWidth: "220px", textAlign: "left" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "90px minmax(0, 1fr)", columnGap: "8px", alignItems: "baseline", marginBottom: "5px" }}>
-              <span className="label" style={{ fontWeight: 700 }}>Date:</span>
-              <span>{fmtDate(proposal.createdAt)}</span>
+            <div className="pdf-header-fixed">
+                <ProposalPdfHeaderNew />
             </div>
-            {proposal.validTill && (
-              <div style={{ display: "grid", gridTemplateColumns: "90px minmax(0, 1fr)", columnGap: "8px", alignItems: "baseline", marginBottom: "5px" }}>
-                <span className="label" style={{ fontWeight: 700 }}>Valid Till:</span>
-                <span>{fmtDate(proposal.validTill)}</span>
-              </div>
-            )}
-            <div style={{ display: "grid", gridTemplateColumns: "90px minmax(0, 1fr)", columnGap: "8px", alignItems: "baseline" }}>
-              <span className="label" style={{ fontWeight: 700 }}>Proposal No.:</span>
-              <span>{proposal.proposalNumber || "—"}</span>
+            <div className="pdf-footer-fixed">
+                <ProposalPdfFooterNew />
             </div>
-          </div>
-        </div>
+            <div className="pdf-watermark-fixed">
+                <img src={PDF_LOGO_PATH} alt="" />
+            </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th style={{ width: "30px" }}>S.No</th>
-              <th>Description</th>
-              <th style={{ width: "90px", textAlign: "right" }}>Price</th>
-              {hasSectionWiseDiscount && <th style={{ width: "90px", textAlign: "right" }}>Discount</th>}
-              <th style={{ width: "60px" }}>Tenure</th>
-              <th style={{ width: "90px", textAlign: "right" }}>Amount (INR)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((it, i) => {
-              console.log("🟢 [PDF] Rendering item:", it.label, "City:", it.cityName);
-              const note = categoryNotes.find((n) => n.category === it.category)?.note;
-              const hasCityPages = ["seo", "adsManagement"].includes(it.category) && cityPages.length > 0;
-              
-              const cities = String(it.cityName || "").split(",").map((s) => s.trim()).filter(Boolean);
-              const keywords = String(it.keywordName || "").split(",").map((s) => s.trim()).filter(Boolean);
-              const cityCount = it.cityCount || cities.length;
-              const keywordCount = it.keywordCount || keywords.length;
-              const cityWord = Number(cityCount) === 1 ? "City" : "Cities";
-              const keywordWord = Number(keywordCount) === 1 ? "Keyword" : "Keywords";
-
-              const baseAmount = Number(it.amount) || 0;
-              const finalAmount = baseAmount - Number(it.serviceDiscount || 0);
-
-              return (
-                <tr key={i}>
-                  <td>{i + 1}.</td>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{it.label}</div>
-                    {it.categoryLabel && <div style={{ color: "#6b7280", fontSize: "11px" }}>{it.categoryLabel}</div>}
-                    
-                    {/* City/keyword: count header row, then one value per row */}
-                    {it.packageKey === "city-page" && (cities.length > 0 || keywords.length > 0 || it.cityCount || it.keywordCount) && (
-                      <div className="city-data-inline">
-                        {(cities.length > 0 || it.cityCount) && (
-                          <>
-                            <span>City: {cityCount} {cityWord},</span>
-                            {cities.map((city, ci) => (
-                              <span key={ci}>{city}{ci < cities.length - 1 ? "," : ""}</span>
-                            ))}
-                          </>
+            <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
+                <h1 className="proposal-title">Proposal</h1>
+                <div className="to-block" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, marginBottom: '2px' }}>To,</div>
+                        <div className="row">
+                            <span className="label">Client Name:</span>
+                            <span>{client.name || '—'}</span>
+                        </div>
+                        <div className="row">
+                            <span className="label">Company:</span>
+                            <span>{client.company || '—'}</span>
+                        </div>
+                        {clientAddress && (
+                            <div className="row">
+                                <span className="label">Address:</span>
+                                <span>{clientAddress}</span>
+                            </div>
                         )}
-                        {(keywords.length > 0 || it.keywordCount) && (
-                          <>
-                            <span>Keywords: {keywordCount} {keywordWord}</span>
-                            {keywords.map((keyword, ki) => (
-                              <span key={ki}>{keyword}{ki < keywords.length - 1 ? "," : ""}</span>
-                            ))}
-                          </>
+                        {client.GSTIN && (
+                            <div className="row">
+                                <span className="label">GST No.:</span>
+                                <span>{client.GSTIN}</span>
+                            </div>
                         )}
-                      </div>
-                    )}
-
-                    {note && <div className="item-note">{note}</div>}
-                    {hasCityPages && (
-                      <div className="city-data-inline">
-                        {cityPages.map((cp, idx) => (
-                          <span key={idx}><b>{cp.city}:</b> {cp.keyword}</span>
-                        ))}
-                      </div>
-                    )}
-                  </td>
-
-                  <td style={{ textAlign: "right", fontWeight: 600 }}>
-                    {fmt(baseAmount)}
-                  </td>
-                  
-                  {hasSectionWiseDiscount && (
-                    <td style={{ textAlign: "right", color: "#111827" }}>
-                      {Number(it.serviceDiscount || 0) > 0 ? fmt(it.serviceDiscount) : "-"}
-                    </td>
-                  )}
-
-                  <td>{it.durationLabel || it.duration || "—"}</td>
-                  
-                  <td style={{ textAlign: "right", fontWeight: 700 }}>
-                    {fmt(finalAmount)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        <div style={{ marginTop: "10px", marginLeft: "auto", width: "320px" }}>
-          <table>
-            <tbody>
-              <tr>
-                <td style={{ border: 0, padding: "3px 4px" }}>Amount</td>
-                <td style={{ border: 0, padding: "3px 4px", textAlign: "right" }}>{fmt(subtotalAfterServiceDiscount)}</td>
-              </tr>
-              
-              {discountAmount > 0 && (
-                <tr>
-                  <td style={{ border: 0, padding: "3px 4px" }}>Global Discount {proposal.discountType === "percentage" && proposal.discountInput > 0 ? ` (${proposal.discountInput}%)` : ""}</td>
-                  <td style={{ border: 0, padding: "3px 4px", textAlign: "right" }}>- {fmt(discountAmount)}</td>
-                </tr>
-              )}
-              
-              <tr>
-                <td style={{ border: 0, padding: "3px 4px" }}>GST @ 18%</td>
-                <td style={{ border: 0, padding: "3px 4px", textAlign: "right" }}>+ {fmt(gstAmount)}</td>
-              </tr>
-              {tdsAmount > 0 && (
-                <tr>
-                  <td style={{ border: 0, padding: "3px 4px" }}>TDS (2%)</td>
-                  <td style={{ border: 0, padding: "3px 4px", textAlign: "right" }}>- {fmt(tdsAmount)}</td>
-                </tr>
-              )}
-              <tr>
-                <td style={{ borderTop: "1px solid #111827", padding: "5px 4px", fontWeight: 700 }}>Total Payable Amount</td>
-                <td style={{ borderTop: "1px solid #111827", padding: "5px 4px", textAlign: "right", fontWeight: 700 }}>{fmt(grandTotal)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div style={{ marginTop: "10px", fontSize: "11.5px" }}><b>In Words:</b> {numberToWords(grandTotal)}</div>
-
-        {proposal.notes && (
-          <div className="general-notes-box">
-            <strong>Additional Notes</strong>
-            <p style={{ margin: 0 }}>{proposal.notes}</p>
-          </div>
-        )}
-
-        {partialPayments.length > 0 && (
-          <div style={{ marginTop: "12px" }}>
-            <div style={{ fontWeight: 700, fontSize: "12px", marginBottom: "4px" }}>Payment Schedule</div>
-            <div className="schedule-grid">
-              <div className="grid-head">Milestone</div>
-              <div className="grid-head right">Amount (INR)</div>
-              {partialPayments.map((p, i) => <React.Fragment key={i}><div className="cell">{p.paymentDuration}</div><div className="cell right">{fmt(p.paymentAmount)}</div></React.Fragment>)}
-              <div className="cell total">Total</div>
-              <div className="cell right total">{fmt(totalPaid)}</div>
-            </div>
-          </div>
-        )}
-
-        <div className="legal-notes" style={{ marginTop: "12px" }}>
-          <ul>{LEGAL_NOTES.map((n, i) => <li key={i}>{n}</li>)}</ul>
-        </div>
-
-        <div className="bank-block">
-          <div><b>Cheque/Draft to be made in favor:</b> <b>Inquiry Bazaar Private Limited</b></div>
-          <div><b>BANK NAME :</b> {BANK_DETAILS.bank}</div>
-          <div><b>PAN No.:</b> {BANK_DETAILS.pan} &nbsp;&nbsp;{" "}</div>
-          <div><b>BANK ACCOUNT NO :</b> {BANK_DETAILS.account} &nbsp;&nbsp;{" "}</div>
-          <div><b>IFSC CODE :</b> {BANK_DETAILS.ifsc}</div>
-          <div style={{ marginTop: "2px" }}><b>Regd. Office:</b> 605-606 Best Business Park, Netaji Subhash Place, Delhi, 110034</div>
-          <div><b>CIN:</b> {BANK_DETAILS.cin}</div>
-        </div>
-      </ScreenPage>
-
-      {showDeliverablesPage && (
-        <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
-          <h1 style={{ textAlign: "center", marginBottom: "8px" }}>Service Offerings and Deliverables</h1>
-          {hasDeliverables && usedCategories.map((catKey) => {
-            const cat = PROPOSAL_CATALOG[catKey];
-            const sectionTitle = DELIVERABLE_SECTION_MAP[catKey] || cat.label;
-            const tickedSections = checklist.filter((c) => cat.checklist?.some((s) => s.title === c.section));
-            if (!tickedSections.length) return null;
-            return (
-              <div key={catKey}>
-                <div className="section-title-bar">{sectionTitle}</div>
-                {tickedSections.map((sec) => (
-                  <div key={sec.section} className="deliverable-row">
-                    <div className="row-title">{sec.section}</div>
-                    <div className="row-items">
-                      <ul style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", columnGap: "24px", rowGap: "6px" }}>
-                        {sec.items.map((it) => <li key={it}>{it}</li>)}
-                      </ul>
                     </div>
-                  </div>
-                ))}
-              </div>
-            );
-          })}
-          {customServiceGroups.map((group) => (
-            <div key={group.key}>
-              <div className="section-title-bar">{group.label}</div>
-              {group.sections.map((sec) => (
-                <div key={sec.section} className="deliverable-row">
-                  <div className="row-title">{sec.section}</div>
-                  <div className="row-items">
-                    <ul style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", columnGap: "24px", rowGap: "6px" }}>
-                      {sec.items.map((it) => <li key={it}>{it}</li>)}
-                    </ul>
-                  </div>
+                    <div style={{ flex: '0 0 220px', minWidth: '220px', textAlign: 'left' }}>
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: '90px minmax(0, 1fr)',
+                                columnGap: '8px',
+                                alignItems: 'baseline',
+                                marginBottom: '5px',
+                            }}
+                        >
+                            <span className="label" style={{ fontWeight: 700 }}>
+                                Date:
+                            </span>
+                            <span>{fmtDate(proposal.createdAt)}</span>
+                        </div>
+                        {proposal.validTill && (
+                            <div
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '90px minmax(0, 1fr)',
+                                    columnGap: '8px',
+                                    alignItems: 'baseline',
+                                    marginBottom: '5px',
+                                }}
+                            >
+                                <span className="label" style={{ fontWeight: 700 }}>
+                                    Valid Till:
+                                </span>
+                                <span>{fmtDate(proposal.validTill)}</span>
+                            </div>
+                        )}
+                        <div style={{ display: 'grid', gridTemplateColumns: '90px minmax(0, 1fr)', columnGap: '8px', alignItems: 'baseline' }}>
+                            <span className="label" style={{ fontWeight: 700 }}>
+                                Proposal No.:
+                            </span>
+                            <span>{proposal.proposalNumber || '—'}</span>
+                        </div>
+                    </div>
                 </div>
-              ))}
-            </div>
-          ))}
-          {hasDeliveryReport && (
-            <div>
-              <div className="delivery-title-bar">Delivery Report ({deliveryPeriod})</div>
-              <div className="delivery-grid">{deliveredMetrics.map((m, i) => <div key={i} className="delivery-item"><span className="label">{m.label}</span><span className="value">{m.count || 0}</span></div>)}</div>
-            </div>
-          )}
-        </ScreenPage>
-      )}
 
-      <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
-        <h1 style={{ textAlign: "center", marginBottom: "8px" }}>Our Services</h1>
-        {SERVICES_CATALOG.map((section) => (
-          <div key={section.title}>
-            <div className="services-section-title">{section.title}</div>
-            <div className="services-items-grid">{section.items.map((it) => <div key={it} className="svc-item">{it}</div>)}</div>
-          </div>
-        ))}
-      </ScreenPage>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style={{ width: '30px' }}>S.No</th>
+                            <th>Description</th>
+                            <th style={{ width: '90px', textAlign: 'right' }}>Price</th>
+                            {hasSectionWiseDiscount && <th style={{ width: '90px', textAlign: 'right' }}>Discount</th>}
+                            <th style={{ width: '60px' }}>Tenure</th>
+                            <th style={{ width: '90px', textAlign: 'right' }}>Amount (INR)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {items.map((it, i) => {
+                            console.log('🟢 [PDF] Rendering item:', it.label, 'City:', it.cityName);
+                            const note = categoryNotes.find((n) => n.category === it.category)?.note;
+                            const hasCityPages = ['seo', 'adsManagement'].includes(it.category) && cityPages.length > 0;
 
-      <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
-        <h1 style={{ textAlign: "center", marginBottom: "14px" }}>Industries We Serve</h1>
-        <div className="industries-new-grid">{INDUSTRIES_SERVED.map((ind) => <div key={ind} className="industry-card">{ind}</div>)}</div>
-      </ScreenPage>
+                            const cities = String(it.cityName || '')
+                                .split(',')
+                                .map((s) => s.trim())
+                                .filter(Boolean);
+                            const keywords = String(it.keywordName || '')
+                                .split(',')
+                                .map((s) => s.trim())
+                                .filter(Boolean);
+                            const cityCount = it.cityCount || cities.length;
+                            const keywordCount = it.keywordCount || keywords.length;
+                            const cityWord = Number(cityCount) === 1 ? 'City' : 'Cities';
+                            const keywordWord = Number(keywordCount) === 1 ? 'Keyword' : 'Keywords';
 
-      <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
-        <h1 style={{ textAlign: "center" }}>Terms &amp; Conditions</h1>
-        <ol style={{ paddingLeft: "18px", margin: 0 }}>
-          {TERMS_AND_CONDITIONS.map((t, i) => {
-            const termsUrl = "https://www.inquirybazaar.com/terms-conditions";
-            if (!t.includes(termsUrl)) {
-              return <li key={i} style={{ fontSize: "11.5px", lineHeight: 1.5, marginBottom: "5px" }}>{t}</li>;
-            }
-            const [beforeUrl, afterUrl] = t.split(termsUrl);
-            return (
-              <li key={i} style={{ fontSize: "11.5px", lineHeight: 1.5, marginBottom: "5px" }}>
-                {beforeUrl}<a href={termsUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#2563eb", textDecoration: "underline", cursor: "pointer" }}>{termsUrl}</a>{afterUrl}
-              </li>
-            );
-          })}
-        </ol>
-      </ScreenPage>
-    </div>
-  );
+                            const baseAmount = Number(it.amount) || 0;
+                            const finalAmount = baseAmount - Number(it.serviceDiscount || 0);
+
+                            return (
+                                <tr key={i}>
+                                    <td>{i + 1}.</td>
+                                    <td>
+                                        <div style={{ fontWeight: 600 }}>{it.label}</div>
+                                        {it.categoryLabel && <div style={{ color: '#6b7280', fontSize: '11px' }}>{it.categoryLabel}</div>}
+
+                                        {/* City/keyword: count header row, then one value per row */}
+                                        {it.packageKey === 'city-page' && (cities.length > 0 || keywords.length > 0 || it.cityCount || it.keywordCount) && (
+                                            <div className="city-data-inline">
+                                                {(cities.length > 0 || it.cityCount) && (
+                                                    <>
+                                                        <span>
+                                                            City: {cityCount} {cityWord},
+                                                        </span>
+                                                        {cities.map((city, ci) => (
+                                                            <span key={ci}>
+                                                                {city}
+                                                                {ci < cities.length - 1 ? ',' : ''}
+                                                            </span>
+                                                        ))}
+                                                    </>
+                                                )}
+                                                {(keywords.length > 0 || it.keywordCount) && (
+                                                    <>
+                                                        <span>
+                                                            Keywords: {keywordCount} {keywordWord}
+                                                        </span>
+                                                        {keywords.map((keyword, ki) => (
+                                                            <span key={ki}>
+                                                                {keyword}
+                                                                {ki < keywords.length - 1 ? ',' : ''}
+                                                            </span>
+                                                        ))}
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {note && <div className="item-note">{note}</div>}
+                                        {hasCityPages && (
+                                            <div className="city-data-inline">
+                                                {cityPages.map((cp, idx) => (
+                                                    <span key={idx}>
+                                                        <b>{cp.city}:</b> {cp.keyword}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </td>
+
+                                    <td style={{ textAlign: 'right', fontWeight: 600 }}>{fmt(baseAmount)}</td>
+
+                                    {hasSectionWiseDiscount && (
+                                        <td style={{ textAlign: 'right', color: '#111827' }}>
+                                            {Number(it.serviceDiscount || 0) > 0 ? fmt(it.serviceDiscount) : '-'}
+                                        </td>
+                                    )}
+
+                                    <td>{it.durationLabel || it.duration || '—'}</td>
+
+                                    <td style={{ textAlign: 'right', fontWeight: 700 }}>{fmt(finalAmount)}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+
+                <div style={{ marginTop: '10px', marginLeft: 'auto', width: '320px' }}>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td style={{ border: 0, padding: '3px 4px' }}>Amount</td>
+                                <td style={{ border: 0, padding: '3px 4px', textAlign: 'right' }}>{fmt(subtotalAfterServiceDiscount)}</td>
+                            </tr>
+
+                            {discountAmount > 0 && (
+                                <tr>
+                                    <td style={{ border: 0, padding: '3px 4px' }}>
+                                        Global Discount{' '}
+                                        {proposal.discountType === 'percentage' && proposal.discountInput > 0 ? ` (${proposal.discountInput}%)` : ''}
+                                    </td>
+                                    <td style={{ border: 0, padding: '3px 4px', textAlign: 'right' }}>- {fmt(discountAmount)}</td>
+                                </tr>
+                            )}
+
+                            <tr>
+                                <td style={{ border: 0, padding: '3px 4px' }}>GST @ 18%</td>
+                                <td style={{ border: 0, padding: '3px 4px', textAlign: 'right' }}>+ {fmt(gstAmount)}</td>
+                            </tr>
+                            {tdsAmount > 0 && (
+                                <tr>
+                                    <td style={{ border: 0, padding: '3px 4px' }}>TDS (2%)</td>
+                                    <td style={{ border: 0, padding: '3px 4px', textAlign: 'right' }}>- {fmt(tdsAmount)}</td>
+                                </tr>
+                            )}
+                            <tr>
+                                <td style={{ borderTop: '1px solid #111827', padding: '5px 4px', fontWeight: 700 }}>Total Payable Amount</td>
+                                <td style={{ borderTop: '1px solid #111827', padding: '5px 4px', textAlign: 'right', fontWeight: 700 }}>{fmt(grandTotal)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style={{ marginTop: '10px', fontSize: '11.5px' }}>
+                    <b>In Words:</b> {numberToWords(grandTotal)}
+                </div>
+
+                {proposal.notes && (
+                    <div className="general-notes-box">
+                        <strong>Additional Notes</strong>
+                        <p style={{ margin: 0 }}>{proposal.notes}</p>
+                    </div>
+                )}
+
+                {partialPayments.length > 0 && (
+                    <div style={{ marginTop: '12px' }}>
+                        <div style={{ fontWeight: 700, fontSize: '12px', marginBottom: '4px' }}>Payment Schedule</div>
+                        <div className="schedule-grid">
+                            <div className="grid-head">Milestone</div>
+                            <div className="grid-head right">Amount (INR)</div>
+                            {partialPayments.map((p, i) => (
+                                <React.Fragment key={i}>
+                                    <div className="cell">{p.paymentDuration}</div>
+                                    <div className="cell right">{fmt(p.paymentAmount)}</div>
+                                </React.Fragment>
+                            ))}
+                            <div className="cell total">Total</div>
+                            <div className="cell right total">{fmt(totalPaid)}</div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="legal-notes" style={{ marginTop: '12px' }}>
+                    <ul>
+                        {LEGAL_NOTES.map((n, i) => (
+                            <li key={i}>{n}</li>
+                        ))}
+                    </ul>
+                </div>
+
+                <div className="bank-block">
+                    <div>
+                        <b>Cheque/Draft to be made in favor:</b> <b>Inquiry Bazaar Private Limited</b>
+                    </div>
+                    <div>
+                        <b>BANK NAME :</b> {BANK_DETAILS.bank}
+                    </div>
+                    <div>
+                        <b>PAN No.:</b> {BANK_DETAILS.pan} &nbsp;&nbsp;{' '}
+                    </div>
+                    <div>
+                        <b>BANK ACCOUNT NO :</b> {BANK_DETAILS.account} &nbsp;&nbsp;{' '}
+                    </div>
+                    <div>
+                        <b>IFSC CODE :</b> {BANK_DETAILS.ifsc}
+                    </div>
+                    <div style={{ marginTop: '2px' }}>
+                        <b>Regd. Office:</b> 605-606 Best Business Park, Netaji Subhash Place, Delhi, 110034
+                    </div>
+                    <div>
+                        <b>CIN:</b> {BANK_DETAILS.cin}
+                    </div>
+                </div>
+            </ScreenPage>
+
+            {showDeliverablesPage && (
+                <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
+                    <h1 style={{ textAlign: 'center', marginBottom: '8px' }}>Service Offerings and Deliverables</h1>
+                    {hasDeliverables &&
+                        usedCategories.map((catKey) => {
+                            const cat = PROPOSAL_CATALOG[catKey];
+                            const sectionTitle = DELIVERABLE_SECTION_MAP[catKey] || cat.label;
+                            const tickedSections = checklist.filter((c) => cat.checklist?.some((s) => s.title === c.section));
+                            if (!tickedSections.length) return null;
+                            return (
+                                <div key={catKey}>
+                                    <div className="section-title-bar">{sectionTitle}</div>
+                                    {tickedSections.map((sec) => (
+                                        <div key={sec.section} className="deliverable-row">
+                                            <div className="row-title">{sec.section}</div>
+                                            <div className="row-items">
+                                                <ul
+                                                    style={{
+                                                        display: 'grid',
+                                                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                                                        columnGap: '24px',
+                                                        rowGap: '6px',
+                                                    }}
+                                                >
+                                                    {sec.items.map((it) => (
+                                                        <li key={it}>{it}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        })}
+                    {customServiceGroups.map((group) => (
+                        <div key={group.key}>
+                            <div className="section-title-bar">{group.label}</div>
+                            {group.sections.map((sec) => (
+                                <div key={sec.section} className="deliverable-row">
+                                    <div className="row-title">{sec.section}</div>
+                                    <div className="row-items">
+                                        <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', columnGap: '24px', rowGap: '6px' }}>
+                                            {sec.items.map((it) => (
+                                                <li key={it}>{it}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                    {hasDeliveryReport && (
+                        <div>
+                            <div className="delivery-title-bar">Delivery Report ({deliveryPeriod})</div>
+                            <div className="delivery-grid">
+                                {deliveredMetrics.map((m, i) => (
+                                    <div key={i} className="delivery-item">
+                                        <span className="label">{m.label}</span>
+                                        <span className="value">{m.count || 0}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </ScreenPage>
+            )}
+
+            <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
+                <h1 style={{ textAlign: 'center', marginBottom: '8px' }}>Our Services</h1>
+                {SERVICES_CATALOG.map((section) => (
+                    <div key={section.title}>
+                        <div className="services-section-title">{section.title}</div>
+                        <div className="services-items-grid">
+                            {section.items.map((it) => (
+                                <div key={it} className="svc-item">
+                                    {it}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </ScreenPage>
+
+            <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
+                <h1 style={{ textAlign: 'center', marginBottom: '14px' }}>Industries We Serve</h1>
+                <div className="industries-new-grid">
+                    {INDUSTRIES_SERVED.map((ind) => (
+                        <div key={ind} className="industry-card">
+                            {ind}
+                        </div>
+                    ))}
+                </div>
+            </ScreenPage>
+
+            <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
+                <h1 style={{ textAlign: 'center' }}>Terms &amp; Conditions</h1>
+                <ol style={{ paddingLeft: '18px', margin: 0 }}>
+                    {TERMS_AND_CONDITIONS.map((t, i) => {
+                        const termsUrl = 'https://www.inquirybazaar.com/terms-conditions';
+                        if (!t.includes(termsUrl)) {
+                            return (
+                                <li key={i} style={{ fontSize: '11.5px', lineHeight: 1.5, marginBottom: '5px' }}>
+                                    {t}
+                                </li>
+                            );
+                        }
+                        const [beforeUrl, afterUrl] = t.split(termsUrl);
+                        return (
+                            <li key={i} style={{ fontSize: '11.5px', lineHeight: 1.5, marginBottom: '5px' }}>
+                                {beforeUrl}
+                                <a
+                                    href={termsUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ color: '#2563eb', textDecoration: 'underline', cursor: 'pointer' }}
+                                >
+                                    {termsUrl}
+                                </a>
+                                {afterUrl}
+                            </li>
+                        );
+                    })}
+                </ol>
+            </ScreenPage>
+        </div>
+    );
 });
 
-PdfNew.displayName = "PdfNew";   
- 
+PdfNew.displayName = 'PdfNew';
+
 export default PdfNew;

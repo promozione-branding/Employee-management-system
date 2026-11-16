@@ -1,12 +1,12 @@
 // app/manager/employee/employee-details/profile/[id]/page.jsx
 
-import React from "react";
-import Profile from "./Profile";
+import React from 'react';
+import Profile from './Profile';
 
 const page = async ({ params }) => {
-  const { id } = await params;
+    const { id } = await params;
 
-  return <Profile employeeId={id} />;
+    return <Profile employeeId={id} />;
 };
 
 export default page;

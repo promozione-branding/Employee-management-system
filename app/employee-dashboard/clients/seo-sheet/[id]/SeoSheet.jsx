@@ -1,991 +1,765 @@
 // app/employee-dashboard/clients/seo-sheet/[id]/SeoSheet.jsx
 
+'use client';
 
-"use client";
+import CommonForm from '@/components/layout/Form';
 
-import CommonForm from "@/components/layout/Form";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { updateRankingFormControls } from '@/config/employee';
+import { useEmployeeStore } from '@/lib/store/EmployeeStore';
 
-import { updateRankingFormControls } from "@/config/employee";
-import { useEmployeeStore } from "@/lib/store/EmployeeStore";
+import { createKeyService, getSeoSheetService, updateRankingService } from '@/service/customer/work';
 
-import {
-  createKeyService,
-  getSeoSheetService,
-  updateRankingService,
-} from "@/service/customer/work";
+import { Plus, Search, X, Pencil } from 'lucide-react';
 
-import { Plus, Search, X, Pencil } from "lucide-react";
-
-import React, { useEffect, useRef, useState } from "react";
-import toast from "react-hot-toast";
+import React, { useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 
 const SeoSheet = ({ clientId }) => {
-  const [data, setData] = useState(null);
-  const [dates, setDates] = useState([]);
+    const [data, setData] = useState(null);
+    const [dates, setDates] = useState([]);
 
-  const [keyword, setKeywords] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+    const [keyword, setKeywords] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
 
-  const { employee } = useEmployeeStore();
+    const { employee } = useEmployeeStore();
 
-  const [updatekeywordId, setUpdatekeywordId] = useState("");
+    const [updatekeywordId, setUpdatekeywordId] = useState('');
 
-  const [updateRankingFormData, setUpdateRankingFormData] =
-    useState({
-      keywordId: "",
-      position: null,
-      page: null,
-      date: "",
-      employeeID: employee?._id,
+    const [updateRankingFormData, setUpdateRankingFormData] = useState({
+        keywordId: '',
+        position: null,
+        page: null,
+        date: '',
+        employeeID: employee?._id,
     });
 
-  const [isDragging, setIsDragging] = useState(false);
-  const [creatingKeyword, setCreatingKeyword] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const [creatingKeyword, setCreatingKeyword] = useState(false);
 
-  const tableRef = useRef(null);
+    const tableRef = useRef(null);
 
-  const dragRef = useRef({
-    isDragging: false,
-    startX: 0,
-    scrollLeft: 0,
-    moved: false,
-  });
+    const dragRef = useRef({
+        isDragging: false,
+        startX: 0,
+        scrollLeft: 0,
+        moved: false,
+    });
 
-  // ==========================================
-  // FETCH SEO SHEET
-  // ==========================================
+    // ==========================================
+    // FETCH SEO SHEET
+    // ==========================================
 
-  const fetchData = async () => {
-    try {
-      const res = await getSeoSheetService(clientId);
+    const fetchData = async () => {
+        try {
+            const res = await getSeoSheetService(clientId);
 
-      const sheet = res.data;
+            const sheet = res.data;
 
-      // Only show projects assigned to logged-in employee
-      const newData = sheet.keywords.filter((i) =>
-        i.project?.employeeId?.some(
-          (id) =>
-            id.toString() === employee?._id?.toString()
-        )
-      );
+            // Only show projects assigned to logged-in employee
+            const newData = sheet.keywords.filter((i) => i.project?.employeeId?.some((id) => id.toString() === employee?._id?.toString()));
 
-      // Extract unique dates
-      let allDates = [];
+            // Extract unique dates
+            let allDates = [];
 
-      sheet.keywords.forEach((kw) => {
-        kw.rankings.forEach((r) => {
-          const d = new Date(r.date).toDateString();
+            sheet.keywords.forEach((kw) => {
+                kw.rankings.forEach((r) => {
+                    const d = new Date(r.date).toDateString();
 
-          if (!allDates.includes(d)) {
-            allDates.push(d);
-          }
-        });
-      });
+                    if (!allDates.includes(d)) {
+                        allDates.push(d);
+                    }
+                });
+            });
 
-      // Sort dates
-      allDates.sort(
-        (a, b) => new Date(a) - new Date(b)
-      );
+            // Sort dates
+            allDates.sort((a, b) => new Date(a) - new Date(b));
 
-      setDates(allDates);
-      setData(newData);
-    } catch (error) {
-      console.log(error);
+            setDates(allDates);
+            setData(newData);
+        } catch (error) {
+            console.log(error);
 
-      toast.error(
-        error?.response?.data?.message ||
-          "Error while fetching SEO sheet"
-      );
-    }
-  };
-
-  useEffect(() => {
-    if (employee?._id && clientId) {
-      fetchData();
-    }
-  }, [employee?._id, clientId]);
-
-  // ==========================================
-  // MOUSE DRAG HORIZONTAL SCROLL
-  // ==========================================
-
-  const handleMouseDown = (e) => {
-    if (e.button !== 0) return;
-
-    if (!tableRef.current) return;
-
-    // Don't start drag from buttons or inputs
-    if (
-      e.target.closest("button") ||
-      e.target.closest("input")
-    ) {
-      return;
-    }
-
-    dragRef.current = {
-      isDragging: true,
-      startX: e.clientX,
-      scrollLeft: tableRef.current.scrollLeft,
-      moved: false,
+            toast.error(error?.response?.data?.message || 'Error while fetching SEO sheet');
+        }
     };
 
-    setIsDragging(true);
-  };
+    useEffect(() => {
+        if (employee?._id && clientId) {
+            fetchData();
+        }
+    }, [employee?._id, clientId]);
 
-  useEffect(() => {
-    if (!isDragging) return;
+    // ==========================================
+    // MOUSE DRAG HORIZONTAL SCROLL
+    // ==========================================
 
-    const handleMouseMove = (e) => {
-      if (
-        !dragRef.current.isDragging ||
-        !tableRef.current
-      ) {
-        return;
-      }
+    const handleMouseDown = (e) => {
+        if (e.button !== 0) return;
 
-      const distance =
-        e.clientX - dragRef.current.startX;
+        if (!tableRef.current) return;
 
-      // Detect actual dragging
-      if (Math.abs(distance) > 4) {
-        dragRef.current.moved = true;
-      }
+        // Don't start drag from buttons or inputs
+        if (e.target.closest('button') || e.target.closest('input')) {
+            return;
+        }
 
-      if (dragRef.current.moved) {
-        tableRef.current.scrollLeft =
-          dragRef.current.scrollLeft - distance;
-      }
-    };
-
-    const handleMouseUp = () => {
-      dragRef.current.isDragging = false;
-      setIsDragging(false);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-
-    document.body.style.userSelect = "none";
-
-    return () => {
-      window.removeEventListener(
-        "mousemove",
-        handleMouseMove
-      );
-
-      window.removeEventListener(
-        "mouseup",
-        handleMouseUp
-      );
-
-      document.body.style.userSelect = "";
-    };
-  }, [isDragging]);
-
-  // Prevent dialog opening after dragging
-  const handleClickCapture = (e) => {
-    if (dragRef.current.moved) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      dragRef.current.moved = false;
-    }
-  };
-
-  // ==========================================
-  // UPDATE RANKING
-  // ==========================================
-
-  async function updateRankingHandler(e) {
-    e.preventDefault();
-
-    try {
-      const res = await updateRankingService({
-        ...updateRankingFormData,
-        keywordId: updatekeywordId,
-        employeeID: employee?._id,
-      });
-
-      if (res.success) {
-        toast.success(
-          res.message || "Ranking updated successfully"
-        );
-
-        await fetchData();
-
-        setUpdatekeywordId("");
-
-        setUpdateRankingFormData({
-          keywordId: "",
-          position: null,
-          page: null,
-          date: "",
-          employeeID: employee?._id,
-        });
-      }
-    } catch (error) {
-      console.log(error);
-
-      toast.error(
-        error?.response?.data?.message ||
-          "Error while updating ranking"
-      );
-    }
-  }
-
-  // ==========================================
-  // CREATE NEW KEYWORD
-  // ==========================================
-
-  async function createKeywordHandle(projectId) {
-    if (!keyword.trim()) {
-      toast.error("Please enter a keyword");
-      return;
-    }
-
-    try {
-      setCreatingKeyword(true);
-
-      const res = await createKeyService({
-        projectId: projectId,
-        keyword: keyword.trim(),
-        type: "secondary",
-        clientId: clientId || "",
-      });
-
-      if (res.success) {
-        toast.success("Keyword created successfully");
-
-        setKeywords("");
-
-        await fetchData();
-      }
-    } catch (error) {
-      console.log(error);
-
-      toast.error(
-        error?.response?.data?.message ||
-          "Error while creating the keyword"
-      );
-    } finally {
-      setCreatingKeyword(false);
-    }
-  }
-
-  // ==========================================
-  // LOADING
-  // ==========================================
-
-  if (!data) {
-    return (
-      <div className="flex min-h-[250px] items-center justify-center">
-        <div className="flex items-center gap-3 text-sm text-gray-500">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
-
-          Loading SEO sheet...
-        </div>
-      </div>
-    );
-  }
-
-  // ==========================================
-  // KEYWORD SEARCH
-  // ==========================================
-
-  const filteredKeywords = data.filter((kw) =>
-    (kw.keyword || "")
-      .toLowerCase()
-      .includes(searchTerm.trim().toLowerCase())
-  );
-
-  // ==========================================
-  // GROUP KEYWORDS BY PROJECT
-  // ==========================================
-
-  const groupedData = filteredKeywords.reduce(
-    (acc, kw) => {
-      const projectId = kw.projectId || "unknown";
-
-      if (!acc[projectId]) {
-        acc[projectId] = {
-          projectName:
-            kw?.project?.projectName || "Unknown Project",
-          keywords: [],
+        dragRef.current = {
+            isDragging: true,
+            startX: e.clientX,
+            scrollLeft: tableRef.current.scrollLeft,
+            moved: false,
         };
-      }
 
-      acc[projectId].keywords.push(kw);
+        setIsDragging(true);
+    };
 
-      return acc;
-    },
-    {}
-  );
+    useEffect(() => {
+        if (!isDragging) return;
 
-  // ==========================================
-  // PROJECT WEBSITE NAME
-  // ==========================================
+        const handleMouseMove = (e) => {
+            if (!dragRef.current.isDragging || !tableRef.current) {
+                return;
+            }
 
-  const getProjectHeading = (projectName) => {
-    const name = String(
-      projectName || "Unknown Project"
-    ).trim();
+            const distance = e.clientX - dragRef.current.startX;
 
-    if (/^seo\s*-/i.test(name)) {
-      return name;
+            // Detect actual dragging
+            if (Math.abs(distance) > 4) {
+                dragRef.current.moved = true;
+            }
+
+            if (dragRef.current.moved) {
+                tableRef.current.scrollLeft = dragRef.current.scrollLeft - distance;
+            }
+        };
+
+        const handleMouseUp = () => {
+            dragRef.current.isDragging = false;
+            setIsDragging(false);
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+
+        document.body.style.userSelect = 'none';
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+
+            window.removeEventListener('mouseup', handleMouseUp);
+
+            document.body.style.userSelect = '';
+        };
+    }, [isDragging]);
+
+    // Prevent dialog opening after dragging
+    const handleClickCapture = (e) => {
+        if (dragRef.current.moved) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            dragRef.current.moved = false;
+        }
+    };
+
+    // ==========================================
+    // UPDATE RANKING
+    // ==========================================
+
+    async function updateRankingHandler(e) {
+        e.preventDefault();
+
+        try {
+            const res = await updateRankingService({
+                ...updateRankingFormData,
+                keywordId: updatekeywordId,
+                employeeID: employee?._id,
+            });
+
+            if (res.success) {
+                toast.success(res.message || 'Ranking updated successfully');
+
+                await fetchData();
+
+                setUpdatekeywordId('');
+
+                setUpdateRankingFormData({
+                    keywordId: '',
+                    position: null,
+                    page: null,
+                    date: '',
+                    employeeID: employee?._id,
+                });
+            }
+        } catch (error) {
+            console.log(error);
+
+            toast.error(error?.response?.data?.message || 'Error while updating ranking');
+        }
     }
 
-    return `SEO - ${name}`;
-  };
+    // ==========================================
+    // CREATE NEW KEYWORD
+    // ==========================================
 
-  // ==========================================
-  // DATE FORMAT
-  // ==========================================
+    async function createKeywordHandle(projectId) {
+        if (!keyword.trim()) {
+            toast.error('Please enter a keyword');
+            return;
+        }
 
-  const formatDate = (date) => {
-    const parsed = new Date(date);
+        try {
+            setCreatingKeyword(true);
 
-    return {
-      day: parsed.getDate(),
+            const res = await createKeyService({
+                projectId: projectId,
+                keyword: keyword.trim(),
+                type: 'secondary',
+                clientId: clientId || '',
+            });
 
-      month: parsed.toLocaleString("en-US", {
-        month: "short",
-      }),
+            if (res.success) {
+                toast.success('Keyword created successfully');
 
-      weekday: parsed.toLocaleString("en-US", {
-        weekday: "short",
-      }),
+                setKeywords('');
 
-      year: parsed.getFullYear(),
+                await fetchData();
+            }
+        } catch (error) {
+            console.log(error);
+
+            toast.error(error?.response?.data?.message || 'Error while creating the keyword');
+        } finally {
+            setCreatingKeyword(false);
+        }
+    }
+
+    // ==========================================
+    // LOADING
+    // ==========================================
+
+    if (!data) {
+        return (
+            <div className="flex min-h-[250px] items-center justify-center">
+                <div className="flex items-center gap-3 text-sm text-gray-500">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+                    Loading SEO sheet...
+                </div>
+            </div>
+        );
+    }
+
+    // ==========================================
+    // KEYWORD SEARCH
+    // ==========================================
+
+    const filteredKeywords = data.filter((kw) => (kw.keyword || '').toLowerCase().includes(searchTerm.trim().toLowerCase()));
+
+    // ==========================================
+    // GROUP KEYWORDS BY PROJECT
+    // ==========================================
+
+    const groupedData = filteredKeywords.reduce((acc, kw) => {
+        const projectId = kw.projectId || 'unknown';
+
+        if (!acc[projectId]) {
+            acc[projectId] = {
+                projectName: kw?.project?.projectName || 'Unknown Project',
+                keywords: [],
+            };
+        }
+
+        acc[projectId].keywords.push(kw);
+
+        return acc;
+    }, {});
+
+    // ==========================================
+    // PROJECT WEBSITE NAME
+    // ==========================================
+
+    const getProjectHeading = (projectName) => {
+        const name = String(projectName || 'Unknown Project').trim();
+
+        if (/^seo\s*-/i.test(name)) {
+            return name;
+        }
+
+        return `SEO - ${name}`;
     };
-  };
 
-  // ==========================================
-  // UI
-  // ==========================================
+    // ==========================================
+    // DATE FORMAT
+    // ==========================================
 
-  return (
-    <div className="w-full space-y-4">
+    const formatDate = (date) => {
+        const parsed = new Date(date);
 
-      {/* ======================================
+        return {
+            day: parsed.getDate(),
+
+            month: parsed.toLocaleString('en-US', {
+                month: 'short',
+            }),
+
+            weekday: parsed.toLocaleString('en-US', {
+                weekday: 'short',
+            }),
+
+            year: parsed.getFullYear(),
+        };
+    };
+
+    // ==========================================
+    // UI
+    // ==========================================
+
+    return (
+        <div className="w-full space-y-4">
+            {/* ======================================
           HEADER + SEARCH
       ====================================== */}
 
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                <div>
+                    <h2 className="text-base font-bold text-gray-900 dark:text-white">SEO Ranking History</h2>
 
-        <div>
-          <h2 className="text-base font-bold text-gray-900 dark:text-white">
-            SEO Ranking History
-          </h2>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Track and update your keyword rankings.</p>
+                </div>
 
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Track and update your keyword rankings.
-          </p>
-        </div>
+                {/* SEARCH */}
 
-        {/* SEARCH */}
+                <div className="relative w-full sm:w-[260px]">
+                    <Search size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
 
-        <div className="relative w-full sm:w-[260px]">
+                    <Input
+                        type="search"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search keywords..."
+                        className="h-9 pr-9 pl-9 text-sm"
+                    />
 
-          <Search
-            size={16}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-          />
+                    {searchTerm && (
+                        <button
+                            type="button"
+                            onClick={() => setSearchTerm('')}
+                            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-700 dark:hover:text-white"
+                            aria-label="Clear search"
+                        >
+                            <X size={15} />
+                        </button>
+                    )}
+                </div>
 
-          <Input
-            type="search"
-            value={searchTerm}
-            onChange={(e) =>
-              setSearchTerm(e.target.value)
-            }
-            placeholder="Search keywords..."
-            className="h-9 pl-9 pr-9 text-sm"
-          />
+                {/* LEGEND */}
 
-          {searchTerm && (
-            <button
-              type="button"
-              onClick={() => setSearchTerm("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 dark:hover:text-white"
-              aria-label="Clear search"
-            >
-              <X size={15} />
-            </button>
-          )}
+                <div className="flex flex-wrap items-center gap-3 text-xs">
+                    <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800">
+                        <span className="h-2 w-2 rounded-full bg-blue-500" />
 
-        </div>
+                        <span className="text-gray-600 dark:text-gray-300">Primary Keyword</span>
+                    </div>
 
-        {/* LEGEND */}
+                    <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800">
+                        <span className="h-2 w-2 rounded-full bg-red-400" />
 
-        <div className="flex flex-wrap items-center gap-3 text-xs">
+                        <span className="text-gray-600 dark:text-gray-300">Ranking Available</span>
+                    </div>
+                </div>
+            </div>
 
-          <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800">
+            {/* SEARCH COUNT */}
 
-            <span className="h-2 w-2 rounded-full bg-blue-500" />
+            {searchTerm && (
+                <div className="px-1 text-xs text-gray-500 dark:text-gray-400">
+                    Found {filteredKeywords.length} matching keyword
+                    {filteredKeywords.length !== 1 ? 's' : ''}
+                </div>
+            )}
 
-            <span className="text-gray-600 dark:text-gray-300">
-              Primary Keyword
-            </span>
-
-          </div>
-
-          <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800">
-
-            <span className="h-2 w-2 rounded-full bg-red-400" />
-
-            <span className="text-gray-600 dark:text-gray-300">
-              Ranking Available
-            </span>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* SEARCH COUNT */}
-
-      {searchTerm && (
-        <div className="px-1 text-xs text-gray-500 dark:text-gray-400">
-          Found {filteredKeywords.length} matching keyword
-          {filteredKeywords.length !== 1 ? "s" : ""}
-        </div>
-      )}
-
-      {/* ======================================
+            {/* ======================================
           SCROLL INSTRUCTIONS
       ====================================== */}
 
-      <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-gray-500 dark:text-gray-400">
+                <span>🖱️ Hold left click and drag to scroll horizontally</span>
 
-        <span>
-          🖱️ Hold left click and drag to scroll horizontally
-        </span>
+                <span>Use mouse wheel to scroll vertically</span>
+            </div>
 
-        <span>
-          Use mouse wheel to scroll vertically
-        </span>
-
-      </div>
-
-      {/* ======================================
+            {/* ======================================
           SEO TABLE
       ====================================== */}
 
-      <div
-        ref={tableRef}
-        onMouseDown={handleMouseDown}
-        onClickCapture={handleClickCapture}
-        onDragStart={(e) => e.preventDefault()}
-        className={`seo-table-scroll w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900 ${
-          isDragging
-            ? "cursor-grabbing"
-            : "cursor-grab"
-        }`}
-        style={{
-          maxHeight: "75vh",
-          overscrollBehavior: "contain",
-          scrollbarWidth: "thin",
-          WebkitOverflowScrolling: "touch",
-        }}
-      >
-
-        <table className="w-max min-w-full border-separate border-spacing-0 text-sm">
-
-          {/* ==================================
+            <div
+                ref={tableRef}
+                onMouseDown={handleMouseDown}
+                onClickCapture={handleClickCapture}
+                onDragStart={(e) => e.preventDefault()}
+                className={`seo-table-scroll w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900 ${
+                    isDragging ? 'cursor-grabbing' : 'cursor-grab'
+                }`}
+                style={{
+                    maxHeight: '75vh',
+                    overscrollBehavior: 'contain',
+                    scrollbarWidth: 'thin',
+                    WebkitOverflowScrolling: 'touch',
+                }}
+            >
+                <table className="w-max min-w-full border-separate border-spacing-0 text-sm">
+                    {/* ==================================
               TABLE HEADER
           ================================== */}
 
-          <thead>
-            <tr>
+                    <thead>
+                        <tr>
+                            {/* S.NO */}
 
-              {/* S.NO */}
+                            <th className="sticky top-0 left-0 z-40 w-[65px] min-w-[65px] border-r border-b border-gray-200 bg-gray-100 px-3 py-4 text-center font-bold text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                                S.No
+                            </th>
 
-              <th
-                className="sticky left-0 top-0 z-40 w-[65px] min-w-[65px] border-b border-r border-gray-200 bg-gray-100 px-3 py-4 text-center font-bold text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-              >
-                S.No
-              </th>
+                            {/* KEYWORD */}
 
-              {/* KEYWORD */}
+                            <th className="sticky top-0 left-[65px] z-40 w-[230px] min-w-[230px] border-r border-b border-gray-200 bg-gray-100 px-5 py-4 text-left font-bold text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                                Keyword
+                            </th>
 
-              <th
-                className="sticky left-[65px] top-0 z-40 w-[230px] min-w-[230px] border-b border-r border-gray-200 bg-gray-100 px-5 py-4 text-left font-bold text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-              >
-                Keyword
-              </th>
+                            {/* DATES */}
 
-              {/* DATES */}
+                            {dates.map((date, i) => {
+                                const formatted = formatDate(date);
 
-              {dates.map((date, i) => {
-                const formatted = formatDate(date);
+                                return (
+                                    <th
+                                        key={i}
+                                        className="sticky top-0 z-30 min-w-[180px] border-r border-b border-gray-200 bg-gray-100 px-4 py-3 text-center dark:border-gray-700 dark:bg-gray-800"
+                                    >
+                                        <div className="flex flex-col items-center gap-1">
+                                            <span className="text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">{formatted.weekday}</span>
 
-                return (
-                  <th
-                    key={i}
-                    className="sticky top-0 z-30 min-w-[180px] border-b border-r border-gray-200 bg-gray-100 px-4 py-3 text-center dark:border-gray-700 dark:bg-gray-800"
-                  >
+                                            <span className="text-sm font-bold text-gray-800 dark:text-white">
+                                                {formatted.day} {formatted.month}
+                                            </span>
 
-                    <div className="flex flex-col items-center gap-1">
+                                            <span className="text-[10px] font-medium text-gray-400">{formatted.year}</span>
+                                        </div>
+                                    </th>
+                                );
+                            })}
+                        </tr>
+                    </thead>
 
-                      <span className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
-                        {formatted.weekday}
-                      </span>
-
-                      <span className="text-sm font-bold text-gray-800 dark:text-white">
-                        {formatted.day} {formatted.month}
-                      </span>
-
-                      <span className="text-[10px] font-medium text-gray-400">
-                        {formatted.year}
-                      </span>
-
-                    </div>
-
-                  </th>
-                );
-              })}
-
-            </tr>
-          </thead>
-
-          {/* ==================================
+                    {/* ==================================
               TABLE BODY
           ================================== */}
 
-          <tbody>
-
-            {Object.entries(groupedData).map(
-              ([projectId, projectData]) => (
-
-                <React.Fragment key={projectId}>
-
-                  {/* ==================================
+                    <tbody>
+                        {Object.entries(groupedData).map(([projectId, projectData]) => (
+                            <React.Fragment key={projectId}>
+                                {/* ==================================
                       PROJECT / WEBSITE HEADING
 
                       Horizontal sticky only.
                       Scrolls normally vertically.
                   ================================== */}
 
-                  <tr>
+                                <tr>
+                                    {/* WEBSITE NAME */}
 
-                    {/* WEBSITE NAME */}
+                                    <td
+                                        colSpan={2}
+                                        className="sticky left-0 z-25 border-r border-b border-gray-200 bg-gray-100 px-5 py-4 font-bold text-gray-800 shadow-[4px_0_6px_-4px_rgba(0,0,0,0.15)] dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                        style={{
+                                            position: 'sticky',
+                                            left: 0,
+                                            zIndex: 25,
+                                            width: '295px',
+                                            minWidth: '295px',
+                                            maxWidth: '295px',
+                                        }}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-sm font-bold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                                                SEO
+                                            </span>
 
-                    <td
-                      colSpan={2}
-                      className="sticky left-0 z-25 border-b border-r border-gray-200 bg-gray-100 px-5 py-4 font-bold text-gray-800 shadow-[4px_0_6px_-4px_rgba(0,0,0,0.15)] dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                      style={{
-                        position: "sticky",
-                        left: 0,
-                        zIndex: 25,
-                        width: "295px",
-                        minWidth: "295px",
-                        maxWidth: "295px",
-                      }}
-                    >
+                                            <span className="text-base">{getProjectHeading(projectData.projectName)}</span>
 
-                      <div className="flex items-center gap-3">
+                                            <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-gray-500 dark:bg-gray-700 dark:text-gray-300">
+                                                {projectData.keywords.length}
+                                            </span>
+                                        </div>
+                                    </td>
 
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-sm font-bold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                          SEO
-                        </span>
+                                    {/* REMAINING DATE AREA */}
 
-                        <span className="text-base">
-                          {getProjectHeading(
-                            projectData.projectName
-                          )}
-                        </span>
+                                    {dates.length > 0 && (
+                                        <td colSpan={dates.length} className="border-b border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800" />
+                                    )}
+                                </tr>
 
-                        <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-gray-500 dark:bg-gray-700 dark:text-gray-300">
-                          {projectData.keywords.length}
-                        </span>
-
-                      </div>
-
-                    </td>
-
-                    {/* REMAINING DATE AREA */}
-
-                    {dates.length > 0 && (
-                      <td
-                        colSpan={dates.length}
-                        className="border-b border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800"
-                      />
-                    )}
-
-                  </tr>
-
-                  {/* ==================================
+                                {/* ==================================
                       PROJECT KEYWORDS
                   ================================== */}
 
-                  {projectData.keywords.map(
-                    (kw, index) => (
+                                {projectData.keywords.map((kw, index) => (
+                                    <tr key={kw._id} className="group">
+                                        {/* STICKY S.NO */}
 
-                      <tr
-                        key={kw._id}
-                        className="group"
-                      >
+                                        <td className="sticky left-0 z-20 w-[65px] min-w-[65px] border-r border-b border-gray-200 bg-white px-3 py-4 text-center font-medium text-gray-600 group-hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:group-hover:bg-gray-800">
+                                            {index + 1}
+                                        </td>
 
-                        {/* STICKY S.NO */}
+                                        {/* STICKY KEYWORD + UPDATE DIALOG */}
 
-                        <td
-                          className="sticky left-0 z-20 w-[65px] min-w-[65px] border-b border-r border-gray-200 bg-white px-3 py-4 text-center font-medium text-gray-600 group-hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:group-hover:bg-gray-800"
-                        >
-                          {index + 1}
-                        </td>
+                                        <Dialog
+                                            open={updatekeywordId === kw._id}
+                                            onOpenChange={(open) => {
+                                                if (!open) {
+                                                    setUpdatekeywordId('');
+                                                }
+                                            }}
+                                        >
+                                            {/* KEYWORD CELL */}
 
-                        {/* STICKY KEYWORD + UPDATE DIALOG */}
+                                            <td
+                                                className={`sticky left-[65px] z-20 w-[230px] min-w-[230px] border-r border-b border-gray-200 bg-white px-3 py-4 capitalize transition-colors group-hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:group-hover:bg-gray-800 ${
+                                                    kw.type === 'primary'
+                                                        ? 'font-bold text-blue-600 dark:text-blue-400'
+                                                        : 'font-medium text-gray-700 dark:text-gray-200'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    {/* SELECTABLE KEYWORD */}
 
-                        <Dialog
-  open={updatekeywordId === kw._id}
-  onOpenChange={(open) => {
-    if (!open) {
-      setUpdatekeywordId("");
-    }
-  }}
->
-  {/* KEYWORD CELL */}
+                                                    <span
+                                                        className="min-w-0 flex-1 cursor-text truncate select-text"
+                                                        title={kw.keyword}
+                                                        onMouseDown={(e) => e.stopPropagation()}
+                                                        onPointerDown={(e) => e.stopPropagation()}
+                                                        onDoubleClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        {kw.keyword}
+                                                    </span>
 
-  <td
-    className={`sticky left-[65px] z-20 w-[230px] min-w-[230px] border-b border-r border-gray-200 bg-white px-3 py-4 capitalize transition-colors group-hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:group-hover:bg-gray-800 ${
-      kw.type === "primary"
-        ? "font-bold text-blue-600 dark:text-blue-400"
-        : "font-medium text-gray-700 dark:text-gray-200"
-    }`}
-  >
-    <div className="flex items-center gap-2">
+                                                    {/* PRIMARY BADGE */}
 
-      {/* SELECTABLE KEYWORD */}
+                                                    {kw.type === 'primary' && (
+                                                        <span className="shrink-0 rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold text-blue-700 uppercase dark:bg-blue-900 dark:text-blue-300">
+                                                            Primary
+                                                        </span>
+                                                    )}
 
-      <span
-        className="min-w-0 flex-1 truncate cursor-text select-text"
-        title={kw.keyword}
-        onMouseDown={(e) => e.stopPropagation()}
-        onPointerDown={(e) => e.stopPropagation()}
-        onDoubleClick={(e) => e.stopPropagation()}
-      >
-        {kw.keyword}
-      </span>
+                                                    {/* EDIT BUTTON */}
 
-      {/* PRIMARY BADGE */}
+                                                    <button
+                                                        type="button"
+                                                        title="Update Ranking"
+                                                        aria-label={`Update ranking for ${kw.keyword}`}
+                                                        onMouseDown={(e) => e.stopPropagation()}
+                                                        onPointerDown={(e) => e.stopPropagation()}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
 
-      {kw.type === "primary" && (
-        <span className="shrink-0 rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-          Primary
-        </span>
-      )}
+                                                            setUpdatekeywordId(kw._id);
 
-      {/* EDIT BUTTON */}
+                                                            setUpdateRankingFormData({
+                                                                keywordId: kw._id,
+                                                                position: null,
+                                                                page: null,
+                                                                date: '',
+                                                                employeeID: employee?._id,
+                                                            });
+                                                        }}
+                                                        className="shrink-0 rounded-md p-1.5 text-gray-400 transition-colors hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/40 dark:hover:text-blue-400"
+                                                    >
+                                                        <Pencil size={14} />
+                                                    </button>
+                                                </div>
+                                            </td>
 
-      <button
-        type="button"
-        title="Update Ranking"
-        aria-label={`Update ranking for ${kw.keyword}`}
-        onMouseDown={(e) => e.stopPropagation()}
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => {
-          e.stopPropagation();
+                                            {/* UPDATE RANKING DIALOG */}
 
-          setUpdatekeywordId(kw._id);
+                                            <DialogContent className="sm:max-w-[425px]">
+                                                <DialogHeader>
+                                                    <DialogTitle>Update Ranking</DialogTitle>
 
-          setUpdateRankingFormData({
-            keywordId: kw._id,
-            position: null,
-            page: null,
-            date: "",
-            employeeID: employee?._id,
-          });
-        }}
-        className="shrink-0 rounded-md p-1.5 text-gray-400 transition-colors hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/40 dark:hover:text-blue-400"
-      >
-        <Pencil size={14} />
-      </button>
+                                                    <DialogDescription className="cursor-text break-words select-text">{kw.keyword}</DialogDescription>
+                                                </DialogHeader>
 
-    </div>
-  </td>
+                                                <div className="pt-3">
+                                                    <CommonForm
+                                                        formControls={updateRankingFormControls}
+                                                        formData={updateRankingFormData}
+                                                        setFormData={setUpdateRankingFormData}
+                                                        onSubmit={updateRankingHandler}
+                                                    />
+                                                </div>
+                                            </DialogContent>
+                                        </Dialog>
 
-  {/* UPDATE RANKING DIALOG */}
+                                        {/* RANKING DATE CELLS */}
 
-  <DialogContent className="sm:max-w-[425px]">
+                                        {dates.map((date, i) => {
+                                            const found = kw.rankings.find((r) => new Date(r.date).toDateString() === date);
 
-    <DialogHeader>
+                                            return (
+                                                <td
+                                                    key={i}
+                                                    className={`min-w-[180px] border-r border-b border-gray-200 px-3 py-4 text-center transition-colors dark:border-gray-700 ${
+                                                        found
+                                                            ? 'bg-red-50/70 dark:bg-red-950/20'
+                                                            : 'bg-white group-hover:bg-gray-50 dark:bg-gray-900 dark:group-hover:bg-gray-800'
+                                                    }`}
+                                                >
+                                                    {found ? (
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <div className="flex items-center justify-center gap-2">
+                                                                <span className="rounded-lg bg-red-100 px-2.5 py-1.5 text-xs font-bold text-red-700 dark:bg-red-900/50 dark:text-red-300">
+                                                                    Page {found.page}
+                                                                </span>
 
-      <DialogTitle>
-        Update Ranking
-      </DialogTitle>
+                                                                <span className="rounded-lg bg-blue-100 px-2.5 py-1.5 text-xs font-bold text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                                                                    Pos {found.position}
+                                                                </span>
+                                                            </div>
 
-      <DialogDescription
-        className="select-text cursor-text break-words"
-      >
-        {kw.keyword}
-      </DialogDescription>
+                                                            {found.employeeID?.basicDetails?.name && (
+                                                                <div className="flex max-w-[160px] items-center justify-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                                                    <span>👤</span>
 
-    </DialogHeader>
+                                                                    <span className="truncate font-medium">{found.employeeID.basicDetails.name}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-lg text-gray-300 dark:text-gray-600">—</span>
+                                                    )}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                ))}
 
-    <div className="pt-3">
-
-      <CommonForm
-        formControls={updateRankingFormControls}
-        formData={updateRankingFormData}
-        setFormData={setUpdateRankingFormData}
-        onSubmit={updateRankingHandler}
-      />
-
-    </div>
-
-  </DialogContent>
-
-</Dialog>
-
-                        {/* RANKING DATE CELLS */}
-
-                        {dates.map((date, i) => {
-
-                          const found = kw.rankings.find(
-                            (r) =>
-                              new Date(r.date).toDateString() === date
-                          );
-
-                          return (
-
-                            <td
-                              key={i}
-                              className={`min-w-[180px] border-b border-r border-gray-200 px-3 py-4 text-center transition-colors dark:border-gray-700 ${
-                                found
-                                  ? "bg-red-50/70 dark:bg-red-950/20"
-                                  : "bg-white group-hover:bg-gray-50 dark:bg-gray-900 dark:group-hover:bg-gray-800"
-                              }`}
-                            >
-
-                              {found ? (
-
-                                <div className="flex flex-col items-center gap-2">
-
-                                  <div className="flex items-center justify-center gap-2">
-
-                                    <span className="rounded-lg bg-red-100 px-2.5 py-1.5 text-xs font-bold text-red-700 dark:bg-red-900/50 dark:text-red-300">
-                                      Page {found.page}
-                                    </span>
-
-                                    <span className="rounded-lg bg-blue-100 px-2.5 py-1.5 text-xs font-bold text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
-                                      Pos {found.position}
-                                    </span>
-
-                                  </div>
-
-                                  {found.employeeID?.basicDetails?.name && (
-
-                                    <div className="flex max-w-[160px] items-center justify-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
-
-                                      <span>👤</span>
-
-                                      <span className="truncate font-medium">
-                                        {found.employeeID.basicDetails.name}
-                                      </span>
-
-                                    </div>
-
-                                  )}
-
-                                </div>
-
-                              ) : (
-
-                                <span className="text-lg text-gray-300 dark:text-gray-600">
-                                  —
-                                </span>
-
-                              )}
-
-                            </td>
-
-                          );
-
-                        })}
-
-                      </tr>
-
-                    )
-                  )}
-
-                  {/* ==================================
+                                {/* ==================================
                       ADD KEYWORD ROW
                   ================================== */}
 
-                  <tr>
+                                <tr>
+                                    <td
+                                        colSpan={dates.length + 2}
+                                        className="border-b border-gray-200 bg-gray-50 px-5 py-3 dark:border-gray-700 dark:bg-gray-800/50"
+                                    >
+                                        <Dialog
+                                            onOpenChange={(open) => {
+                                                if (!open) {
+                                                    setKeywords('');
+                                                }
+                                            }}
+                                        >
+                                            <DialogTrigger asChild>
+                                                <button
+                                                    type="button"
+                                                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
+                                                >
+                                                    <Plus size={16} />
+                                                    Add Keyword
+                                                </button>
+                                            </DialogTrigger>
 
-                    <td
-                      colSpan={dates.length + 2}
-                      className="border-b border-gray-200 bg-gray-50 px-5 py-3 dark:border-gray-700 dark:bg-gray-800/50"
-                    >
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>Add Your Keyword</DialogTitle>
 
-                      <Dialog
-                        onOpenChange={(open) => {
-                          if (!open) {
-                            setKeywords("");
-                          }
-                        }}
-                      >
+                                                    <DialogDescription>Add a secondary keyword to this project.</DialogDescription>
+                                                </DialogHeader>
 
-                        <DialogTrigger asChild>
+                                                <div className="mt-4 flex flex-col gap-3">
+                                                    <Label>Keyword</Label>
 
-                          <button
-                            type="button"
-                            className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
-                          >
+                                                    <Input
+                                                        type="text"
+                                                        value={keyword || ''}
+                                                        onChange={(e) => setKeywords(e.target.value)}
+                                                        placeholder="Enter keyword..."
+                                                    />
+                                                </div>
 
-                            <Plus size={16} />
+                                                <div className="mt-3">
+                                                    <button
+                                                        type="button"
+                                                        disabled={creatingKeyword || !keyword?.trim()}
+                                                        className="w-full rounded-lg bg-blue-600 p-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                                        onClick={() => createKeywordHandle(projectId)}
+                                                    >
+                                                        {creatingKeyword ? 'Adding...' : 'Add Keyword'}
+                                                    </button>
+                                                </div>
+                                            </DialogContent>
+                                        </Dialog>
+                                    </td>
+                                </tr>
+                            </React.Fragment>
+                        ))}
 
-                            Add Keyword
-
-                          </button>
-
-                        </DialogTrigger>
-
-                        <DialogContent>
-
-                          <DialogHeader>
-
-                            <DialogTitle>
-                              Add Your Keyword
-                            </DialogTitle>
-
-                            <DialogDescription>
-                              Add a secondary keyword to this project.
-                            </DialogDescription>
-
-                          </DialogHeader>
-
-                          <div className="mt-4 flex flex-col gap-3">
-
-                            <Label>Keyword</Label>
-
-                            <Input
-                              type="text"
-                              value={keyword || ""}
-                              onChange={(e) =>
-                                setKeywords(e.target.value)
-                              }
-                              placeholder="Enter keyword..."
-                            />
-
-                          </div>
-
-                          <div className="mt-3">
-
-                            <button
-                              type="button"
-                              disabled={
-                                creatingKeyword ||
-                                !keyword?.trim()
-                              }
-                              className="w-full rounded-lg bg-blue-600 p-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                              onClick={() =>
-                                createKeywordHandle(projectId)
-                              }
-                            >
-
-                              {creatingKeyword
-                                ? "Adding..."
-                                : "Add Keyword"}
-
-                            </button>
-
-                          </div>
-
-                        </DialogContent>
-
-                      </Dialog>
-
-                    </td>
-
-                  </tr>
-
-                </React.Fragment>
-
-              )
-            )}
-
-            {/* ==================================
+                        {/* ==================================
                 NO SEARCH RESULTS
             ================================== */}
 
-            {filteredKeywords.length === 0 && (
+                        {filteredKeywords.length === 0 && (
+                            <tr>
+                                <td colSpan={dates.length + 2} className="px-5 py-12 text-center text-gray-500 dark:text-gray-400">
+                                    {searchTerm ? `No keywords found matching "${searchTerm}".` : 'No SEO keywords available for your assigned projects.'}
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
 
-              <tr>
-
-                <td
-                  colSpan={dates.length + 2}
-                  className="px-5 py-12 text-center text-gray-500 dark:text-gray-400"
-                >
-
-                  {searchTerm
-                    ? `No keywords found matching "${searchTerm}".`
-                    : "No SEO keywords available for your assigned projects."}
-
-                </td>
-
-              </tr>
-
-            )}
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-      {/* ======================================
+            {/* ======================================
           SCROLLBAR STYLING
       ====================================== */}
 
-      <style jsx>{`
+            <style jsx>{`
+                .seo-table-scroll {
+                    overscroll-behavior: contain;
+                    -webkit-overflow-scrolling: touch;
+                    scrollbar-width: thin;
+                    scrollbar-color: #a1a1aa transparent;
+                }
 
-        .seo-table-scroll {
-          overscroll-behavior: contain;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: thin;
-          scrollbar-color: #a1a1aa transparent;
-        }
+                .seo-table-scroll::-webkit-scrollbar {
+                    width: 9px;
+                    height: 9px;
+                }
 
-        .seo-table-scroll::-webkit-scrollbar {
-          width: 9px;
-          height: 9px;
-        }
+                .seo-table-scroll::-webkit-scrollbar-track {
+                    background: transparent;
+                }
 
-        .seo-table-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
+                .seo-table-scroll::-webkit-scrollbar-thumb {
+                    background: #a1a1aa;
+                    border-radius: 20px;
+                }
 
-        .seo-table-scroll::-webkit-scrollbar-thumb {
-          background: #a1a1aa;
-          border-radius: 20px;
-        }
+                .seo-table-scroll::-webkit-scrollbar-thumb:hover {
+                    background: #71717a;
+                }
 
-        .seo-table-scroll::-webkit-scrollbar-thumb:hover {
-          background: #71717a;
-        }
-
-        .seo-table-scroll::-webkit-scrollbar-corner {
-          background: transparent;
-        }
-
-      `}</style>
-
-    </div>
-  );
+                .seo-table-scroll::-webkit-scrollbar-corner {
+                    background: transparent;
+                }
+            `}</style>
+        </div>
+    );
 };
 
 export default SeoSheet;

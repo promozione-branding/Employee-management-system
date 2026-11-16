@@ -1,10 +1,10 @@
 // app/dashboard/invoice/view-invoice/[id]/page.jsx
 
-import ViewInvoice from "./ViewInvoice";
+import ViewInvoice from './ViewInvoice';
 
 const page = async ({ params }) => {
-  const { id } = await params;
-  return <ViewInvoice id={id} />;
+    const { id } = await params;
+    return <ViewInvoice id={id} />;
 };
 
 export default page;

@@ -1,135 +1,117 @@
 // app/api/sales-dashboard/dashboard-api/today-meeting/[id]/route.js
 
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import Meeting from "@/models/admin/meeting/Meeting";
-import mongoose from "mongoose";
+import { NextResponse } from 'next/server';
+import { connectDB } from '@/lib/db';
+import Meeting from '@/models/admin/meeting/Meeting';
+import mongoose from 'mongoose';
 
 function getRange(preset, fromStr, toStr) {
-  const IST_OFFSET_MIN = 330;
-  const now = new Date();
-  const nowIST = new Date(now.getTime() + IST_OFFSET_MIN * 60 * 1000);
+    const IST_OFFSET_MIN = 330;
+    const now = new Date();
+    const nowIST = new Date(now.getTime() + IST_OFFSET_MIN * 60 * 1000);
 
-  const startOfTodayIST = new Date(
-    Date.UTC(
-      nowIST.getUTCFullYear(),
-      nowIST.getUTCMonth(),
-      nowIST.getUTCDate(),
-      0,
-      0,
-      0,
-      0,
-    ),
-  );
-  const startOfTodayUTC = new Date(
-    startOfTodayIST.getTime() - IST_OFFSET_MIN * 60 * 1000,
-  );
+    const startOfTodayIST = new Date(Date.UTC(nowIST.getUTCFullYear(), nowIST.getUTCMonth(), nowIST.getUTCDate(), 0, 0, 0, 0));
+    const startOfTodayUTC = new Date(startOfTodayIST.getTime() - IST_OFFSET_MIN * 60 * 1000);
 
-  const dayMs = 24 * 60 * 60 * 1000;
+    const dayMs = 24 * 60 * 60 * 1000;
 
-  if (preset === "yesterday") {
-    return {
-      from: new Date(startOfTodayUTC.getTime() - dayMs),
-      to: startOfTodayUTC,
-    };
-  }
-  if (preset === "tomorrow") {
-    return {
-      from: new Date(startOfTodayUTC.getTime() + dayMs),
-      to: new Date(startOfTodayUTC.getTime() + 2 * dayMs),
-    };
-  }
-  if (preset === "next3") {
-    return {
-      from: startOfTodayUTC,
-      to: new Date(startOfTodayUTC.getTime() + 3 * dayMs),
-    };
-  }
-  if (preset === "custom" && fromStr) {
-    const fromDate = new Date(`${fromStr}T00:00:00+05:30`);
-    let toDate;
-    if (toStr) {
-      toDate = new Date(`${toStr}T00:00:00+05:30`);
-      toDate = new Date(toDate.getTime() + dayMs);
-    } else {
-      toDate = new Date(fromDate.getTime() + dayMs);
+    if (preset === 'yesterday') {
+        return {
+            from: new Date(startOfTodayUTC.getTime() - dayMs),
+            to: startOfTodayUTC,
+        };
     }
-    return { from: fromDate, to: toDate };
-  }
+    if (preset === 'tomorrow') {
+        return {
+            from: new Date(startOfTodayUTC.getTime() + dayMs),
+            to: new Date(startOfTodayUTC.getTime() + 2 * dayMs),
+        };
+    }
+    if (preset === 'next3') {
+        return {
+            from: startOfTodayUTC,
+            to: new Date(startOfTodayUTC.getTime() + 3 * dayMs),
+        };
+    }
+    if (preset === 'custom' && fromStr) {
+        const fromDate = new Date(`${fromStr}T00:00:00+05:30`);
+        let toDate;
+        if (toStr) {
+            toDate = new Date(`${toStr}T00:00:00+05:30`);
+            toDate = new Date(toDate.getTime() + dayMs);
+        } else {
+            toDate = new Date(fromDate.getTime() + dayMs);
+        }
+        return { from: fromDate, to: toDate };
+    }
 
-  return {
-    from: startOfTodayUTC,
-    to: new Date(startOfTodayUTC.getTime() + dayMs),
-  };
+    return {
+        from: startOfTodayUTC,
+        to: new Date(startOfTodayUTC.getTime() + dayMs),
+    };
 }
 
 export async function GET(req, { params }) {
-  try {
-    await connectDB();
+    try {
+        await connectDB();
 
-    const { id } = await params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid salesperson id" },
-        { status: 400 },
-      );
+        const { id } = await params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return NextResponse.json({ success: false, message: 'Invalid salesperson id' }, { status: 400 });
+        }
+
+        const { searchParams } = new URL(req.url);
+        const preset = searchParams.get('preset') || 'today';
+        const fromStr = searchParams.get('from') || '';
+        const toStr = searchParams.get('to') || '';
+
+        const { from, to } = getRange(preset, fromStr, toStr);
+
+        const pipeline = [
+            { $unwind: '$meetingUpdate' },
+            {
+                $match: {
+                    'meetingUpdate.salesPersonId': new mongoose.Types.ObjectId(id),
+                    'meetingUpdate.meetingAt': { $gte: from, $lt: to },
+                },
+            },
+            { $sort: { 'meetingUpdate.meetingAt': 1 } },
+            {
+                $lookup: {
+                    from: 'customers',
+                    localField: 'meetingUpdate.clientId',
+                    foreignField: '_id',
+                    as: 'clientData',
+                },
+            },
+            {
+                $project: {
+                    _id: '$meetingUpdate._id',
+                    clientId: '$meetingUpdate.clientId',
+                    clientName: { $arrayElemAt: ['$clientData.name', 0] },
+                    company: { $arrayElemAt: ['$clientData.company', 0] },
+                    updateType: '$meetingUpdate.updateType',
+                    status: '$meetingUpdate.status',
+                    note: '$meetingUpdate.note',
+                    meetingAt: '$meetingUpdate.meetingAt',
+                    reminderAt: '$meetingUpdate.reminderAt',
+                },
+            },
+        ];
+
+        const meetings = await Meeting.aggregate(pipeline);
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: 'Meetings',
+                data: meetings,
+                range: { from, to, preset },
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error('[today-meeting]', error);
+        return NextResponse.json({ success: false, message: 'Server error', error: error.message }, { status: 500 });
     }
-
-    const { searchParams } = new URL(req.url);
-    const preset = searchParams.get("preset") || "today";
-    const fromStr = searchParams.get("from") || "";
-    const toStr = searchParams.get("to") || "";
-
-    const { from, to } = getRange(preset, fromStr, toStr);
-
-    const pipeline = [
-      { $unwind: "$meetingUpdate" },
-      {
-        $match: {
-          "meetingUpdate.salesPersonId": new mongoose.Types.ObjectId(id),
-          "meetingUpdate.meetingAt": { $gte: from, $lt: to },
-        },
-      },
-      { $sort: { "meetingUpdate.meetingAt": 1 } },
-      {
-        $lookup: {
-          from: "customers",
-          localField: "meetingUpdate.clientId",
-          foreignField: "_id",
-          as: "clientData",
-        },
-      },
-      {
-        $project: {
-          _id: "$meetingUpdate._id",
-          clientId: "$meetingUpdate.clientId",
-          clientName: { $arrayElemAt: ["$clientData.name", 0] },
-          company: { $arrayElemAt: ["$clientData.company", 0] },
-          updateType: "$meetingUpdate.updateType",
-          status: "$meetingUpdate.status",
-          note: "$meetingUpdate.note",
-          meetingAt: "$meetingUpdate.meetingAt",
-          reminderAt: "$meetingUpdate.reminderAt",
-        },
-      },
-    ];
-
-    const meetings = await Meeting.aggregate(pipeline);
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Meetings",
-        data: meetings,
-        range: { from, to, preset },
-      },
-      { status: 200 },
-    );
-  } catch (error) {
-    console.error("[today-meeting]", error);
-    return NextResponse.json(
-      { success: false, message: "Server error", error: error.message },
-      { status: 500 },
-    );
-  }
 }

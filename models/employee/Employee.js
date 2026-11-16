@@ -1,151 +1,135 @@
 // models/employee/Employee.js
 
-import mongoose from "mongoose";
-import { isValidSubDesignation } from "../../config/employeeDesignation.js";
+import mongoose from 'mongoose';
+import { isValidSubDesignation } from '../../config/employeeDesignation.js';
 
 const EmployeeSchema = new mongoose.Schema(
-  {
-    employeeId: {
-      type: String,
-      unique: true,
-      index: true,
-    },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    workDetails: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "EmployeeWorkDetail",
-      },
-    ],
-
-    basicDetails: {
-      profileImage: {
-        type: String,
-      },
-
-      name: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-
-      designation: {
-        type: String,
-        enum: [
-          "SEO",
-          "WEB_DEVELOPER",
-          "SOCIAL_MEDIA",
-          "ADS_MANAGER",
-          "SALES",
-          "OTHER",
-        ],
-        required: true,
-      },
-      subDesignation: {
-        type: String,
-        required: true,
-        validate: {
-          validator: function (value) {
-            const designation =
-              this?.designation || this?.basicDetails?.designation;
-            return isValidSubDesignation(designation, value);
-          },
-          message: "Invalid subDesignation for selected designation",
+    {
+        employeeId: {
+            type: String,
+            unique: true,
+            index: true,
         },
-      },
-      authRole: {
-        type: String,
-        enum: [
-          "INTERN",
-          "EXECUTIVE",
-          "SR_EXECUTIVE",
-          "ASSISTANCE_MANAGER",
-          "MANAGER",
-          "SR_MANAGER",
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+        workDetails: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'EmployeeWorkDetail',
+            },
         ],
-      },
 
-      phone: {
-        type: String,
-        required: true,
-      },
+        basicDetails: {
+            profileImage: {
+                type: String,
+            },
 
-      address: {
-        type: String,
-        required: true,
-      },
+            name: {
+                type: String,
+                required: true,
+                trim: true,
+            },
 
-      email: {
-        type: String,
-        required: true,
-        lowercase: true,
-        trim: true,
-        match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
-      },
+            designation: {
+                type: String,
+                enum: ['SEO', 'WEB_DEVELOPER', 'SOCIAL_MEDIA', 'ADS_MANAGER', 'SALES', 'OTHER'],
+                required: true,
+            },
+            subDesignation: {
+                type: String,
+                required: true,
+                validate: {
+                    validator: function (value) {
+                        const designation = this?.designation || this?.basicDetails?.designation;
+                        return isValidSubDesignation(designation, value);
+                    },
+                    message: 'Invalid subDesignation for selected designation',
+                },
+            },
+            authRole: {
+                type: String,
+                enum: ['INTERN', 'EXECUTIVE', 'SR_EXECUTIVE', 'ASSISTANCE_MANAGER', 'MANAGER', 'SR_MANAGER'],
+            },
 
-      dob: {
-        type: Date,
-      },
+            phone: {
+                type: String,
+                required: true,
+            },
 
-      gender: {
-        type: String,
-        enum: ["MALE", "FEMALE", "OTHER"],
-        required: true,
-      },
+            address: {
+                type: String,
+                required: true,
+            },
 
-      joiningDate: {
-        type: Date,
-        default: Date.now,
-      },
-      resignedDate: {
-        type: Date,
-        default: null,
-      },
-      resignedEmployee: {
-        type: Boolean,
-        default: false,
-      },
+            email: {
+                type: String,
+                required: true,
+                lowercase: true,
+                trim: true,
+                match: [/^\S+@\S+\.\S+$/, 'Invalid email format'],
+            },
 
-      // ------------------------------------------------------------
-      // MyOperator Calling integration
-      // ------------------------------------------------------------
-      myoperatorUserId: {
-        type: String,
-        default: "",
-        trim: true,
-      },
-      myoperatorName: {
-        type: String,
-        default: "",
-        trim: true,
-      },
+            dob: {
+                type: Date,
+            },
+
+            gender: {
+                type: String,
+                enum: ['MALE', 'FEMALE', 'OTHER'],
+                required: true,
+            },
+
+            joiningDate: {
+                type: Date,
+                default: Date.now,
+            },
+            resignedDate: {
+                type: Date,
+                default: null,
+            },
+            resignedEmployee: {
+                type: Boolean,
+                default: false,
+            },
+
+            // ------------------------------------------------------------
+            // MyOperator Calling integration
+            // ------------------------------------------------------------
+            myoperatorUserId: {
+                type: String,
+                default: '',
+                trim: true,
+            },
+            myoperatorName: {
+                type: String,
+                default: '',
+                trim: true,
+            },
+        },
+
+        EmployeeCalendarId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'EmployeeCalendar',
+        },
+
+        employeeTodoId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'EmployeeTodo',
+        },
+
+        employeeReminderId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'EmployeeReminder',
+        },
+        salesDetails: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'SalesEmployee',
+        },
     },
-
-    EmployeeCalendarId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "EmployeeCalendar",
-    },
-
-    employeeTodoId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "EmployeeTodo",
-    },
-
-    employeeReminderId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "EmployeeReminder",
-    },
-    salesDetails: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "SalesEmployee",
-    },
-  },
-  { timestamps: true },
+    { timestamps: true }
 );
 
-export default mongoose.models.Employee ||
-  mongoose.model("Employee", EmployeeSchema);
+export default mongoose.models.Employee || mongoose.model('Employee', EmployeeSchema);

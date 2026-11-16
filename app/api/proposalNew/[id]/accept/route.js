@@ -1,84 +1,86 @@
 // app/api/proposalNew/[id]/accept/route.js
 
-import { connectDB } from "@/lib/db";
-import ProposalNew from "@/models/admin/proposalNew/ProposalNew";
-import { NextResponse } from "next/server";
-import { getTransporter, MAIL_FROM } from "@/lib/mailerNew";
-import mongoose from "mongoose";
-import puppeteer from "puppeteer";
+import { connectDB } from '@/lib/db';
+import ProposalNew from '@/models/admin/proposalNew/ProposalNew';
+import { NextResponse } from 'next/server';
+import { getTransporter, MAIL_FROM } from '@/lib/mailerNew';
+import mongoose from 'mongoose';
+import puppeteer from 'puppeteer';
 
 export async function POST(req, { params }) {
-  try {
-    await connectDB();
-    const { id } = await params;
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ success: false, message: "Invalid id" }, { status: 400 });
-
-    const { token } = await req.json();
-    const proposal = await ProposalNew.findOne({ _id: id, acceptToken: token }).populate({ path: "clientId", select: "name email" });
-
-    if (!proposal) return NextResponse.json({ success: false, message: "Invalid token" }, { status: 404 });
-    if (proposal.status === "accepted") return NextResponse.json({ success: true, message: "Already accepted" }, { status: 200 });
-
-    proposal.status = "accepted";
-    proposal.acceptedAt = new Date();
-    proposal.acceptedByEmail = proposal.sentToEmail || proposal.clientId?.email || "";
-    await proposal.save();
-
-    const baseUrl = process.env.Proposal_mail_URL || process.env.APP_URL || "http://localhost:3000";
-    let pdfBuffer = null;
-
     try {
-      const browser = await puppeteer.launch({ headless: "new", args: ["--no-sandbox", "--disable-setuid-sandbox"] });
-      const page = await browser.newPage();
-      const cookies = req.headers.get("cookie");
+        await connectDB();
+        const { id } = await params;
+        if (!id || !mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ success: false, message: 'Invalid id' }, { status: 400 });
 
-      if (cookies) {
-        const cookieParams = cookies.split(";").map((c) => {
-          const [name, ...rest] = c.trim().split("=");
-          return { name, value: rest.join("="), domain: new URL(baseUrl).hostname, path: "/" };
-        });
-        await page.setCookie(...cookieParams);
-      }
+        const { token } = await req.json();
+        const proposal = await ProposalNew.findOne({ _id: id, acceptToken: token }).populate({ path: 'clientId', select: 'name email' });
 
-      await page.goto(`${baseUrl}/proposal/pdf-print-new/${id}`, { waitUntil: "networkidle0" });
-      await new Promise((resolve) => setTimeout(resolve, 2500));
-      pdfBuffer = await page.pdf({ format: "A4", printBackground: true, margin: { top: "0", right: "0", bottom: "0", left: "0" } });
-      await browser.close();
-    } catch (pdfErr) {
-      console.log("PDF generation failed:", pdfErr);
-    }
+        if (!proposal) return NextResponse.json({ success: false, message: 'Invalid token' }, { status: 404 });
+        if (proposal.status === 'accepted') return NextResponse.json({ success: true, message: 'Already accepted' }, { status: 200 });
 
-    try {
-      const transporter = getTransporter();
-      const mainRecipient = proposal.sentToEmail || proposal.clientId?.email;
-      if (!mainRecipient) throw new Error("No recipient email found.");
+        proposal.status = 'accepted';
+        proposal.acceptedAt = new Date();
+        proposal.acceptedByEmail = proposal.sentToEmail || proposal.clientId?.email || '';
+        await proposal.save();
 
-      const ccEmails = new Set();
-      if (process.env.YOUR_EMAIL_ADDRESS) ccEmails.add(process.env.YOUR_EMAIL_ADDRESS);
-      if (proposal.clientId?.email && proposal.clientId.email !== mainRecipient) ccEmails.add(proposal.clientId.email);
+        const baseUrl = process.env.Proposal_mail_URL || process.env.APP_URL || 'http://localhost:3000';
+        let pdfBuffer = null;
 
-      const mailOptions = {
-        from: MAIL_FROM, to: mainRecipient, cc: ccEmails.size > 0 ? Array.from(ccEmails).join(", ") : undefined,
-        subject: `Welcome to Inquiry Bazaar — Proposal Accepted`,
-        html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
-            <p>Dear ${proposal.clientId?.name || "Client"},</p>
+        try {
+            const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+            const page = await browser.newPage();
+            const cookies = req.headers.get('cookie');
+
+            if (cookies) {
+                const cookieParams = cookies.split(';').map((c) => {
+                    const [name, ...rest] = c.trim().split('=');
+                    return { name, value: rest.join('='), domain: new URL(baseUrl).hostname, path: '/' };
+                });
+                await page.setCookie(...cookieParams);
+            }
+
+            await page.goto(`${baseUrl}/proposal/pdf-print-new/${id}`, { waitUntil: 'networkidle0' });
+            await new Promise((resolve) => setTimeout(resolve, 2500));
+            pdfBuffer = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '0', right: '0', bottom: '0', left: '0' } });
+            await browser.close();
+        } catch (pdfErr) {
+            console.log('PDF generation failed:', pdfErr);
+        }
+
+        try {
+            const transporter = getTransporter();
+            const mainRecipient = proposal.sentToEmail || proposal.clientId?.email;
+            if (!mainRecipient) throw new Error('No recipient email found.');
+
+            const ccEmails = new Set();
+            if (process.env.YOUR_EMAIL_ADDRESS) ccEmails.add(process.env.YOUR_EMAIL_ADDRESS);
+            if (proposal.clientId?.email && proposal.clientId.email !== mainRecipient) ccEmails.add(proposal.clientId.email);
+
+            const mailOptions = {
+                from: MAIL_FROM,
+                to: mainRecipient,
+                cc: ccEmails.size > 0 ? Array.from(ccEmails).join(', ') : undefined,
+                subject: `Welcome to Inquiry Bazaar — Proposal Accepted`,
+                html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
+            <p>Dear ${proposal.clientId?.name || 'Client'},</p>
             <p>Thank you for accepting proposal <strong>${proposal.proposalNumber}</strong>.</p>
             <p><strong>Please find your accepted proposal PDF attached.</strong></p>
             <p>Best regards,<br/>The Inquiry Bazaar</p></div>`,
-      };
+            };
 
-      if (pdfBuffer) {
-        mailOptions.attachments = [{ filename: `${proposal.proposalNumber}.pdf`, content: pdfBuffer, contentType: "application/pdf" }];
-      }
+            if (pdfBuffer) {
+                mailOptions.attachments = [{ filename: `${proposal.proposalNumber}.pdf`, content: pdfBuffer, contentType: 'application/pdf' }];
+            }
 
-      await transporter.sendMail(mailOptions);
-    } catch (mailErr) { 
-      console.log("Thank-you mail error:", mailErr); 
+            await transporter.sendMail(mailOptions);
+        } catch (mailErr) {
+            console.log('Thank-you mail error:', mailErr);
+        }
+
+        return NextResponse.json({ success: true, message: 'Proposal accepted' }, { status: 200 });
+    } catch (error) {
+        console.log('acceptProposal error:', error);
+        return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
     }
-
-    return NextResponse.json({ success: true, message: "Proposal accepted" }, { status: 200 });
-  } catch (error) {
-    console.log("acceptProposal error:", error);
-    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
-  }
 }

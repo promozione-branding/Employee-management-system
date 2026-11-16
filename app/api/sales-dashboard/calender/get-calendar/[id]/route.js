@@ -1,47 +1,47 @@
 // app/api/sales-dashboard/calender/get-calendar/[id]/route.js
 
-import { connectDB } from "@/lib/db";
-import EmployeeCalendar from "@/models/employee/EmployeeCalendar";
-import { NextResponse } from "next/server";
+import { connectDB } from '@/lib/db';
+import EmployeeCalendar from '@/models/employee/EmployeeCalendar';
+import { NextResponse } from 'next/server';
 
 export async function GET(req, { params }) {
-  try {
-    await connectDB();
+    try {
+        await connectDB();
 
-    const { id } = await params;
+        const { id } = await params;
 
-    const employeeCalendar = await EmployeeCalendar.findOne({ employeeId: id });
+        const employeeCalendar = await EmployeeCalendar.findOne({ employeeId: id });
 
-    if (!employeeCalendar) {
-      return NextResponse.json(
-        {
-          message: "there is no employee calendar found",
-          success: false,
-        },
-        {
-          status: 404,
-        },
-      );
+        if (!employeeCalendar) {
+            return NextResponse.json(
+                {
+                    message: 'there is no employee calendar found',
+                    success: false,
+                },
+                {
+                    status: 404,
+                }
+            );
+        }
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: 'calendar Data fetched successfully',
+                data: employeeCalendar,
+            },
+            {
+                status: 200,
+            }
+        );
+    } catch (error) {
+        console.log(error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: 'server error',
+            },
+            { status: 500 }
+        );
     }
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "calendar Data fetched successfully",
-        data: employeeCalendar,
-      },
-      {
-        status: 200,
-      },
-    );
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "server error",
-      },
-      { status: 500 },
-    );
-  }
 }

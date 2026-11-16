@@ -1,76 +1,66 @@
 // app/api/customer/project-cycle/create/route.js
 
-import { connectDB } from "@/lib/db";
-import ProjectCycle from "@/models/admin/ProjectCycle";
-import { NextResponse } from "next/server";
-import Customer from "@/models/admin/Customer";
+import { connectDB } from '@/lib/db';
+import ProjectCycle from '@/models/admin/ProjectCycle';
+import { NextResponse } from 'next/server';
+import Customer from '@/models/admin/Customer';
 
 export async function POST(req) {
-  try {
-    await connectDB();
-    const body = await req.json();
-    const {
-      clientId,
-      service,
-      serviceName,
-      projectName,
-      serviceType,
-      proposalId,
-      proposalNumber,
-      category,
-      categoryLabel,
-    } = body;
-    const startDate = body.startDate || body["start-date"] || undefined;
-    const endDate = body.endDate || body["end-date"] || undefined;
+    try {
+        await connectDB();
+        const body = await req.json();
+        const { clientId, service, serviceName, projectName, serviceType, proposalId, proposalNumber, category, categoryLabel } = body;
+        const startDate = body.startDate || body['start-date'] || undefined;
+        const endDate = body.endDate || body['end-date'] || undefined;
 
-    if (!clientId) {
-      return NextResponse.json({
-        success: false,
-        message: "Client ID is required",
-      });
+        if (!clientId) {
+            return NextResponse.json({
+                success: false,
+                message: 'Client ID is required',
+            });
+        }
+
+        const finalService = service === 'other' ? serviceName : service;
+
+        let projectCycle = await ProjectCycle.findOne({ clientId });
+
+        const newProject = {
+            projectName,
+            service: finalService,
+            startDate,
+            endDate,
+            serviceType,
+            // New optional fields — omitted if not sent (old callers unaffected)
+            ...(proposalId ? { proposalId } : {}),
+            ...(proposalNumber ? { proposalNumber } : {}),
+            ...(category ? { category } : {}),
+            ...(categoryLabel ? { categoryLabel } : {}),
+            status: 'in_build',
+        };
+
+        if (projectCycle) {
+            projectCycle.projectDuration.push(newProject);
+            await projectCycle.save();
+        } else {
+            projectCycle = await ProjectCycle.create({
+                clientId,
+                projectDuration: [newProject],
+            });
+            await Customer.findByIdAndUpdate(clientId, {
+                projectCycle: projectCycle._id,
+            });
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: 'Project added successfully',
+            data: projectCycle,
+        });
+    } catch (error) {
+        console.log(error);
+        return NextResponse.json({
+            success: false,
+            message: 'Server error',
+        });
     }
-
-    const finalService = service === "other" ? serviceName : service;
-
-    let projectCycle = await ProjectCycle.findOne({ clientId });
-
-    const newProject = {
-      projectName,
-      service: finalService,
-      startDate,
-      endDate,
-      serviceType,
-      // New optional fields — omitted if not sent (old callers unaffected)
-      ...(proposalId ? { proposalId } : {}),
-      ...(proposalNumber ? { proposalNumber } : {}),
-      ...(category ? { category } : {}),
-      ...(categoryLabel ? { categoryLabel } : {}),
-      status: "in_build",
-    };
-
-    if (projectCycle) {
-      projectCycle.projectDuration.push(newProject);
-      await projectCycle.save();
-    } else {
-      projectCycle = await ProjectCycle.create({
-        clientId,
-        projectDuration: [newProject],
-      });
-      await Customer.findByIdAndUpdate(clientId, {
-        projectCycle: projectCycle._id,
-      });
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: "Project added successfully",
-      data: projectCycle,
-    });
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json({
-      success: false,
-      message: "Server error",
-    });
-  }
 }

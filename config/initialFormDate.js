@@ -1,152 +1,152 @@
 // config/initialFormDate.js
 
 export const initialPerposelFormData = {
-  dateOfProposal: "",
-  discount: "",
-  discountPercentage: "",
-  validTill: "",
-  paymentMethod: "",
-  notes: "",
+    dateOfProposal: '',
+    discount: '',
+    discountPercentage: '',
+    validTill: '',
+    paymentMethod: '',
+    notes: '',
 };
 
 export const initialservicesFormData = {
-  serviceName: "",
-  duration: "",
-  price: "",
-  description: "",
+    serviceName: '',
+    duration: '',
+    price: '',
+    description: '',
 };
 export const initialservicesforInvoiceFormData = {
-  serviceName: "",
-  HSN: "",
-  price: "",
+    serviceName: '',
+    HSN: '',
+    price: '',
 };
 
 export const initialDeliverablesFormData = {
-  title: "",
-  items: "",
+    title: '',
+    items: '',
 };
 
 export const initialInvoiceFormData = {
-  clientName: "",
-  clientCompany: "",
-  clientAddress: "",
-  GSTIN: "",
-  taxType: "",
+    clientName: '',
+    clientCompany: '',
+    clientAddress: '',
+    GSTIN: '',
+    taxType: '',
 };
 
 export const initalCustomerFormData = {
-  name: "",
-  company: "",
-  GSTIN: "",
-  tanNo: "",
-  email: "",
-  phone: "",
-  website: "",
-  Address: "",
-  city: "",
-  state: "",
-  pincode: "",
-  country: "",
-  meetingDate: "",
-  salesPersonEmail: "",
-  SalesPersonName: "",
-  notes: "",
-  salesExecutive: "",
-  isPaid: "",
+    name: '',
+    company: '',
+    GSTIN: '',
+    tanNo: '',
+    email: '',
+    phone: '',
+    website: '',
+    Address: '',
+    city: '',
+    state: '',
+    pincode: '',
+    country: '',
+    meetingDate: '',
+    salesPersonEmail: '',
+    SalesPersonName: '',
+    notes: '',
+    salesExecutive: '',
+    isPaid: '',
 };
 
 export const initalServiceFormData = {
-  serviceTitle: "",
-  amount: "",
-  duration: "",
-  discountAmount: "",
-  discountPercentage: "",
+    serviceTitle: '',
+    amount: '',
+    duration: '',
+    discountAmount: '',
+    discountPercentage: '',
 };
 
 export const initialInvoiceServiceFormData = {
-  serviceName: "",
-  HSN: "",
-  price: 0,
+    serviceName: '',
+    HSN: '',
+    price: 0,
 };
 
 export const registerFormData = {
-  username: "",
-  email: "",
-  password: "",
+    username: '',
+    email: '',
+    password: '',
 };
 
 export const loginFormData = {
-  email: "",
-  password: "",
+    email: '',
+    password: '',
 };
 
 export const ledgerFormInitialFormData = {
-  voucher: "",
-  debit: "",
-  credit: "",
+    voucher: '',
+    debit: '',
+    credit: '',
 };
 
 export const initialEmployeeRegisterFormData = {
-  username: "",
-  email: "",
-  password: "",
-  role: "",
+    username: '',
+    email: '',
+    password: '',
+    role: '',
 };
 
 export const initialEmployeesBasicDetails = {
-  employeeId: "",
-  name: "",
-  designation: "",
-  subDesignation: "",
-  authRole: "",
-  phone: "",
-  address: "",
-  email: "",
-  dob: "",
-  gender: "",
-  joiningDate: "",
-  myoperatorUserId: "",
-  myoperatorName: "",
+    employeeId: '',
+    name: '',
+    designation: '',
+    subDesignation: '',
+    authRole: '',
+    phone: '',
+    address: '',
+    email: '',
+    dob: '',
+    gender: '',
+    joiningDate: '',
+    myoperatorUserId: '',
+    myoperatorName: '',
 };
 
 export const initialEmployeesBasicDetailsEdit = {
-  name: "",
-  designation: "",
-  subDesignation: "",
-  authRole: "",
-  phone: "",
-  address: "",
-  email: "",
-  dob: "",
-  gender: "",
-  joiningDate: "",
-  myoperatorUserId: "",
-  myoperatorName: "",
+    name: '',
+    designation: '',
+    subDesignation: '',
+    authRole: '',
+    phone: '',
+    address: '',
+    email: '',
+    dob: '',
+    gender: '',
+    joiningDate: '',
+    myoperatorUserId: '',
+    myoperatorName: '',
 };
 
 export const initialAnnouncementFormData = {
-  title: "",
-  content: "",
-  targetDepartment: "ALL",
-  startDate: "",
-  endDate: "",
+    title: '',
+    content: '',
+    targetDepartment: 'ALL',
+    startDate: '',
+    endDate: '',
 };
 
 export const initialAttachmentFormData = {
-  assetType: "",
-  title: "",
-  description: "",
-  visibility: "",
-  referenceLink: "",
-  file: "",
+    assetType: '',
+    title: '',
+    description: '',
+    visibility: '',
+    referenceLink: '',
+    file: '',
 };
 
 export const initialEditProposal = {
-  clientName: "",
-  clientCompany: "",
-  clientAddress: "",
-  dateOfProposal: "",
-  GSTIN: "",
-  tanNo: "",
-  validTill: "",
+    clientName: '',
+    clientCompany: '',
+    clientAddress: '',
+    dateOfProposal: '',
+    GSTIN: '',
+    tanNo: '',
+    validTill: '',
 };

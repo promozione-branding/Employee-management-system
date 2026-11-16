@@ -1,802 +1,797 @@
 // config/data.js
 //
 
-import {
-  EMPLOYEE_AUTH_ROLE_OPTIONS,
-  EMPLOYEE_DESIGNATION_OPTIONS,
-  getSubDesignationOptions,
-} from "./employeeDesignation";
+import { EMPLOYEE_AUTH_ROLE_OPTIONS, EMPLOYEE_DESIGNATION_OPTIONS, getSubDesignationOptions } from './employeeDesignation';
 
 export const addProposalFormControl = [
-  {
-    label: "Date Of Proposal",
-    name: "dateOfProposal",
-    componentType: "input",
-    type: "date",
-  },
-  {
-    label: "Valid Till",
-    name: "validTill",
-    componentType: "input",
-    type: "date",
-  },
-  {
-    label: "Payment Method",
-    name: "paymentMethod",
-    componentType: "select",
-    options: [
-      { id: "upi", label: "UPI" },
-      { id: "card", label: "Card" },
-      { id: "net banking", label: "Net Banking" },
-      { id: "cheque", label: "Cheque" },
-    ],
-  },
-  {
-    label: "Notes",
-    name: "notes",
-    componentType: "input",
-    type: "text",
-  },
+    {
+        label: 'Date Of Proposal',
+        name: 'dateOfProposal',
+        componentType: 'input',
+        type: 'date',
+    },
+    {
+        label: 'Valid Till',
+        name: 'validTill',
+        componentType: 'input',
+        type: 'date',
+    },
+    {
+        label: 'Payment Method',
+        name: 'paymentMethod',
+        componentType: 'select',
+        options: [
+            { id: 'upi', label: 'UPI' },
+            { id: 'card', label: 'Card' },
+            { id: 'net banking', label: 'Net Banking' },
+            { id: 'cheque', label: 'Cheque' },
+        ],
+    },
+    {
+        label: 'Notes',
+        name: 'notes',
+        componentType: 'input',
+        type: 'text',
+    },
 ];
 
 export const addInvoiceFormControl = [
-  {
-    label: "Client Name",
-    name: "clientName",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter product clientName",
-  },
-  {
-    label: "Client Company",
-    name: "clientCompany",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter product clientCompany",
-  },
-  {
-    label: "Client Address",
-    name: "clientAddress",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter product clientAddress",
-  },
-  {
-    label: "GSTIN",
-    name: "GSTIN",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter product GSTIN",
-  },
-  {
-    label: "Type Of Tax",
-    name: "taxType",
-    componentType: "select",
-    options: [
-      { id: "SGST/CGST", label: "SGST/CGST" },
-      { id: "IGST", label: "IGST" },
-    ],
-  },
+    {
+        label: 'Client Name',
+        name: 'clientName',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter product clientName',
+    },
+    {
+        label: 'Client Company',
+        name: 'clientCompany',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter product clientCompany',
+    },
+    {
+        label: 'Client Address',
+        name: 'clientAddress',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter product clientAddress',
+    },
+    {
+        label: 'GSTIN',
+        name: 'GSTIN',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter product GSTIN',
+    },
+    {
+        label: 'Type Of Tax',
+        name: 'taxType',
+        componentType: 'select',
+        options: [
+            { id: 'SGST/CGST', label: 'SGST/CGST' },
+            { id: 'IGST', label: 'IGST' },
+        ],
+    },
 ];
 
 export const addCustomerFormControl = [
-  {
-    label: "Client Name",
-    name: "name",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Client Name",
-  },
-  {
-    label: "Company Name",
-    name: "company",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Client Company",
-  },
-  {
-    label: "GST No.",
-    name: "GSTIN",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter GST No",
-  },
-  {
-    label: "TAN No.",
-    name: "tanNo",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Tax Deduction and Collection Account Number",
-  },
-  {
-    label: "Email Id",
-    name: "email",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Email",
-  },
-  {
-    label: "Contact No.",
-    name: "phone",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Contact No",
-  },
-  {
-    label: "Website Url",
-    name: "website",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Website url",
-  },
-  {
-    label: "Address",
-    name: "Address",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter client address",
-  },
-  {
-    label: "City",
-    name: "city",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter client city",
-  },
-  {
-    label: "State",
-    name: "state",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter client state",
-  },
-  {
-    label: "Pincode",
-    name: "pincode",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Pincode",
-  },
-  {
-    label: "Country",
-    name: "country",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter country",
-  },
-  {
-    label: "Meeting Date",
-    name: "meetingDate",
-    componentType: "input",
-    type: "date",
-  },
-  {
-    label: "Paid",
-    name: "isPaid",
-    componentType: "select",
-    options: [
-      { id: "Paid", label: "Paid" },
-      { id: "Unpaid", label: "Unpaid" },
-    ],
-  },
+    {
+        label: 'Client Name',
+        name: 'name',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Client Name',
+    },
+    {
+        label: 'Company Name',
+        name: 'company',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Client Company',
+    },
+    {
+        label: 'GST No.',
+        name: 'GSTIN',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter GST No',
+    },
+    {
+        label: 'TAN No.',
+        name: 'tanNo',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Tax Deduction and Collection Account Number',
+    },
+    {
+        label: 'Email Id',
+        name: 'email',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Email',
+    },
+    {
+        label: 'Contact No.',
+        name: 'phone',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Contact No',
+    },
+    {
+        label: 'Website Url',
+        name: 'website',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Website url',
+    },
+    {
+        label: 'Address',
+        name: 'Address',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter client address',
+    },
+    {
+        label: 'City',
+        name: 'city',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter client city',
+    },
+    {
+        label: 'State',
+        name: 'state',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter client state',
+    },
+    {
+        label: 'Pincode',
+        name: 'pincode',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Pincode',
+    },
+    {
+        label: 'Country',
+        name: 'country',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter country',
+    },
+    {
+        label: 'Meeting Date',
+        name: 'meetingDate',
+        componentType: 'input',
+        type: 'date',
+    },
+    {
+        label: 'Paid',
+        name: 'isPaid',
+        componentType: 'select',
+        options: [
+            { id: 'Paid', label: 'Paid' },
+            { id: 'Unpaid', label: 'Unpaid' },
+        ],
+    },
 
-  {
-    label: "Notes",
-    name: "notes",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Customer notes",
-  },
+    {
+        label: 'Notes',
+        name: 'notes',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Customer notes',
+    },
 ];
 
 export const ServiceFormControl = [
-  {
-    label: "Service Title",
-    name: "serviceTitle",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Service Title",
-  },
-  {
-    label: "Service Description",
-    name: "description",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Service Description",
-  },
-  {
-    label: "Service Discount Amount",
-    name: "discountAmount",
-    componentType: "input",
-    type: "text",
-    placeholder: "Service Discount Amount",
-  },
-  {
-    label: "Service Discount Amount Percentage",
-    name: "discountPercentage",
-    componentType: "input",
-    type: "text",
-    placeholder: "Service Discount Amount Percentage",
-  },
-  {
-    label: "Amount",
-    name: "amount",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Service Amount",
-  },
-  {
-    label: "Duration of the project",
-    name: "duration",
-    componentType: "select",
-    options: [
-      { id: "1 Month", label: "1 Month" },
-      { id: "3 Month", label: "3 Month" },
-      { id: "6 Month", label: "6 Month" },
-      { id: "9 Month", label: "9 Month" },
-      { id: "1 Year", label: "1 Year" },
-      { id: "2 Year", label: "2 Year" },
-      { id: "3 Year", label: "3 Year" },
-    ],
-  },
+    {
+        label: 'Service Title',
+        name: 'serviceTitle',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Service Title',
+    },
+    {
+        label: 'Service Description',
+        name: 'description',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Service Description',
+    },
+    {
+        label: 'Service Discount Amount',
+        name: 'discountAmount',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Service Discount Amount',
+    },
+    {
+        label: 'Service Discount Amount Percentage',
+        name: 'discountPercentage',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Service Discount Amount Percentage',
+    },
+    {
+        label: 'Amount',
+        name: 'amount',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Service Amount',
+    },
+    {
+        label: 'Duration of the project',
+        name: 'duration',
+        componentType: 'select',
+        options: [
+            { id: '1 Month', label: '1 Month' },
+            { id: '3 Month', label: '3 Month' },
+            { id: '6 Month', label: '6 Month' },
+            { id: '9 Month', label: '9 Month' },
+            { id: '1 Year', label: '1 Year' },
+            { id: '2 Year', label: '2 Year' },
+            { id: '3 Year', label: '3 Year' },
+        ],
+    },
 ];
 
 export const editFormControls = [
-  {
-    label: "Client Name",
-    name: "clientName",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Client Company",
-    name: "clientCompany",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Client Address",
-    name: "clientAddress",
-    componentType: "textarea",
-    type: "text",
-  },
-  {
-    label: "Date Of Proposals",
-    name: "dateOfProposal",
-    componentType: "input",
-    type: "date",
-  },
-  {
-    label: "GSTIN",
-    name: "GSTIN",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Tan No",
-    name: "tanNo",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Tan no PDES03028F",
-  },
-  {
-    label: "Discount",
-    name: "discount",
-    componentType: "input",
-    type: "number",
-    placeholder: "Enter only one discount Amount fields",
-  },
-  {
-    label: "Discount Percentage",
-    name: "discountPercentage",
-    componentType: "input",
-    placeholder: "Enter only one discount Percentage discount Amount fields",
-    type: "number",
-  },
-  {
-    label: "Valid Till",
-    name: "validTill",
-    componentType: "input",
-    type: "date",
-  },
-  {
-    label: "Payment Method",
-    name: "paymentMethod",
-    componentType: "select",
-    options: [
-      { id: "upi", label: "UPI" },
-      { id: "card", label: "Card" },
-      { id: "bank", label: "Bank" },
-    ],
-  },
+    {
+        label: 'Client Name',
+        name: 'clientName',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Client Company',
+        name: 'clientCompany',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Client Address',
+        name: 'clientAddress',
+        componentType: 'textarea',
+        type: 'text',
+    },
+    {
+        label: 'Date Of Proposals',
+        name: 'dateOfProposal',
+        componentType: 'input',
+        type: 'date',
+    },
+    {
+        label: 'GSTIN',
+        name: 'GSTIN',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Tan No',
+        name: 'tanNo',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Tan no PDES03028F',
+    },
+    {
+        label: 'Discount',
+        name: 'discount',
+        componentType: 'input',
+        type: 'number',
+        placeholder: 'Enter only one discount Amount fields',
+    },
+    {
+        label: 'Discount Percentage',
+        name: 'discountPercentage',
+        componentType: 'input',
+        placeholder: 'Enter only one discount Percentage discount Amount fields',
+        type: 'number',
+    },
+    {
+        label: 'Valid Till',
+        name: 'validTill',
+        componentType: 'input',
+        type: 'date',
+    },
+    {
+        label: 'Payment Method',
+        name: 'paymentMethod',
+        componentType: 'select',
+        options: [
+            { id: 'upi', label: 'UPI' },
+            { id: 'card', label: 'Card' },
+            { id: 'bank', label: 'Bank' },
+        ],
+    },
 ];
 
 export const createInviceFormControls = [
-  {
-    label: "Invoice Type",
-    name: "invoiceType",
-    componentType: "select",
-    options: [
-      { id: "normal", label: "Tax Invoice" },
-      {
-        id: "tds",
-        label: "SUPPLEMENTARY TAX INVOICE(TDS)",
-      },
-    ],
-  },
-  {
-    label: "Tax Type",
-    name: "taxType",
-    componentType: "select",
-    options: [
-      { id: "IGST", label: "IGST" },
-      { id: "SGST/CGST", label: "SGST/CGST" },
-    ],
-  },
-  {
-    label: "Invoice Number",
-    name: "invoiceNo",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Invoice Number",
-  },
-  {
-    label: "Date Of Invoice",
-    name: "invoiceDate",
-    componentType: "input",
-    type: "date",
-  },
+    {
+        label: 'Invoice Type',
+        name: 'invoiceType',
+        componentType: 'select',
+        options: [
+            { id: 'normal', label: 'Tax Invoice' },
+            {
+                id: 'tds',
+                label: 'SUPPLEMENTARY TAX INVOICE(TDS)',
+            },
+        ],
+    },
+    {
+        label: 'Tax Type',
+        name: 'taxType',
+        componentType: 'select',
+        options: [
+            { id: 'IGST', label: 'IGST' },
+            { id: 'SGST/CGST', label: 'SGST/CGST' },
+        ],
+    },
+    {
+        label: 'Invoice Number',
+        name: 'invoiceNo',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Invoice Number',
+    },
+    {
+        label: 'Date Of Invoice',
+        name: 'invoiceDate',
+        componentType: 'input',
+        type: 'date',
+    },
 ];
 
 export const createServiceForInvoice = [
-  {
-    label: "Service Name",
-    name: "serviceName",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter product Service Name",
-  },
-  {
-    label: "HSN code",
-    name: "HSN",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter HSN no",
-  },
-  {
-    label: "Price",
-    name: "price",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Service price",
-  },
+    {
+        label: 'Service Name',
+        name: 'serviceName',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter product Service Name',
+    },
+    {
+        label: 'HSN code',
+        name: 'HSN',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter HSN no',
+    },
+    {
+        label: 'Price',
+        name: 'price',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Service price',
+    },
 ];
 
 export const registerFormControl = [
-  {
-    label: "Username",
-    name: "username",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Your Username",
-  },
-  {
-    label: "Email",
-    name: "email",
-    componentType: "input",
-    type: "email",
-    placeholder: "Enter Your Email",
-  },
-  {
-    label: "Password",
-    name: "password",
-    componentType: "input",
-    type: "password",
-    placeholder: "Enter Your Password",
-  },
+    {
+        label: 'Username',
+        name: 'username',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Your Username',
+    },
+    {
+        label: 'Email',
+        name: 'email',
+        componentType: 'input',
+        type: 'email',
+        placeholder: 'Enter Your Email',
+    },
+    {
+        label: 'Password',
+        name: 'password',
+        componentType: 'input',
+        type: 'password',
+        placeholder: 'Enter Your Password',
+    },
 ];
 
 export const loginFormControl = [
-  {
-    label: "Email",
-    name: "email",
-    componentType: "input",
-    type: "email",
-    placeholder: "Enter Your Email",
-  },
-  {
-    label: "Password",
-    name: "password",
-    componentType: "input",
-    type: "password",
-    placeholder: "Enter Your Password",
-  },
+    {
+        label: 'Email',
+        name: 'email',
+        componentType: 'input',
+        type: 'email',
+        placeholder: 'Enter Your Email',
+    },
+    {
+        label: 'Password',
+        name: 'password',
+        componentType: 'input',
+        type: 'password',
+        placeholder: 'Enter Your Password',
+    },
 ];
 
 export const ledgerFormControl = [
-  {
-    label: "Voucher",
-    name: "voucher",
-    componentType: "select",
-    options: [
-      { id: "upi", label: "UPI" },
-      { id: "card", label: "Card" },
-      { id: "net banking", label: "Net Banking" },
-      { id: "cheque", label: "Cheque" },
-      { id: "other", label: "Other" },
-    ],
-  },
-  {
-    label: "Debit",
-    name: "debit",
-    componentType: "input",
-    type: "text",
-    placeholder: "Debit Amount",
-  },
-  {
-    label: "Credit",
-    name: "credit",
-    componentType: "input",
-    type: "text",
-    placeholder: "Credit Amount",
-  },
+    {
+        label: 'Voucher',
+        name: 'voucher',
+        componentType: 'select',
+        options: [
+            { id: 'upi', label: 'UPI' },
+            { id: 'card', label: 'Card' },
+            { id: 'net banking', label: 'Net Banking' },
+            { id: 'cheque', label: 'Cheque' },
+            { id: 'other', label: 'Other' },
+        ],
+    },
+    {
+        label: 'Debit',
+        name: 'debit',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Debit Amount',
+    },
+    {
+        label: 'Credit',
+        name: 'credit',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Credit Amount',
+    },
 ];
 
 export const employeeRegisterFormControl = [
-  {
-    label: "Username",
-    name: "username",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Your Username",
-  },
-  {
-    label: "Email",
-    name: "email",
-    componentType: "input",
-    type: "email",
-    placeholder: "Enter Your Email",
-  },
-  {
-    label: "Password",
-    name: "password",
-    componentType: "input",
-    type: "password",
-    placeholder: "Enter Your Password",
-  },
-  {
-    label: "Role",
-    name: "role",
-    componentType: "select",
-    options: [
-      { id: "admin", label: "Admin" },
-      { id: "employee", label: "Employee" },
-      { id: "sales", label: "Sales" },
-      { id: "manager", label: "Manager" },
-    ],
-  },
+    {
+        label: 'Username',
+        name: 'username',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Your Username',
+    },
+    {
+        label: 'Email',
+        name: 'email',
+        componentType: 'input',
+        type: 'email',
+        placeholder: 'Enter Your Email',
+    },
+    {
+        label: 'Password',
+        name: 'password',
+        componentType: 'input',
+        type: 'password',
+        placeholder: 'Enter Your Password',
+    },
+    {
+        label: 'Role',
+        name: 'role',
+        componentType: 'select',
+        options: [
+            { id: 'admin', label: 'Admin' },
+            { id: 'employee', label: 'Employee' },
+            { id: 'sales', label: 'Sales' },
+            { id: 'manager', label: 'Manager' },
+        ],
+    },
 ];
 
-export const getEmployeeBasicDetailsFormControl = (designation = "") => [
-  {
-    label: "EmployeeId",
-    name: "employeeId",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Your employeeId",
-  },
-  {
-    label: "Name",
-    name: "name",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Your Name",
-  },
-  {
-    label: "Department",
-    name: "designation",
-    componentType: "select",
-    options: EMPLOYEE_DESIGNATION_OPTIONS,
-  },
-  {
-    label: "Sub Department",
-    name: "subDesignation",
-    componentType: "select",
-    options: getSubDesignationOptions(designation),
-  },
-  {
-    label: "Designation",
-    name: "authRole",
-    componentType: "select",
-    options: EMPLOYEE_AUTH_ROLE_OPTIONS,
-  },
-  {
-    label: "Gender",
-    name: "gender",
-    componentType: "select",
-    options: [
-      { id: "MALE", label: "Male" },
-      { id: "FEMALE", label: "Female" },
-    ],
-  },
-  {
-    label: "Phone",
-    name: "phone",
-    componentType: "input",
-    type: "tel",
-    placeholder: "Enter Your Phone",
-  },
-  {
-    label: "Address",
-    name: "address",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Email",
-    name: "email",
-    componentType: "input",
-    type: "email",
-  },
-  {
-    label: "Date of Birth",
-    name: "dob",
-    componentType: "input",
-    type: "date",
-  },
-  {
-    label: "Joining Date",
-    name: "joiningDate",
-    componentType: "input",
-    type: "date",
-  },
-  // ------------------------------------------------------------
-  // MyOperator Calling
-  // ------------------------------------------------------------
-  {
-    label: "MyOperator User ID",
-    name: "myoperatorUserId",
-    componentType: "input",
-    type: "text",
-    placeholder: "Paste UUID from MyOperator panel → Users",
-  },
-  {
-    label: "MyOperator Name",
-    name: "myoperatorName",
-    componentType: "input",
-    type: "text",
-    placeholder: "Agent name in MyOperator (for reference)",
-  },
+export const getEmployeeBasicDetailsFormControl = (designation = '') => [
+    {
+        label: 'EmployeeId',
+        name: 'employeeId',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Your employeeId',
+    },
+    {
+        label: 'Name',
+        name: 'name',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Your Name',
+    },
+    {
+        label: 'Department',
+        name: 'designation',
+        componentType: 'select',
+        options: EMPLOYEE_DESIGNATION_OPTIONS,
+    },
+    {
+        label: 'Sub Department',
+        name: 'subDesignation',
+        componentType: 'select',
+        options: getSubDesignationOptions(designation),
+    },
+    {
+        label: 'Designation',
+        name: 'authRole',
+        componentType: 'select',
+        options: EMPLOYEE_AUTH_ROLE_OPTIONS,
+    },
+    {
+        label: 'Gender',
+        name: 'gender',
+        componentType: 'select',
+        options: [
+            { id: 'MALE', label: 'Male' },
+            { id: 'FEMALE', label: 'Female' },
+        ],
+    },
+    {
+        label: 'Phone',
+        name: 'phone',
+        componentType: 'input',
+        type: 'tel',
+        placeholder: 'Enter Your Phone',
+    },
+    {
+        label: 'Address',
+        name: 'address',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Email',
+        name: 'email',
+        componentType: 'input',
+        type: 'email',
+    },
+    {
+        label: 'Date of Birth',
+        name: 'dob',
+        componentType: 'input',
+        type: 'date',
+    },
+    {
+        label: 'Joining Date',
+        name: 'joiningDate',
+        componentType: 'input',
+        type: 'date',
+    },
+    // ------------------------------------------------------------
+    // MyOperator Calling
+    // ------------------------------------------------------------
+    {
+        label: 'MyOperator User ID',
+        name: 'myoperatorUserId',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Paste UUID from MyOperator panel → Users',
+    },
+    {
+        label: 'MyOperator Name',
+        name: 'myoperatorName',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Agent name in MyOperator (for reference)',
+    },
 ];
 
-export const editEmployeeBasicDetailsFormControl = (designation = "") => [
-  {
-    label: "Name",
-    name: "name",
-    componentType: "input",
-    type: "text",
-    placeholder: "Enter Your Name",
-  },
-  {
-    label: "Department",
-    name: "designation",
-    componentType: "select",
-    options: EMPLOYEE_DESIGNATION_OPTIONS,
-  },
-  {
-    label: "Sub Department",
-    name: "subDesignation",
-    componentType: "select",
-    options: getSubDesignationOptions(designation),
-  },
-  {
-    label: "Designation",
-    name: "authRole",
-    componentType: "select",
-    options: EMPLOYEE_AUTH_ROLE_OPTIONS,
-  },
-  {
-    label: "Gender",
-    name: "gender",
-    componentType: "select",
-    options: [
-      { id: "MALE", label: "Male" },
-      { id: "FEMALE", label: "Female" },
-    ],
-  },
-  {
-    label: "Phone",
-    name: "phone",
-    componentType: "input",
-    type: "tel",
-    placeholder: "Enter Your Phone",
-  },
-  {
-    label: "Address",
-    name: "address",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Email",
-    name: "email",
-    componentType: "input",
-    type: "email",
-  },
-  {
-    label: "Date of Birth",
-    name: "dob",
-    componentType: "input",
-    type: "date",
-  },
-  {
-    label: "Joining Date",
-    name: "joiningDate",
-    componentType: "input",
-    type: "date",
-  },
-  // ------------------------------------------------------------
-  // MyOperator Calling
-  // ------------------------------------------------------------
-  {
-    label: "MyOperator User ID",
-    name: "myoperatorUserId",
-    componentType: "input",
-    type: "text",
-    placeholder: "Paste UUID from MyOperator panel → Users",
-  },
-  {
-    label: "MyOperator Name",
-    name: "myoperatorName",
-    componentType: "input",
-    type: "text",
-    placeholder: "Agent name in MyOperator (for reference)",
-  },
+export const editEmployeeBasicDetailsFormControl = (designation = '') => [
+    {
+        label: 'Name',
+        name: 'name',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Your Name',
+    },
+    {
+        label: 'Department',
+        name: 'designation',
+        componentType: 'select',
+        options: EMPLOYEE_DESIGNATION_OPTIONS,
+    },
+    {
+        label: 'Sub Department',
+        name: 'subDesignation',
+        componentType: 'select',
+        options: getSubDesignationOptions(designation),
+    },
+    {
+        label: 'Designation',
+        name: 'authRole',
+        componentType: 'select',
+        options: EMPLOYEE_AUTH_ROLE_OPTIONS,
+    },
+    {
+        label: 'Gender',
+        name: 'gender',
+        componentType: 'select',
+        options: [
+            { id: 'MALE', label: 'Male' },
+            { id: 'FEMALE', label: 'Female' },
+        ],
+    },
+    {
+        label: 'Phone',
+        name: 'phone',
+        componentType: 'input',
+        type: 'tel',
+        placeholder: 'Enter Your Phone',
+    },
+    {
+        label: 'Address',
+        name: 'address',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Email',
+        name: 'email',
+        componentType: 'input',
+        type: 'email',
+    },
+    {
+        label: 'Date of Birth',
+        name: 'dob',
+        componentType: 'input',
+        type: 'date',
+    },
+    {
+        label: 'Joining Date',
+        name: 'joiningDate',
+        componentType: 'input',
+        type: 'date',
+    },
+    // ------------------------------------------------------------
+    // MyOperator Calling
+    // ------------------------------------------------------------
+    {
+        label: 'MyOperator User ID',
+        name: 'myoperatorUserId',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Paste UUID from MyOperator panel → Users',
+    },
+    {
+        label: 'MyOperator Name',
+        name: 'myoperatorName',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Agent name in MyOperator (for reference)',
+    },
 ];
 
-export const employeeBasicDetailsFormControl =
-  getEmployeeBasicDetailsFormControl();
+export const employeeBasicDetailsFormControl = getEmployeeBasicDetailsFormControl();
 
 export const projectDurationFormControl = [
-  {
-    label: "Service",
-    name: "service",
-    componentType: "select",
-    options: [
-      { id: "seo", label: "SEO" },
-      { id: "ads", label: "Ads Manager" },
-      { id: "web-dev", label: "Web Development" },
-      { id: "social-media", label: "Social Media" },
-      { id: "other", label: "Other" },
-    ],
-  },
-  {
-    label: "Start Date",
-    name: "start-date",
-    componentType: "input",
-    type: "date",
-  },
-  {
-    label: "End Date",
-    name: "end-date",
-    componentType: "input",
-    type: "date",
-  },
+    {
+        label: 'Service',
+        name: 'service',
+        componentType: 'select',
+        options: [
+            { id: 'seo', label: 'SEO' },
+            { id: 'ads', label: 'Ads Manager' },
+            { id: 'web-dev', label: 'Web Development' },
+            { id: 'social-media', label: 'Social Media' },
+            { id: 'other', label: 'Other' },
+        ],
+    },
+    {
+        label: 'Start Date',
+        name: 'start-date',
+        componentType: 'input',
+        type: 'date',
+    },
+    {
+        label: 'End Date',
+        name: 'end-date',
+        componentType: 'input',
+        type: 'date',
+    },
 ];
 
 export const teamUpdateFormControl = [
-  {
-    label: "Title",
-    name: "title",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Description",
-    name: "description",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Link",
-    name: "link",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Update Type",
-    name: "updateType",
-    componentType: "select",
-    options: [
-      { id: "call", label: "Call" },
-      { id: "general", label: "General" },
-    ],
-  },
+    {
+        label: 'Title',
+        name: 'title',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Description',
+        name: 'description',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Link',
+        name: 'link',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Update Type',
+        name: 'updateType',
+        componentType: 'select',
+        options: [
+            { id: 'call', label: 'Call' },
+            { id: 'general', label: 'General' },
+        ],
+    },
 ];
 
 export const attachmentFormControl = [
-  {
-    label: "Asset Type",
-    name: "assetType",
-    componentType: "select",
-    options: [
-      { id: "image", label: "image" },
-      { id: "video", label: "video" },
-      { id: "pdf", label: "pdf" },
-      { id: "docs", label: "docs" },
-      { id: "other", label: "other" },
-    ],
-  },
-  {
-    label: "Title",
-    name: "title",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Description",
-    name: "description",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Visibility",
-    name: "visibility",
-    componentType: "select",
-    options: [
-      { id: "public", label: "Public" },
-      { id: "private", label: "Private" },
-    ],
-  },
-  {
-    label: "Reference Link",
-    name: "referenceLink",
-    componentType: "input",
-    type: "text",
-  },
+    {
+        label: 'Asset Type',
+        name: 'assetType',
+        componentType: 'select',
+        options: [
+            { id: 'image', label: 'image' },
+            { id: 'video', label: 'video' },
+            { id: 'pdf', label: 'pdf' },
+            { id: 'docs', label: 'docs' },
+            { id: 'other', label: 'other' },
+        ],
+    },
+    {
+        label: 'Title',
+        name: 'title',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Description',
+        name: 'description',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Visibility',
+        name: 'visibility',
+        componentType: 'select',
+        options: [
+            { id: 'public', label: 'Public' },
+            { id: 'private', label: 'Private' },
+        ],
+    },
+    {
+        label: 'Reference Link',
+        name: 'referenceLink',
+        componentType: 'input',
+        type: 'text',
+    },
 ];
 
 export const editProposalFormControl = [
-  {
-    label: "Customer Name",
-    name: "clientName",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Customer Company",
-    name: "clientCompany",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Customer Address",
-    name: "clientAddress",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Date of Proposal",
-    name: "dateOfProposal",
-    componentType: "input",
-    type: "date",
-  },
-  {
-    label: "GSTIN",
-    name: "GSTIN",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Tan No",
-    name: "tanNo",
-    componentType: "input",
-    type: "text",
-  },
-  {
-    label: "Valid Till",
-    name: "validTill",
-    componentType: "input",
-    type: "date",
-  },
+    {
+        label: 'Customer Name',
+        name: 'clientName',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Customer Company',
+        name: 'clientCompany',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Customer Address',
+        name: 'clientAddress',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Date of Proposal',
+        name: 'dateOfProposal',
+        componentType: 'input',
+        type: 'date',
+    },
+    {
+        label: 'GSTIN',
+        name: 'GSTIN',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Tan No',
+        name: 'tanNo',
+        componentType: 'input',
+        type: 'text',
+    },
+    {
+        label: 'Valid Till',
+        name: 'validTill',
+        componentType: 'input',
+        type: 'date',
+    },
 ];

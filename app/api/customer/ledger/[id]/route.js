@@ -1,45 +1,43 @@
 // app/api/customer/ledger/[id]/route.js
 
-import { connectDB } from "@/lib/db";
-import Customer from "@/models/admin/Customer";
-import { NextResponse } from "next/server";
-import Ledger from "@/models/admin/Ledger";
+import { connectDB } from '@/lib/db';
+import Customer from '@/models/admin/Customer';
+import { NextResponse } from 'next/server';
+import Ledger from '@/models/admin/Ledger';
 
 export async function GET(req, { params }) {
-  try {
-    await connectDB();
+    try {
+        await connectDB();
 
-    const { id } = await params;
+        const { id } = await params;
 
-    const ledgerDetails = await Customer.findById(id)
-      .select("ledger")
-      .populate({
-        path: "ledger",
-      });
+        const ledgerDetails = await Customer.findById(id).select('ledger').populate({
+            path: 'ledger',
+        });
 
-    if (!ledgerDetails) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Customer not found",
-        },
-        { status: 404 },
-      );
+        if (!ledgerDetails) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: 'Customer not found',
+                },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: 'Customer ledger fetched successfully',
+            data: ledgerDetails,
+        });
+    } catch (error) {
+        console.error('Error fetching customer ledger:', error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: 'Server error while fetching the ledger',
+            },
+            { status: 500 }
+        );
     }
-
-    return NextResponse.json({
-      success: true,
-      message: "Customer ledger fetched successfully",
-      data: ledgerDetails,
-    });
-  } catch (error) {
-    console.error("Error fetching customer ledger:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Server error while fetching the ledger",
-      },
-      { status: 500 },
-    );
-  }
 }

@@ -1,20 +1,15 @@
 // service/customer/proposal/index.js
 
-import axiosInstance from "@/service/axiosInstance";
+import axiosInstance from '@/service/axiosInstance';
 
 export async function getProposalDetail(id) {
-  const { data } = await axiosInstance.get(
-    `/api/customer/propsals/proposal-edit/get-proposal/${id}`,
-  );
+    const { data } = await axiosInstance.get(`/api/customer/propsals/proposal-edit/get-proposal/${id}`);
 
-  return data;
+    return data;
 }
 
 export async function editProposalService(id, formData) {
-  const { data } = await axiosInstance.put(
-    `/api/customer/propsals/proposal-edit/get-proposal/${id}`,
-    formData,
-  );
+    const { data } = await axiosInstance.put(`/api/customer/propsals/proposal-edit/get-proposal/${id}`, formData);
 
-  return data;
+    return data;
 }

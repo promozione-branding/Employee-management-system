@@ -1,70 +1,50 @@
 // service/customer/work/index.js
 
-import axiosInstance from "@/service/axiosInstance";
+import axiosInstance from '@/service/axiosInstance';
 
 export async function getEmployeesByDomain(domain) {
-  const { data } = await axiosInstance.get(
-    `/api/customer/work/employee-by-domain?domain=${domain}`,
-  );
+    const { data } = await axiosInstance.get(`/api/customer/work/employee-by-domain?domain=${domain}`);
 
-  return data;
+    return data;
 }
 
 export async function createWorkDetailsService(formData) {
-  const { data } = await axiosInstance.post(
-    "/api/customer/work/create-work-details",
-    formData,
-  );
+    const { data } = await axiosInstance.post('/api/customer/work/create-work-details', formData);
 
-  return data;
+    return data;
 }
 
 export async function getClientWorkService(id) {
-  const { data } = await axiosInstance.get(
-    `/api/customer/work/client-work-details/${id}`,
-  );
-  return data;
+    const { data } = await axiosInstance.get(`/api/customer/work/client-work-details/${id}`);
+    return data;
 }
 
 // create key word and after creating fire the mailt to admin whenever new keyword is created
 export async function createKeyService(formData) {
-  const { data } = await axiosInstance.post(
-    `/api/customer/work/seo-sheet/create-keyword`,
-    formData,
-  );
-  return data;
+    const { data } = await axiosInstance.post(`/api/customer/work/seo-sheet/create-keyword`, formData);
+    return data;
 }
 
 // update ranking key word
 export async function updateRankingService(formData) {
-  const { data } = await axiosInstance.post(
-    `/api/customer/work/seo-sheet/update-ranking`,
-    formData,
-  );
-  return data;
+    const { data } = await axiosInstance.post(`/api/customer/work/seo-sheet/update-ranking`, formData);
+    return data;
 }
 
 // update ranking key word
 export async function getSeoSheetService(id) {
-  const { data } = await axiosInstance.get(
-    `/api/customer/work/seo-sheet/get-sheet/${id}`,
-  );
-  return data;
+    const { data } = await axiosInstance.get(`/api/customer/work/seo-sheet/get-sheet/${id}`);
+    return data;
 }
 
 // edit ranking key word
 export async function editRankingService(formData) {
-  const { data } = await axiosInstance.put(
-    `/api/customer/work/seo-sheet/update-ranking/edit-ranking`,
-    formData,
-  );
-  return data;
+    const { data } = await axiosInstance.put(`/api/customer/work/seo-sheet/update-ranking/edit-ranking`, formData);
+    return data;
 }
 
 export async function deleteKeywordService(id) {
-  const { data } = await axiosInstance.delete(
-    `/api/customer/work/seo-sheet/delete-keyword/${id}`,
-  );
+    const { data } = await axiosInstance.delete(`/api/customer/work/seo-sheet/delete-keyword/${id}`);
 
-  return data;
+    return data;
 }

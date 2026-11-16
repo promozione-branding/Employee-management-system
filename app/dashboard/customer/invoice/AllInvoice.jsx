@@ -1,417 +1,356 @@
 // app/dashboard/customer/invoice/AllInvoice.jsx
 
-"use client";
-import {
-  customerLedgerService,
-  getAllinvoicesCustomer,
-} from "@/service/customer";
-import {
-  deleteInvoiceById,
-  pdfDownloaderById,
-  sendInvoicePdfService,
-} from "@/service/invoice";
-import { createLedgerService, ledgerEntriesService } from "@/service/ledger";
-import { pdf } from "@react-pdf/renderer";
-import {
-  BanknoteArrowUp,
-  BookMarked,
-  Download,
-  Edit,
-  Edit2,
-  Eye,
-  Mail,
-  SquarePen,
-  Trash2,
-} from "lucide-react";
-import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import Loading from "@/components/layout/Loading";
-import InvoicePdfTemplate from "@/components/pdf/InvoicePdfTemplate";
+'use client';
+import { customerLedgerService, getAllinvoicesCustomer } from '@/service/customer';
+import { deleteInvoiceById, pdfDownloaderById, sendInvoicePdfService } from '@/service/invoice';
+import { createLedgerService, ledgerEntriesService } from '@/service/ledger';
+import { pdf } from '@react-pdf/renderer';
+import { BanknoteArrowUp, BookMarked, Download, Edit, Edit2, Eye, Mail, SquarePen, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import Loading from '@/components/layout/Loading';
+import InvoicePdfTemplate from '@/components/pdf/InvoicePdfTemplate';
 
 const AllInvoice = ({ customerId }) => {
-  const [invoicesList, setInvoicesList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [sendingInvoiceId, setSendingInvoiceId] = useState(null);
-  const [ledgerData, setLedgerData] = useState(null);
+    const [invoicesList, setInvoicesList] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [sendingInvoiceId, setSendingInvoiceId] = useState(null);
+    const [ledgerData, setLedgerData] = useState(null);
 
-  const router = useRouter();
+    const router = useRouter();
 
-  async function fetchingInvoices() {
-    if (!customerId) {
-      setLoading(false);
-      return;
+    async function fetchingInvoices() {
+        if (!customerId) {
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
+        try {
+            const response = await getAllinvoicesCustomer(customerId);
+            if (response.success) {
+                setInvoicesList(response.data);
+            } else {
+                toast.error(response.message || 'Failed to fetch invoices.');
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error(error?.response?.data?.message || 'An error occurred while fetching customer invoices.');
+        } finally {
+            setLoading(false);
+        }
     }
-    setLoading(true);
-    try {
-      const response = await getAllinvoicesCustomer(customerId);
-      if (response.success) {
-        setInvoicesList(response.data);
-      } else {
-        toast.error(response.message || "Failed to fetch invoices.");
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(
-        error?.response?.data?.message ||
-          "An error occurred while fetching customer invoices.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-  async function handleInvoiceSend(invoiceId) {
-    if (sendingInvoiceId) return; // Prevent multiple clicks
-    setSendingInvoiceId(invoiceId);
-    const toastId = toast.loading("Sending Invoice...");
-    try {
-      const res = await sendInvoicePdfService({ invoiceId });
-      if (res.success) {
-        toast.success("Email send Successfully", { id: toastId });
-      } else {
-        throw new Error(res.message || "Failed to send email.");
-      }
-    } catch (error) {
-      console.error("sendEmailHandler error:", error);
-      toast.error(error.message || "An error while sending invoice", {
-        id: toastId,
-      });
-    } finally {
-      setSendingInvoiceId(null);
-    }
-  }
-
-  async function invoiceLedgerEntry(invoice) {
-    // console.log(invoice, "invoice");
-    let currentLedger = null;
-    try {
-      const res = await customerLedgerService(customerId);
-      if (res.success) {
-        currentLedger = res.data?.ledger;
-      }
-    } catch (error) {
-      console.log(error);
+    async function handleInvoiceSend(invoiceId) {
+        if (sendingInvoiceId) return; // Prevent multiple clicks
+        setSendingInvoiceId(invoiceId);
+        const toastId = toast.loading('Sending Invoice...');
+        try {
+            const res = await sendInvoicePdfService({ invoiceId });
+            if (res.success) {
+                toast.success('Email send Successfully', { id: toastId });
+            } else {
+                throw new Error(res.message || 'Failed to send email.');
+            }
+        } catch (error) {
+            console.error('sendEmailHandler error:', error);
+            toast.error(error.message || 'An error while sending invoice', {
+                id: toastId,
+            });
+        } finally {
+            setSendingInvoiceId(null);
+        }
     }
 
-    const totalAmount = invoice?.totalAmount || 0;
-    const gstAmount = totalAmount * 0.18;
-    const tdsAmount = invoice?.tanNo ? totalAmount * 0.02 : 0;
+    async function invoiceLedgerEntry(invoice) {
+        // console.log(invoice, "invoice");
+        let currentLedger = null;
+        try {
+            const res = await customerLedgerService(customerId);
+            if (res.success) {
+                currentLedger = res.data?.ledger;
+            }
+        } catch (error) {
+            console.log(error);
+        }
 
-    const currentBalance =
-      currentLedger?.entries?.length > 0
-        ? currentLedger.entries[currentLedger.entries.length - 1].balance
-        : 0;
+        const totalAmount = invoice?.totalAmount || 0;
+        const gstAmount = totalAmount * 0.18;
+        const tdsAmount = invoice?.tanNo ? totalAmount * 0.02 : 0;
 
-    const data = {
-      proposalId: invoice?._id,
-      date: new Date().toISOString(),
-      voucher: "Invoice",
-      debit: 0,
-      credit: 0,
-      balance: currentBalance,
-      particular: {
-        description: `Invoice #${invoice?.invoiceNo}`,
-        items: [
-          {
-            subDescription: "Total Amount",
-            price: invoice?.totalAmount,
-          },
-        ],
-      },
+        const currentBalance = currentLedger?.entries?.length > 0 ? currentLedger.entries[currentLedger.entries.length - 1].balance : 0;
+
+        const data = {
+            proposalId: invoice?._id,
+            date: new Date().toISOString(),
+            voucher: 'Invoice',
+            debit: 0,
+            credit: 0,
+            balance: currentBalance,
+            particular: {
+                description: `Invoice #${invoice?.invoiceNo}`,
+                items: [
+                    {
+                        subDescription: 'Total Amount',
+                        price: invoice?.totalAmount,
+                    },
+                ],
+            },
+        };
+
+        try {
+            let res;
+            if (currentLedger) {
+                res = await ledgerEntriesService(currentLedger._id, {
+                    entriesData: data,
+                    proposalId: invoice._id,
+                });
+            }
+            if (res.success) {
+                toast.success('Ledger Entry created Successfully');
+                router.push('/dashboard/customer');
+            } else {
+                toast.error(res.message || 'Failed to create ledger entry');
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error(error.message || 'Error creating ledger entry');
+        }
+    }
+
+    const downloadInvoicePdf = async (invoiceId) => {
+        const toastId = toast.loading('Preparing invoice download...');
+        let objectUrl = null;
+
+        try {
+            console.log('[Invoice PDF] 1. Starting download', {
+                invoiceId,
+                time: new Date().toISOString(),
+            });
+
+            // Step 1: Fetch invoice data
+            toast.loading('Fetching invoice data...', { id: toastId });
+
+            const res = await pdfDownloaderById(invoiceId);
+
+            console.log('[Invoice PDF] 2. API response:', res);
+            console.log('[Invoice PDF] API success:', res?.success);
+            console.log('[Invoice PDF] Response data:', res?.data);
+
+            if (!res?.success || !res?.data) {
+                throw new Error(res?.message || 'Invoice data was not returned by the API.');
+            }
+
+            const pdfData = res.data;
+
+            console.log('[Invoice PDF] 3. Invoice data validation:', {
+                invoiceId: pdfData?._id,
+                clientCompany: pdfData?.clientCompany,
+                invoiceNo: pdfData?.invoiceNo,
+                dataType: typeof pdfData,
+                keys: pdfData && typeof pdfData === 'object' ? Object.keys(pdfData) : [],
+            });
+
+            // Step 2: Generate the PDF
+            toast.loading('Generating PDF...', { id: toastId });
+
+            console.time('[Invoice PDF] PDF generation');
+
+            let blob;
+
+            try {
+                blob = await pdf(<InvoicePdfTemplate data={pdfData} />).toBlob();
+            } finally {
+                console.timeEnd('[Invoice PDF] PDF generation');
+            }
+
+            console.log('[Invoice PDF] 4. PDF blob generated:', {
+                isBlob: blob instanceof Blob,
+                size: blob?.size,
+                type: blob?.type,
+            });
+
+            if (!(blob instanceof Blob) || blob.size === 0) {
+                throw new Error('PDF generation returned an empty file.');
+            }
+
+            // Step 3: Prepare the download
+            toast.loading('Preparing file...', { id: toastId });
+
+            objectUrl = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            const invoiceNumber = pdfData?.invoiceNo || invoiceId;
+
+            link.href = objectUrl;
+            link.download = `${invoiceNumber}-Invoice.pdf`;
+            link.style.display = 'none';
+
+            document.body.appendChild(link);
+
+            console.log('[Invoice PDF] 5. Triggering browser download', {
+                filename: link.download,
+                blobSize: blob.size,
+            });
+
+            link.click();
+            link.remove();
+
+            // Do not revoke the object URL immediately after link.click().
+            const urlToRevoke = objectUrl;
+            objectUrl = null;
+
+            window.setTimeout(() => {
+                URL.revokeObjectURL(urlToRevoke);
+                console.log('[Invoice PDF] 6. Download URL cleaned up');
+            }, 5000);
+
+            toast.success('PDF download initiated.', { id: toastId });
+        } catch (error) {
+            console.error('[Invoice PDF] DOWNLOAD FAILED:', error);
+            console.error('[Invoice PDF] Error details:', {
+                name: error?.name,
+                message: error?.message,
+                stack: error?.stack,
+                invoiceId,
+            });
+
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+            }
+
+            toast.error(error?.message || 'Invoice download failed. Check the console.', { id: toastId });
+        }
     };
 
-    try {
-      let res;
-      if (currentLedger) {
-        res = await ledgerEntriesService(currentLedger._id, {
-          entriesData: data,
-          proposalId: invoice._id,
-        });
-      }
-      if (res.success) {
-        toast.success("Ledger Entry created Successfully");
-        router.push("/dashboard/customer");
-      } else {
-        toast.error(res.message || "Failed to create ledger entry");
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message || "Error creating ledger entry");
-    }
-  }
+    useEffect(() => {
+        fetchingInvoices();
+    }, [customerId]);
 
-  const downloadInvoicePdf = async (invoiceId) => {
-    const toastId = toast.loading("Preparing invoice download...");
-    let objectUrl = null;
-
-    try {
-      console.log("[Invoice PDF] 1. Starting download", {
-        invoiceId,
-        time: new Date().toISOString(),
-      });
-
-      // Step 1: Fetch invoice data
-      toast.loading("Fetching invoice data...", { id: toastId });
-
-      const res = await pdfDownloaderById(invoiceId);
-
-      console.log("[Invoice PDF] 2. API response:", res);
-      console.log("[Invoice PDF] API success:", res?.success);
-      console.log("[Invoice PDF] Response data:", res?.data);
-
-      if (!res?.success || !res?.data) {
-        throw new Error(
-          res?.message || "Invoice data was not returned by the API.",
-        );
-      }
-
-      const pdfData = res.data;
-
-      console.log("[Invoice PDF] 3. Invoice data validation:", {
-        invoiceId: pdfData?._id,
-        clientCompany: pdfData?.clientCompany,
-        invoiceNo: pdfData?.invoiceNo,
-        dataType: typeof pdfData,
-        keys:
-          pdfData && typeof pdfData === "object" ? Object.keys(pdfData) : [],
-      });
-
-      // Step 2: Generate the PDF
-      toast.loading("Generating PDF...", { id: toastId });
-
-      console.time("[Invoice PDF] PDF generation");
-
-      let blob;
-
-      try {
-        blob = await pdf(<InvoicePdfTemplate data={pdfData} />).toBlob();
-      } finally {
-        console.timeEnd("[Invoice PDF] PDF generation");
-      }
-
-      console.log("[Invoice PDF] 4. PDF blob generated:", {
-        isBlob: blob instanceof Blob,
-        size: blob?.size,
-        type: blob?.type,
-      });
-
-      if (!(blob instanceof Blob) || blob.size === 0) {
-        throw new Error("PDF generation returned an empty file.");
-      }
-
-      // Step 3: Prepare the download
-      toast.loading("Preparing file...", { id: toastId });
-
-      objectUrl = URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      const invoiceNumber = pdfData?.invoiceNo || invoiceId;
-
-      link.href = objectUrl;
-      link.download = `${invoiceNumber}-Invoice.pdf`;
-      link.style.display = "none";
-
-      document.body.appendChild(link);
-
-      console.log("[Invoice PDF] 5. Triggering browser download", {
-        filename: link.download,
-        blobSize: blob.size,
-      });
-
-      link.click();
-      link.remove();
-
-      // Do not revoke the object URL immediately after link.click().
-      const urlToRevoke = objectUrl;
-      objectUrl = null;
-
-      window.setTimeout(() => {
-        URL.revokeObjectURL(urlToRevoke);
-        console.log("[Invoice PDF] 6. Download URL cleaned up");
-      }, 5000);
-
-      toast.success("PDF download initiated.", { id: toastId });
-    } catch (error) {
-      console.error("[Invoice PDF] DOWNLOAD FAILED:", error);
-      console.error("[Invoice PDF] Error details:", {
-        name: error?.name,
-        message: error?.message,
-        stack: error?.stack,
-        invoiceId,
-      });
-
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-
-      toast.error(
-        error?.message || "Invoice download failed. Check the console.",
-        { id: toastId },
-      );
-    }
-  };
-
-  useEffect(() => {
-    fetchingInvoices();
-  }, [customerId]);
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  async function handleDeleteInvoice(invoiceId) {
-    if (!invoiceId) {
-      toast.error("Invalid invoice ID.");
-      return;
+    if (loading) {
+        return <Loading />;
     }
 
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this invoice?",
+    async function handleDeleteInvoice(invoiceId) {
+        if (!invoiceId) {
+            toast.error('Invalid invoice ID.');
+            return;
+        }
+
+        const confirmed = window.confirm('Are you sure you want to delete this invoice?');
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            const response = await deleteInvoiceById(invoiceId);
+
+            if (response?.success) {
+                toast.success('Invoice deleted successfully.');
+
+                // Refresh invoice list
+                await fetchingInvoices();
+            } else {
+                toast.error(response?.message || 'Failed to delete invoice.');
+            }
+        } catch (error) {
+            console.error('DELETE INVOICE ERROR:', error);
+
+            toast.error(error?.message || 'Failed to delete invoice.');
+        }
+    }
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <h1 className="mb-8 text-center text-3xl font-bold">All Invoices</h1>
+
+            <Link
+                href={`/dashboard/invoice/${customerId}`}
+                className="fixed right-10 bottom-10 flex h-20 w-20 items-center justify-center rounded-full bg-blue-300"
+            >
+                <BanknoteArrowUp size={30} />
+            </Link>
+
+            {invoicesList.length === 0 ? (
+                <div className="rounded-lg bg-gray-50 py-10 text-center">
+                    <p className="text-gray-500">No invoices found for this customer.</p>
+                </div>
+            ) : (
+                <div className="overflow-x-auto rounded-lg bg-white shadow">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                    Invoice #
+                                </th>
+
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                    Client Name
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                    Date
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                    GSTIN
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                    Amount
+                                </th>
+                                <th scope="col" className="relative px-6 py-3">
+                                    <span className="sr-only">View</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 bg-white">
+                            {invoicesList.map((invoice) => (
+                                <tr key={invoice._id}>
+                                    <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">{invoice.invoiceNo}</td>
+
+                                    <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">{invoice.clientName}</td>
+                                    <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">{new Date(invoice.invoiceDate).toLocaleDateString()}</td>
+                                    <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">{invoice?.GSTIN}</td>
+                                    <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                                        {new Intl.NumberFormat('en-IN', {
+                                            style: 'currency',
+                                            currency: 'INR',
+                                        }).format(invoice.totalAmount)}
+                                    </td>
+                                    <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
+                                        <div className="flex items-center gap-4">
+                                            <Link href={`/dashboard/invoice/edit-invoice/${invoice._id}`}>
+                                                <SquarePen />
+                                            </Link>
+                                            <button onClick={() => handleDeleteInvoice(invoice._id)}>
+                                                <Trash2 />
+                                            </button>
+                                            <button onClick={() => downloadInvoicePdf(invoice._id)}>
+                                                <Download />
+                                            </button>
+                                            <Link href={`/dashboard/invoice/pdf-download/${invoice._id}`}>
+                                                <Eye />
+                                            </Link>
+
+                                            <button
+                                                onClick={() => handleInvoiceSend(invoice?._id)}
+                                                disabled={sendingInvoiceId === invoice._id}
+                                                className="disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                <Mail />
+                                            </button>
+                                            <button onClick={() => invoiceLedgerEntry(invoice)} className="disabled:cursor-not-allowed disabled:opacity-50">
+                                                <BookMarked />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>
     );
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      const response = await deleteInvoiceById(invoiceId);
-
-      if (response?.success) {
-        toast.success("Invoice deleted successfully.");
-
-        // Refresh invoice list
-        await fetchingInvoices();
-      } else {
-        toast.error(response?.message || "Failed to delete invoice.");
-      }
-    } catch (error) {
-      console.error("DELETE INVOICE ERROR:", error);
-
-      toast.error(error?.message || "Failed to delete invoice.");
-    }
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-center font-bold text-3xl mb-8">All Invoices</h1>
-
-      <Link
-        href={`/dashboard/invoice/${customerId}`}
-        className="fixed bottom-10 right-10 h-20 w-20 bg-blue-300 flex items-center justify-center rounded-full"
-      >
-        <BanknoteArrowUp size={30} />
-      </Link>
-
-      {invoicesList.length === 0 ? (
-        <div className="text-center py-10 bg-gray-50 rounded-lg">
-          <p className="text-gray-500">No invoices found for this customer.</p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto bg-white rounded-lg shadow">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Invoice #
-                </th>
-
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Client Name
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Date
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  GSTIN
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Amount
-                </th>
-                <th scope="col" className="relative px-6 py-3">
-                  <span className="sr-only">View</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {invoicesList.map((invoice) => (
-                <tr key={invoice._id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {invoice.invoiceNo}
-                  </td>
-
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {invoice.clientName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(invoice.invoiceDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {invoice?.GSTIN}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Intl.NumberFormat("en-IN", {
-                      style: "currency",
-                      currency: "INR",
-                    }).format(invoice.totalAmount)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center gap-4">
-                      <Link
-                        href={`/dashboard/invoice/edit-invoice/${invoice._id}`}
-                      >
-                        <SquarePen />
-                      </Link>
-                      <button onClick={() => handleDeleteInvoice(invoice._id)}>
-                        <Trash2 />
-                      </button>
-                      <button onClick={() => downloadInvoicePdf(invoice._id)}>
-                        <Download />
-                      </button>
-                      <Link
-                        href={`/dashboard/invoice/pdf-download/${invoice._id}`}
-                      >
-                        <Eye />
-                      </Link>
-
-                      <button
-                        onClick={() => handleInvoiceSend(invoice?._id)}
-                        disabled={sendingInvoiceId === invoice._id}
-                        className="disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Mail />
-                      </button>
-                      <button
-                        onClick={() => invoiceLedgerEntry(invoice)}
-                        className="disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <BookMarked />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
 };
 
 export default AllInvoice;

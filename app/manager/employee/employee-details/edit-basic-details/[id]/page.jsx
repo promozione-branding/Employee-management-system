@@ -1,11 +1,11 @@
 // app/manager/employee/employee-details/edit-basic-details/[id]/page.jsx
 
-import EditBasicDetail from "./EditBasicDetail";
+import EditBasicDetail from './EditBasicDetail';
 
 const page = async ({ params }) => {
-  const { id } = await params;
+    const { id } = await params;
 
-  return <EditBasicDetail employeeId={id} />;
+    return <EditBasicDetail employeeId={id} />;
 };
 
 export default page;

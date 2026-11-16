@@ -1,46 +1,45 @@
 // models/admin/meeting/Meeting.js
 
-import mongoose from "mongoose";
-import { auditPlugin } from "@/lib/auditPlugin";
+import mongoose from 'mongoose';
+import { auditPlugin } from '@/lib/auditPlugin';
 
 const MeetingSchema = new mongoose.Schema(
-  {
-    meetingUpdate: [
-      new mongoose.Schema(
-        {
-          salesPersonId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-          },
-          salesPerson: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-          clientId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Customer",
-            required: true,
-          },
-          updateType: {
-            type: String,
-            enum: ["call", "meeting", "general"],
-          },
-          status: String,
-          note: String,
-          reminderAt: { type: Date },
-          meetingAt: { type: Date },
-          reminderSent: { type: Boolean, default: false },
-          reminderSentAt: { type: Date },
-        },
-        { timestamps: true, strictPopulate: false },
-      ),
-    ],
-  },
-  { timestamps: true },
+    {
+        meetingUpdate: [
+            new mongoose.Schema(
+                {
+                    salesPersonId: {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: 'User',
+                        required: true,
+                    },
+                    salesPerson: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+                    clientId: {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: 'Customer',
+                        required: true,
+                    },
+                    updateType: {
+                        type: String,
+                        enum: ['call', 'meeting', 'general'],
+                    },
+                    status: String,
+                    note: String,
+                    reminderAt: { type: Date },
+                    meetingAt: { type: Date },
+                    reminderSent: { type: Boolean, default: false },
+                    reminderSentAt: { type: Date },
+                },
+                { timestamps: true, strictPopulate: false }
+            ),
+        ],
+    },
+    { timestamps: true }
 );
 
 // 👇 THIS IS THE MISSING LINK 👇
-MeetingSchema.plugin(auditPlugin, { module: "meeting" });
+MeetingSchema.plugin(auditPlugin, { module: 'meeting' });
 
-const Meeting =
-  mongoose.models.Meeting || mongoose.model("Meeting", MeetingSchema);
+const Meeting = mongoose.models.Meeting || mongoose.model('Meeting', MeetingSchema);
 
 export default Meeting;

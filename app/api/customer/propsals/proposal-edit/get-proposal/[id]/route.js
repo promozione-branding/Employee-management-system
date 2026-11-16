@@ -1,46 +1,46 @@
 // app/api/customer/propsals/proposal-edit/get-proposal/[id]/route.js
 
-import { connectDB } from "@/lib/db";
-import Proposal from "@/models/admin/proposal/Proposal";
-import { NextResponse } from "next/server";
-import Customer from "@/models/admin/Customer";
-import Service from "@/models/admin/proposal/Service";
+import { connectDB } from '@/lib/db';
+import Proposal from '@/models/admin/proposal/Proposal';
+import { NextResponse } from 'next/server';
+import Customer from '@/models/admin/Customer';
+import Service from '@/models/admin/proposal/Service';
 
 export async function GET(req, { params }) {
-  try {
-    await connectDB();
+    try {
+        await connectDB();
 
-    const { id } = await params;
+        const { id } = await params;
 
-    const proposal = await Proposal.findById(id).populate("services");
+        const proposal = await Proposal.findById(id).populate('services');
 
-    if (!proposal) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "proposal not found",
-        },
-        {
-          status: 404,
-        },
-      );
+        if (!proposal) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: 'proposal not found',
+                },
+                {
+                    status: 404,
+                }
+            );
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: 'proposal details fetch',
+            data: proposal,
+        });
+    } catch (error) {
+        console.log(error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: 'server error',
+            },
+            { status: 500 }
+        );
     }
-
-    return NextResponse.json({
-      success: true,
-      message: "proposal details fetch",
-      data: proposal,
-    });
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "server error",
-      },
-      { status: 500 },
-    );
-  }
 }
 
 // export async function PUT(req, { params }) {
@@ -97,84 +97,74 @@ export async function GET(req, { params }) {
 // }
 
 export async function PUT(req, { params }) {
-  try {
-    await connectDB();
+    try {
+        await connectDB();
 
-    const { id } = await params;
-    const body = await req.json();
+        const { id } = await params;
+        const body = await req.json();
 
-    // 🔐 AUTH
-    const authUser = await getAuthUser(req);
-    if (!authUser) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 },
-      );
+        // 🔐 AUTH
+        const authUser = await getAuthUser(req);
+        if (!authUser) {
+            return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+        }
+
+        // 🔍 FIND EXISTING PROPOSAL
+        const proposal = await Proposal.findById(id);
+        if (!proposal) {
+            return NextResponse.json({ success: false, message: 'Proposal not found' }, { status: 404 });
+        }
+
+        // 🧾 OLD SNAPSHOT (for history)
+        const oldData = proposal.toObject();
+
+        // 🔄 UPDATE (FULL REPLACEMENT – PUT semantics)
+        proposal.clientId = body.clientId;
+        proposal.clientName = body.clientName;
+        proposal.clientCompany = body.clientCompany;
+        proposal.clientAddress = body.clientAddress;
+        proposal.GSTIN = body.GSTIN;
+        proposal.tanNo = body.tanNo;
+        proposal.services = body.services;
+        proposal.discount = body.discount;
+        proposal.discountPercentage = body.discountPercentage;
+        proposal.totalAmount = body.totalAmount;
+        proposal.validTill = body.validTill;
+        proposal.paymentMethod = body.paymentMethod;
+        proposal.partlyPayment = body.partlyPayment;
+
+        const updatedProposal = await proposal.save();
+
+        // 📝 AUDIT LOG
+        const { _id: historyId } = await createAuditLog({
+            clientId: updatedProposal.clientId,
+            entityType: 'Proposal',
+            entityId: updatedProposal._id,
+            action: 'UPDATE',
+            oldData,
+            newData: updatedProposal.toObject(),
+            userId: authUser._id,
+        });
+
+        // 🔗 PUSH HISTORY TO CUSTOMER
+        await Customer.findByIdAndUpdate(updatedProposal.clientId, { $push: { history: historyId } }, { new: true });
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: 'Proposal updated successfully',
+                data: updatedProposal,
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error('Edit Proposal API Error:', error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: 'Server error while editing proposal',
+            },
+            { status: 500 }
+        );
     }
-
-    // 🔍 FIND EXISTING PROPOSAL
-    const proposal = await Proposal.findById(id);
-    if (!proposal) {
-      return NextResponse.json(
-        { success: false, message: "Proposal not found" },
-        { status: 404 },
-      );
-    }
-
-    // 🧾 OLD SNAPSHOT (for history)
-    const oldData = proposal.toObject();
-
-    // 🔄 UPDATE (FULL REPLACEMENT – PUT semantics)
-    proposal.clientId = body.clientId;
-    proposal.clientName = body.clientName;
-    proposal.clientCompany = body.clientCompany;
-    proposal.clientAddress = body.clientAddress;
-    proposal.GSTIN = body.GSTIN;
-    proposal.tanNo = body.tanNo;
-    proposal.services = body.services;
-    proposal.discount = body.discount;
-    proposal.discountPercentage = body.discountPercentage;
-    proposal.totalAmount = body.totalAmount;
-    proposal.validTill = body.validTill;
-    proposal.paymentMethod = body.paymentMethod;
-    proposal.partlyPayment = body.partlyPayment;
-
-    const updatedProposal = await proposal.save();
-
-    // 📝 AUDIT LOG
-    const { _id: historyId } = await createAuditLog({
-      clientId: updatedProposal.clientId,
-      entityType: "Proposal",
-      entityId: updatedProposal._id,
-      action: "UPDATE",
-      oldData,
-      newData: updatedProposal.toObject(),
-      userId: authUser._id,
-    });
-
-    // 🔗 PUSH HISTORY TO CUSTOMER
-    await Customer.findByIdAndUpdate(
-      updatedProposal.clientId,
-      { $push: { history: historyId } },
-      { new: true },
-    );
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Proposal updated successfully",
-        data: updatedProposal,
-      },
-      { status: 200 },
-    );
-  } catch (error) {
-    console.error("Edit Proposal API Error:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Server error while editing proposal",
-      },
-      { status: 500 },
-    );
-  }
 }

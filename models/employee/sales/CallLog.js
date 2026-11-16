@@ -1,125 +1,116 @@
 // models/employee/sales/CallLog.js
 
-import mongoose from "mongoose";
-import { auditPlugin } from "@/lib/auditPlugin"; // 👈 Added for Edit History
+import mongoose from 'mongoose';
+import { auditPlugin } from '@/lib/auditPlugin'; // 👈 Added for Edit History
 
 const CallLogSchema = new mongoose.Schema(
-  {
-    // ============================================================
-    // MYOPERATOR IDENTIFIERS
-    // ============================================================
-    // MyOperator's unique call id (echoed in webhooks + Search Logs)
-    // Note: index is declared once below via CallLogSchema.index(...)
-    myoperatorCallId: {
-      type: String,
-      sparse: true,
+    {
+        // ============================================================
+        // MYOPERATOR IDENTIFIERS
+        // ============================================================
+        // MyOperator's unique call id (echoed in webhooks + Search Logs)
+        // Note: index is declared once below via CallLogSchema.index(...)
+        myoperatorCallId: {
+            type: String,
+            sparse: true,
+        },
+
+        // OUR generated reference id — the golden thread.
+        // Sent at OBD initiate time, echoed back in every webhook.
+        // Unique per call so we can dedupe webhooks safely.
+        referenceId: {
+            type: String,
+            required: true,
+            unique: true,
+            index: true,
+        },
+
+        // Your MyOperator company id (6abd2f0bd0544239)
+        companyId: {
+            type: String,
+            index: true,
+        },
+
+        // ============================================================
+        // CALL BASICS
+        // ============================================================
+        direction: {
+            type: String,
+            enum: ['inbound', 'outbound'],
+            required: true,
+            index: true,
+        },
+
+        // Normalized to E.164 (e.g. +919876543210) for reliable matching
+        fromNumber: { type: String, index: true },
+        toNumber: { type: String, index: true },
+
+        // The shared virtual number the call ran through
+        virtualNumber: { type: String, index: true },
+
+        // ============================================================
+        // STATUS & DURATION
+        // ============================================================
+        status: {
+            type: String,
+            enum: ['initiated', 'ringing', 'answered', 'completed', 'missed', 'busy', 'failed', 'cancelled'],
+            default: 'initiated',
+            index: true,
+        },
+
+        // Fast UI filter — avoids string matching in dashboards
+        connected: { type: Boolean, default: false, index: true },
+
+        durationSeconds: { type: Number, default: 0 },
+
+        startedAt: { type: Date, index: true },
+        endedAt: { type: Date },
+
+        // ============================================================
+        // RECORDING
+        // ============================================================
+        recordingUrl: { type: String, default: '' },
+        // When we download + store it (S3 / local) instead of relying on MyOperator's expiring URL
+        recordingStoredUrl: { type: String, default: '' },
+        recordingFetchedAt: { type: Date },
+
+        // ============================================================
+        // AGENT ATTRIBUTION  (who made/handled the call)
+        // ============================================================
+        agentErpUserId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Employee',
+            index: true,
+        },
+        agentName: { type: String, default: '' }, // denormalized for fast display
+        agentEmail: { type: String, default: '' },
+        agentMyopUserId: { type: String, default: '' }, // MyOperator UUID
+
+        // ============================================================
+        // CUSTOMER LINK
+        // ============================================================
+        customerId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Customer',
+            index: true,
+        },
+        customerName: { type: String, default: '' }, // denormalized
+        customerPhone: { type: String, index: true }, // normalized E.164
+
+        // ============================================================
+        // OUTCOME
+        // ============================================================
+        disposition: { type: String, default: '' },
+        note: { type: String, default: '' },
+
+        // ============================================================
+        // WEBHOOK BOOKKEEPING
+        // ============================================================
+        lastEventType: { type: String, default: '' },
+        lastEventAt: { type: Date },
+        rawWebhookPayloads: { type: [Object], default: [] }, // audit trail
     },
-
-    // OUR generated reference id — the golden thread.
-    // Sent at OBD initiate time, echoed back in every webhook.
-    // Unique per call so we can dedupe webhooks safely.
-    referenceId: {
-      type: String,
-      required: true,
-      unique: true,
-      index: true,
-    },
-
-    // Your MyOperator company id (6abd2f0bd0544239)
-    companyId: {
-      type: String,
-      index: true,
-    },
-
-    // ============================================================
-    // CALL BASICS
-    // ============================================================
-    direction: {
-      type: String,
-      enum: ["inbound", "outbound"],
-      required: true,
-      index: true,
-    },
-
-    // Normalized to E.164 (e.g. +919876543210) for reliable matching
-    fromNumber: { type: String, index: true },
-    toNumber: { type: String, index: true },
-
-    // The shared virtual number the call ran through
-    virtualNumber: { type: String, index: true },
-
-    // ============================================================
-    // STATUS & DURATION
-    // ============================================================
-    status: {
-      type: String,
-      enum: [
-        "initiated",
-        "ringing",
-        "answered",
-        "completed",
-        "missed",
-        "busy",
-        "failed",
-        "cancelled",
-      ],
-      default: "initiated",
-      index: true,
-    },
-
-    // Fast UI filter — avoids string matching in dashboards
-    connected: { type: Boolean, default: false, index: true },
-
-    durationSeconds: { type: Number, default: 0 },
-
-    startedAt: { type: Date, index: true },
-    endedAt: { type: Date },
-
-    // ============================================================
-    // RECORDING
-    // ============================================================
-    recordingUrl: { type: String, default: "" },
-    // When we download + store it (S3 / local) instead of relying on MyOperator's expiring URL
-    recordingStoredUrl: { type: String, default: "" },
-    recordingFetchedAt: { type: Date },
-
-    // ============================================================
-    // AGENT ATTRIBUTION  (who made/handled the call)
-    // ============================================================
-    agentErpUserId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Employee",
-      index: true,
-    },
-    agentName: { type: String, default: "" }, // denormalized for fast display
-    agentEmail: { type: String, default: "" },
-    agentMyopUserId: { type: String, default: "" }, // MyOperator UUID
-
-    // ============================================================
-    // CUSTOMER LINK
-    // ============================================================
-    customerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Customer",
-      index: true,
-    },
-    customerName: { type: String, default: "" }, // denormalized
-    customerPhone: { type: String, index: true }, // normalized E.164
-
-    // ============================================================
-    // OUTCOME
-    // ============================================================
-    disposition: { type: String, default: "" },
-    note: { type: String, default: "" },
-
-    // ============================================================
-    // WEBHOOK BOOKKEEPING
-    // ============================================================
-    lastEventType: { type: String, default: "" },
-    lastEventAt: { type: Date },
-    rawWebhookPayloads: { type: [Object], default: [] }, // audit trail
-  },
-  { timestamps: true },
+    { timestamps: true }
 );
 
 // ============================================================
@@ -153,9 +144,8 @@ CallLogSchema.index({ companyId: 1, startedAt: -1 });
 // ============================================================
 // 🔗 AUDIT PLUGIN (This connects calls to Edit History!)
 // ============================================================
-CallLogSchema.plugin(auditPlugin, { module: "call" });
+CallLogSchema.plugin(auditPlugin, { module: 'call' });
 
-const CallLog =
-  mongoose.models.CallLog || mongoose.model("CallLog", CallLogSchema);
+const CallLog = mongoose.models.CallLog || mongoose.model('CallLog', CallLogSchema);
 
 export default CallLog;

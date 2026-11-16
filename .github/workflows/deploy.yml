@@ -1,31 +1,31 @@
 name: CI/CD – Deploy Employee Management System
 
 on:
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
 
 jobs:
-  deploy-production:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    deploy-production:
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            set -e
-            cd ${{ secrets.APP_DIR }}
-            git fetch origin
-            git reset --hard origin/main
-            rm -rf .next
-            npm install
-            npm run build
-            pm2 restart ERP
+            - name: Deploy to VPS
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      set -e
+                      cd ${{ secrets.APP_DIR }}
+                      git fetch origin
+                      git reset --hard origin/main
+                      rm -rf .next
+                      npm install
+                      npm run build
+                      pm2 restart ERP

@@ -7,8 +7,8 @@
 // so any lingering import points to a no-op instead of firing duplicate mails.
 
 export async function checkWorkflowRenewals() {
-  console.log("[workflow-renewal] disabled — use ProjectCycle cron instead");
-  return;
+    console.log('[workflow-renewal] disabled — use ProjectCycle cron instead');
+    return;
 }
 
 export default { checkWorkflowRenewals };

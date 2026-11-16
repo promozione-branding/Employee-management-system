@@ -1,9 +1,9 @@
 // app/sales-dashboard/clients/page.jsx
 
-"use client";
+'use client';
 
-import Client from "./Clients";
+import Client from './Clients';
 
 export default function Page() {
-  return <Client />;
+    return <Client />;
 }

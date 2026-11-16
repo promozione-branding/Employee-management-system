@@ -1,11 +1,11 @@
 // app/sales-dashboard/clients/client-assign/[id]/page.jsx
 
-import ClientAssign from "./ClientAssign";
+import ClientAssign from './ClientAssign';
 
 const page = async ({ params }) => {
-  const { id } = await params;
+    const { id } = await params;
 
-  return <ClientAssign clientId={id} />;
+    return <ClientAssign clientId={id} />;
 };
 
 export default page;

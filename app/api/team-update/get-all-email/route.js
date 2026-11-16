@@ -1,31 +1,31 @@
 // app/api/team-update/get-all-email/route.js
 
-import { connectDB } from "@/lib/db";
-import User from "@/models/admin/User";
-import { NextResponse } from "next/server";
+import { connectDB } from '@/lib/db';
+import User from '@/models/admin/User';
+import { NextResponse } from 'next/server';
 
 export async function GET(req) {
-  try {
-    await connectDB();
+    try {
+        await connectDB();
 
-    const allEmail = await User.find().select("email");
+        const allEmail = await User.find().select('email');
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Success",
-        data: allEmail,
-      },
-      { status: 200 },
-    );
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Server error",
-      },
-      { status: 500 },
-    );
-  }
+        return NextResponse.json(
+            {
+                success: true,
+                message: 'Success',
+                data: allEmail,
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: 'Server error',
+            },
+            { status: 500 }
+        );
+    }
 }

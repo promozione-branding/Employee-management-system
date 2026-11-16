@@ -1,90 +1,69 @@
 // components/admin-dashboard/dashboard/KPI.jsx
 
+'use client';
 
-"use client";
+import { allClientCountService, allEmployeeService, currentMonthDealValueService, currentMonthRevenueService } from '@/service/admin-dashboard/dashboard-api';
 
-import {
-  allClientCountService,
-  allEmployeeService,
-  currentMonthDealValueService,
-  currentMonthRevenueService,
-} from "@/service/admin-dashboard/dashboard-api";
+import { ArrowUpRight, ArrowDownRight, FileText, IdCardLanyard, IndianRupee, Users } from 'lucide-react';
 
-import {
-  ArrowUpRight,
-  ArrowDownRight,
-  FileText,
-  IdCardLanyard,
-  IndianRupee,
-  Users,
-} from "lucide-react";
-
-import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
 
 // ========================================
 // KPI CARD CONFIGURATION
 // ========================================
 
 const KPI_CARDS = [
-  {
-    title: "Month deal value",
-    icon: IndianRupee,
-    iconColor: "#376BB5",
-    iconBg: "#E9EFF9",
-    trend: "+12.5%",
-    trendType: "up",
-    chartColor: "#376BB5",
-    chartPath:
-      "M0 45 L32 31 L64 39 L96 42 L128 24 L160 17 L192 28 L224 23 L256 5 L288 5 L320 14 L352 2",
-    key: "dealValue",
-    getValue: (data) =>
-      `₹${Number(data.dealValue || 0).toLocaleString("en-IN")}`,
-  },
-  {
-    title: "Total customers",
-    icon: Users,
-    iconColor: "#13875C",
-    iconBg: "#E5F5EC",
-    trend: "+8.2%",
-    trendType: "up",
-    chartColor: "#13875C",
-    chartPath:
-      "M0 40 L32 36 L64 45 L96 37 L128 21 L160 24 L192 32 L224 19 L256 7 L288 14 L320 16 L352 0",
-    key: "clientCount",
-    getValue: (data) =>
-      Number(data.clientCount || 0).toLocaleString("en-IN"),
-    href: "/dashboard/customer",
-  },
-  {
-    title: "Month revenue",
-    icon: FileText,
-    iconColor: "#7050E8",
-    iconBg: "#EFEBFC",
-    trend: "+3.1%",
-    trendType: "up",
-    chartColor: "#7050E8",
-    chartPath:
-      "M0 36 L32 40 L64 45 L96 32 L128 23 L160 31 L192 30 L224 14 L256 11 L288 20 L320 12 L352 0",
-    key: "revenue",
-    getValue: (data) =>
-      `₹${Number(data.revenue || 0).toLocaleString("en-IN")}`,
-  },
-  {
-    title: "Total employees",
-    icon: IdCardLanyard,
-    iconColor: "#F47B20",
-    iconBg: "#FFF1E5",
-    trend: "-2.3%",
-    trendType: "down",
-    chartColor: "#F47B20",
-    chartPath:
-      "M0 0 L32 16 L64 20 L96 9 L128 17 L160 33 L192 30 L224 21 L256 35 L288 48 L320 38 L352 36",
-    key: "employeeCount",
-    getValue: (data) =>
-      Number(data.employeeCount || 0).toLocaleString("en-IN"),
-    href: "/dashboard/employee",
-  },
+    {
+        title: 'Month deal value',
+        icon: IndianRupee,
+        iconColor: '#376BB5',
+        iconBg: '#E9EFF9',
+        trend: '+12.5%',
+        trendType: 'up',
+        chartColor: '#376BB5',
+        chartPath: 'M0 45 L32 31 L64 39 L96 42 L128 24 L160 17 L192 28 L224 23 L256 5 L288 5 L320 14 L352 2',
+        key: 'dealValue',
+        getValue: (data) => `₹${Number(data.dealValue || 0).toLocaleString('en-IN')}`,
+    },
+    {
+        title: 'Total customers',
+        icon: Users,
+        iconColor: '#13875C',
+        iconBg: '#E5F5EC',
+        trend: '+8.2%',
+        trendType: 'up',
+        chartColor: '#13875C',
+        chartPath: 'M0 40 L32 36 L64 45 L96 37 L128 21 L160 24 L192 32 L224 19 L256 7 L288 14 L320 16 L352 0',
+        key: 'clientCount',
+        getValue: (data) => Number(data.clientCount || 0).toLocaleString('en-IN'),
+        href: '/dashboard/customer',
+    },
+    {
+        title: 'Month revenue',
+        icon: FileText,
+        iconColor: '#7050E8',
+        iconBg: '#EFEBFC',
+        trend: '+3.1%',
+        trendType: 'up',
+        chartColor: '#7050E8',
+        chartPath: 'M0 36 L32 40 L64 45 L96 32 L128 23 L160 31 L192 30 L224 14 L256 11 L288 20 L320 12 L352 0',
+        key: 'revenue',
+        getValue: (data) => `₹${Number(data.revenue || 0).toLocaleString('en-IN')}`,
+    },
+    {
+        title: 'Total employees',
+        icon: IdCardLanyard,
+        iconColor: '#F47B20',
+        iconBg: '#FFF1E5',
+        trend: '-2.3%',
+        trendType: 'down',
+        chartColor: '#F47B20',
+        chartPath: 'M0 0 L32 16 L64 20 L96 9 L128 17 L160 33 L192 30 L224 21 L256 35 L288 48 L320 38 L352 36',
+        key: 'employeeCount',
+        getValue: (data) => Number(data.employeeCount || 0).toLocaleString('en-IN'),
+        href: '/dashboard/employee',
+    },
 ];
 
 // ========================================
@@ -92,48 +71,31 @@ const KPI_CARDS = [
 // ========================================
 
 function Sparkline({ path, color, id }) {
-  return (
-    <div className="mt-auto w-full pt-3">
-      <svg
-        viewBox="0 0 352 52"
-        preserveAspectRatio="none"
-        className="h-[54px] w-full overflow-visible"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <defs>
-          <linearGradient
-            id={`gradient-${id}`}
-            x1="0"
-            y1="0"
-            x2="0"
-            y2="52"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop offset="0%" stopColor={color} stopOpacity="0.23" />
-            <stop offset="100%" stopColor={color} stopOpacity="0" />
-          </linearGradient>
-        </defs>
+    return (
+        <div className="mt-auto w-full pt-3">
+            <svg
+                viewBox="0 0 352 52"
+                preserveAspectRatio="none"
+                className="h-[54px] w-full overflow-visible"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+            >
+                <defs>
+                    <linearGradient id={`gradient-${id}`} x1="0" y1="0" x2="0" y2="52" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor={color} stopOpacity="0.23" />
+                        <stop offset="100%" stopColor={color} stopOpacity="0" />
+                    </linearGradient>
+                </defs>
 
-        {/* Gradient area */}
-        <path
-          d={`${path} L352 52 L0 52 Z`}
-          fill={`url(#gradient-${id})`}
-        />
+                {/* Gradient area */}
+                <path d={`${path} L352 52 L0 52 Z`} fill={`url(#gradient-${id})`} />
 
-        {/* Chart line */}
-        <path
-          d={path}
-          stroke={color}
-          strokeWidth="2.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-    </div>
-  );
+                {/* Chart line */}
+                <path d={path} stroke={color} strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+            </svg>
+        </div>
+    );
 }
 
 // ========================================
@@ -141,122 +103,57 @@ function Sparkline({ path, color, id }) {
 // ========================================
 
 function KpiCard({ card, value }) {
-  const Icon = card.icon;
+    const Icon = card.icon;
 
-  const content = (
-    <div
-      className="
-        group relative flex h-full min-h-[277px]
-        flex-col overflow-hidden
-        rounded-[25px]
-        border border-[#E1E7F0] dark:border-slate-700
-        bg-white dark:bg-slate-900
-        p-5 sm:p-6
-        shadow-[0_3px_10px_rgba(10,46,102,0.055)]
-        dark:shadow-[0_4px_16px_rgba(0,0,0,0.16)]
-        transition-all duration-300 ease-out
-        hover:-translate-y-1
-        hover:border-[#D4DEEC] dark:hover:border-slate-600
-        hover:shadow-[0_12px_28px_rgba(10,46,102,0.10)]
-        dark:hover:shadow-[0_12px_28px_rgba(0,0,0,0.30)]
-      "
-    >
-      {/* Top row: Icon and trend */}
-      <div className="mb-4 flex items-center justify-between gap-3">
-        {/* Icon */}
-        <div
-          className="
-            flex h-[50px] w-[50px] shrink-0
-            items-center justify-center
-            rounded-[16px]
-          "
-          style={{ backgroundColor: card.iconBg }}
-        >
-          <Icon
-            size={24}
-            strokeWidth={2}
-            style={{ color: card.iconColor }}
-          />
+    const content = (
+        <div className="group relative flex h-full min-h-[277px] flex-col overflow-hidden rounded-[25px] border border-[#E1E7F0] bg-white p-5 shadow-[0_3px_10px_rgba(10,46,102,0.055)] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#D4DEEC] hover:shadow-[0_12px_28px_rgba(10,46,102,0.10)] sm:p-6 dark:border-slate-700 dark:bg-slate-900 dark:shadow-[0_4px_16px_rgba(0,0,0,0.16)] dark:hover:border-slate-600 dark:hover:shadow-[0_12px_28px_rgba(0,0,0,0.30)]">
+            {/* Top row: Icon and trend */}
+            <div className="mb-4 flex items-center justify-between gap-3">
+                {/* Icon */}
+                <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[16px]" style={{ backgroundColor: card.iconBg }}>
+                    <Icon size={24} strokeWidth={2} style={{ color: card.iconColor }} />
+                </div>
+
+                {/* Trend badge */}
+                <div
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[14px] font-bold ${
+                        card.trendType === 'up' ? 'bg-[#E4F5EC] text-[#078451]' : 'bg-[#FDEAEA] text-[#C92D2D]'
+                    } `}
+                >
+                    {card.trendType === 'up' ? <ArrowUpRight size={16} strokeWidth={2.5} /> : <ArrowDownRight size={16} strokeWidth={2.5} />}
+
+                    <span>{card.trend}</span>
+                </div>
+            </div>
+
+            {/* Card title */}
+            <p className="mb-1.5 text-[16px] font-medium tracking-tight text-[#56647D] dark:text-slate-300">{card.title}</p>
+
+            {/* KPI value */}
+            <h3 className="text-[34px] leading-[1.2] font-bold tracking-[-1.2px] break-words text-[#0C1B35] sm:text-[38px] dark:text-white">{value}</h3>
+
+            {/* Comparison text */}
+            <p className="mt-1 text-[14px] font-normal text-[#8491A8] dark:text-slate-400">vs last month</p>
+
+            {/* Bottom chart */}
+            <Sparkline path={card.chartPath} color={card.chartColor} id={card.key} />
         </div>
-
-        {/* Trend badge */}
-        <div
-          className={`
-            inline-flex items-center gap-1.5
-            rounded-full px-3 py-1.5
-            text-[14px] font-bold
-            ${
-              card.trendType === "up"
-                ? "bg-[#E4F5EC] text-[#078451]"
-                : "bg-[#FDEAEA] text-[#C92D2D]"
-            }
-          `}
-        >
-          {card.trendType === "up" ? (
-            <ArrowUpRight size={16} strokeWidth={2.5} />
-          ) : (
-            <ArrowDownRight size={16} strokeWidth={2.5} />
-          )}
-
-          <span>{card.trend}</span>
-        </div>
-      </div>
-
-      {/* Card title */}
-      <p className="mb-1.5 text-[16px] font-medium tracking-tight text-[#56647D] dark:text-slate-300">
-        {card.title}
-      </p>
-
-      {/* KPI value */}
-      <h3
-        className="
-          break-words
-          text-[34px] font-bold
-          leading-[1.2]
-          tracking-[-1.2px]
-          text-[#0C1B35] dark:text-white
-          sm:text-[38px]
-        "
-      >
-        {value}
-      </h3>
-
-      {/* Comparison text */}
-      <p className="mt-1 text-[14px] font-normal text-[#8491A8] dark:text-slate-400">
-        vs last month
-      </p>
-
-      {/* Bottom chart */}
-      <Sparkline
-        path={card.chartPath}
-        color={card.chartColor}
-        id={card.key}
-      />
-    </div>
-  );
-
-  // Preserve existing navigation functionality.
-  if (card.href) {
-    return (
-      <Link
-        href={card.href}
-        aria-label={`View ${card.title}`}
-        className="
-          block h-full rounded-[25px]
-          focus-visible:outline-none
-          focus-visible:ring-2
-          focus-visible:ring-[#F27B1E]
-          focus-visible:ring-offset-2
-          focus-visible:ring-offset-white
-          dark:focus-visible:ring-offset-slate-950
-        "
-      >
-        {content}
-      </Link>
     );
-  }
 
-  return content;
+    // Preserve existing navigation functionality.
+    if (card.href) {
+        return (
+            <Link
+                href={card.href}
+                aria-label={`View ${card.title}`}
+                className="block h-full rounded-[25px] focus-visible:ring-2 focus-visible:ring-[#F27B1E] focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none dark:focus-visible:ring-offset-slate-950"
+            >
+                {content}
+            </Link>
+        );
+    }
+
+    return content;
 }
 
 // ========================================
@@ -264,85 +161,70 @@ function KpiCard({ card, value }) {
 // ========================================
 
 export default function KPI() {
-  const [clientCount, setClientCount] = useState(0);
-  const [employeeCount, setEmployeeCount] = useState(0);
-  const [totalDealValue, setTotalDealValue] = useState(0);
-  const [totalRevenue, setTotalRevenue] = useState(0);
+    const [clientCount, setClientCount] = useState(0);
+    const [employeeCount, setEmployeeCount] = useState(0);
+    const [totalDealValue, setTotalDealValue] = useState(0);
+    const [totalRevenue, setTotalRevenue] = useState(0);
 
-  // Existing API functionality preserved.
-  useEffect(() => {
-    let active = true;
+    // Existing API functionality preserved.
+    useEffect(() => {
+        let active = true;
 
-    async function fetchKpiData() {
-      const requests = [
-        allClientCountService().then((res) => {
-          if (active && res?.success) {
-            setClientCount(res.data ?? 0);
-          }
-        }),
+        async function fetchKpiData() {
+            const requests = [
+                allClientCountService().then((res) => {
+                    if (active && res?.success) {
+                        setClientCount(res.data ?? 0);
+                    }
+                }),
 
-        allEmployeeService().then((res) => {
-          if (active && res?.success) {
-            setEmployeeCount(res.data ?? 0);
-          }
-        }),
+                allEmployeeService().then((res) => {
+                    if (active && res?.success) {
+                        setEmployeeCount(res.data ?? 0);
+                    }
+                }),
 
-        currentMonthDealValueService().then((res) => {
-          if (active && res?.success) {
-            setTotalDealValue(res.revenue ?? 0);
-          }
-        }),
+                currentMonthDealValueService().then((res) => {
+                    if (active && res?.success) {
+                        setTotalDealValue(res.revenue ?? 0);
+                    }
+                }),
 
-        currentMonthRevenueService().then((res) => {
-          if (active && res?.success) {
-            setTotalRevenue(res.revenue ?? 0);
-          }
-        }),
-      ];
+                currentMonthRevenueService().then((res) => {
+                    if (active && res?.success) {
+                        setTotalRevenue(res.revenue ?? 0);
+                    }
+                }),
+            ];
 
-      const results = await Promise.allSettled(requests);
+            const results = await Promise.allSettled(requests);
 
-      results.forEach((result) => {
-        if (result.status === "rejected") {
-          console.error("Failed to fetch KPI data:", result.reason);
+            results.forEach((result) => {
+                if (result.status === 'rejected') {
+                    console.error('Failed to fetch KPI data:', result.reason);
+                }
+            });
         }
-      });
-    }
 
-    fetchKpiData();
+        fetchKpiData();
 
-    return () => {
-      active = false;
+        return () => {
+            active = false;
+        };
+    }, []);
+
+    const data = {
+        dealValue: totalDealValue,
+        clientCount,
+        revenue: totalRevenue,
+        employeeCount,
     };
-  }, []);
 
-  const data = {
-    dealValue: totalDealValue,
-    clientCount,
-    revenue: totalRevenue,
-    employeeCount,
-  };
-
-  return (
-    <section
-      aria-label="Business overview"
-      className="
-        mb-6 grid
-        grid-cols-1
-        gap-4
-        sm:grid-cols-2
-        lg:mb-8
-        lg:grid-cols-4
-        lg:gap-5
-      "
-    >
-      {KPI_CARDS.map((card) => (
-        <KpiCard
-          key={card.key}
-          card={card}
-          value={card.getValue(data)}
-        />
-      ))}
-    </section>
-  );
+    return (
+        <section aria-label="Business overview" className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:mb-8 lg:grid-cols-4 lg:gap-5">
+            {KPI_CARDS.map((card) => (
+                <KpiCard key={card.key} card={card} value={card.getValue(data)} />
+            ))}
+        </section>
+    );
 }

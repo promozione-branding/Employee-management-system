@@ -1,11 +1,8 @@
 // service/employee-dashboard/work-details/index.js
 
-import axiosInstance from "@/service/axiosInstance";
+import axiosInstance from '@/service/axiosInstance';
 
 export async function addCheckListService(id, formData) {
-  const { data } = await axiosInstance.patch(
-    `/api/employee-dashboard/employee-work-details/add-check-list/${id}`,
-    formData,
-  );
-  return data;
+    const { data } = await axiosInstance.patch(`/api/employee-dashboard/employee-work-details/add-check-list/${id}`, formData);
+    return data;
 }

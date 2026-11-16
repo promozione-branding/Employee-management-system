@@ -1,11 +1,11 @@
 // app/sales-dashboard/clients/ledger/[id]/page.jsx
 
-import CreateLedgerPage from "./CreateLedger";
+import CreateLedgerPage from './CreateLedger';
 
 const page = async ({ params }) => {
-  const { id } = await params;
+    const { id } = await params;
 
-  return <CreateLedgerPage customerId={id} />;
+    return <CreateLedgerPage customerId={id} />;
 };
 
 export default page;

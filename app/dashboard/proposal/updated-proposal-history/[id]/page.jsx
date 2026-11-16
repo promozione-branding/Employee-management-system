@@ -1,11 +1,11 @@
 // app/dashboard/proposal/updated-proposal-history/[id]/page.jsx
 
-import React from "react";
-import UpdateProposalHistory from "./UpdateProposalHistory";
+import React from 'react';
+import UpdateProposalHistory from './UpdateProposalHistory';
 
 const page = async ({ params }) => {
-  const { id } = await params;
-  return <UpdateProposalHistory proposalId={id} />;
+    const { id } = await params;
+    return <UpdateProposalHistory proposalId={id} />;
 };
 
 export default page;

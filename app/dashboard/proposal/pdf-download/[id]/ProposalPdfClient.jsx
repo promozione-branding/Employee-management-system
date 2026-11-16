@@ -1,14 +1,14 @@
 // app/dashboard/proposal/pdf-download/[id]/ProposalPdfClient.jsx
 
-"use client";
+'use client';
 
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
-const ProposalPdf = dynamic(() => import("./ProposalPdf"), {
-  ssr: false,
-  loading: () => <p>Loading PDF...</p>,
+const ProposalPdf = dynamic(() => import('./ProposalPdf'), {
+    ssr: false,
+    loading: () => <p>Loading PDF...</p>,
 });
 
 export default function ProposalPdfClient({ id }) {
-  return <ProposalPdf id={id} />;
+    return <ProposalPdf id={id} />;
 }

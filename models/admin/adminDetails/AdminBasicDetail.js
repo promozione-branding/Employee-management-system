@@ -1,27 +1,25 @@
 // models/admin/adminDetails/AdminBasicDetail.js
 
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const AdminBasicDetailSchema = new mongoose.Schema(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "User",
+    {
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'User',
+        },
+        profileImage: {
+            type: String,
+        },
+        department: String,
+        phone: {
+            type: String,
+            required: true,
+        },
     },
-    profileImage: {
-      type: String,
-    },
-    department: String,
-    phone: {
-      type: String,
-      required: true,
-    },
-  },
-  { timestamps: true },
+    { timestamps: true }
 );
 
-const AdminBasicDetail =
-  mongoose.models.AdminBasicDetail ||
-  mongoose.model("AdminBasicDetail", AdminBasicDetailSchema);
+const AdminBasicDetail = mongoose.models.AdminBasicDetail || mongoose.model('AdminBasicDetail', AdminBasicDetailSchema);
 export default AdminBasicDetail;

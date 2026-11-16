@@ -1,33 +1,29 @@
 // app/api/proposals/get-all-proposal/route.js
 
-import { connectDB } from "@/lib/db";
-import Proposal from "@/models/admin/proposal/Proposal";
+import { connectDB } from '@/lib/db';
+import Proposal from '@/models/admin/proposal/Proposal';
 
 export async function GET() {
-  try {
-    await connectDB();
+    try {
+        await connectDB();
 
-    const items = await Proposal.find()
-      .select(
-        "clientName clientCompany dateOfProposal GSTIN totalAmount proposalNo",
-      )
-      .sort({ createdAt: -1 });
+        const items = await Proposal.find().select('clientName clientCompany dateOfProposal GSTIN totalAmount proposalNo').sort({ createdAt: -1 });
 
-    return Response.json(
-      {
-        success: true,
-        data: items,
-      },
-      { status: 200 },
-    );
-  } catch (error) {
-    console.log("GET API Error:", error);
-    return Response.json(
-      {
-        success: false,
-        message: "Server error",
-      },
-      { status: 500 },
-    );
-  }
+        return Response.json(
+            {
+                success: true,
+                data: items,
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.log('GET API Error:', error);
+        return Response.json(
+            {
+                success: false,
+                message: 'Server error',
+            },
+            { status: 500 }
+        );
+    }
 }

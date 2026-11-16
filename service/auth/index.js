@@ -1,44 +1,38 @@
 // service/auth/index.js
 
-import axiosInstance from "../axiosInstance";
+import axiosInstance from '../axiosInstance';
 
 export async function registerService(formData) {
-  const data = await axiosInstance.post("/api/user/register", formData);
-  return data;
+    const data = await axiosInstance.post('/api/user/register', formData);
+    return data;
 }
 
 export async function loginService(formData) {
-  const { data } = await axiosInstance.post("/api/user/login", formData);
-  return data;
+    const { data } = await axiosInstance.post('/api/user/login', formData);
+    return data;
 }
 
 export async function sendOtpService(formdata) {
-  const { data } = await axiosInstance.post("/api/user/send-otp", formdata);
-  return data;
+    const { data } = await axiosInstance.post('/api/user/send-otp', formdata);
+    return data;
 }
 
 export async function verifyOTP(formData) {
-  const { data } = await axiosInstance.post("/api/user/verify-otp", formData);
-  return data;
+    const { data } = await axiosInstance.post('/api/user/verify-otp', formData);
+    return data;
 }
 
 export async function createUserService(formData) {
-  const { data } = await axiosInstance.post("/api/user/create-user", formData);
-  return data;
+    const { data } = await axiosInstance.post('/api/user/create-user', formData);
+    return data;
 }
 
 export async function forgotPasswordService(formData) {
-  const { data } = await axiosInstance.post(
-    "/api/user/forgot-password",
-    formData,
-  );
-  return data;
+    const { data } = await axiosInstance.post('/api/user/forgot-password', formData);
+    return data;
 }
 
 export async function resetPasswordService(formData) {
-  const { data } = await axiosInstance.post(
-    "/api/user/reset-password",
-    formData,
-  );
-  return data;
+    const { data } = await axiosInstance.post('/api/user/reset-password', formData);
+    return data;
 }

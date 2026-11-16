@@ -1,10 +1,10 @@
 // app/dashboard/invoice/page.jsx
 
-import React from "react";
-import AllInvoices from "./AllInvoices";
+import React from 'react';
+import AllInvoices from './AllInvoices';
 
 const page = () => {
-  return <AllInvoices />;
+    return <AllInvoices />;
 };
 
 export default page;

@@ -1,57 +1,47 @@
 // models/admin/Announcement.js
 
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const AnnouncementSchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      required: true,
-      trim: true,
+    {
+        title: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        content: {
+            type: String,
+            required: true,
+        },
+        author: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        targetDepartment: {
+            type: String,
+            enum: ['ALL', 'SEO', 'WEB_DEVELOPER', 'SOCIAL_MEDIA', 'ADS_MANAGER', 'SALES', 'OTHER'],
+            default: 'ALL',
+        },
+        startDate: {
+            type: Date,
+            default: Date.now,
+        },
+        endDate: {
+            type: Date,
+        },
+        sent: {
+            type: Boolean,
+            default: false,
+        },
+        accept: {
+            type: Boolean,
+            default: false,
+        },
+        acknowled: {
+            type: Boolean,
+            default: false,
+        },
     },
-    content: {
-      type: String,
-      required: true,
-    },
-    author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    targetDepartment: {
-      type: String,
-      enum: [
-        "ALL",
-        "SEO",
-        "WEB_DEVELOPER",
-        "SOCIAL_MEDIA",
-        "ADS_MANAGER",
-        "SALES",
-        "OTHER",
-      ],
-      default: "ALL",
-    },
-    startDate: {
-      type: Date,
-      default: Date.now,
-    },
-    endDate: {
-      type: Date,
-    },
-    sent: {
-      type: Boolean,
-      default: false,
-    },
-    accept: {
-      type: Boolean,
-      default: false,
-    },
-    acknowled: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  { timestamps: true },
+    { timestamps: true }
 );
-const Announcement =
-  mongoose.models.Announcement ||
-  mongoose.model("Announcement", AnnouncementSchema);
+const Announcement = mongoose.models.Announcement || mongoose.model('Announcement', AnnouncementSchema);
 export default Announcement;

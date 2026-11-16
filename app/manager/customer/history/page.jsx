@@ -1,89 +1,85 @@
 // app/manager/customer/history/page.jsx
 
-"use client";
+'use client';
 
-import Link from "next/link";
+import Link from 'next/link';
 import {
-  Activity,
-  Album,
-  BadgeIndianRupee,
-  BanknoteArrowUp,
-  NotebookTabs,
-  Paperclip,
-  PhoneCall,
-  SquareChartGantt,
-  TableProperties,
-  Users,
-  Volleyball,
-} from "lucide-react";
+    Activity,
+    Album,
+    BadgeIndianRupee,
+    BanknoteArrowUp,
+    NotebookTabs,
+    Paperclip,
+    PhoneCall,
+    SquareChartGantt,
+    TableProperties,
+    Users,
+    Volleyball,
+} from 'lucide-react';
 
 const HistoryPage = ({ customerId }) => {
-  const cardData = [
-    {
-      label: "Client Profile",
-      icon: <Users />,
-      href: `/manager/customer/history/client-history/${customerId}`,
-    },
-    {
-      label: "Work Details",
-      icon: <Activity />,
-      href: `/manager/customer/history/work-detail/${customerId}`,
-    },
-    {
-      label: "Sales",
-      icon: <BanknoteArrowUp />,
-      href: `/manager/customer/history/sales-history/${customerId}`,
-    },
-    {
-      label: "Team Update",
-      icon: <Volleyball />,
-      href: `/manager/customer/history/team-update/${customerId}`,
-    },
-    {
-      label: "My Updates",
-      icon: <PhoneCall />,
-      href: `/manager/customer/history/my-update/${customerId}`,
-    },
-    {
-      label: "Attachment",
-      icon: <Paperclip />,
-      href: `/manager/customer/history/attachment-history/${customerId}`,
-    },
-    {
-      label: "SEO Report",
-      icon: <TableProperties />,
-      href: `/manager/customer/history/seo-report-history/${customerId}`,
-    },
-    // {
-    //   label: "Proposal",
-    //   icon: <SquareChartGantt />,
-    //   href: `/manager/customer/history/client-proposal/${customerId}`,
-    // },
-    // {
-    //   label: "Invoice",
-    //   icon: <BanknoteArrowUp />,
-    //   href: `/manager/customer/history/client-invoice/${customerId}`,
-    // },
-  ];
+    const cardData = [
+        {
+            label: 'Client Profile',
+            icon: <Users />,
+            href: `/manager/customer/history/client-history/${customerId}`,
+        },
+        {
+            label: 'Work Details',
+            icon: <Activity />,
+            href: `/manager/customer/history/work-detail/${customerId}`,
+        },
+        {
+            label: 'Sales',
+            icon: <BanknoteArrowUp />,
+            href: `/manager/customer/history/sales-history/${customerId}`,
+        },
+        {
+            label: 'Team Update',
+            icon: <Volleyball />,
+            href: `/manager/customer/history/team-update/${customerId}`,
+        },
+        {
+            label: 'My Updates',
+            icon: <PhoneCall />,
+            href: `/manager/customer/history/my-update/${customerId}`,
+        },
+        {
+            label: 'Attachment',
+            icon: <Paperclip />,
+            href: `/manager/customer/history/attachment-history/${customerId}`,
+        },
+        {
+            label: 'SEO Report',
+            icon: <TableProperties />,
+            href: `/manager/customer/history/seo-report-history/${customerId}`,
+        },
+        // {
+        //   label: "Proposal",
+        //   icon: <SquareChartGantt />,
+        //   href: `/manager/customer/history/client-proposal/${customerId}`,
+        // },
+        // {
+        //   label: "Invoice",
+        //   icon: <BanknoteArrowUp />,
+        //   href: `/manager/customer/history/client-invoice/${customerId}`,
+        // },
+    ];
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
-      {cardData.map((card, index) => (
-        <Link href={card.href} key={index} className="block">
-          <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-xl transition-shadow border border-gray-200 h-full cursor-pointer">
-            <div className="flex items-center space-x-4">
-              <div className="bg-emerald-100 text-emerald-600 p-3 rounded-full">
-                {card.icon}
-              </div>
-              <h3 className="text-lg font-semibold capitalize text-gray-800">
-                {card.label}
-              </h3>
-            </div>
-          </div>
-        </Link>
-      ))}
-    </div>
-  );
+    return (
+        <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
+            {cardData.map((card, index) => (
+                <Link href={card.href} key={index} className="block">
+                    <div className="h-full cursor-pointer rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-xl">
+                        <div className="flex items-center space-x-4">
+                            <div className="rounded-full bg-emerald-100 p-3 text-emerald-600">{card.icon}</div>
+                            <h3 className="text-lg font-semibold text-gray-800 capitalize">{card.label}</h3>
+                        </div>
+                    </div>
+                </Link>
+            ))}
+        </div>
+    );
 };
 
 export default HistoryPage;

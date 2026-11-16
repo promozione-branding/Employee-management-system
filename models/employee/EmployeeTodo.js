@@ -1,41 +1,39 @@
 // models/employee/EmployeeTodo.js
 
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const TodoItemSchema = new mongoose.Schema(
-  {
-    description: {
-      type: String,
-      trim: true,
+    {
+        description: {
+            type: String,
+            trim: true,
+        },
+        status: {
+            type: String,
+            enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED'],
+            default: 'PENDING',
+        },
+        completedAt: {
+            type: Date,
+        },
     },
-    status: {
-      type: String,
-      enum: ["PENDING", "IN_PROGRESS", "COMPLETED"],
-      default: "PENDING",
-    },
-    completedAt: {
-      type: Date,
-    },
-  },
-  { timestamps: true },
+    { timestamps: true }
 );
 
 const EmployeeTodoSchema = new mongoose.Schema(
-  {
-    employeeId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "Employee",
+    {
+        employeeId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'Employee',
+        },
+        todos: {
+            type: [TodoItemSchema],
+            default: [],
+        },
     },
-    todos: {
-      type: [TodoItemSchema],
-      default: [],
-    },
-  },
-  { timestamps: true },
+    { timestamps: true }
 );
 
-const EmployeeTodo =
-  mongoose.models.EmployeeTodo ||
-  mongoose.model("EmployeeTodo", EmployeeTodoSchema);
+const EmployeeTodo = mongoose.models.EmployeeTodo || mongoose.model('EmployeeTodo', EmployeeTodoSchema);
 export default EmployeeTodo;

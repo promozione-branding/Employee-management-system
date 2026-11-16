@@ -1,11 +1,11 @@
 // app/dashboard/profile/page.jsx
 
-"use client";
+'use client';
 
-import Profile from "./Profile";
+import Profile from './Profile';
 
 const page = () => {
-  return <Profile />;
+    return <Profile />;
 };
 
 export default page;

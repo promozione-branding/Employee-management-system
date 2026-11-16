@@ -1,11 +1,11 @@
 // app/employee-dashboard/clients/work/[id]/page.jsx
 
-import React from "react";
-import WorkDetails from "./WorkDetails";
+import React from 'react';
+import WorkDetails from './WorkDetails';
 
 const page = async ({ params }) => {
-  const { id } = await params;
-  return <WorkDetails workDetailId={id} />;
+    const { id } = await params;
+    return <WorkDetails workDetailId={id} />;
 };
 
 export default page;

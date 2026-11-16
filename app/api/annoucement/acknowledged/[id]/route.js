@@ -1,48 +1,48 @@
 // app/api/annoucement/acknowledged/[id]/route.js
 
-import { connectDB } from "@/lib/db";
-import Announcement from "@/models/admin/Announcement";
-import { NextResponse } from "next/server";
+import { connectDB } from '@/lib/db';
+import Announcement from '@/models/admin/Announcement';
+import { NextResponse } from 'next/server';
 
 export async function PUT(req, { params }) {
-  try {
-    await connectDB();
+    try {
+        await connectDB();
 
-    const { id } = await params;
+        const { id } = await params;
 
-    const announcement = await Announcement.findById(id);
+        const announcement = await Announcement.findById(id);
 
-    if (!announcement) {
-      return NextResponse.json(
-        {
-          message: "Announcement does not exist",
-          success: false,
-        },
-        {
-          status: 404,
-        },
-      );
+        if (!announcement) {
+            return NextResponse.json(
+                {
+                    message: 'Announcement does not exist',
+                    success: false,
+                },
+                {
+                    status: 404,
+                }
+            );
+        }
+
+        announcement.acknowled = true;
+        await announcement.save();
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: 'Success',
+                data: announcement,
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: 'Server error',
+            },
+            { status: 500 }
+        );
     }
-
-    announcement.acknowled = true;
-    await announcement.save();
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Success",
-        data: announcement,
-      },
-      { status: 200 },
-    );
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Server error",
-      },
-      { status: 500 },
-    );
-  }
 }

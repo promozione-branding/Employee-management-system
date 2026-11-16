@@ -1,46 +1,45 @@
 // models/employee/TeamUpdate.js
 
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const TeamUpdateSchema = new mongoose.Schema(
-  {
-    clientId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Customer",
-    },
-    updateType: {
-      type: String,
-      enum: ["call", "general"],
-      default: "general",
-    },
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    {
+        clientId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Customer',
+        },
+        updateType: {
+            type: String,
+            enum: ['call', 'general'],
+            default: 'general',
+        },
+        title: {
+            type: String,
+            required: true,
+            trim: true,
+        },
 
-    description: {
-      type: String,
-      required: true,
-    },
+        description: {
+            type: String,
+            required: true,
+        },
 
-    link: {
-      type: String,
-    },
+        link: {
+            type: String,
+        },
 
-    recipients: [
-      {
-        type: String,
-      },
-    ],
+        recipients: [
+            {
+                type: String,
+            },
+        ],
 
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+        createdBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
     },
-  },
-  { timestamps: true },
+    { timestamps: true }
 );
 
-export default mongoose.models.TeamUpdate ||
-  mongoose.model("TeamUpdate", TeamUpdateSchema);
+export default mongoose.models.TeamUpdate || mongoose.model('TeamUpdate', TeamUpdateSchema);
