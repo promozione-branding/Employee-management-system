@@ -1,3 +1,4 @@
+
 // app/api/meeting/[id]/route.js
 
 import { connectDB } from '@/lib/db';
@@ -8,7 +9,6 @@ import User from '@/models/admin/User';
 import nodemailer from 'nodemailer';
 import { recordEdit } from '@/lib/auditLog';
 import { getAuthUser } from '@/lib/getAuthUser';
-import { withAudit } from '@/lib/withAudit';
 import Employee from '@/models/employee/Employee';
 
 const Admin_for_updateOfCallMeetingGeneral = (process.env.Admin_for_updateOfCallMeetingGeneral || 'sourabh@inquirybazaar.com').toLowerCase().trim();
@@ -19,20 +19,9 @@ export async function PUT(req, { params }) {
 
         const { id } = await params;
 
-        const { salesPersonId, salesPerson, clientId, updateType, status, note, reminderAt, meetingAt, subject, sendToSelf, ccAdmin, mailRecipients } =
-            await req.json();
+        const body = await req.json();
 
-        console.log('=== MEETING UPDATE START ===');
-        console.log('Meeting ID:', id);
-        console.log('updateType:', updateType);
-        console.log('sendToSelf:', sendToSelf, '| ccAdmin:', ccAdmin);
-
-        const meeting = await Meeting.findById(id);
-        if (!meeting) {
-            return NextResponse.json({ success: false, message: 'Meeting not found' }, { status: 404 });
-        }
-
-        meeting.meetingUpdate.push({
+        const {
             salesPersonId,
             salesPerson,
             clientId,
@@ -41,11 +30,64 @@ export async function PUT(req, { params }) {
             note,
             reminderAt,
             meetingAt,
-        });
+            subject,
+            sendToSelf,
+            ccAdmin,
+            mailRecipients,
+            location,
+        } = body;
 
+        // ── MANDATORY LOCATION VALIDATION (meeting only) ──
+        if (updateType === 'meeting') {
+            const latNum = Number(location?.lat);
+            const lngNum = Number(location?.lng);
+            const hasCoords = Number.isFinite(latNum) && Number.isFinite(lngNum);
+            if (!hasCoords) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: 'Location is required for meeting update. Please capture location and try again.',
+                    },
+                    { status: 400 }
+                );
+            }
+        }
+
+        const meeting = await Meeting.findById(id);
+        if (!meeting) {
+            return NextResponse.json({ success: false, message: 'Meeting not found' }, { status: 404 });
+        }
+
+        // ── Normalise location (only when present & valid) ──
+        const locationPayload =
+            location && Number.isFinite(Number(location.lat)) && Number.isFinite(Number(location.lng))
+                ? {
+                      lat: Number(location.lat),
+                      lng: Number(location.lng),
+                      accuracy: location.accuracy != null ? Number(location.accuracy) : undefined,
+                      address: location.address || '',
+                      capturedAt: location.capturedAt ? new Date(location.capturedAt) : new Date(),
+                  }
+                : undefined;
+
+        const newUpdate = {
+            salesPersonId,
+            salesPerson,
+            clientId,
+            updateType,
+            status,
+            note,
+            reminderAt,
+            meetingAt,
+            ...(locationPayload ? { location: locationPayload } : {}),
+        };
+
+        meeting.meetingUpdate.push(newUpdate);
         await meeting.save();
 
-        // ── Audit Hook (unchanged) ──
+        const savedEntry = meeting.meetingUpdate[meeting.meetingUpdate.length - 1];
+
+        // ── Audit Hook ──
         try {
             const authUser = await getAuthUser(req);
             if (authUser) {
@@ -57,7 +99,7 @@ export async function PUT(req, { params }) {
                     summary: `Added ${updateType || 'general'} update: ${note ? `"${note.substring(0, 40)}..."` : 'No note'}`,
                     actor: { userId: authUser._id },
                     isConfidential: false,
-                    afterSnapshot: meeting.meetingUpdate[meeting.meetingUpdate.length - 1],
+                    afterSnapshot: savedEntry,
                     req,
                 });
             }
@@ -79,14 +121,12 @@ export async function PUT(req, { params }) {
             const creatorName = creator?.username || 'Unknown';
             const creatorRole = creator?.role || 'unknown';
 
-            // ── PRIMARY ADMIN (only sourabh) ──
             let primaryAdminEmail = '';
             const shouldIncludeAdmin = typeof ccAdmin === 'boolean' ? ccAdmin : updateType === 'meeting';
             if (shouldIncludeAdmin && Admin_for_updateOfCallMeetingGeneral) {
                 primaryAdminEmail = Admin_for_updateOfCallMeetingGeneral;
             }
 
-            // ── Extra CC from ticked recipients (User OR Employee) ──
             const extraIds = Array.isArray(mailRecipients) ? mailRecipients : [];
 
             let extraEmails = [];
@@ -103,9 +143,6 @@ export async function PUT(req, { params }) {
             const ccCandidates = [primaryAdminEmail, ...extraEmails].filter(Boolean);
             const ccEmails = [...new Set(ccCandidates.filter((e) => e && e !== creatorEmail))];
 
-            console.log('To (creator):', creatorEmail);
-            console.log('CC:', ccEmails);
-
             if (creatorEmail || ccEmails.length > 0) {
                 try {
                     const transporter = nodemailer.createTransport({
@@ -116,11 +153,28 @@ export async function PUT(req, { params }) {
                         },
                     });
 
-                    // ── Default subject: "{Client Name} - {Update Type}" ──
                     const clientName = findCustomer?.name || findCustomer?.company || 'Client';
                     const typeLabel = updateType === 'meeting' ? 'Meeting' : updateType === 'call' ? 'Call' : 'General';
                     const defaultSubject = `${clientName} - ${typeLabel}`;
                     const finalSubject = updateType === 'general' && subject && subject.trim() ? subject.trim() : defaultSubject;
+
+                    const locationRow = locationPayload
+                        ? `
+                          <tr>
+                            <td style="padding: 8px 0; font-weight: bold;">Location</td>
+                            <td style="padding: 8px 0;">
+                              ${locationPayload.lat.toFixed(6)}, ${locationPayload.lng.toFixed(6)}
+                              ${locationPayload.accuracy ? `(±${Math.round(locationPayload.accuracy)}m)` : ''}
+                              <br/>
+                              <span style="color:#555;">${locationPayload.address || ''}</span>
+                              <br/>
+                              <a href="https://www.google.com/maps?q=${locationPayload.lat},${locationPayload.lng}" target="_blank" rel="noopener">
+                                Open in Google Maps
+                              </a>
+                            </td>
+                          </tr>
+                        `
+                        : '';
 
                     await transporter.sendMail({
                         from: `"ERP Notifications" <${process.env.YOUR_EMAIL_ADDRESS}>`,
@@ -148,6 +202,7 @@ export async function PUT(req, { params }) {
                     <tr><td style="padding: 8px 0; font-weight: bold;">Update Type</td><td style="padding: 8px 0;">${typeLabel}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Status</td><td style="padding: 8px 0;">${status || '-'}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Meeting Date</td><td style="padding: 8px 0;">${meetingAt ? new Date(meetingAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : '-'}</td></tr>
+                    ${locationRow}
                     <tr><td style="padding: 8px 0; font-weight: bold;">Note</td><td style="padding: 8px 0;">${note || '-'}</td></tr>
                   </table>
                   <hr style="margin: 25px 0; border: none; border-top: 1px solid #e5e7eb;" />
@@ -156,19 +211,11 @@ export async function PUT(req, { params }) {
               </div>
             `,
                     });
-
-                    console.log('✅ EMAIL SENT → To:', creatorEmail, '| CC:', ccEmails);
                 } catch (mailError) {
                     console.error('❌ EMAIL ERROR:', mailError.message);
                 }
-            } else {
-                console.log('⚠️ No recipients — email skipped');
             }
-        } else {
-            console.log('📭 Mail disabled for this update — skipped');
         }
-
-        console.log('=== MEETING UPDATE END ===');
 
         return NextResponse.json(
             {
@@ -180,6 +227,21 @@ export async function PUT(req, { params }) {
         );
     } catch (error) {
         console.error('❌ UPDATE MEETING ERROR:', error);
+        return NextResponse.json({ success: false, message: 'Server error', error: error.message }, { status: 500 });
+    }
+}
+
+// ── GET — kills the 405s from frontend refetches ──
+export async function GET(req, { params }) {
+    try {
+        await connectDB();
+        const { id } = await params;
+        const meeting = await Meeting.findById(id).lean();
+        if (!meeting) {
+            return NextResponse.json({ success: false, message: 'Meeting not found' }, { status: 404 });
+        }
+        return NextResponse.json({ success: true, data: meeting });
+    } catch (error) {
         return NextResponse.json({ success: false, message: 'Server error', error: error.message }, { status: 500 });
     }
 }

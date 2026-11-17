@@ -11,44 +11,117 @@ import { getAuthUser } from '@/lib/getAuthUser';
 import Employee from '@/models/employee/Employee';
 
 // Primary admin — the ONLY person auto-CC'd on meetings.
-// Override via env: Admin_for_updateOfCallMeetingGeneral=someone@yourdomain.com
-const Admin_for_updateOfCallMeetingGeneral = (process.env.Admin_for_updateOfCallMeetingGeneral || 'sourabh@inquirybazaar.com').toLowerCase().trim();
+const Admin_for_updateOfCallMeetingGeneral = (process.env.Admin_for_updateOfCallMeetingGeneral || 'sourabh@inquirybazaar.com')
+    .toLowerCase()
+    .trim();
 
 export async function POST(req) {
     try {
         await connectDB();
 
-        const { salesPersonId, salesPerson, clientId, updateType, status, note, reminderAt, meetingAt, subject, sendToSelf, ccAdmin, mailRecipients } =
-            await req.json();
+        const body = await req.json();
+
+        const {
+            salesPersonId,
+            salesPerson,
+            clientId,
+            updateType,
+            status,
+            note,
+            reminderAt,
+            meetingAt,
+            subject,
+            sendToSelf,
+            ccAdmin,
+            mailRecipients,
+            location, // 👈 NEW — { lat, lng, accuracy, address, capturedAt }
+        } = body;
 
         console.log('=== MEETING CREATE START ===');
         console.log('updateType:', updateType);
         console.log('sendToSelf:', sendToSelf, '| ccAdmin:', ccAdmin);
+
+        // ── LOCATION LOGS (find exactly what came in during POST) ──
+        console.log('📍 [location] raw from request:', JSON.stringify(location));
+        console.log('📍 [location] type:', typeof location);
+        if (location && typeof location === 'object') {
+            console.log('📍 [location] lat:', location.lat, '| type:', typeof location.lat);
+            console.log('📍 [location] lng:', location.lng, '| type:', typeof location.lng);
+            console.log('📍 [location] accuracy:', location.accuracy);
+            console.log('📍 [location] address:', location.address);
+            console.log('📍 [location] capturedAt:', location.capturedAt);
+        } else {
+            console.log('📍 [location] NOT an object or missing');
+        }
+
+        // ── MANDATORY LOCATION VALIDATION (server-side, meeting only) ──
+        if (updateType === 'meeting') {
+            const latNum = Number(location?.lat);
+            const lngNum = Number(location?.lng);
+            const hasCoords = Number.isFinite(latNum) && Number.isFinite(lngNum);
+            if (!hasCoords) {
+                console.log('❌ [location] MISSING or INVALID for meeting — rejecting request');
+                console.log('   received location:', JSON.stringify(location));
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: 'Location is required for meeting update. Please capture location and try again.',
+                    },
+                    { status: 400 }
+                );
+            }
+            console.log('✅ [location] VALID for meeting:', latNum, lngNum);
+        }
 
         const findCustomer = await Customer.findById(clientId);
         if (!findCustomer) {
             return NextResponse.json({ success: false, message: 'Customer not found' }, { status: 404 });
         }
 
+        // ── Normalise location payload (only attach when present) ──
+        const locationPayload =
+            location && Number.isFinite(Number(location.lat)) && Number.isFinite(Number(location.lng))
+                ? {
+                      lat: Number(location.lat),
+                      lng: Number(location.lng),
+                      accuracy: location.accuracy != null ? Number(location.accuracy) : undefined,
+                      address: location.address || '',
+                      capturedAt: location.capturedAt ? new Date(location.capturedAt) : new Date(),
+                  }
+                : undefined;
+
+        console.log('📍 [location] normalised payload to save:', JSON.stringify(locationPayload));
+
+        const meetingUpdateDoc = {
+            salesPersonId,
+            salesPerson,
+            clientId,
+            updateType,
+            status,
+            note,
+            reminderAt,
+            meetingAt,
+            // only set location when it exists — avoids overwriting on non-meeting updates
+            ...(locationPayload ? { location: locationPayload } : {}),
+        };
+
+        console.log('🧾 [meetingUpdateDoc] keys:', Object.keys(meetingUpdateDoc));
+        console.log('🧾 [meetingUpdateDoc] location present:', !!meetingUpdateDoc.location);
+
         const createMeeting = await Meeting.create({
-            meetingUpdate: [
-                {
-                    salesPersonId,
-                    salesPerson,
-                    clientId,
-                    updateType,
-                    status,
-                    note,
-                    reminderAt,
-                    meetingAt,
-                },
-            ],
+            meetingUpdate: [meetingUpdateDoc],
         });
+
+        console.log('✅ [meeting created] id:', createMeeting._id);
+        console.log(
+            '✅ [meeting created] location in DB:',
+            JSON.stringify(createMeeting.meetingUpdate?.[0]?.location || null)
+        );
 
         findCustomer.meetingUpdate = createMeeting._id;
         await findCustomer.save();
 
-        // ── Audit Hook (unchanged) ──
+        // ── Audit Hook ──
         try {
             const authUser = await getAuthUser(req);
             if (authUser) {
@@ -67,7 +140,6 @@ export async function POST(req) {
         } catch (auditErr) {
             console.error('[edit-history] failed to record meeting:', auditErr);
         }
-        // ── END AUDIT HOOK ──
 
         // =========================================================
         // MAIL DECISION
@@ -80,17 +152,12 @@ export async function POST(req) {
             const creatorName = creator?.username || 'Unknown';
             const creatorRole = creator?.role || 'unknown';
 
-            // ── PRIMARY ADMIN (only sourabh) ──
-            // NO other "role: admin" users are auto-added.
             let primaryAdminEmail = '';
             const shouldIncludeAdmin = typeof ccAdmin === 'boolean' ? ccAdmin : updateType === 'meeting';
             if (shouldIncludeAdmin && Admin_for_updateOfCallMeetingGeneral) {
-                // Use the configured email directly. Existence in DB not required —
-                // the mail should go out even if the User doc is missing.
                 primaryAdminEmail = Admin_for_updateOfCallMeetingGeneral;
             }
 
-            // ── Extra CC from ticked recipients (User OR Employee) ──
             const extraIds = Array.isArray(mailRecipients) ? mailRecipients : [];
 
             let extraEmails = [];
@@ -120,11 +187,30 @@ export async function POST(req) {
                         },
                     });
 
-                    // ── Default subject: "{Client Name} - {Update Type}" ──
                     const clientName = findCustomer?.name || findCustomer?.company || 'Client';
                     const typeLabel = updateType === 'meeting' ? 'Meeting' : updateType === 'call' ? 'Call' : 'General';
                     const defaultSubject = `${clientName} - ${typeLabel}`;
-                    const finalSubject = updateType === 'general' && subject && subject.trim() ? subject.trim() : defaultSubject;
+                    const finalSubject =
+                        updateType === 'general' && subject && subject.trim() ? subject.trim() : defaultSubject;
+
+                    // ── location block for the mail body ──
+                    const locationRow = locationPayload
+                        ? `
+                          <tr>
+                            <td style="padding: 8px 0; font-weight: bold;">Location</td>
+                            <td style="padding: 8px 0;">
+                              ${locationPayload.lat.toFixed(6)}, ${locationPayload.lng.toFixed(6)}
+                              ${locationPayload.accuracy ? `(±${Math.round(locationPayload.accuracy)}m)` : ''}
+                              <br/>
+                              <span style="color:#555;">${locationPayload.address || ''}</span>
+                              <br/>
+                              <a href="https://www.google.com/maps?q=${locationPayload.lat},${locationPayload.lng}" target="_blank" rel="noopener">
+                                Open in Google Maps
+                              </a>
+                            </td>
+                          </tr>
+                        `
+                        : '';
 
                     await transporter.sendMail({
                         from: `"ERP Notifications" <${process.env.YOUR_EMAIL_ADDRESS}>`,
@@ -152,6 +238,7 @@ export async function POST(req) {
                     <tr><td style="padding: 8px 0; font-weight: bold;">Update Type</td><td style="padding: 8px 0;">${typeLabel}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Status</td><td style="padding: 8px 0;">${status || '-'}</td></tr>
                     <tr><td style="padding: 8px 0; font-weight: bold;">Meeting Date</td><td style="padding: 8px 0;">${meetingAt ? new Date(meetingAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : '-'}</td></tr>
+                    ${locationRow}
                     <tr><td style="padding: 8px 0; font-weight: bold;">Note</td><td style="padding: 8px 0;">${note || '-'}</td></tr>
                   </table>
                   <hr style="margin: 25px 0; border: none; border-top: 1px solid #e5e7eb;" />

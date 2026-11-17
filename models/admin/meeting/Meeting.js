@@ -29,6 +29,15 @@ const MeetingSchema = new mongoose.Schema(
                     meetingAt: { type: Date },
                     reminderSent: { type: Boolean, default: false },
                     reminderSentAt: { type: Date },
+
+                    // ── 👇 NEW: location (mandatory for meeting updates, optional otherwise) ──
+                    location: {
+                        lat: { type: Number },
+                        lng: { type: Number },
+                        accuracy: { type: Number },
+                        address: { type: String, default: '' },
+                        capturedAt: { type: Date, default: Date.now },
+                    },
                 },
                 { timestamps: true, strictPopulate: false }
             ),
@@ -37,7 +46,7 @@ const MeetingSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// 👇 THIS IS THE MISSING LINK 👇
+// 👇 audit plugin stays as-is 👇
 MeetingSchema.plugin(auditPlugin, { module: 'meeting' });
 
 const Meeting = mongoose.models.Meeting || mongoose.model('Meeting', MeetingSchema);
