@@ -1,5 +1,7 @@
-
 // app/api/meeting/[id]/route.js
+
+
+
 
 import { connectDB } from '@/lib/db';
 import { NextResponse } from 'next/server';
