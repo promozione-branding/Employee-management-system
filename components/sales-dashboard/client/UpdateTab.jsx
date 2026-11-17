@@ -77,6 +77,94 @@ const CcPicker = ({ title, employees, selected, onToggle, search, setSearch }) =
     );
 };
 
+// ---------- Location helper (free, no key) ----------
+async function reverseGeocode(lat, lng) {
+    try {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
+        const res = await fetch(url, { headers: { Accept: 'application/json' } });
+        if (!res.ok) throw new Error('Reverse geocode failed');
+        const data = await res.json();
+        return data?.display_name || '';
+    } catch (e) {
+        console.log('reverseGeocode error:', e);
+        return '';
+    }
+}
+
+const LocationPicker = ({ value, onChange }) => {
+    const [loading, setLoading] = useState(false);
+
+    const capture = () => {
+        if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+            toast.error('Geolocation is not supported by this browser');
+            return;
+        }
+        setLoading(true);
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const { latitude, longitude, accuracy } = pos.coords;
+                const address = await reverseGeocode(latitude, longitude);
+                onChange({
+                    lat: latitude,
+                    lng: longitude,
+                    accuracy,
+                    address,
+                    capturedAt: new Date().toISOString(),
+                });
+                setLoading(false);
+                toast.success('Location captured');
+            },
+            (err) => {
+                setLoading(false);
+                const msg =
+                    err.code === err.PERMISSION_DENIED
+                        ? 'Location permission denied'
+                        : err.code === err.POSITION_UNAVAILABLE
+                        ? 'Location unavailable'
+                        : err.code === err.TIMEOUT
+                        ? 'Location request timed out'
+                        : 'Could not get location';
+                toast.error(msg);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    };
+
+    return (
+        <div className="flex flex-col gap-2 rounded-lg border bg-gray-50 p-3">
+            <div className="flex items-center justify-between">
+                <Label>Location (optional)</Label>
+                <div className="flex gap-2">
+                    <Button type="button" size="sm" variant="secondary" onClick={capture} disabled={loading}>
+                        {loading ? 'Locating…' : value ? 'Recapture' : 'Capture Location'}
+                    </Button>
+                    {value && (
+                        <Button type="button" size="sm" variant="ghost" onClick={() => onChange(null)}>
+                            Clear
+                        </Button>
+                    )}
+                </div>
+            </div>
+            {value ? (
+                <div className="space-y-1 text-xs text-gray-700">
+                    <div>
+                        <strong>Lat/Lng:</strong> {value.lat.toFixed(6)}, {value.lng.toFixed(6)}
+                        {value.accuracy ? ` (±${Math.round(value.accuracy)}m)` : ''}
+                    </div>
+                    {value.address && (
+                        <div>
+                            <strong>Address:</strong> {value.address}
+                        </div>
+                    )}
+                    <div className="text-gray-500">Captured: {new Date(value.capturedAt).toLocaleString()}</div>
+                </div>
+            ) : (
+                <div className="text-xs text-gray-500">No location captured yet.</div>
+            )}
+        </div>
+    );
+};
+
 const UpdateTab = ({ customerId, salesPersonId }) => {
     const [loading, setLoading] = useState(false);
     const [newMeeting, setNewMeeting] = useState(false);
@@ -100,6 +188,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
         meetingDate: '',
     });
     const [meetingRecipients, setMeetingRecipients] = useState([]);
+    const [meetingLocation, setMeetingLocation] = useState(null); // 👈 NEW
 
     // ---------- Call ----------
     const [callForm, setCallForm] = useState({
@@ -272,6 +361,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
             sendToSelf: true,
             ccAdmin: true,
             mailRecipients: meetingRecipients.map((u) => u?._id),
+            location: meetingLocation || undefined, // 👈 NEW
         };
         if (!formData?.salesPersonId || !formData?.clientId) {
             toast.error('client id and salesPersonId not found');
@@ -285,6 +375,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                 setLoading(false);
                 setMeetingRecipients([]);
                 setMeetingSearch('');
+                setMeetingLocation(null); // 👈 NEW
                 setMeetingForm({
                     status: '',
                     note: '',
@@ -317,6 +408,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
             sendToSelf: true,
             ccAdmin: true,
             mailRecipients: meetingRecipients.map((u) => u?._id),
+            location: meetingLocation || undefined, // 👈 NEW
         };
 
         if (!formData?.salesPersonId || !formData?.clientId) {
@@ -333,6 +425,7 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                     setLoading(false);
                     setMeetingRecipients([]);
                     setMeetingSearch('');
+                    setMeetingLocation(null); // 👈 NEW
                     setMeetingForm({
                         status: '',
                         note: '',
@@ -626,6 +719,9 @@ const UpdateTab = ({ customerId, salesPersonId }) => {
                                 />
                             </div>
                         </div>
+
+                        {/* 👇 NEW — location block */}
+                        <LocationPicker value={meetingLocation} onChange={setMeetingLocation} />
 
                         <div className="flex flex-col gap-2 rounded-lg border bg-blue-50/50 p-3">
                             <div className="text-xs text-gray-700">
