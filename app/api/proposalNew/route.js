@@ -3,6 +3,7 @@
 import { connectDB } from '@/lib/db';
 import ProposalNew from '@/models/admin/proposalNew/ProposalNew';
 import { getAuthUser } from '@/lib/getAuthUser';
+import { resolveUserName } from '@/lib/resolveUserName';
 import { NextResponse } from 'next/server';
 
 const round0 = (n) => Math.round(Number(n) || 0);
@@ -15,10 +16,14 @@ export async function GET(req) {
         const { searchParams } = new URL(req.url);
         const clientId = searchParams.get('clientId');
         if (!clientId) return NextResponse.json({ success: false, message: 'clientId required' }, { status: 400 });
+
         const list = await ProposalNew.find({ clientId })
-            .populate({ path: 'salesExecutive', select: 'basicDetails.name' })
-            .populate({ path: 'clientId', select: 'name company phone email GSTIN tanNo Address city state country pincode' })
+            .populate({
+                path: 'clientId',
+                select: 'name company phone email GSTIN tanNo Address city state country pincode',
+            })
             .sort({ createdAt: -1 });
+
         return NextResponse.json({ success: true, data: list }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ success: false, message: error.message || 'Server error' }, { status: 500 });
@@ -31,8 +36,10 @@ export async function POST(req) {
         const authUser = await getAuthUser(req);
         if (!authUser) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
+        const creatorName = await resolveUserName(authUser);
+        console.log('🟢 [POST proposalNew] creatorName resolved →', creatorName, '| authUser:', authUser);
+
         const body = await req.json();
-        console.log('🟢 [API] Received items from frontend:', body.items);
         const {
             clientId,
             items = [],
@@ -55,7 +62,8 @@ export async function POST(req) {
 
         const subtotal = round0(items.reduce((s, it) => s + Number(it.amount || 0), 0));
         const totalServiceDiscount = round0(items.reduce((s, it) => s + Number(it.serviceDiscount || 0), 0));
-        const globalDiscountAmount = discountType === 'percentage' ? round0((subtotal * Number(discountInput || 0)) / 100) : round0(discountInput || 0);
+        const globalDiscountAmount =
+            discountType === 'percentage' ? round0((subtotal * Number(discountInput || 0)) / 100) : round0(discountInput || 0);
         const discountAmount = round0(totalServiceDiscount + globalDiscountAmount);
         const baseAfterDiscount = round0(subtotal - discountAmount);
         const gstAmount = round0(baseAfterDiscount * 0.18);
@@ -72,6 +80,7 @@ export async function POST(req) {
         const doc = await ProposalNew.create({
             clientId,
             salesExecutive: authUser._id,
+            createdByName: creatorName,
             items,
             partialPayments,
             deliveryPeriod,
@@ -95,8 +104,11 @@ export async function POST(req) {
             status: 'draft',
         });
 
+        console.log('✅ [POST proposalNew] created:', doc.proposalNumber, '| createdByName:', doc.createdByName);
+
         return NextResponse.json({ success: true, data: doc }, { status: 201 });
     } catch (error) {
+        console.error('❌ [POST proposalNew] error:', error);
         return NextResponse.json({ success: false, message: error.message || 'Server error' }, { status: 500 });
     }
 }

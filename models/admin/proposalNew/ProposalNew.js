@@ -1,3 +1,4 @@
+
 // models/admin/proposalNew/ProposalNew.js
 
 import mongoose from 'mongoose';
@@ -27,7 +28,10 @@ const PartialPaymentSchema = new mongoose.Schema(
     { _id: false }
 );
 
-const DeliveredMetricSchema = new mongoose.Schema({ label: { type: String, required: true }, count: { type: Number, default: 0, min: 0 } }, { _id: false });
+const DeliveredMetricSchema = new mongoose.Schema(
+    { label: { type: String, required: true }, count: { type: Number, default: 0, min: 0 } },
+    { _id: false }
+);
 
 const ChecklistSectionSchema = new mongoose.Schema(
     {
@@ -38,9 +42,15 @@ const ChecklistSectionSchema = new mongoose.Schema(
     { _id: false }
 );
 
-const CategoryNoteSchema = new mongoose.Schema({ category: { type: String, required: true }, note: { type: String, default: '' } }, { _id: false });
+const CategoryNoteSchema = new mongoose.Schema(
+    { category: { type: String, required: true }, note: { type: String, default: '' } },
+    { _id: false }
+);
 
-const CityPageSchema = new mongoose.Schema({ city: { type: String, required: true }, keyword: { type: String, required: true } }, { _id: false });
+const CityPageSchema = new mongoose.Schema(
+    { city: { type: String, required: true }, keyword: { type: String, required: true } },
+    { _id: false }
+);
 
 const ProposalNewSchema = new mongoose.Schema(
     {
@@ -74,6 +84,12 @@ const ProposalNewSchema = new mongoose.Schema(
         acceptedAt: { type: Date },
         acceptedByEmail: { type: String },
         acceptedIp: { type: String },
+
+        // 👇 audit trail — denormalized names
+        createdByName: { type: String, default: '' },
+        lastEditedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
+        lastEditedByName: { type: String, default: '' },
+        lastEditedAt: { type: Date },
     },
     { timestamps: true }
 );

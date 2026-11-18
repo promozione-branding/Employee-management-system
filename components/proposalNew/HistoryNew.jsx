@@ -9,12 +9,15 @@ import { downloadProposalPdf } from './PdfNew';
 import { listProposalNewService, getProposalNewByIdService, deleteProposalNewService, sendProposalMailService } from '@/service/proposalNew';
 
 const fmt = (n) => `₹ ${Number(n || 0).toLocaleString('en-IN')}`;
-const fmtDate = (d) =>
+
+const fmtDateTime = (d) =>
     d
-        ? new Date(d).toLocaleDateString('en-IN', {
+        ? new Date(d).toLocaleString('en-IN', {
               day: '2-digit',
               month: 'short',
               year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
           })
         : '—';
 
@@ -79,8 +82,6 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
         try {
             const res = await getProposalNewByIdService(id);
             if (!res.success || !res.data) return toast.error('Failed to load proposal');
-            // Render exactly what will be downloaded, then download it from the
-            // committed preview DOM in the effect below — never on a timer guess.
             pendingDownloadRef.current = true;
             setPreview(res.data);
         } catch (err) {
@@ -91,7 +92,6 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
     useEffect(() => {
         if (!preview || !pendingDownloadRef.current) return;
         pendingDownloadRef.current = false;
-        // Double rAF: preview state is committed and PdfNew has painted.
         const raf = requestAnimationFrame(() =>
             requestAnimationFrame(() => {
                 const node = document.getElementById('proposal-print-root');
@@ -155,40 +155,63 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
     return (
         <>
             <ul className="flex flex-col gap-3">
-                {list.map((p) => (
-                    <li key={p._id} className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
-                                <FileText className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <div>
-                                <p className="font-semibold text-gray-800">{p.proposalNumber || '—'}</p>
-                                <p className="text-xs text-gray-500">
-                                    {fmtDate(p.createdAt)} · {p.items?.length || 0} items · {p.status || 'draft'}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <span className="text-sm font-semibold text-gray-800">{fmt(p.grandTotal)}</span>
+                {list.map((p) => {
+                    const wasEdited = !!p?.lastEditedAt;
 
-                            <button onClick={() => handleView(p._id)} className="text-blue-600 hover:text-blue-800" title="View">
-                                <Eye className="h-4 w-4" />
-                            </button>
-                            <button onClick={() => handleEdit(p._id)} className="text-amber-600 hover:text-amber-800" title="Edit">
-                                <Pencil className="h-4 w-4" />
-                            </button>
-                            <button onClick={() => handleDownload(p._id)} className="text-emerald-600 hover:text-emerald-800" title="Download PDF">
-                                <Download className="h-4 w-4" />
-                            </button>
-                            <button onClick={() => openMailModal(p._id)} className="text-indigo-600 hover:text-indigo-800" title="Send mail">
-                                <Mail className="h-4 w-4" />
-                            </button>
-                            <button onClick={() => handleDelete(p._id)} className="text-red-500 hover:text-red-700" title="Delete">
-                                <Trash2 className="h-4 w-4" />
-                            </button>
-                        </div>
-                    </li>
-                ))}
+                    return (
+                        <li key={p._id} className="grid grid-cols-1 items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto_auto]">
+                            
+                            {/* LEFT SIDE: Icon, Number, Status */}
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50">
+                                    <FileText className="h-5 w-5 text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-gray-800">{p.proposalNumber || '—'}</p>
+                                    <p className="text-xs text-gray-500">
+                                        {p.items?.length || 0} items · {p.status || 'draft'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* MIDDLE: Created & Edited Dates */}
+                            <div className="flex flex-col gap-0.5 text-[11px] text-gray-500 border-l border-gray-200 pl-4">
+                                <p>
+                                    <span className="font-medium text-gray-700">Created:</span> {fmtDateTime(p.createdAt)} by {p.createdByName || '—'}
+                                </p>
+                                {wasEdited && (
+                                    <p className="text-amber-600/90">
+                                        <span className="font-medium">Edited:</span> {fmtDateTime(p.lastEditedAt)} by {p.lastEditedByName || '—'}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* RIGHT SIDE: Price + Actions */}
+                            <div className="flex items-center gap-4 border-l border-gray-200 pl-4">
+                                <span className="text-sm font-semibold text-gray-800">{fmt(p.grandTotal)}</span>
+                                
+                                <div className="flex items-center gap-3">
+                                    <button onClick={() => handleView(p._id)} className="text-blue-600 hover:text-blue-800" title="View">
+                                        <Eye className="h-4 w-4" />
+                                    </button>
+                                    <button onClick={() => handleEdit(p._id)} className="text-amber-600 hover:text-amber-800" title="Edit">
+                                        <Pencil className="h-4 w-4" />
+                                    </button>
+                                    <button onClick={() => handleDownload(p._id)} className="text-emerald-600 hover:text-emerald-800" title="Download PDF">
+                                        <Download className="h-4 w-4" />
+                                    </button>
+                                    <button onClick={() => openMailModal(p._id)} className="text-indigo-600 hover:text-indigo-800" title="Send mail">
+                                        <Mail className="h-4 w-4" />
+                                    </button>
+                                    <button onClick={() => handleDelete(p._id)} className="text-red-500 hover:text-red-700" title="Delete">
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                        </li>
+                    );
+                })}
             </ul>
 
             {preview && <PreviewNew proposal={preview} onClose={() => setPreview(null)} />}
