@@ -108,7 +108,7 @@ export default function CallHistoryList({ customerId, scope = 'all' }) {
                         <Th>Date / Time</Th>
                         <Th>Agent</Th>
                         <Th>Direction</Th>
-                        <Th>Status</Th>
+                        <Th>Status</Th>  
                         <Th>Duration</Th>
                         <Th>Note / Disposition</Th>
                         <Th center>Recording</Th>

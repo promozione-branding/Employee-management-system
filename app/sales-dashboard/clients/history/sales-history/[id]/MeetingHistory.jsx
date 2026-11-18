@@ -1,5 +1,4 @@
 // app/sales-dashboard/clients/history/sales-history/[id]/MeetingHistory.jsx
-
 'use client';
 
 import Loading from '@/components/layout/Loading';
@@ -14,52 +13,106 @@ const TABS = [
     { id: 'calls', label: 'Calls' },
 ];
 
+const TYPE_FILTERS = [
+    { id: '', label: 'All' },
+    { id: 'call', label: 'Call' },
+    { id: 'meeting', label: 'Meeting' },
+    { id: 'general', label: 'General' },
+];
+
+const DATE_PRESETS = [
+    { id: 'all', label: 'All' },
+    { id: 'today', label: 'Today' },
+    { id: 'yesterday', label: 'Yesterday' },
+    { id: 'custom', label: 'Custom' },
+];
+
 // ------------------------------------------------------------------
-// Sort helper: upcoming meetings first (soonest first), then past
-// (most recent first). Meetings without a date go to the bottom.
+// Local calendar-day helpers
 // ------------------------------------------------------------------
-function sortByUpcoming(items) {
-    const now = Date.now();
-    const withTime = (item) => {
-        const t = item?.meetingAt ? new Date(item.meetingAt).getTime() : 0;
-        return isNaN(t) ? 0 : t;
-    };
+function toLocalDateStr(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
 
-    const upcoming = [];
-    const past = [];
-    const noDate = [];
+// The date we filter/sort on.
+// General updates have no meetingAt → fall back to createdAt
+function recordDate(item) {
+    return item?.meetingAt || item?.createdAt || null;
+}
 
-    for (const item of items) {
-        const t = withTime(item);
-        if (!t) noDate.push(item);
-        else if (t >= now) upcoming.push(item);
-        else past.push(item);
-    }
-
-    upcoming.sort((a, b) => withTime(a) - withTime(b)); // soonest first
-    past.sort((a, b) => withTime(b) - withTime(a)); // most recent first
-
-    return [...upcoming, ...past, ...noDate];
+// Inclusive day-range test on the record's effective date.
+function inDateRange(item, fromStr, toStr) {
+    if (!fromStr && !toStr) return true;
+    const raw = recordDate(item);
+    if (!raw) return false;
+    const dt = new Date(raw);
+    if (isNaN(dt.getTime())) return false;
+    const dayStr = toLocalDateStr(dt);
+    if (fromStr && dayStr < fromStr) return false;
+    if (toStr && dayStr > toStr) return false;
+    return true;
 }
 
 // ------------------------------------------------------------------
-// Filter: keep meetings whose meetingAt falls on the chosen YYYY-MM-DD
+// Sort:
+//  - upcoming meetings first (soonest meetingAt)
+//  - then everything else by createdAt DESC (latest update first)
 // ------------------------------------------------------------------
-function filterByDate(items, dateStr) {
-    if (!dateStr) return items;
-    const [y, m, d] = dateStr.split('-').map(Number);
-    return items.filter((item) => {
-        if (!item?.meetingAt) return false;
-        const dt = new Date(item.meetingAt);
-        return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
+function sortForDisplay(items) {
+    const now = Date.now();
+    const meetingTime = (item) => {
+        const v = item?.meetingAt ? new Date(item.meetingAt).getTime() : 0;
+        return isNaN(v) ? 0 : v;
+    };
+    const createdTime = (item) => {
+        const v = item?.createdAt ? new Date(item.createdAt).getTime() : 0;
+        return isNaN(v) ? 0 : v;
+    };
+
+    const upcoming = [];
+    const rest = [];
+
+    for (const item of items) {
+        const mt = meetingTime(item);
+        if (mt && mt >= now) upcoming.push(item);
+        else rest.push(item);
+    }
+
+    upcoming.sort((a, b) => meetingTime(a) - meetingTime(b));
+
+    rest.sort((a, b) => {
+        const dc = createdTime(b) - createdTime(a);
+        if (dc !== 0) return dc;
+        return meetingTime(b) - meetingTime(a);
     });
+
+    return [...upcoming, ...rest];
+}
+
+// Normalize "who updated"
+function getActor(item) {
+    const p = item?.salesPersonId;
+    if (!p) return { name: 'Unknown', email: '', role: '' };
+    if (typeof p === 'string') return { name: p, email: '', role: '' };
+    return {
+        name: p.username || p.name || p.fullName || 'Unknown',
+        email: p.email || '',
+        role: p.role || p.userType || '',
+    };
 }
 
 const MeetingHistory = ({ customerId }) => {
     const [activeTab, setActiveTab] = useState('updates');
     const [loading, setLoading] = useState(true);
     const [historyData, setHistoryData] = useState([]);
-    const [filterDate, setFilterDate] = useState(''); // "" = all
+
+    const [typeFilter, setTypeFilter] = useState('');
+    const [datePreset, setDatePreset] = useState('all');
+    const [fromDate, setFromDate] = useState('');
+    const [toDate, setToDate] = useState('');
 
     useEffect(() => {
         async function handleCustomerHistoryFetch() {
@@ -67,38 +120,67 @@ const MeetingHistory = ({ customerId }) => {
                 const res = await clientMeetingHistory(customerId);
                 if (res.success) {
                     setHistoryData(res.data?.meetingUpdate?.meetingUpdate || []);
-                    setLoading(false);
                 }
             } catch (error) {
                 console.log(error);
-                setLoading(false);
                 toast.error(error.message || 'Error while fetching customer history');
+            } finally {
+                setLoading(false);
             }
         }
         if (customerId) handleCustomerHistoryFetch();
     }, [customerId]);
 
-    // Sorted + filtered list
-    const displayed = useMemo(() => {
-        const sorted = sortByUpcoming(historyData || []);
-        return filterByDate(sorted, filterDate);
-    }, [historyData, filterDate]);
+    const { from, to } = useMemo(() => {
+        const today = new Date();
+        const todayStr = toLocalDateStr(today);
 
-    // Counts for quick context
+        if (datePreset === 'today') return { from: todayStr, to: todayStr };
+        if (datePreset === 'yesterday') {
+            const y = new Date(today);
+            y.setDate(y.getDate() - 1);
+            const yStr = toLocalDateStr(y);
+            return { from: yStr, to: yStr };
+        }
+        if (datePreset === 'custom') return { from: fromDate, to: toDate };
+        return { from: '', to: '' };
+    }, [datePreset, fromDate, toDate]);
+
+    const displayed = useMemo(() => {
+        let list = historyData || [];
+        if (typeFilter) {
+            list = list.filter((i) => (i?.updateType || '').toLowerCase() === typeFilter);
+        }
+        list = list.filter((i) => inDateRange(i, from, to));
+        return sortForDisplay(list);
+    }, [historyData, typeFilter, from, to]);
+
     const counts = useMemo(() => {
         const now = Date.now();
         let upcoming = 0;
         let past = 0;
+        let total = 0;
         (historyData || []).forEach((item) => {
-            if (!item?.meetingAt) return;
-            const t = new Date(item.meetingAt).getTime();
-            if (!isNaN(t)) {
-                if (t >= now) upcoming++;
+            if (typeFilter && (item?.updateType || '').toLowerCase() !== typeFilter) return;
+            if (!inDateRange(item, from, to)) return;
+            total++;
+            const mt = item?.meetingAt ? new Date(item.meetingAt).getTime() : 0;
+            if (mt && !isNaN(mt)) {
+                if (mt >= now) upcoming++;
                 else past++;
             }
         });
-        return { upcoming, past, total: historyData?.length || 0 };
-    }, [historyData]);
+        return { upcoming, past, total };
+    }, [historyData, typeFilter, from, to]);
+
+    const clearFilters = () => {
+        setTypeFilter('');
+        setDatePreset('all');
+        setFromDate('');
+        setToDate('');
+    };
+
+    const anyFilter = Boolean(typeFilter || datePreset !== 'all' || fromDate || toDate);
 
     return (
         <div>
@@ -118,42 +200,86 @@ const MeetingHistory = ({ customerId }) => {
                 ))}
             </div>
 
-            {/* Updates tab */}
             {activeTab === 'updates' && (
                 <>
                     {loading ? (
                         <Loading />
                     ) : (
                         <>
-                            {/* Toolbar: counts + date picker */}
-                            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                                <div className="flex items-center gap-3 text-xs text-gray-600">
-                                    <span className="rounded bg-gray-100 px-2 py-1">
-                                        Total <b className="text-gray-800">{counts.total}</b>
-                                    </span>
-                                    <span className="rounded bg-blue-50 px-2 py-1 text-blue-700">
-                                        Upcoming <b>{counts.upcoming}</b>
-                                    </span>
-                                    <span className="rounded bg-emerald-50 px-2 py-1 text-emerald-700">
-                                        Past <b>{counts.past}</b>
-                                    </span>
+                            {/* Filters */}
+                            <div className="mb-4 space-y-3 rounded-lg border border-gray-200 bg-white p-3">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="mr-1 text-xs font-medium text-gray-500 uppercase">Type:</span>
+                                    {TYPE_FILTERS.map((f) => (
+                                        <button
+                                            key={f.id || 'all'}
+                                            type="button"
+                                            onClick={() => setTypeFilter(f.id)}
+                                            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                                                typeFilter === f.id
+                                                    ? 'border-blue-600 bg-blue-600 text-white'
+                                                    : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    ))}
                                 </div>
 
-                                <div className="flex items-center gap-2">
-                                    <div className="relative">
-                                        <CalendarDays className="pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                        <input
-                                            type="date"
-                                            value={filterDate}
-                                            onChange={(e) => setFilterDate(e.target.value)}
-                                            className="rounded-md border border-gray-200 bg-white py-1.5 pr-2 pl-8 text-sm"
-                                        />
-                                    </div>
-                                    {filterDate && (
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="mr-1 text-xs font-medium text-gray-500 uppercase">Date:</span>
+                                    {DATE_PRESETS.map((p) => (
+                                        <button
+                                            key={p.id}
+                                            type="button"
+                                            onClick={() => {
+                                                setDatePreset(p.id);
+                                                if (p.id !== 'custom') {
+                                                    setFromDate('');
+                                                    setToDate('');
+                                                }
+                                            }}
+                                            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                                                datePreset === p.id
+                                                    ? 'border-emerald-600 bg-emerald-600 text-white'
+                                                    : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            {p.label}
+                                        </button>
+                                    ))}
+
+                                    {datePreset === 'custom' && (
+                                        <div className="ml-2 flex flex-wrap items-center gap-2">
+                                            <div className="relative">
+                                                <CalendarDays className="pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                                <input
+                                                    type="date"
+                                                    value={fromDate}
+                                                    max={toDate || undefined}
+                                                    onChange={(e) => setFromDate(e.target.value)}
+                                                    className="rounded-md border border-gray-200 bg-white py-1.5 pr-2 pl-8 text-sm"
+                                                />
+                                            </div>
+                                            <span className="text-xs text-gray-400">to</span>
+                                            <div className="relative">
+                                                <CalendarDays className="pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                                <input
+                                                    type="date"
+                                                    value={toDate}
+                                                    min={fromDate || undefined}
+                                                    onChange={(e) => setToDate(e.target.value)}
+                                                    className="rounded-md border border-gray-200 bg-white py-1.5 pr-2 pl-8 text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {anyFilter && (
                                         <button
                                             type="button"
-                                            onClick={() => setFilterDate('')}
-                                            className="inline-flex items-center gap-1 rounded border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+                                            onClick={clearFilters}
+                                            className="ml-auto inline-flex items-center gap-1 rounded border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
                                         >
                                             <X className="h-3.5 w-3.5" />
                                             Clear
@@ -162,42 +288,78 @@ const MeetingHistory = ({ customerId }) => {
                                 </div>
                             </div>
 
-                            {/* Empty state */}
+                            {/* Summary chips */}
+                            <div className="mb-4 flex flex-wrap items-center gap-3 text-xs text-gray-600">
+                                <span className="rounded bg-gray-100 px-2 py-1">
+                                    Total <b className="text-gray-800">{counts.total}</b>
+                                </span>
+                                <span className="rounded bg-blue-50 px-2 py-1 text-blue-700">
+                                    Upcoming <b>{counts.upcoming}</b>
+                                </span>
+                                <span className="rounded bg-emerald-50 px-2 py-1 text-emerald-700">
+                                    Past <b>{counts.past}</b>
+                                </span>
+                            </div>
+
                             {displayed.length === 0 ? (
                                 <div className="rounded-lg bg-white p-10 text-center text-sm text-gray-500 shadow-md">
-                                    {filterDate ? `No meetings on ${new Date(filterDate).toLocaleDateString()}.` : 'No history available.'}
+                                    {anyFilter ? 'No updates match the current filters.' : 'No history available.'}
                                 </div>
                             ) : (
                                 <div className="overflow-x-auto rounded-lg bg-white shadow-md">
                                     <table className="min-w-full divide-y divide-gray-200">
                                         <thead className="bg-gray-50">
                                             <tr>
-                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">S.No</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Meeting Type</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Notes</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Status</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Meeting At</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Reminder At</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Sales Person</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">S.No</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Type</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Updated By</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Notes</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Status</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Meeting At</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Reminder At</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Created</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200 bg-white">
                                             {displayed.map((item, idx) => {
                                                 const isUpcoming = item?.meetingAt && new Date(item.meetingAt).getTime() >= Date.now();
+                                                const actor = getActor(item);
+                                                const type = (item?.updateType || 'meeting').toLowerCase();
 
                                                 return (
                                                     <tr key={item?._id} className="hover:bg-gray-50">
-                                                        <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">{idx + 1}</td>
-                                                        <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 capitalize">
-                                                            {item?.updateType || 'Meeting'}
+                                                        <td className="px-4 py-3 text-sm whitespace-nowrap text-gray-500">{idx + 1}</td>
+                                                        <td className="px-4 py-3 text-sm whitespace-nowrap">
+                                                            <span
+                                                                className={`inline-block rounded px-2 py-0.5 text-xs font-medium capitalize ${
+                                                                    type === 'call'
+                                                                        ? 'bg-blue-50 text-blue-700'
+                                                                        : type === 'meeting'
+                                                                          ? 'bg-purple-50 text-purple-700'
+                                                                          : 'bg-gray-100 text-gray-700'
+                                                                }`}
+                                                            >
+                                                                {type}
+                                                            </span>
                                                         </td>
-                                                        <td className="max-w-xs truncate px-6 py-4 text-sm text-gray-500" title={item?.note}>
+                                                        <td className="px-4 py-3 text-sm">
+                                                            <p className="max-w-[180px] truncate font-medium text-gray-800">{actor.name}</p>
+                                                            {actor.email && (
+                                                                <p className="max-w-[180px] truncate text-xs text-gray-500">{actor.email}</p>
+                                                            )}
+                                                            {actor.role && (
+                                                                <span className="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 uppercase">
+                                                                    {actor.role}
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                        <td className="max-w-xs truncate px-4 py-3 text-sm text-gray-500" title={item?.note}>
                                                             {item?.note || '-'}
                                                         </td>
-                                                        <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500 capitalize">
+                                                        <td className="px-4 py-3 text-sm whitespace-nowrap text-gray-500 capitalize">
                                                             {item?.status || 'Pending'}
                                                         </td>
-                                                        <td className="px-6 py-4 text-sm whitespace-nowrap">
+                                                        <td className="px-4 py-3 text-sm whitespace-nowrap">
                                                             <span className={isUpcoming ? 'font-medium text-blue-700' : 'text-gray-500'}>
                                                                 {item?.meetingAt
                                                                     ? new Date(item.meetingAt).toLocaleString([], {
@@ -212,7 +374,7 @@ const MeetingHistory = ({ customerId }) => {
                                                                 </span>
                                                             )}
                                                         </td>
-                                                        <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                                                        <td className="px-4 py-3 text-sm whitespace-nowrap text-gray-500">
                                                             {item?.reminderAt
                                                                 ? new Date(item.reminderAt).toLocaleString([], {
                                                                       dateStyle: 'medium',
@@ -220,8 +382,13 @@ const MeetingHistory = ({ customerId }) => {
                                                                   })
                                                                 : 'N/A'}
                                                         </td>
-                                                        <td className="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-500">
-                                                            {item?.salesPersonId?.username || 'Unknown'}
+                                                        <td className="px-4 py-3 text-xs whitespace-nowrap text-gray-500">
+                                                            {item?.createdAt
+                                                                ? new Date(item.createdAt).toLocaleString([], {
+                                                                      dateStyle: 'medium',
+                                                                      timeStyle: 'short',
+                                                                  })
+                                                                : '—'}
                                                         </td>
                                                     </tr>
                                                 );
@@ -235,7 +402,7 @@ const MeetingHistory = ({ customerId }) => {
                 </>
             )}
 
-            {/* Calls tab */}
+            {/* Calls tab — unchanged */}
             {activeTab === 'calls' && <CallHistoryList customerId={customerId} scope="all" />}
         </div>
     );
