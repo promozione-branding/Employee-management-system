@@ -1,10 +1,7 @@
 'use client';
-// app/dashboard/whoami/page.jsx
-// Temporary debug page — DELETE when done.
-
 import { useEffect, useState } from 'react';
 
-export default function WhoAmIPage() {
+export default function WhoAmIDebug() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState(null);
@@ -13,6 +10,7 @@ export default function WhoAmIPage() {
         try {
             setLoading(true);
             setErr(null);
+            // We still hit the same API
             const res = await fetch('/api/test/whoami', { credentials: 'include' });
             const json = await res.json();
             setData(json);
@@ -37,7 +35,6 @@ export default function WhoAmIPage() {
                 >
                     Refresh
                 </button>
-                <span style={{ color: '#666', fontSize: 12 }}>← Post-login test. Share JSON if something is null.</span>
             </div>
 
             {loading && <p>Loading…</p>}
@@ -74,30 +71,6 @@ export default function WhoAmIPage() {
                                         {data.authUser?.role || <span style={{ color: 'red' }}>null</span>}
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td style={{ padding: '6px 12px', border: '1px solid #ddd', fontWeight: 600 }}>User.username</td>
-                                    <td style={{ padding: '6px 12px', border: '1px solid #ddd' }}>
-                                        {data.userDoc?.username || <span style={{ color: '#999' }}>—</span>}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: '6px 12px', border: '1px solid #ddd', fontWeight: 600 }}>User.name</td>
-                                    <td style={{ padding: '6px 12px', border: '1px solid #ddd' }}>
-                                        {data.userDoc?.name || <span style={{ color: '#999' }}>—</span>}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: '6px 12px', border: '1px solid #ddd', fontWeight: 600 }}>User.basicDetails.name</td>
-                                    <td style={{ padding: '6px 12px', border: '1px solid #ddd' }}>
-                                        {data.userDoc?.basicDetails?.name || <span style={{ color: '#999' }}>—</span>}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: '6px 12px', border: '1px solid #ddd', fontWeight: 600 }}>Employee.basicDetails.name</td>
-                                    <td style={{ padding: '6px 12px', border: '1px solid #ddd' }}>
-                                        {data.employeeDoc?.basicDetails?.name || <span style={{ color: '#999' }}>—</span>}
-                                    </td>
-                                </tr>
                                 <tr style={{ background: '#fef9c3' }}>
                                     <td style={{ padding: '6px 12px', border: '1px solid #ddd', fontWeight: 700 }}>resolvedName</td>
                                     <td style={{ padding: '6px 12px', border: '1px solid #ddd', fontWeight: 700 }}>
@@ -107,19 +80,9 @@ export default function WhoAmIPage() {
                             </tbody>
                         </table>
                     </section>
-
-                    <section style={{ marginBottom: 20 }}>
+                    <section>
                         <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>📦 Raw JSON</h2>
-                        <pre
-                            style={{
-                                background: '#fff',
-                                padding: 12,
-                                border: '1px solid #ddd',
-                                borderRadius: 6,
-                                overflow: 'auto',
-                                maxHeight: '50vh',
-                            }}
-                        >
+                        <pre style={{ background: '#fff', padding: 12, border: '1px solid #ddd', borderRadius: 6, overflow: 'auto', maxHeight: '50vh' }}>
                             {JSON.stringify(data, null, 2)}
                         </pre>
                     </section>
