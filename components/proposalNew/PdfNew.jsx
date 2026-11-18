@@ -468,7 +468,7 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                     <div style={{ marginTop: '12px' }}>
                         <div style={{ fontWeight: 700, fontSize: '12px', marginBottom: '4px' }}>Payment Schedule</div>
                         <div className="schedule-grid">
-                            <div className="grid-head">Milestone</div>
+                            <div className="grid-head">Payment Stage</div>
                             <div className="grid-head right">Amount (INR)</div>
                             {partialPayments.map((p, i) => (
                                 <React.Fragment key={i}>
