@@ -8,7 +8,7 @@ const WorkflowSchema = new mongoose.Schema(
     {
         customerId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Customer',
+            ref: 'Customer', 
             required: true,
             index: true,
         },
@@ -68,7 +68,7 @@ const WorkflowSchema = new mongoose.Schema(
             nextReminderAt: { type: Date, default: null, index: true },
         },
     },
-    { timestamps: true }
+    { timestamps: true } 
 );
 
 WorkflowSchema.index({ createdAt: -1 });

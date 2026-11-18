@@ -58,7 +58,7 @@ export async function POST(req) {
 
             await EmployeeWorkDetail.updateOne(
                 {
-                    _id: workDetail._id,
+                    _id: workDetail._id, 
                 },
                 {
                     $addToSet: {
@@ -227,3 +227,4 @@ export async function POST(req) {
         );
     }
 }
+ 

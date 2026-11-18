@@ -9,12 +9,13 @@ import { toast } from 'react-hot-toast';
 import { listProposalNewService, getProposalNewByIdService } from '@/service/proposalNew';
 import { getLedgerNewService } from '@/service/proposalNew/ledgerNew';
 import { hasLedgerEntryForProposal } from '@/lib/ledgerNewMath';
+import WorkflowHistory from './WorkflowHistory'; // 👈 NEW
 
 const DURATION_OPTIONS = [
     { value: '3m', label: '3 Months', months: 3 },
     { value: '6m', label: '6 Months', months: 6 },
     { value: '12m', label: '12 Months', months: 12 },
-    { value: 'custom', label: 'Custom', months: null },
+    { value: 'custom', label: 'Custom', months: null }, 
 ];
 
 const getToday = () => {
@@ -106,6 +107,9 @@ export default function Createworkflow({ customerId, onSave, onGoToLedger }) {
     const [loadingProposalDetails, setLoadingProposalDetails] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+
+    // 👈 NEW: Refresh key for the history list
+    const [refreshKey, setRefreshKey] = useState(0);
 
     // Load the customer's proposal history.
     const fetchProposals = useCallback(async () => {
@@ -325,6 +329,7 @@ export default function Createworkflow({ customerId, onSave, onGoToLedger }) {
 
             toast.success('Workflow created successfully.');
             resetForm();
+            setRefreshKey((prev) => prev + 1); // 👈 Trigger history refresh
         } catch (err) {
             console.error('Failed to save workflow:', err);
 
@@ -340,221 +345,143 @@ export default function Createworkflow({ customerId, onSave, onGoToLedger }) {
     const labelClassName = 'mb-1.5 block text-sm font-medium text-gray-700';
 
     return (
-        <div className="mb-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
-            {/* Header */}
-            <div className="flex items-center gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3 sm:px-5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white">
-                    <Workflow className="h-4 w-4 text-gray-700" />
+        <div className="flex flex-col gap-2"> {/* 👈 Wrapper */}
+            
+            <div className="mb-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
+                {/* Header */}
+                <div className="flex items-center gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3 sm:px-5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white">
+                        <Workflow className="h-4 w-4 text-gray-700" />
+                    </div>
+
+                    <div>
+                        <h2 className="text-base font-semibold text-gray-900">Create Workflow</h2>
+                        <p className="mt-0.5 text-xs text-gray-500">Create a workflow from an existing customer proposal.</p>
+                    </div>
                 </div>
 
-                <div>
-                    <h2 className="text-base font-semibold text-gray-900">Create Workflow</h2>
-                    <p className="mt-0.5 text-xs text-gray-500">Create a workflow from an existing customer proposal.</p>
-                </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-5 p-4 sm:p-5">
-                {/* Proposal selection */}
-                <section className="space-y-3">
-                    <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-gray-500" />
-                        <h3 className="text-sm font-semibold text-gray-800">Proposal Details</h3>
-                    </div>
-
-                    <div>
-                        <label htmlFor="workflow-proposal" className={labelClassName}>
-                            Select Proposal <span className="text-red-500">*</span>
-                        </label>
-
-                        <div className="relative">
-                            <select
-                                id="workflow-proposal"
-                                value={selectedProposalId}
-                                onChange={(event) => handleProposalChange(event.target.value)}
-                                disabled={loadingProposals || saving}
-                                className={`${inputClassName} appearance-none pr-9`}
-                                required
-                            >
-                                <option value="">{loadingProposals ? 'Loading proposal history...' : 'Choose a proposal'}</option>
-
-                                {proposals.map((proposal) => {
-                                    const id = getProposalId(proposal);
-
-                                    if (!id) return null;
-
-                                    return (
-                                        <option key={id} value={id}>
-                                            {getProposalLabel(proposal)}
-                                        </option>
-                                    );
-                                })}
-                            </select>
-
-                            <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                <form onSubmit={handleSubmit} className="space-y-5 p-4 sm:p-5">
+                    {/* Proposal selection */}
+                    <section className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-gray-500" />
+                            <h3 className="text-sm font-semibold text-gray-800">Proposal Details</h3>
                         </div>
 
-                        {!loadingProposals && proposals.length === 0 && !error && (
-                            <p className="mt-1.5 text-xs text-gray-500">No proposals were found for this customer.</p>
-                        )}
-                    </div>
-
-                    {loadingProposalDetails && (
-                        <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-600">
-                            <LoaderCircle className="h-4 w-4 animate-spin" />
-                            Loading proposal details...
-                        </div>
-                    )}
-
-                    {ledgerBlocked && (
-                        <div
-                            role="alert"
-                            className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
-                        >
-                            <span>Kindly make entry on ledger to continue</span>
-                            {typeof onGoToLedger === 'function' && (
-                                <button
-                                    type="button"
-                                    onClick={onGoToLedger}
-                                    className="rounded-md bg-amber-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-800"
-                                >
-                                    Go to New Ledger
-                                </button>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Selected proposal summary */}
-                    {selectedProposal && !loadingProposalDetails && (
-                        <div className="rounded-lg border border-emerald-400 bg-emerald-50 p-3">
-                            <div className="flex items-start gap-2">
-                                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
-                                    <Check className="h-3 w-3" />
-                                </div>
-
-                                <div className="min-w-0">
-                                    <p className="text-sm font-medium text-emerald-900">{selectedProposal.proposalNumber || 'Selected proposal'}</p>
-
-                                    <p className="mt-0.5 text-xs text-emerald-800">
-                                        {categories.length} {categories.length === 1 ? 'service' : 'services'} available in this proposal.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </section>
-
-                {/* Category selection */}
-                <section className="space-y-3">
-                    <div>
-                        <h3 className="text-sm font-semibold text-gray-800">Workflow Category</h3>
-                        <p className="mt-1 text-xs text-gray-500">Select the service included in the chosen proposal.</p>
-                    </div>
-
-                    <div>
-                        <label htmlFor="workflow-category" className={labelClassName}>
-                            Service / Category <span className="text-red-500">*</span>
-                        </label>
-
-                        <div className="relative">
-                            <select
-                                id="workflow-category"
-                                value={selectedCategory}
-                                onChange={(event) => setSelectedCategory(event.target.value)}
-                                disabled={!selectedProposal || loadingProposalDetails || saving || categories.length === 0}
-                                className={`${inputClassName} appearance-none pr-9`}
-                                required
-                            >
-                                <option value="">
-                                    {!selectedProposal
-                                        ? 'Select a proposal first'
-                                        : categories.length === 0
-                                          ? 'No services found in this proposal'
-                                          : 'Choose a service'}
-                                </option>
-
-                                {categories.map((category) => (
-                                    <option key={category.value} value={category.value}>
-                                        {category.label}
-                                    </option>
-                                ))}
-                            </select>
-
-                            <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                        </div>
-                    </div>
-
-                    {selectedCategory && (
-                        <div className="flex items-center gap-2 rounded-lg border border-emerald-400 bg-emerald-50 px-3 py-2">
-                            <Check className="h-4 w-4 shrink-0 text-emerald-600" />
-                            <span className="text-sm font-medium text-emerald-900">
-                                {categories.find((category) => category.value === selectedCategory)?.label || selectedCategory}
-                            </span>
-                        </div>
-                    )}
-                </section>
-
-                {/* Description */}
-                <section className="space-y-1.5">
-                    <label htmlFor="workflow-description" className="block text-sm font-semibold text-gray-800">
-                        Description
-                        <span className="ml-1 font-normal text-gray-400">(Optional)</span>
-                    </label>
-
-                    <textarea
-                        id="workflow-description"
-                        value={description}
-                        onChange={(event) => setDescription(event.target.value)}
-                        placeholder="Describe the work, deliverables, goals, or special instructions..."
-                        rows={4}
-                        disabled={saving}
-                        className={`${inputClassName} resize-y`}
-                    />
-
-                    <p className="text-xs text-gray-500">Add the details your team needs to complete this workflow.</p>
-                </section>
-
-                {/* Dates and duration */}
-                <section className="space-y-3">
-                    <div className="flex items-center gap-2">
-                        <CalendarDays className="h-4 w-4 text-gray-500" />
-                        <h3 className="text-sm font-semibold text-gray-800">Timeline</h3>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        {/* Start date */}
                         <div>
-                            <label htmlFor="workflow-start-date" className={labelClassName}>
-                                Start Date <span className="text-red-500">*</span>
-                            </label>
-
-                            <input
-                                id="workflow-start-date"
-                                type="date"
-                                value={startDate}
-                                onChange={(event) => handleStartDateChange(event.target.value)}
-                                disabled={saving}
-                                className={inputClassName}
-                                required
-                            />
-                        </div>
-
-                        {/* Duration */}
-                        <div>
-                            <label htmlFor="workflow-duration" className={labelClassName}>
-                                Duration <span className="text-red-500">*</span>
+                            <label htmlFor="workflow-proposal" className={labelClassName}>
+                                Select Proposal <span className="text-red-500">*</span>
                             </label>
 
                             <div className="relative">
                                 <select
-                                    id="workflow-duration"
-                                    value={duration}
-                                    onChange={(event) => handleDurationChange(event.target.value)}
-                                    disabled={saving}
+                                    id="workflow-proposal"
+                                    value={selectedProposalId}
+                                    onChange={(event) => handleProposalChange(event.target.value)}
+                                    disabled={loadingProposals || saving}
                                     className={`${inputClassName} appearance-none pr-9`}
+                                    required
                                 >
-                                    {DURATION_OPTIONS.map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
+                                    <option value="">{loadingProposals ? 'Loading proposal history...' : 'Choose a proposal'}</option>
+
+                                    {proposals.map((proposal) => {
+                                        const id = getProposalId(proposal);
+
+                                        if (!id) return null;
+
+                                        return (
+                                            <option key={id} value={id}>
+                                                {getProposalLabel(proposal)}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+
+                                <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                            </div>
+
+                            {!loadingProposals && proposals.length === 0 && !error && (
+                                <p className="mt-1.5 text-xs text-gray-500">No proposals were found for this customer.</p>
+                            )}
+                        </div>
+
+                        {loadingProposalDetails && (
+                            <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-600">
+                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                Loading proposal details...
+                            </div>
+                        )}
+
+                        {ledgerBlocked && (
+                            <div
+                                role="alert"
+                                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+                            >
+                                <span>Kindly make entry on ledger to continue</span>
+                                {typeof onGoToLedger === 'function' && (
+                                    <button
+                                        type="button"
+                                        onClick={onGoToLedger}
+                                        className="rounded-md bg-amber-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-800"
+                                    >
+                                        Go to New Ledger
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Selected proposal summary */}
+                        {selectedProposal && !loadingProposalDetails && (
+                            <div className="rounded-lg border border-emerald-400 bg-emerald-50 p-3">
+                                <div className="flex items-start gap-2">
+                                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
+                                        <Check className="h-3 w-3" />
+                                    </div>
+
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-medium text-emerald-900">{selectedProposal.proposalNumber || 'Selected proposal'}</p>
+
+                                        <p className="mt-0.5 text-xs text-emerald-800">
+                                            {categories.length} {categories.length === 1 ? 'service' : 'services'} available in this proposal.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* Category selection */}
+                    <section className="space-y-3">
+                        <div>
+                            <h3 className="text-sm font-semibold text-gray-800">Workflow Category</h3>
+                            <p className="mt-1 text-xs text-gray-500">Select the service included in the chosen proposal.</p>
+                        </div>
+
+                        <div>
+                            <label htmlFor="workflow-category" className={labelClassName}>
+                                Service / Category <span className="text-red-500">*</span>
+                            </label>
+
+                            <div className="relative">
+                                <select
+                                    id="workflow-category"
+                                    value={selectedCategory}
+                                    onChange={(event) => setSelectedCategory(event.target.value)}
+                                    disabled={!selectedProposal || loadingProposalDetails || saving || categories.length === 0}
+                                    className={`${inputClassName} appearance-none pr-9`}
+                                    required
+                                >
+                                    <option value="">
+                                        {!selectedProposal
+                                            ? 'Select a proposal first'
+                                            : categories.length === 0
+                                              ? 'No services found in this proposal'
+                                              : 'Choose a service'}
+                                    </option>
+
+                                    {categories.map((category) => (
+                                        <option key={category.value} value={category.value}>
+                                            {category.label}
                                         </option>
                                     ))}
                                 </select>
@@ -563,112 +490,197 @@ export default function Createworkflow({ customerId, onSave, onGoToLedger }) {
                             </div>
                         </div>
 
-                        {/* Custom end date */}
-                        {duration === 'custom' && (
-                            <div className="sm:col-span-2">
-                                <label htmlFor="workflow-custom-end-date" className={labelClassName}>
-                                    Custom End Date <span className="text-red-500">*</span>
+                        {selectedCategory && (
+                            <div className="flex items-center gap-2 rounded-lg border border-emerald-400 bg-emerald-50 px-3 py-2">
+                                <Check className="h-4 w-4 shrink-0 text-emerald-600" />
+                                <span className="text-sm font-medium text-emerald-900">
+                                    {categories.find((category) => category.value === selectedCategory)?.label || selectedCategory}
+                                </span>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* Description */}
+                    <section className="space-y-1.5">
+                        <label htmlFor="workflow-description" className="block text-sm font-semibold text-gray-800">
+                            Description
+                            <span className="ml-1 font-normal text-gray-400">(Optional)</span>
+                        </label>
+
+                        <textarea
+                            id="workflow-description"
+                            value={description}
+                            onChange={(event) => setDescription(event.target.value)}
+                            placeholder="Describe the work, deliverables, goals, or special instructions..."
+                            rows={4}
+                            disabled={saving}
+                            className={`${inputClassName} resize-y`}
+                        />
+
+                        <p className="text-xs text-gray-500">Add the details your team needs to complete this workflow.</p>
+                    </section>
+
+                    {/* Dates and duration */}
+                    <section className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <CalendarDays className="h-4 w-4 text-gray-500" />
+                            <h3 className="text-sm font-semibold text-gray-800">Timeline</h3>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            {/* Start date */}
+                            <div>
+                                <label htmlFor="workflow-start-date" className={labelClassName}>
+                                    Start Date <span className="text-red-500">*</span>
                                 </label>
 
                                 <input
-                                    id="workflow-custom-end-date"
+                                    id="workflow-start-date"
                                     type="date"
-                                    value={customEndDate}
-                                    min={startDate || undefined}
-                                    onChange={(event) => setCustomEndDate(event.target.value)}
+                                    value={startDate}
+                                    onChange={(event) => handleStartDateChange(event.target.value)}
                                     disabled={saving}
                                     className={inputClassName}
                                     required
                                 />
                             </div>
-                        )}
 
-                        {/* Calculated end date */}
-                        <div className={duration === 'custom' ? 'sm:col-span-2' : ''}>
-                            <label htmlFor="workflow-end-date" className={labelClassName}>
-                                End Date
-                            </label>
+                            {/* Duration */}
+                            <div>
+                                <label htmlFor="workflow-duration" className={labelClassName}>
+                                    Duration <span className="text-red-500">*</span>
+                                </label>
 
-                            <input
-                                id="workflow-end-date"
-                                type="text"
-                                value={formatDate(computedEndDate)}
-                                readOnly
-                                className={`${inputClassName} bg-gray-50 font-medium text-gray-700`}
-                            />
+                                <div className="relative">
+                                    <select
+                                        id="workflow-duration"
+                                        value={duration}
+                                        onChange={(event) => handleDurationChange(event.target.value)}
+                                        disabled={saving}
+                                        className={`${inputClassName} appearance-none pr-9`}
+                                    >
+                                        {DURATION_OPTIONS.map((option) => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
 
-                            <p className="mt-1.5 text-xs text-gray-500">
-                                {duration === 'custom' ? 'Select the end date manually above.' : 'Automatically calculated from the start date and duration.'}
-                            </p>
+                                    <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                                </div>
+                            </div>
+
+                            {/* Custom end date */}
+                            {duration === 'custom' && (
+                                <div className="sm:col-span-2">
+                                    <label htmlFor="workflow-custom-end-date" className={labelClassName}>
+                                        Custom End Date <span className="text-red-500">*</span>
+                                    </label>
+
+                                    <input
+                                        id="workflow-custom-end-date"
+                                        type="date"
+                                        value={customEndDate}
+                                        min={startDate || undefined}
+                                        onChange={(event) => setCustomEndDate(event.target.value)}
+                                        disabled={saving}
+                                        className={inputClassName}
+                                        required
+                                    />
+                                </div>
+                            )}
+
+                            {/* Calculated end date */}
+                            <div className={duration === 'custom' ? 'sm:col-span-2' : ''}>
+                                <label htmlFor="workflow-end-date" className={labelClassName}>
+                                    End Date
+                                </label>
+
+                                <input
+                                    id="workflow-end-date"
+                                    type="text"
+                                    value={formatDate(computedEndDate)}
+                                    readOnly
+                                    className={`${inputClassName} bg-gray-50 font-medium text-gray-700`}
+                                />
+
+                                <p className="mt-1.5 text-xs text-gray-500">
+                                    {duration === 'custom' ? 'Select the end date manually above.' : 'Automatically calculated from the start date and duration.'}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
 
-                {/* Timeline summary */}
-                {startDate && computedEndDate && (
-                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-                        <p className="text-xs font-medium text-gray-500">WORKFLOW TIMELINE</p>
+                    {/* Timeline summary */}
+                    {startDate && computedEndDate && (
+                        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                            <p className="text-xs font-medium text-gray-500">WORKFLOW TIMELINE</p>
 
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-                            <span className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 font-medium text-gray-800">{formatDate(startDate)}</span>
+                            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                                <span className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 font-medium text-gray-800">{formatDate(startDate)}</span>
 
-                            <span className="text-gray-400">→</span>
+                                <span className="text-gray-400">→</span>
 
-                            <span className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 font-medium text-gray-800">
-                                {formatDate(computedEndDate)}
-                            </span>
+                                <span className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 font-medium text-gray-800">
+                                    {formatDate(computedEndDate)}
+                                </span>
+                            </div>
                         </div>
+                    )}
+
+                    {/* Error message */}
+                    {error && (
+                        <div role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                            {error}
+                        </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex flex-col-reverse gap-2 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end">
+                        <button
+                            type="button"
+                            onClick={resetForm}
+                            disabled={saving}
+                            className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            Reset
+                        </button>
+
+                        <button
+                            type="submit"
+                            disabled={
+                                saving ||
+                                loadingLedger ||
+                                ledgerBlocked ||
+                                loadingProposals ||
+                                loadingProposalDetails ||
+                                !selectedProposal ||
+                                !selectedCategory ||
+                                !startDate ||
+                                !computedEndDate ||
+                                computedEndDate < startDate
+                            }
+                            className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
+                        >
+                            {saving ? (
+                                <>
+                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="h-4 w-4" />
+                                    Create Workflow
+                                </>
+                            )}
+                        </button>
                     </div>
-                )}
+                </form>
+            </div>
 
-                {/* Error message */}
-                {error && (
-                    <div role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                        {error}
-                    </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex flex-col-reverse gap-2 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end">
-                    <button
-                        type="button"
-                        onClick={resetForm}
-                        disabled={saving}
-                        className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        Reset
-                    </button>
-
-                    <button
-                        type="submit"
-                        disabled={
-                            saving ||
-                            loadingLedger ||
-                            ledgerBlocked ||
-                            loadingProposals ||
-                            loadingProposalDetails ||
-                            !selectedProposal ||
-                            !selectedCategory ||
-                            !startDate ||
-                            !computedEndDate ||
-                            computedEndDate < startDate
-                        }
-                        className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
-                    >
-                        {saving ? (
-                            <>
-                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                                Saving...
-                            </>
-                        ) : (
-                            <>
-                                <Save className="h-4 w-4" />
-                                Create Workflow
-                            </>
-                        )}
-                    </button>
-                </div>
-            </form>
+            {/* 👇 NEW: Workflow History UI */}
+            <WorkflowHistory customerId={customerId} refreshKey={refreshKey} />
+            
         </div>
     );
 }
