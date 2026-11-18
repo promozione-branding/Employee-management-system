@@ -156,7 +156,7 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
         <>
             <ul className="flex flex-col gap-3">
                 {list.map((p) => {
-                    const wasEdited = !!p?.lastEditedAt;
+                    const history = p?.editHistory || [];
 
                     return (
                         <li key={p._id} className="grid grid-cols-1 items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto_auto]">
@@ -174,15 +174,21 @@ const HistoryNew = ({ customerId, onEdit, refreshKey = 0 }) => {
                                 </div>
                             </div>
 
-                            {/* MIDDLE: Created & Edited Dates */}
-                            <div className="flex flex-col gap-0.5 text-[11px] text-gray-500 border-l border-gray-200 pl-4">
-                                <p>
-                                    <span className="font-medium text-gray-700">Created:</span> {fmtDateTime(p.createdAt)} by {p.createdByName || '—'}
+                            {/* MIDDLE: Created & Edit History */}
+                            <div className="flex flex-col gap-1 text-[11px] text-gray-500 border-l border-gray-200 pl-4 py-1">
+                                <p className="text-gray-700">
+                                    <span className="font-semibold">Created:</span> {fmtDateTime(p.createdAt)} by {p.createdByName || '—'}
                                 </p>
-                                {wasEdited && (
-                                    <p className="text-amber-600/90">
-                                        <span className="font-medium">Edited:</span> {fmtDateTime(p.lastEditedAt)} by {p.lastEditedByName || '—'}
-                                    </p>
+                                
+                                {/* Loop through the last 4 edits */}
+                                {history.length > 0 && (
+                                    <div className="mt-1 flex flex-col gap-0.5">
+                                        {history.map((edit, idx) => (
+                                            <p key={idx} className="text-amber-600/80 leading-tight">
+                                                <span className="font-medium">Edited:</span> {fmtDateTime(edit.editedAt)} by {edit.editedByName}
+                                            </p>
+                                        ))}
+                                    </div>
                                 )}
                             </div>
 

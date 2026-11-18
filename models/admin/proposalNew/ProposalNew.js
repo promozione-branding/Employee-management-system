@@ -1,4 +1,3 @@
-
 // models/admin/proposalNew/ProposalNew.js
 
 import mongoose from 'mongoose';
@@ -85,11 +84,16 @@ const ProposalNewSchema = new mongoose.Schema(
         acceptedByEmail: { type: String },
         acceptedIp: { type: String },
 
-        // 👇 audit trail — denormalized names
+        // 👇 Audit trail
         createdByName: { type: String, default: '' },
-        lastEditedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
-        lastEditedByName: { type: String, default: '' },
-        lastEditedAt: { type: Date },
+        
+        // 👇 NEW: Array to store the last 4 edits
+        editHistory: [
+            {
+                editedByName: { type: String, required: true },
+                editedAt: { type: Date, default: Date.now }
+            }
+        ],
     },
     { timestamps: true }
 );

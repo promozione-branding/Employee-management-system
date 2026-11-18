@@ -1,14 +1,15 @@
+
 // app/api/proposalNew/[id]/route.js
 
 import { connectDB } from '@/lib/db';
 import ProposalNew from '@/models/admin/proposalNew/ProposalNew';
 import { getAuthUser } from '@/lib/getAuthUser';
+import { resolveUserName } from '@/lib/resolveUserName';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 
 const round0 = (n) => Math.round(Number(n) || 0);
 
-// ✅ THIS IS THE FIX: GET has NO authUser check.
 export async function GET(req, { params }) {
     try {
         await connectDB();
@@ -17,9 +18,10 @@ export async function GET(req, { params }) {
             return NextResponse.json({ success: false, message: 'Invalid id' }, { status: 400 });
         }
 
-        const doc = await ProposalNew.findById(id)
-            .populate({ path: 'salesExecutive', select: 'basicDetails.name' })
-            .populate({ path: 'clientId', select: 'name company phone email GSTIN tanNo Address city state country pincode' });
+        const doc = await ProposalNew.findById(id).populate({
+            path: 'clientId',
+            select: 'name company phone email GSTIN tanNo Address city state country pincode',
+        });
 
         if (!doc) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
         return NextResponse.json({ success: true, data: doc }, { status: 200 });
@@ -28,7 +30,6 @@ export async function GET(req, { params }) {
     }
 }
 
-// PUT still needs auth (only admins can edit)
 export async function PUT(req, { params }) {
     try {
         await connectDB();
@@ -38,6 +39,8 @@ export async function PUT(req, { params }) {
         const { id } = await params;
         const existing = await ProposalNew.findById(id);
         if (!existing) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
+
+        const editorName = await resolveUserName(authUser);
 
         const body = await req.json();
         const {
@@ -75,7 +78,8 @@ export async function PUT(req, { params }) {
 
         const subtotal = round0(parsedItems.reduce((s, it) => s + it.amount, 0));
         const totalServiceDiscount = round0(parsedItems.reduce((s, it) => s + it.serviceDiscount, 0));
-        const globalDiscountAmount = discountType === 'percentage' ? round0((subtotal * Number(discountInput || 0)) / 100) : round0(discountInput || 0);
+        const globalDiscountAmount =
+            discountType === 'percentage' ? round0((subtotal * Number(discountInput || 0)) / 100) : round0(discountInput || 0);
         const discountAmount = round0(totalServiceDiscount + globalDiscountAmount);
         const baseAfterDiscount = round0(subtotal - discountAmount);
         const gstAmount = round0(baseAfterDiscount * 0.18);
@@ -88,6 +92,10 @@ export async function PUT(req, { params }) {
                 { success: false, message: `Partial payments must sum to ₹${grandTotal}. Remaining: ₹${grandTotal - totalPartial}` },
                 { status: 400 }
             );
+
+        // 👇 Build the new edit history (keep only last 4)
+        const newEdit = { editedByName: editorName, editedAt: new Date() };
+        const updatedHistory = [newEdit, ...(existing.editHistory || [])].slice(0, 4);
 
         Object.assign(existing, {
             items: parsedItems,
@@ -108,6 +116,7 @@ export async function PUT(req, { params }) {
             notes,
             validTill,
             paymentMethod,
+            editHistory: updatedHistory, // 👈 Save the array
         });
 
         existing.markModified('items');
