@@ -1,4 +1,3 @@
-// app/dashboard/customer/[customer]/CustomerDashboard.jsx
 
 'use client';
 
@@ -11,7 +10,20 @@ import { useActiveCustomerStore } from '@/lib/store/ActiveCustomerStore';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { UserRound, FileText, Receipt, BookOpen, Workflow, ClipboardList, History, Paperclip, Files, Wallet, ArrowLeft } from 'lucide-react';
+import {
+    UserRound,
+    FileText,
+    Receipt,
+    BookOpen,
+    Workflow,
+    ClipboardList,
+    History,
+    Paperclip,
+    Files,
+    Wallet,
+    ArrowLeft,
+    BriefcaseBusiness
+} from 'lucide-react';
 
 import Customer from '../Customer';
 import CustomerProposal from '../CustomerProposal';
@@ -37,6 +49,7 @@ const CUSTOMER_TABS = [
     { value: 'attachment', label: 'Attachment', icon: Paperclip },
     { value: 'proposal', label: 'Proposal', icon: Files },
     { value: 'ledger', label: 'Ledger', icon: Wallet },
+    { value: 'assignwork', label: 'Assign work', icon: BriefcaseBusiness },
 ];
 
 function DashboardContent({ customerId, salesPersonId, customerName, companyName }) {
@@ -53,7 +66,18 @@ function DashboardContent({ customerId, salesPersonId, customerName, companyName
 
     const [customerLoading, setCustomerLoading] = useState(!customerName || !companyName);
 
-    const [activeTab, setActiveTab] = useState(() => (CUSTOMER_TABS.some((tab) => tab.value === requestedTab) ? requestedTab : 'Customer'));
+    const [activeTab, setActiveTab] = useState(() => (
+        CUSTOMER_TABS.some((tab) => tab.value === requestedTab)
+            ? requestedTab
+            : 'Customer'
+    ));
+
+    // Redirect direct access to Assign Work.
+    useEffect(() => {
+        if (requestedTab === 'assignwork' && customerId) {
+            router.replace(`/dashboard/customer/work/${customerId}`);
+        }
+    }, [requestedTab, customerId, router]);
 
     // Fetch customer information.
     useEffect(() => {
@@ -74,6 +98,7 @@ function DashboardContent({ customerId, salesPersonId, customerName, companyName
                         name: response.data.name || customerName || '',
                         company: response.data.company || companyName || '',
                     };
+
                     setCustomerDetails(fetchedData);
                     setActiveCustomer(fetchedData);
                 }
@@ -93,7 +118,7 @@ function DashboardContent({ customerId, salesPersonId, customerName, companyName
         };
     }, [customerId, customerName, companyName, setActiveCustomer]);
 
-    // Set initial fallback to store if props exist
+    // Set initial fallback to store if props exist.
     useEffect(() => {
         if (customerName || companyName) {
             setActiveCustomer({ name: customerName, company: companyName });
@@ -102,12 +127,22 @@ function DashboardContent({ customerId, salesPersonId, customerName, companyName
 
     // Keep the selected tab synchronized with the URL.
     useEffect(() => {
-        const nextTab = CUSTOMER_TABS.some((tab) => tab.value === requestedTab) ? requestedTab : 'Customer';
+        const nextTab = CUSTOMER_TABS.some((tab) => tab.value === requestedTab)
+            ? requestedTab
+            : 'Customer';
 
-        setActiveTab(nextTab);
+        if (nextTab !== 'assignwork') {
+            setActiveTab(nextTab);
+        }
     }, [requestedTab]);
 
     const handleTabChange = (value) => {
+        // Assign Work opens its dedicated page.
+        if (value === 'assignwork') {
+            router.push(`/dashboard/customer/work/${customerId}`);
+            return;
+        }
+
         setActiveTab(value);
 
         const params = new URLSearchParams(searchParams.toString());
@@ -127,10 +162,13 @@ function DashboardContent({ customerId, salesPersonId, customerName, companyName
             <div className="mx-auto w-full max-w-[1800px]">
                 <section className="w-full min-w-0 rounded-xl border border-[#E3E7F0] bg-white shadow-sm">
                     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full min-w-0">
+
                         {/* Compact header and sticky navigation */}
                         <div className="relative z-30 rounded-t-xl border-b border-[#E3E7F0] bg-white px-3 py-2.5 sm:px-4 lg:sticky lg:top-0">
+
                             {/* Information header */}
                             <div className="mb-2 flex min-w-0 items-center justify-between gap-3">
+
                                 {/* Back arrow and dashboard title */}
                                 <div className="flex min-w-0 items-center gap-2">
                                     <Link
@@ -144,7 +182,9 @@ function DashboardContent({ customerId, salesPersonId, customerName, companyName
 
                                     <span className="hidden h-6 w-1 shrink-0 rounded-full bg-[#F27B1E] sm:block" />
 
-                                    <h1 className="truncate text-sm font-bold text-[#0A2E66] sm:text-base">Customer Dashboard</h1>
+                                    <h1 className="truncate text-sm font-bold text-[#0A2E66] sm:text-base">
+                                        Customer Dashboard
+                                    </h1>
                                 </div>
 
                                 {/* Customer and company details */}
@@ -154,18 +194,24 @@ function DashboardContent({ customerId, salesPersonId, customerName, companyName
                                     </span>
 
                                     <div className="min-w-0">
-                                        <p title={displayedCustomerName} className="truncate text-xs font-semibold text-[#0A2E66] sm:text-sm">
+                                        <p
+                                            title={displayedCustomerName}
+                                            className="truncate text-xs font-semibold text-[#0A2E66] sm:text-sm"
+                                        >
                                             {displayedCustomerName || (customerLoading ? 'Loading...' : 'Customer')}
                                         </p>
 
-                                        <p title={displayedCompanyName} className="truncate text-[10px] text-[#697386] sm:text-xs">
+                                        <p
+                                            title={displayedCompanyName}
+                                            className="truncate text-[10px] text-[#697386] sm:text-xs"
+                                        >
                                             {displayedCompanyName || (customerLoading ? 'Loading company...' : 'Company unavailable')}
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* All 10 tabs in one horizontal line */}
+                            {/* All tabs in one horizontal line */}
                             <TabsList className="flex h-auto w-full flex-nowrap items-stretch justify-start gap-1 overflow-x-auto overflow-y-hidden rounded-lg border border-[#E3E7F0] bg-[#F2F4F9] p-1 whitespace-nowrap [scrollbar-width:thin]">
                                 {CUSTOMER_TABS.map(({ value, label, icon: Icon }) => (
                                     <TabsTrigger
@@ -177,7 +223,9 @@ function DashboardContent({ customerId, salesPersonId, customerName, companyName
 
                                         <span>{label}</span>
 
-                                        {activeTab === value && <span className="absolute right-2 bottom-0 left-2 h-[2px] rounded-full bg-[#F27B1E]" />}
+                                        {activeTab === value && (
+                                            <span className="absolute right-2 bottom-0 left-2 h-[2px] rounded-full bg-[#F27B1E]" />
+                                        )}
                                     </TabsTrigger>
                                 ))}
                             </TabsList>
@@ -185,6 +233,7 @@ function DashboardContent({ customerId, salesPersonId, customerName, companyName
 
                         {/* Tab content */}
                         <div className="w-full min-w-0 p-3 sm:p-4 lg:p-5">
+
                             <TabsContent value="Customer" className="mt-0 min-w-0 outline-none">
                                 <Customer customerId={customerId} />
                             </TabsContent>
@@ -231,6 +280,7 @@ function DashboardContent({ customerId, salesPersonId, customerName, companyName
                             <TabsContent value="ledger" className="mt-0 min-w-0 outline-none">
                                 <LedgerDetails customerId={customerId} />
                             </TabsContent>
+
                         </div>
                     </Tabs>
                 </section>
@@ -247,12 +297,19 @@ export default function CustomerDashboard({ customerId, salesPersonId, customerN
                     <div className="flex items-center gap-3 rounded-xl border border-[#E3E7F0] bg-white px-5 py-4 shadow-sm">
                         <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#DCE5F5] border-t-[#F27B1E]" />
 
-                        <span className="text-sm font-medium text-[#5B6478]">Loading customer dashboard...</span>
+                        <span className="text-sm font-medium text-[#5B6478]">
+                            Loading customer dashboard...
+                        </span>
                     </div>
                 </div>
             }
         >
-            <DashboardContent customerId={customerId} salesPersonId={salesPersonId} customerName={customerName} companyName={companyName} />
+            <DashboardContent
+                customerId={customerId}
+                salesPersonId={salesPersonId}
+                customerName={customerName}
+                companyName={companyName}
+            />
         </Suspense>
     );
 }
