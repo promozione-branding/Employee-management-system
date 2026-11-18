@@ -1,7 +1,8 @@
 // app/dashboard/customer/history/sales-history/[id]/page.jsx
 
 import React from 'react';
-import MeetingHistory from './MeetingHistory';
+
+import MeetingHistory from '@/components/sales-dashboard/client/MeetingHistory';
 
 const page = async ({ params }) => {
     const { id } = await params;

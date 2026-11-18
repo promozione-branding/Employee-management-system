@@ -1,4 +1,4 @@
-// app/sales-dashboard/clients/history/sales-history/[id]/MeetingHistory.jsx
+// components/sales-dashboard/client/MeetingHistory.jsx
 'use client';
 
 import Loading from '@/components/layout/Loading';
@@ -28,7 +28,7 @@ const DATE_PRESETS = [
 ];
 
 // ------------------------------------------------------------------
-// Local calendar-day helpers
+// Local calendar-day helpers (timezone-safe)
 // ------------------------------------------------------------------
 function toLocalDateStr(d) {
     const y = d.getFullYear();
@@ -39,6 +39,7 @@ function toLocalDateStr(d) {
 
 // The date we filter/sort on.
 // General updates have no meetingAt → fall back to createdAt
+// (i.e. "when was this update made").
 function recordDate(item) {
     return item?.meetingAt || item?.createdAt || null;
 }
@@ -60,6 +61,7 @@ function inDateRange(item, fromStr, toStr) {
 // Sort:
 //  - upcoming meetings first (soonest meetingAt)
 //  - then everything else by createdAt DESC (latest update first)
+//  - records with neither date go last
 // ------------------------------------------------------------------
 function sortForDisplay(items) {
     const now = Date.now();
@@ -81,8 +83,10 @@ function sortForDisplay(items) {
         else rest.push(item);
     }
 
+    // Upcoming: soonest first
     upcoming.sort((a, b) => meetingTime(a) - meetingTime(b));
 
+    // Rest: most recent update first (createdAt desc), tie-break by meetingAt desc
     rest.sort((a, b) => {
         const dc = createdTime(b) - createdTime(a);
         if (dc !== 0) return dc;
@@ -92,7 +96,7 @@ function sortForDisplay(items) {
     return [...upcoming, ...rest];
 }
 
-// Normalize "who updated"
+// Normalize "who updated" — works whether salesPersonId is populated or an id
 function getActor(item) {
     const p = item?.salesPersonId;
     if (!p) return { name: 'Unknown', email: '', role: '' };
@@ -109,8 +113,9 @@ const MeetingHistory = ({ customerId }) => {
     const [loading, setLoading] = useState(true);
     const [historyData, setHistoryData] = useState([]);
 
-    const [typeFilter, setTypeFilter] = useState('');
-    const [datePreset, setDatePreset] = useState('all');
+    // Filters
+    const [typeFilter, setTypeFilter] = useState(''); // '', call, meeting, general
+    const [datePreset, setDatePreset] = useState('all'); // all | today | yesterday | custom
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
 
@@ -131,6 +136,7 @@ const MeetingHistory = ({ customerId }) => {
         if (customerId) handleCustomerHistoryFetch();
     }, [customerId]);
 
+    // Resolve preset → concrete [from, to] strings
     const { from, to } = useMemo(() => {
         const today = new Date();
         const todayStr = toLocalDateStr(today);
@@ -143,7 +149,7 @@ const MeetingHistory = ({ customerId }) => {
             return { from: yStr, to: yStr };
         }
         if (datePreset === 'custom') return { from: fromDate, to: toDate };
-        return { from: '', to: '' };
+        return { from: '', to: '' }; // all
     }, [datePreset, fromDate, toDate]);
 
     const displayed = useMemo(() => {
@@ -208,6 +214,7 @@ const MeetingHistory = ({ customerId }) => {
                         <>
                             {/* Filters */}
                             <div className="mb-4 space-y-3 rounded-lg border border-gray-200 bg-white p-3">
+                                {/* Row 1 — type pills */}
                                 <div className="flex flex-wrap items-center gap-2">
                                     <span className="mr-1 text-xs font-medium text-gray-500 uppercase">Type:</span>
                                     {TYPE_FILTERS.map((f) => (
@@ -226,6 +233,7 @@ const MeetingHistory = ({ customerId }) => {
                                     ))}
                                 </div>
 
+                                {/* Row 2 — date presets + custom range */}
                                 <div className="flex flex-wrap items-center gap-2">
                                     <span className="mr-1 text-xs font-medium text-gray-500 uppercase">Date:</span>
                                     {DATE_PRESETS.map((p) => (
