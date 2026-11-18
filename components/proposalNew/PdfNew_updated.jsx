@@ -1,3 +1,5 @@
+// components/proposalNew/PdfNew_updated.jsx
+
 // components/proposalNew/PdfNew.jsx
 //it's a file to replace in Pdfnew.jsx in this folder
 

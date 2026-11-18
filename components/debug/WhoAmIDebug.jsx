@@ -1,3 +1,5 @@
+// components/debug/WhoAmIDebug.jsx
+
 'use client';
 import { useEffect, useState } from 'react';
 
