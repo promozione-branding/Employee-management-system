@@ -2,16 +2,24 @@
 
 import axiosInstance from '../axiosInstance';
 
-export async function getAllCustomerServices(page, limit, isPaid) {
+export async function getAllCustomerServices(page, limit, isPaid, category) {
     const params = { page, limit };
     if (isPaid) {
         params.isPaid = true;
+    }
+    if (category?.trim()) {
+        params.category = category.trim();
     }
 
     const { data } = await axiosInstance.get('/api/customer/get-all-customer', {
         params,
     });
 
+    return data;
+}
+
+export async function getCustomerCategoriesService() {
+    const { data } = await axiosInstance.get('/api/customer/categories');
     return data;
 }
 

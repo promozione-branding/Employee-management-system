@@ -11,6 +11,7 @@ import {
     editCustomerServices,
     deleteCustomerServices,
     getAllCustomerServices,
+    getCustomerCategoriesService,
     getCustomerServices,
     getAllSalesService,
 } from '@/service/customer';
@@ -33,7 +34,30 @@ const SrClientList = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [isPaid, setIsPaid] = useState(false);
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [categoryInput, setCategoryInput] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('');
+    const [categoryOptions, setCategoryOptions] = useState([]);
     const LIMIT = 20;
+
+    // Category filter: typed text or a picked existing category.
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCategoryFilter(categoryInput.trim());
+            setPage(1);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [categoryInput]);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await getCustomerCategoriesService();
+                if (res.success) setCategoryOptions(Array.isArray(res.data) ? res.data : []);
+            } catch {
+                // Filter still works with manually typed text.
+            }
+        })();
+    }, []);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -57,7 +81,7 @@ const SrClientList = () => {
     /* ---------------- Fetch Customers ---------------- */
     useEffect(() => {
         fetchData();
-    }, [page, debouncedSearch, isPaid]);
+    }, [page, debouncedSearch, isPaid, categoryFilter]);
 
     async function fetchData() {
         try {
@@ -65,9 +89,9 @@ const SrClientList = () => {
             let res;
 
             if (debouncedSearch.trim()) {
-                res = await searchClientService(debouncedSearch, page, isPaid);
+                res = await searchClientService(debouncedSearch, page, isPaid, categoryFilter);
             } else {
-                res = await getAllCustomerServices(page, LIMIT, isPaid);
+                res = await getAllCustomerServices(page, LIMIT, isPaid, categoryFilter);
             }
 
             if (res.success) {
@@ -179,6 +203,26 @@ const SrClientList = () => {
                 </div>
 
                 <div className="flex flex-wrap justify-between gap-3">
+                    <div className="relative">
+                        <Input
+                            type="text"
+                            placeholder="Filter by category..."
+                            value={categoryInput}
+                            onChange={(e) => setCategoryInput(e.target.value)}
+                            list="sr-category-options"
+                            aria-label="Filter by category"
+                            className="pr-8"
+                        />
+                        <datalist id="sr-category-options">
+                            {categoryOptions.map((category) => (
+                                <option key={category} value={category} />
+                            ))}
+                        </datalist>
+                        {categoryInput && (
+                            <X size={15} className="absolute top-1/2 right-2.5 -translate-y-1/2 cursor-pointer text-gray-500 hover:text-black" onClick={() => setCategoryInput('')} />
+                        )}
+                    </div>
+
                     <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm transition-colors hover:bg-gray-50">
                         <Checkbox
                             id="paid-filter"
@@ -215,12 +259,13 @@ const SrClientList = () => {
 
             {/* DESKTOP TABLE */}
             <div className="hidden overflow-x-auto rounded-xl border bg-white shadow md:block">
-                <div className="grid border-b px-4 py-2 font-semibold text-gray-500 md:grid-cols-5">
+                <div className="grid border-b px-4 py-2 font-semibold text-gray-500 md:grid-cols-6">
                     <p>Name</p>
                     <p>Company</p>
                     {/* <p className="md:hidden lg:block">GSTIN</p> */}
                     <p className="text-center">Phone</p>
                     <p className="text-center">Sales Executive</p>
+                    <p className="text-center">Category</p>
                     <p className="text-center">Action</p>
                 </div>
 
@@ -228,7 +273,8 @@ const SrClientList = () => {
                     {loading ? (
                         <div className="space-y-3 p-4">
                             {[...Array(10)].map((_, i) => (
-                                <div key={i} className="grid animate-pulse grid-cols-5 gap-4">
+                                <div key={i} className="grid animate-pulse grid-cols-6 gap-4">
+                                    <div className="h-8 rounded bg-gray-200" />
                                     <div className="h-8 rounded bg-gray-200" />
                                     <div className="h-8 rounded bg-gray-200" />
                                     <div className="h-8 rounded bg-gray-200" />
@@ -238,10 +284,10 @@ const SrClientList = () => {
                             ))}
                         </div>
                     ) : customers.length ? (
-                        customers.map(({ company, name, phone, salesExecutive, _id, isPaid }, idx) => (
+                        customers.map(({ company, name, phone, category, salesExecutive, _id, isPaid }, idx) => (
                             <div
                                 key={_id}
-                                className={`grid grid-cols-6 items-center border-b px-4 py-3 md:grid-cols-5 ${isPaid && 'bg-green-100'} ${
+                                className={`grid grid-cols-6 items-center border-b px-4 py-3 md:grid-cols-6 ${isPaid && 'bg-green-100'} ${
                                     idx % 2 === 0 ? 'bg-gray-50' : ''
                                 }`}
                             >
@@ -256,6 +302,14 @@ const SrClientList = () => {
                                         </span>
                                     ))}
                                 </div>
+
+                                <p className="text-center">
+                                    {category ? (
+                                        <span className="inline-block max-w-[140px] truncate rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800">{category}</span>
+                                    ) : (
+                                        <span className="text-sm text-gray-400">—</span>
+                                    )}
+                                </p>
 
                                 <div className="flex justify-center gap-3 lg:gap-5">
                                     {/* <Link href={`/sales-dashboard/customer/work/${_id}`}>
@@ -340,7 +394,7 @@ const SrClientList = () => {
                         </div>
                     ))
                 ) : customers.length ? (
-                    customers.map(({ company, name, phone, GSTIN, salesExecutive, _id, isPaid }) => (
+                    customers.map(({ company, name, phone, GSTIN, category, salesExecutive, _id, isPaid }) => (
                         <div
                             key={_id}
                             className={`flex flex-col gap-3 rounded-xl border bg-white p-4 shadow transition ${isPaid ? 'border-green-400 bg-green-50' : ''} `}
@@ -356,6 +410,12 @@ const SrClientList = () => {
                             </div>
 
                             {GSTIN && <p className="text-sm">GSTIN: {GSTIN}</p>}
+
+                            {category && (
+                                <p className="text-sm">
+                                    Category: <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">{category}</span>
+                                </p>
+                            )}
 
                             <p className="text-sm">📞 {phone}</p>
 

@@ -38,6 +38,7 @@ import {
     editCustomerServices,
     deleteCustomerServices,
     getAllCustomerServices,
+    getCustomerCategoriesService,
     getCustomerServices,
     getAllSalesService,
 } from '@/service/customer';
@@ -61,6 +62,9 @@ const CustomerManager = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [isPaid, setIsPaid] = useState(false);
     const [executiveFilter, setExecutiveFilter] = useState('all');
+    const [categoryInput, setCategoryInput] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('');
+    const [categoryOptions, setCategoryOptions] = useState([]);
     const [viewMode, setViewMode] = useState('list');
     const [selectedCustomers, setSelectedCustomers] = useState([]);
 
@@ -73,6 +77,28 @@ const CustomerManager = () => {
 
         return () => clearTimeout(timer);
     }, [searchInput]);
+
+    // Debounce category filter (typed text or a picked existing category)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCategoryFilter(categoryInput.trim());
+            setPage(1);
+        }, 400);
+
+        return () => clearTimeout(timer);
+    }, [categoryInput]);
+
+    // Existing categories for the filter dropdown
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await getCustomerCategoriesService();
+                if (res.success) setCategoryOptions(Array.isArray(res.data) ? res.data : []);
+            } catch {
+                // Filter still works with manually typed text.
+            }
+        })();
+    }, []);
 
     // Fetch sales executives
     const fetchSalesPerson = useCallback(async () => {
@@ -92,7 +118,9 @@ const CustomerManager = () => {
         try {
             setLoading(true);
 
-            const res = debouncedSearch ? await searchClientService(debouncedSearch, page, isPaid) : await getAllCustomerServices(page, LIMIT, isPaid);
+            const res = debouncedSearch
+                ? await searchClientService(debouncedSearch, page, isPaid, categoryFilter)
+                : await getAllCustomerServices(page, LIMIT, isPaid, categoryFilter);
 
             if (res.success) {
                 setCustomers(Array.isArray(res.data) ? res.data : []);
@@ -105,7 +133,7 @@ const CustomerManager = () => {
         } finally {
             setLoading(false);
         }
-    }, [page, debouncedSearch, isPaid]);
+    }, [page, debouncedSearch, isPaid, categoryFilter]);
 
     useEffect(() => {
         fetchData();
@@ -218,7 +246,7 @@ const CustomerManager = () => {
     // Export currently visible customers
     const exportCSV = () => {
         if (!visibleCustomers.length) {
-            toast.error('There are no clients to export.');
+            toast.error('There are no clients to export.'); 
             return;
         }
 
@@ -445,6 +473,32 @@ const CustomerManager = () => {
                             ))}
                         </select>
 
+                        <div className="relative w-full sm:max-w-[220px]">
+                            <Input
+                                value={categoryInput}
+                                onChange={(event) => setCategoryInput(event.target.value)}
+                                placeholder="Filter by category"
+                                list="customer-category-options"
+                                aria-label="Filter by category"
+                                className="h-12 rounded-xl border-[#E0E5EF] bg-white pr-10 pl-4 text-sm text-[#0F1B33] placeholder:text-[#8A92A6] focus-visible:ring-[#F27B1E]"
+                            />
+                            <datalist id="customer-category-options">
+                                {categoryOptions.map((category) => (
+                                    <option key={category} value={category} />
+                                ))}
+                            </datalist>
+                            {categoryInput && (
+                                <button
+                                    type="button"
+                                    onClick={() => setCategoryInput('')}
+                                    aria-label="Clear category filter"
+                                    className="absolute top-1/2 right-3 -translate-y-1/2 rounded p-1 text-[#8A92A6] hover:text-[#0F1B33]"
+                                >
+                                    <X size={16} />
+                                </button>
+                            )}
+                        </div>
+
                         <label className="flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-[#E0E5EF] px-3 text-sm font-medium text-[#5B6478]">
                             <Checkbox
                                 checked={isPaid}
@@ -523,6 +577,7 @@ const CustomerManager = () => {
                                     <th className="px-4 py-4">Phone</th>
                                     <th className="px-4 py-4">Sales executive</th>
                                     <th className="px-4 py-4">Payment</th>
+                                    <th className="px-4 py-4">Category</th>
                                     <th className="px-5 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -531,7 +586,7 @@ const CustomerManager = () => {
                                 {loading ? (
                                     Array.from({ length: 6 }).map((_, index) => (
                                         <tr key={index}>
-                                            {Array.from({ length: 6 }).map((__, cell) => (
+                                            {Array.from({ length: 7 }).map((__, cell) => (
                                                 <td key={cell} className="px-4 py-5">
                                                     <div className="h-5 animate-pulse rounded-md bg-[#F2F4F9]" />
                                                 </td>
@@ -617,6 +672,16 @@ const CustomerManager = () => {
                                                 </span>
                                             </td>
 
+                                            <td className="px-4 py-4">
+                                                {customer.category ? (
+                                                    <span className="inline-flex max-w-[160px] items-center truncate rounded-full bg-[#E9EFF9] px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-[#0A2E66]">
+                                                        {customer.category}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-sm text-[#8A92A6]">—</span>
+                                                )}
+                                            </td>
+
                                             <td className="px-5 py-4">
                                                 <ActionButtons customer={customer} />
                                             </td>
@@ -624,7 +689,7 @@ const CustomerManager = () => {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={6} className="px-5 py-16 text-center">
+                                        <td colSpan={7} className="px-5 py-16 text-center">
                                             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E9EFF9] text-[#0A2E66]">
                                                 <Users size={25} />
                                             </div>
@@ -709,6 +774,12 @@ const CustomerManager = () => {
                                                 >
                                                     {customer.isPaid ? 'Paid' : 'Payment pending'}
                                                 </span>
+
+                                                {customer.category ? (
+                                                    <span className="max-w-[140px] truncate rounded-full bg-[#E9EFF9] px-3 py-1.5 text-xs font-semibold text-[#0A2E66]">
+                                                        {customer.category}
+                                                    </span>
+                                                ) : null}
 
                                                 <ActionButtons customer={customer} />
                                             </div>

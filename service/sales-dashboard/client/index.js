@@ -7,13 +7,14 @@ export async function createClientService(formData) {
     return data;
 }
 
-export async function getClientService(id, page = 1, limit = 20, search = '', isPaid = false) {
+export async function getClientService(id, page = 1, limit = 20, search = '', isPaid = false, category = '') {
     const { data } = await axiosInstance.get(`/api/sales-dashboard/client/get/${id}`, {
         params: {
             page,
             limit,
             search,
             ...(isPaid && { isPaid: true }),
+            ...(category?.trim() && { category: category.trim() }),
         },
     });
 

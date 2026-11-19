@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 
-import { editCustomerServices, deleteCustomerServices, getCustomerServices } from '@/service/customer';
+import { editCustomerServices, deleteCustomerServices, getCustomerCategoriesService, getCustomerServices } from '@/service/customer';
 
 import { createClientService, getClientService } from '@/service/sales-dashboard/client';
 
@@ -53,6 +53,9 @@ const ExecutiveClientList = () => {
     const [searchInput, setSearchInput] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [isPaid, setIsPaid] = useState(false);
+    const [categoryInput, setCategoryInput] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('');
+    const [categoryOptions, setCategoryOptions] = useState([]);
 
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -67,6 +70,28 @@ const ExecutiveClientList = () => {
         return () => clearTimeout(timer);
     }, [searchInput]);
 
+    // Debounce category filter (typed text or a picked existing category).
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCategoryFilter(categoryInput.trim());
+            setPage(1);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [categoryInput]);
+
+    // Existing categories for the filter dropdown.
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await getCustomerCategoriesService();
+                if (res.success) setCategoryOptions(Array.isArray(res.data) ? res.data : []);
+            } catch {
+                // Filter still works with manually typed text.
+            }
+        })();
+    }, []);
+
     // Fetch clients assigned to the logged-in executive.
     const fetchCustomers = useCallback(async () => {
         if (!employee?._id) {
@@ -78,7 +103,7 @@ const ExecutiveClientList = () => {
         try {
             setClientLoading(true);
 
-            const res = await getClientService(employee._id, page, LIMIT, debouncedSearch, isPaid);
+            const res = await getClientService(employee._id, page, LIMIT, debouncedSearch, isPaid, categoryFilter);
 
             if (res?.success) {
                 setCustomers(Array.isArray(res.data) ? res.data : []);
@@ -95,7 +120,7 @@ const ExecutiveClientList = () => {
         } finally {
             setClientLoading(false);
         }
-    }, [employee?._id, page, debouncedSearch, isPaid]);
+    }, [employee?._id, page, debouncedSearch, isPaid, categoryFilter]);
 
     useEffect(() => {
         fetchCustomers();
@@ -315,6 +340,33 @@ const ExecutiveClientList = () => {
                         )}
                     </div>
 
+                    <div className="relative w-full md:max-w-[220px]">
+                        <Input
+                            type="text"
+                            placeholder="Filter by category"
+                            value={categoryInput}
+                            onChange={(e) => setCategoryInput(e.target.value)}
+                            list="executive-category-options"
+                            aria-label="Filter by category"
+                            className="h-12 rounded-xl border-[#E0E5EF] bg-white pr-10 pl-4 text-sm text-[#0F1B33] placeholder:text-[#8A92A6] focus-visible:ring-[#F27B1E]"
+                        />
+                        <datalist id="executive-category-options">
+                            {categoryOptions.map((category) => (
+                                <option key={category} value={category} />
+                            ))}
+                        </datalist>
+                        {categoryInput && (
+                            <button
+                                type="button"
+                                aria-label="Clear category filter"
+                                onClick={() => setCategoryInput('')}
+                                className="absolute top-1/2 right-3 -translate-y-1/2 rounded-md p-1 text-[#8A92A6] transition hover:bg-[#F2F4F9] hover:text-[#0F1B33]"
+                            >
+                                <X size={16} />
+                            </button>
+                        )}
+                    </div>
+
                     <label className="flex h-12 cursor-pointer items-center gap-3 rounded-xl border border-[#E0E5EF] bg-[#F7F8FC] px-4 transition hover:border-[#C8D3E5]">
                         <Checkbox
                             id="paid-filter"
@@ -352,6 +404,7 @@ const ExecutiveClientList = () => {
                                 <th className="px-4 py-4">Company</th>
                                 <th className="px-4 py-4">GSTIN</th>
                                 <th className="px-4 py-4">Payment</th>
+                                <th className="px-4 py-4">Category</th>
                                 <th className="px-5 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -360,7 +413,7 @@ const ExecutiveClientList = () => {
                             {clientLoading ? (
                                 Array.from({ length: 5 }).map((_, index) => (
                                     <tr key={index}>
-                                        {Array.from({ length: 6 }).map((__, cell) => (
+                                        {Array.from({ length: 7 }).map((__, cell) => (
                                             <td key={cell} className="px-4 py-5">
                                                 <div className="h-5 animate-pulse rounded-md bg-[#F2F4F9]" />
                                             </td>
@@ -416,6 +469,16 @@ const ExecutiveClientList = () => {
                                             <PaymentBadge paid={customer.isPaid} />
                                         </td>
 
+                                        <td className="px-4 py-4">
+                                            {customer.category ? (
+                                                <span className="inline-block max-w-[150px] truncate rounded-full bg-[#E9EFF9] px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-[#0A2E66]">
+                                                    {customer.category}
+                                                </span>
+                                            ) : (
+                                                <span className="text-sm text-[#8A92A6]">—</span>
+                                            )}
+                                        </td>
+
                                         <td className="px-5 py-4">
                                             <ClientActions customer={customer} />
                                         </td>
@@ -423,7 +486,7 @@ const ExecutiveClientList = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={6} className="px-5 py-16 text-center">
+                                    <td colSpan={7} className="px-5 py-16 text-center">
                                         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E9EFF9] text-[#0A2E66]">
                                             <Users size={25} />
                                         </div>
@@ -432,12 +495,13 @@ const ExecutiveClientList = () => {
 
                                         <p className="mt-1 text-sm text-[#8A92A6]">Try a different search or change the payment filter.</p>
 
-                                        {(searchInput || isPaid) && (
+                                        {(searchInput || isPaid || categoryInput) && (
                                             <button
                                                 type="button"
                                                 onClick={() => {
                                                     clearSearch();
                                                     setIsPaid(false);
+                                                    setCategoryInput('');
                                                     setPage(1);
                                                 }}
                                                 className="mt-3 text-sm font-semibold text-[#0A2E66] transition hover:text-[#F27B1E]"
@@ -502,6 +566,13 @@ const ExecutiveClientList = () => {
                                     <FileText size={16} className="mt-0.5 shrink-0 text-[#8A92A6]" />
                                     <span className="break-all text-[#5B6478]">GSTIN: {customer.GSTIN || '—'}</span>
                                 </div>
+
+                                {customer.category && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <span className="text-[#8A92A6]">Category:</span>
+                                        <span className="rounded-full bg-[#E9EFF9] px-2.5 py-0.5 text-xs font-semibold text-[#0A2E66]">{customer.category}</span>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="mt-4 flex items-center justify-between border-t border-[#E3E7F0] pt-3">

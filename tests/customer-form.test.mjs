@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 
 import { addCustomerFormControl } from '../config/data.js';
 import { initalCustomerFormData } from '../config/initialFormDate.js';
-import { buildCustomerFormData, buildCustomerPayload, validateCustomerForm } from '../lib/customerForm.js';
+import { buildCustomerFormData, buildCustomerPayload, escapeRegExp, matchesCategory, validateCustomerForm } from '../lib/customerForm.js';
 
 test('category is in the shared controls and initial data', () => {
     assert.ok(addCustomerFormControl.some((c) => c.name === 'category'));
@@ -47,6 +47,15 @@ test('payload converts Paid and salesExecutive select value', () => {
     assert.deepEqual(payload.salesExecutive, ['emp1']);
     const noExec = buildCustomerPayload({ ...initalCustomerFormData, name: 'A', phone: '123' });
     assert.equal('salesExecutive' in noExec, false);
+});
+
+test('category filter: manual typing matches partially, case-insensitive', () => {
+    assert.equal(matchesCategory('Retail Store', 'retail'), true);
+    assert.equal(matchesCategory('Retail Store', 'RET'), true);
+    assert.equal(matchesCategory('Retail Store', 'wholesale'), false);
+    assert.equal(matchesCategory('', 'retail'), false);
+    assert.equal(matchesCategory(undefined, ''), true);
+    assert.equal(escapeRegExp('a.b(c)'), 'a\\.b\\(c\\)');
 });
 
 test('edit form data: old customer without category does not break', () => {

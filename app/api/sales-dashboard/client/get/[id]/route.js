@@ -6,6 +6,7 @@ import { connectDB } from '@/lib/db';
 import Customer from '@/models/admin/Customer';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
+import { escapeRegExp } from '@/lib/customerForm';
 
 export async function GET(req, { params }) {
     try {
@@ -31,6 +32,7 @@ export async function GET(req, { params }) {
         const limit = Math.min(100, Math.max(1, Number.parseInt(searchParams.get('limit'), 10) || 20));
 
         const search = (searchParams.get('search') || '').trim();
+        const category = (searchParams.get('category') || '').trim();
         const isPaid = searchParams.get('isPaid');
 
         // Show clients assigned to this sales executive.
@@ -56,6 +58,11 @@ export async function GET(req, { params }) {
             filter.$or = searchConditions;
         }
 
+        // Optional category filter: manual text, partial + case-insensitive.
+        if (category) {
+            filter.category = { $regex: escapeRegExp(category), $options: 'i' };
+        }
+
         // Filter only when Paid is explicitly enabled.
         // Otherwise, show both paid and unpaid clients.
         if (isPaid === 'true') {
@@ -65,7 +72,7 @@ export async function GET(req, { params }) {
         const total = await Customer.countDocuments(filter);
 
         const customers = await Customer.find(filter)
-            .select('name company phone GSTIN Address isPaid salesExecutive')
+            .select('name company phone GSTIN category Address isPaid salesExecutive')
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit)

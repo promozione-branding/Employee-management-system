@@ -2,6 +2,7 @@
 
 import { connectDB } from '@/lib/db';
 import Customer from '@/models/admin/Customer';
+import { matchesCategory } from '@/lib/customerForm';
 import { NextResponse } from 'next/server';
 
 function normalize(text = '') {
@@ -15,6 +16,7 @@ export async function GET(req) {
         await connectDB();
         const { searchParams } = new URL(req.url);
         const q = searchParams.get('q') || '';
+        const category = (searchParams.get('category') || '').trim();
         const isPaid = searchParams.get('isPaid');
         const page = Number(searchParams.get('page')) || 1;
         const limit = Number(searchParams.get('limit')) || 20;
@@ -27,9 +29,14 @@ export async function GET(req) {
         }
 
         let customers = await Customer.find(filter)
-            .select(`name company phone Address GSTIN salesExecutive isPaid createdAt`)
+            .select(`name company phone Address GSTIN category salesExecutive isPaid createdAt`)
             .populate({ path: 'salesExecutive', select: 'basicDetails.name' })
             .lean();
+
+        // Optional category filter: manual text, partial + case-insensitive.
+        if (category) {
+            customers = customers.filter((customer) => matchesCategory(customer?.category, category));
+        }
 
         // Elastic search
         if (q.trim()) {

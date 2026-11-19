@@ -5,7 +5,7 @@
 import ExecutiveClientList from '@/components/sales-dashboard/auth-role/executive/client/ExecutiveClientList';
 import SrClientList from '@/components/sales-dashboard/auth-role/sr-manager/client/SrClientList';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; 
 
 import { useSalesEmployeeStore } from '@/lib/store/salesEmployeeStore';
 import { Users, UsersRound, LoaderCircle } from 'lucide-react';
