@@ -88,6 +88,11 @@ a { color: #111827; text-decoration: none; }
 .general-notes-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; margin-top: 14px; font-size: 11px; line-height: 1.6; }
 .general-notes-box strong { color: #1e3a5f; display: block; margin-bottom: 4px; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
 
+/* ✅ NEW: Compact, understated Terms & Conditions */
+.terms-compact { margin-top: 14px; margin-bottom: 8px; font-size: 8px; line-height: 1.3; color: #6b7280; }
+.terms-compact-title { font-size: 8.5px; font-weight: 700; color: #4b5563; margin-bottom: 4px; text-transform: uppercase; }
+.terms-compact-item { margin-bottom: 2px; font-size: 8px; line-height: 1.3; }
+
 @media print {
   body { margin: 0; }
   .pdf-header-inline { display: none !important; } .pdf-footer-inline { display: none !important; }
@@ -99,7 +104,7 @@ a { color: #111827; text-decoration: none; }
   .pdf-footer-fixed .left, .pdf-footer-fixed .right { flex: 1; } .pdf-footer-fixed .right { text-align: right; } .pdf-footer-fixed .center { flex: 0 0 auto; text-align: center; }
   .pdf-watermark-fixed { display: flex !important; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 0; }
   .pdf-watermark-fixed img { width: 480px; height: auto; opacity: 0.08; }
-  /* Top padding must clear the fixed header (top:8mm + 110px logo ~29mm + padding/border ~38mm), otherwise its opaque white background paints over the centered Proposal title on page 1. */
+  
   .pdf-screen-page {
     display: block !important;
     width: 210mm !important;
@@ -120,7 +125,7 @@ a { color: #111827; text-decoration: none; }
   .pdf-screen-page:last-child { page-break-after: auto; break-after: auto; }
   .pdf-watermark-inline { display: none !important; }
   .pdf-page-body { position: relative !important; z-index: 20 !important; }
-  /* Keep the Proposal heading visible and centered in Chrome print/PDF output. */
+  
   .proposal-title {
     display: block !important;
     visibility: visible !important;
@@ -138,7 +143,7 @@ a { color: #111827; text-decoration: none; }
   .deliverable-row { break-inside: auto; page-break-inside: auto; }
   .deliverable-row .row-title { break-after: avoid; page-break-after: avoid; }
   .section-title-bar, .delivery-title-bar, .services-section-title { break-after: avoid; page-break-after: avoid; }
-  .industry-card, .svc-item, .schedule-grid, .delivery-grid, .delivery-item, .legal-notes li, .bank-block, .general-notes-box { break-inside: avoid; page-break-inside: avoid; }
+  .industry-card, .svc-item, .schedule-grid, .delivery-grid, .delivery-item, .legal-notes li, .bank-block, .general-notes-box, .terms-compact { break-inside: avoid; page-break-inside: avoid; }
 }
 `;
 
@@ -154,8 +159,6 @@ export const downloadProposalPdf = (proposal, sourceNode = null) => {
     );
     win.document.close();
 
-    // Print only after the cloned document and its logo/watermark images have
-    // loaded — a blind timeout can snapshot the page before layout settles.
     let printed = false;
     const printWhenReady = () => {
         if (printed) return;
@@ -231,7 +234,8 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
     const hasDeliveryReport = deliveredMetrics.length > 0;
     const showDeliverablesPage = hasDeliverables || customServiceGroups.length > 0 || hasDeliveryReport;
 
-    const totalPages = 3 + (showDeliverablesPage ? 1 : 0) + 1;
+    // ✅ Page count updated: Since T&C is now on page 1, we don't need an extra page for it at the end.
+    const totalPages = 3 + (showDeliverablesPage ? 1 : 0);
     let pageCounter = 1;
 
     const subtotalAfterServiceDiscount = subtotal - serviceDiscountAmount;
@@ -329,7 +333,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                     </thead>
                     <tbody>
                         {items.map((it, i) => {
-                            console.log('🟢 [PDF] Rendering item:', it.label, 'City:', it.cityName);
                             const note = categoryNotes.find((n) => n.category === it.category)?.note;
                             const hasCityPages = ['seo', 'adsManagement'].includes(it.category) && cityPages.length > 0;
 
@@ -482,6 +485,36 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                     </div>
                 )}
 
+                {/* ✅ COMPACT TERMS & CONDITIONS SECTION */}
+                <div className="terms-compact">
+                    <div className="terms-compact-title">Terms &amp; Conditions</div>
+                    {TERMS_AND_CONDITIONS.map((t, i) => {
+                        const termsUrl = 'https://www.inquirybazaar.com/terms-conditions';
+                        if (!t.includes(termsUrl)) {
+                            return (
+                                <div key={i} className="terms-compact-item">
+                                    {i + 1}. {t}
+                                </div>
+                            );
+                        }
+                        const [beforeUrl, afterUrl] = t.split(termsUrl);
+                        return (
+                            <div key={i} className="terms-compact-item">
+                                {i + 1}. {beforeUrl}
+                                <a
+                                    href={termsUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ color: '#6b7280', textDecoration: 'underline' }}
+                                >
+                                    {termsUrl}
+                                </a>
+                                {afterUrl}
+                            </div>
+                        );
+                    })}
+                </div>
+
                 <div className="legal-notes" style={{ marginTop: '12px' }}>
                     <ul>
                         {LEGAL_NOTES.map((n, i) => (
@@ -609,36 +642,6 @@ const PdfNew = forwardRef(({ proposal }, ref) => {
                 </div>
             </ScreenPage>
 
-            <ScreenPage pageNumber={pageCounter++} totalPages={totalPages}>
-                <h1 style={{ textAlign: 'center' }}>Terms &amp; Conditions</h1>
-                <ol style={{ paddingLeft: '18px', margin: 0 }}>
-                    {TERMS_AND_CONDITIONS.map((t, i) => {
-                        const termsUrl = 'https://www.inquirybazaar.com/terms-conditions';
-                        if (!t.includes(termsUrl)) {
-                            return (
-                                <li key={i} style={{ fontSize: '11.5px', lineHeight: 1.5, marginBottom: '5px' }}>
-                                    {t}
-                                </li>
-                            );
-                        }
-                        const [beforeUrl, afterUrl] = t.split(termsUrl);
-                        return (
-                            <li key={i} style={{ fontSize: '11.5px', lineHeight: 1.5, marginBottom: '5px' }}>
-                                {beforeUrl}
-                                <a
-                                    href={termsUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{ color: '#2563eb', textDecoration: 'underline', cursor: 'pointer' }}
-                                >
-                                    {termsUrl}
-                                </a>
-                                {afterUrl}
-                            </li>
-                        );
-                    })}
-                </ol>
-            </ScreenPage>
         </div>
     );
 });
