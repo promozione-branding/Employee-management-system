@@ -39,10 +39,12 @@ import Createworkflow from '@/components/admin-dashboard/tabs/Createworkflow';
 import ProposalTabNew from '@/components/proposalNew/ProposalTabNew';
 import LedgerTabNew from '@/components/proposalNew/LedgerTabNew';
 import UpdateTab from '@/components/sales-dashboard/client/UpdateTab';
+import InvoiceTabNew from '@/components/invoiceNew/InvoiceTabNew';
 
 const CUSTOMER_TABS = [
     { value: 'Customer', label: 'Customer', icon: UserRound },
     { value: 'newproposal', label: 'New Proposal', icon: FileText },
+    { value: 'newinvoice', label: 'New Invoice', icon: Receipt },
     { value: 'invoice', label: 'Invoice', icon: Receipt },
     { value: 'newledger', label: 'New Ledger', icon: BookOpen },
     { value: 'createworkflow', label: 'Create Workflow', icon: Workflow },
@@ -242,6 +244,9 @@ function DashboardContent({ customerId, salesPersonId, customerName, companyName
 
                             <TabsContent value="newproposal" className="mt-0 min-w-0 outline-none">
                                 <ProposalTabNew customerId={customerId} />
+                            </TabsContent>
+                            <TabsContent value="newinvoice" className="mt-0 min-w-0 outline-none">
+                                <InvoiceTabNew customerId={customerId} />
                             </TabsContent>
 
                             <TabsContent value="invoice" className="mt-0 min-w-0 outline-none">
