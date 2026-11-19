@@ -7,14 +7,10 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 import { Sheet, SheetContent } from '@/components/ui/sheet';
-import CommonForm from '@/components/layout/Form';
+import CustomerForm from '@/components/subComponents/customer/CustomerForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-
-import { initalCustomerFormData } from '@/config/initialFormDate';
-import { salesClientFC } from '@/config/sales/data';
-import { initialClientData } from '@/config/sales/initialFormData';
 
 import { editCustomerServices, deleteCustomerServices, getCustomerServices } from '@/service/customer';
 
@@ -49,7 +45,7 @@ const ExecutiveClientList = () => {
     const [clientLoading, setClientLoading] = useState(true);
 
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState(initialClientData);
+    const [editingCustomer, setEditingCustomer] = useState(null);
     const [editingId, setEditingId] = useState(null);
 
     const { employee } = useSalesEmployeeStore();
@@ -107,38 +103,26 @@ const ExecutiveClientList = () => {
 
     // Reset the create/edit form.
     const resetForm = () => {
-        setFormData(initialClientData || initalCustomerFormData);
+        setEditingCustomer(null);
         setEditingId(null);
         setOpen(false);
     };
 
     // Open the form for a new client.
     const handleCreate = () => {
-        setFormData(initialClientData);
+        setEditingCustomer(null);
         setEditingId(null);
         setOpen(true);
     };
 
-    // Create or update a client.
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!formData.name?.trim()) {
-            toast.error('Please enter client name');
-            return;
-        }
-
-        if (!String(formData.phone ?? '').trim()) {
-            toast.error('Please enter client phone number');
-            return;
-        }
-
+    // Create or update a client (validation + payload handled by CustomerForm).
+    const handleSubmit = async (payload) => {
         try {
             let res;
 
             if (editingId) {
                 // Preserve the existing assignment during edits.
-                res = await editCustomerServices(editingId, formData);
+                res = await editCustomerServices(editingId, payload);
             } else {
                 if (!employee?._id) {
                     toast.error('Unable to identify the logged-in sales executive');
@@ -146,12 +130,7 @@ const ExecutiveClientList = () => {
                 }
 
                 // Assign the new client to the current executive.
-                const payload = {
-                    ...formData,
-                    salesExecutive: [employee._id],
-                };
-
-                res = await createClientService(payload);
+                res = await createClientService({ ...payload, salesExecutive: [employee._id] });
             }
 
             if (res?.success) {
@@ -180,11 +159,7 @@ const ExecutiveClientList = () => {
             const res = await getCustomerServices(id);
 
             if (res?.success) {
-                setFormData({
-                    ...initialClientData,
-                    ...res.data,
-                });
-
+                setEditingCustomer(res.data);
                 setEditingId(id);
                 setOpen(true);
             } else {
@@ -577,10 +552,10 @@ const ExecutiveClientList = () => {
                         </p>
                     </div>
 
-                    <CommonForm
-                        formData={formData}
-                        setFormData={setFormData}
-                        formControls={salesClientFC}
+                    <CustomerForm
+                        key={editingId || 'new-customer'}
+                        customer={editingCustomer}
+                        showSalesExecutive={false}
                         buttonText={editingId ? 'Save changes' : 'Add client'}
                         onSubmit={handleSubmit}
                     />

@@ -8,6 +8,7 @@
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
+        "test": "node --test tests/customer-form.test.mjs",
         "format:tailwind": "prettier --write .",
         "format": "prettier --write .",
         "format:check": "prettier --check ."

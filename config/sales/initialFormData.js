@@ -14,5 +14,7 @@ export const initialClientData = {
     pincode: '',
     country: '',
     meetingDate: '',
+    category: '',
+    isPaid: '',
     notes: '',
 };

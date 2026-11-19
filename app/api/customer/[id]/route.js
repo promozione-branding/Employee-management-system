@@ -10,7 +10,30 @@ import { recordEdit, diffObjects } from '@/lib/auditLog';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 
-const OPTIONAL_TEXT_FIELDS = ['company', 'GSTIN', 'tanNo', 'email', 'website', 'Address', 'city', 'state', 'pincode', 'country'];
+// Fields that are optional: submitting a blank value keeps the existing stored value.
+const OPTIONAL_TEXT_FIELDS = ['company', 'GSTIN', 'tanNo', 'email', 'website', 'Address', 'city', 'state', 'pincode', 'country', 'category'];
+
+// Per-field max lengths — protects against pasted junk bloating the DB.
+const MAX_LENGTH_BY_FIELD = {
+    company: 200,
+    GSTIN: 15,
+    tanNo: 20,
+    email: 200,
+    website: 300,
+    Address: 500,
+    city: 100,
+    state: 100,
+    pincode: 20,
+    country: 100,
+    category: 60,
+};
+
+// Explicitly whitelist the fields we allow to be updated
+const ALLOWED_UPDATE_FIELDS = [
+    'name', 'company', 'GSTIN', 'tanNo', 'email', 'phone', 'website',
+    'Address', 'city', 'state', 'pincode', 'country', 'category',
+    'meetingDate', 'isPaid', 'notes', 'salesExecutive'
+];
 
 const isValidId = (id) => typeof id === 'string' && mongoose.Types.ObjectId.isValid(id);
 
@@ -36,7 +59,6 @@ export async function GET(req, { params }) {
         return NextResponse.json({ success: true, data: customer }, { status: 200 });
     } catch (error) {
         console.error('Get customer by ID error:', error);
-
         return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
     }
 }
@@ -67,9 +89,7 @@ export async function DELETE(req, { params }) {
 
         await customer.deleteOne();
 
-        // Remove the client from its sales employee assignments.
         const assignedEmployeeIds = (customer.salesExecutive || []).map((employeeId) => employeeId.toString());
-
         for (const employeeId of assignedEmployeeIds) {
             await SalesEmployee.updateOne({ employeeId }, { $pull: { client: customer._id } });
         }
@@ -82,7 +102,6 @@ export async function DELETE(req, { params }) {
             userId: authUser._id,
         });
 
-        // ── NEW: mirror to unified EditHistory ──
         try {
             await recordEdit({
                 clientId: customer._id,
@@ -98,18 +117,10 @@ export async function DELETE(req, { params }) {
         } catch (auditErr) {
             console.error('[edit-history] failed to record customer delete:', auditErr);
         }
-        // ── END ──
 
-        return NextResponse.json(
-            {
-                success: true,
-                message: `${customer.name} customer deleted successfully`,
-            },
-            { status: 200 }
-        );
+        return NextResponse.json({ success: true, message: `${customer.name} customer deleted successfully` }, { status: 200 });
     } catch (error) {
         console.error('Delete customer error:', error);
-
         return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
     }
 }
@@ -139,30 +150,16 @@ export async function PUT(req, { params }) {
         const customer = await Customer.findById(id);
 
         if (!customer) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: 'Customer does not exist',
-                },
-                { status: 404 }
-            );
+            return NextResponse.json({ success: false, message: 'Customer does not exist' }, { status: 404 });
         }
 
         const oldData = customer.toObject();
-
         const oldEmployeeIds = (customer.salesExecutive || []).map((employeeId) => employeeId.toString());
 
         // Validate GSTIN only when a non-empty value is provided.
-        // An empty GSTIN is ignored to preserve existing customer data.
         if (Object.prototype.hasOwnProperty.call(body, 'GSTIN')) {
             if (body.GSTIN !== null && body.GSTIN !== undefined && typeof body.GSTIN !== 'string') {
-                return NextResponse.json(
-                    {
-                        success: false,
-                        message: 'GSTIN must be a string',
-                    },
-                    { status: 400 }
-                );
+                return NextResponse.json({ success: false, message: 'GSTIN must be a string' }, { status: 400 });
             }
 
             const gstin = body.GSTIN?.trim().toUpperCase();
@@ -172,12 +169,7 @@ export async function PUT(req, { params }) {
                     {
                         success: false,
                         message: 'GSTIN must contain exactly 15 alphanumeric characters.',
-                        errors: [
-                            {
-                                field: 'GSTIN',
-                                message: 'Please enter a valid 15-character GSTIN.',
-                            },
-                        ],
+                        errors: [{ field: 'GSTIN', message: 'Please enter a valid 15-character GSTIN.' }],
                     },
                     { status: 400 }
                 );
@@ -201,31 +193,16 @@ export async function PUT(req, { params }) {
             ];
 
             if (ids.some((employeeId) => !isValidId(employeeId))) {
-                return NextResponse.json(
-                    {
-                        success: false,
-                        message: 'Invalid sales employee ID',
-                    },
-                    { status: 400 }
-                );
+                return NextResponse.json({ success: false, message: 'Invalid sales employee ID' }, { status: 400 });
             }
 
-            // Empty selection means "keep the existing assignment".
             if (ids.length > 0) {
                 for (const employeeId of ids) {
                     const employee = await Employee.findById(employeeId);
-
                     if (!employee) {
-                        return NextResponse.json(
-                            {
-                                success: false,
-                                message: 'Sales employee not found',
-                            },
-                            { status: 404 }
-                        );
+                        return NextResponse.json({ success: false, message: 'Sales employee not found' }, { status: 404 });
                     }
                 }
-
                 newEmployeeIds = ids;
                 body.salesExecutive = ids;
             } else {
@@ -233,12 +210,10 @@ export async function PUT(req, { params }) {
             }
         }
 
-        // Only update fields that belong to the Customer schema.
-        // Never allow the request to overwrite internal history or IDs.
-        const protectedFields = new Set(['_id', '__v', 'createdAt', 'updatedAt', 'history']);
-
+        // Only update fields that we allow.
         for (const key of Object.keys(body)) {
-            if (protectedFields.has(key) || !Customer.schema.path(key)) {
+            // 🛑 THE FIX: We check our explicit ALLOWED_UPDATE_FIELDS list instead of Customer.schema.path(key)
+            if (!ALLOWED_UPDATE_FIELDS.includes(key)) {
                 continue;
             }
 
@@ -246,6 +221,17 @@ export async function PUT(req, { params }) {
 
             // Preserve saved values when optional text fields are blank.
             if (OPTIONAL_TEXT_FIELDS.includes(key)) {
+                if (value !== null && value !== undefined && typeof value !== 'string') {
+                    return NextResponse.json(
+                        {
+                            success: false,
+                            message: `${key} must be a string`,
+                            errors: [{ field: key, message: `${key} must be a string.` }],
+                        },
+                        { status: 400 }
+                    );
+                }
+
                 if (typeof value === 'string') {
                     value = value.trim();
 
@@ -253,14 +239,21 @@ export async function PUT(req, { params }) {
                         continue;
                     }
 
-                    if (key === 'email') {
-                        value = value.toLowerCase();
+                    const maxLen = MAX_LENGTH_BY_FIELD[key];
+                    if (maxLen && value.length > maxLen) {
+                        return NextResponse.json(
+                            {
+                                success: false,
+                                message: `${key} must be at most ${maxLen} characters.`,
+                                errors: [{ field: key, message: `${key} must be at most ${maxLen} characters.` }],
+                            },
+                            { status: 400 }
+                        );
                     }
 
-                    if (key === 'GSTIN') {
-                        value = value.toUpperCase();
-                    }
-                } else if (value == null) {
+                    if (key === 'email') value = value.toLowerCase();
+                    if (key === 'GSTIN') value = value.toUpperCase();
+                } else {
                     continue;
                 }
             }
@@ -269,23 +262,14 @@ export async function PUT(req, { params }) {
                 if (typeof value !== 'string' || !value.trim()) {
                     continue;
                 }
-
                 value = value.trim();
             }
 
             if (key === 'phone') {
                 const phone = String(value ?? '').trim();
-
                 if (!phone || !Number.isFinite(Number(phone))) {
-                    return NextResponse.json(
-                        {
-                            success: false,
-                            message: 'Please enter a valid client phone number',
-                        },
-                        { status: 400 }
-                    );
+                    return NextResponse.json({ success: false, message: 'Please enter a valid client phone number' }, { status: 400 });
                 }
-
                 value = Number(phone);
             }
 
@@ -296,7 +280,6 @@ export async function PUT(req, { params }) {
             customer.set(key, value);
         }
 
-        // Save the customer first.
         const editedCustomer = await customer.save();
 
         // Synchronize the SalesEmployee client lists if the assignment changed.
@@ -310,9 +293,7 @@ export async function PUT(req, { params }) {
             }
 
             for (const employeeId of newEmployeeIds) {
-                let salesEmployee = await SalesEmployee.findOne({
-                    employeeId,
-                });
+                let salesEmployee = await SalesEmployee.findOne({ employeeId });
 
                 if (!salesEmployee) {
                     salesEmployee = await SalesEmployee.create({
@@ -321,14 +302,12 @@ export async function PUT(req, { params }) {
                     });
 
                     const employee = await Employee.findById(employeeId);
-
                     if (employee) {
                         employee.salesDetails = salesEmployee._id;
                         await employee.save();
                     }
                 } else {
                     const alreadyAssigned = (salesEmployee.client || []).some((clientId) => clientId.toString() === editedCustomer._id.toString());
-
                     if (!alreadyAssigned) {
                         salesEmployee.client.push(editedCustomer._id);
                         await salesEmployee.save();
@@ -337,7 +316,7 @@ export async function PUT(req, { params }) {
             }
         }
 
-        // Create the audit log after a successful customer save.
+        // Create the audit log
         const auditLog = await createAuditLog({
             clientId: id,
             entityType: 'Customer',
@@ -353,7 +332,7 @@ export async function PUT(req, { params }) {
             await editedCustomer.save();
         }
 
-        // ── NEW: mirror to unified EditHistory ──
+        // Mirror to unified EditHistory
         try {
             const changes = diffObjects(oldData, editedCustomer.toObject());
             if (changes.length > 0) {
@@ -374,7 +353,6 @@ export async function PUT(req, { params }) {
         } catch (auditErr) {
             console.error('[edit-history] failed to record customer update:', auditErr);
         }
-        // ── END ──
 
         return NextResponse.json(
             {
@@ -398,12 +376,7 @@ export async function PUT(req, { params }) {
                                   field: err.path,
                                   message: err.message,
                               }))
-                            : [
-                                  {
-                                      field: error.path || 'unknown',
-                                      message: error.message,
-                                  },
-                              ],
+                            : [{ field: error.path || 'unknown', message: error.message }],
                 },
                 { status: 400 }
             );

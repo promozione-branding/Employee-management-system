@@ -1,7 +1,7 @@
 // config/data.js
 //
 
-import { EMPLOYEE_AUTH_ROLE_OPTIONS, EMPLOYEE_DESIGNATION_OPTIONS, getSubDesignationOptions } from './employeeDesignation';
+import { EMPLOYEE_AUTH_ROLE_OPTIONS, EMPLOYEE_DESIGNATION_OPTIONS, getSubDesignationOptions } from './employeeDesignation.js';
 
 export const addProposalFormControl = [
     {
@@ -82,6 +82,7 @@ export const addCustomerFormControl = [
         componentType: 'input',
         type: 'text',
         placeholder: 'Enter Client Name',
+        required: true,
     },
     {
         label: 'Company Name',
@@ -117,6 +118,7 @@ export const addCustomerFormControl = [
         componentType: 'input',
         type: 'text',
         placeholder: 'Enter Contact No',
+        required: true,
     },
     {
         label: 'Website Url',
@@ -165,6 +167,13 @@ export const addCustomerFormControl = [
         name: 'meetingDate',
         componentType: 'input',
         type: 'date',
+    },
+    {
+        label: 'Category',
+        name: 'category',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Category',
     },
     {
         label: 'Paid',

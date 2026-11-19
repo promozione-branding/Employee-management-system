@@ -134,6 +134,7 @@ export async function POST(req) {
             email: optionalText(body.email)?.toLowerCase(),
             website: optionalText(body.website),
             Address: optionalText(body.Address),
+            category: optionalText(body.category)?.slice(0, 60),
             city: optionalText(body.city),
             state: optionalText(body.state),
             pincode: optionalText(body.pincode),

@@ -86,6 +86,14 @@ const CustomerSchema = new mongoose.Schema(
             trim: true,
         },
 
+        // 🆕 category — free-text, optional
+        category: {
+            type: String,
+            trim: true,
+            default: '',
+            maxlength: 60,
+        },
+
         meetingDate: {
             type: String,
         },
@@ -194,5 +202,8 @@ CustomerSchema.index(
 );
 CustomerSchema.index({ salesExecutive: 1 });
 CustomerSchema.index({ city: 1 });
+
+// 🆕 category filter index — cheap, non-unique, safe on existing data
+CustomerSchema.index({ category: 1 });
 
 export default mongoose.models.Customer || mongoose.model('Customer', CustomerSchema);

@@ -27,8 +27,70 @@ export async function POST(req) {
 
         const data = await req.json();
 
+        // 🧼 WHITELIST — only allow known schema fields on create
+        const ALLOWED_CREATE_FIELDS = [
+            'name',
+            'company',
+            'GSTIN',
+            'tanNo',
+            'email',
+            'phone',
+            'website',
+            'Address',
+            'city',
+            'state',
+            'pincode',
+            'country',
+            'meetingDate',
+            'category', 
+            'isPaid',
+            'notes',
+            'salesExecutive',
+        ];
+
+        const safeData = {};
+        for (const key of ALLOWED_CREATE_FIELDS) {
+            if (Object.prototype.hasOwnProperty.call(data, key)) {
+                safeData[key] = data[key];
+            }
+        }
+
+        // Only name + phone are compulsory; category/GST/city/... are optional.
+        if (typeof safeData.name !== 'string' || !safeData.name.trim()) {
+            return NextResponse.json({ success: false, message: 'Please enter client name', errors: [{ field: 'name', message: 'Please enter client name.' }] }, { status: 400 });
+        }
+        safeData.name = safeData.name.trim();
+
+        const phone = String(safeData.phone ?? '').trim();
+        if (!phone || !Number.isFinite(Number(phone))) {
+            return NextResponse.json({ success: false, message: 'Please enter a valid client phone number', errors: [{ field: 'phone', message: 'Please enter a valid client phone number.' }] }, { status: 400 });
+        }
+        safeData.phone = Number(phone);
+
+        // Drop blank optional fields so '' is never stored over real data.
+        for (const field of ['company', 'GSTIN', 'tanNo', 'email', 'website', 'Address', 'city', 'state', 'pincode', 'country', 'category', 'meetingDate', 'notes']) {
+            if (typeof safeData[field] === 'string') {
+                safeData[field] = safeData[field].trim();
+                if (!safeData[field]) delete safeData[field];
+            }
+        }
+        if (safeData.email) safeData.email = safeData.email.toLowerCase();
+        if (safeData.GSTIN) {
+            safeData.GSTIN = safeData.GSTIN.toUpperCase();
+            if (!/^[0-9A-Z]{15}$/.test(safeData.GSTIN)) {
+                return NextResponse.json({ success: false, message: 'GSTIN must contain exactly 15 alphanumeric characters.', errors: [{ field: 'GSTIN', message: 'Please enter a valid 15-character GSTIN.' }] }, { status: 400 });
+            }
+        }
+        if (safeData.category && safeData.category.length > 60) {
+            return NextResponse.json({ success: false, message: 'Category must be at most 60 characters.', errors: [{ field: 'category', message: 'Category must be at most 60 characters.' }] }, { status: 400 });
+        }
+        if (typeof safeData.salesExecutive === 'string') {
+            safeData.salesExecutive = safeData.salesExecutive.trim() ? [safeData.salesExecutive.trim()] : [];
+        }
+        safeData.isPaid = safeData.isPaid === true || safeData.isPaid === 'Paid' || safeData.isPaid === 'true';
+
         // 🆕 CREATE CUSTOMER
-        const newCustomer = await Customer.create(data);
+        const newCustomer = await Customer.create(safeData);
 
         // 🧾 CREATE AUDIT LOG
         await createAuditLog({
@@ -79,12 +141,8 @@ export async function POST(req) {
 
                 await transporter.sendMail({
                     from: `"ERP Notifications" <${process.env.YOUR_EMAIL_ADDRESS}>`,
-
-                    // 👑 ONLY ADMIN EMAILS
                     to: adminEmails,
-
                     subject: `New Client Created - ${customerName}`,
-
                     html: `
             <div
               style="
@@ -96,7 +154,6 @@ export async function POST(req) {
                 padding: 20px;
               "
             >
-
               <div
                 style="
                   background: #1d4ed8;
@@ -105,13 +162,8 @@ export async function POST(req) {
                   border-radius: 8px 8px 0 0;
                 "
               >
-                <h2 style="margin: 0;">
-                  New Client Created
-                </h2>
-
-                <p style="margin: 5px 0 0;">
-                  ERP Notification
-                </p>
+                <h2 style="margin: 0;">New Client Created</h2>
+                <p style="margin: 5px 0 0;">ERP Notification</p>
               </div>
 
               <div
@@ -122,114 +174,50 @@ export async function POST(req) {
                   border-radius: 0 0 8px 8px;
                 "
               >
+                <p>A new client has been created in the ERP system.</p>
 
-                <p>
-                  A new client has been created
-                  in the ERP system.
-                </p>
+                <h3 style="color: #1d4ed8;">Client Details</h3>
 
-                <h3 style="color: #1d4ed8;">
-                  Client Details
-                </h3>
-
-                <table
-                  style="
-                    width: 100%;
-                    border-collapse: collapse;
-                  "
-                >
-
+                <table style="width: 100%; border-collapse: collapse;">
                   <tr>
-                    <td
-                      style="
-                        padding: 8px 0;
-                        font-weight: bold;
-                      "
-                    >
-                      Client Name
-                    </td>
-
+                    <td style="padding: 8px 0; font-weight: bold;">Client Name</td>
+                    <td style="padding: 8px 0;">${customerName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: bold;">Client ID</td>
+                    <td style="padding: 8px 0;">${newCustomer._id}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: bold;">Category</td>
+                    <td style="padding: 8px 0;">${newCustomer.category || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: bold;">Created By</td>
+                    <td style="padding: 8px 0;">${createdBy}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: bold;">Created At</td>
                     <td style="padding: 8px 0;">
-                      ${customerName}
+                      ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
                     </td>
                   </tr>
-
-                  <tr>
-                    <td
-                      style="
-                        padding: 8px 0;
-                        font-weight: bold;
-                      "
-                    >
-                      Client ID
-                    </td>
-
-                    <td style="padding: 8px 0;">
-                      ${newCustomer._id}
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td
-                      style="
-                        padding: 8px 0;
-                        font-weight: bold;
-                      "
-                    >
-                      Created By
-                    </td>
-
-                    <td style="padding: 8px 0;">
-                      ${createdBy}
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td
-                      style="
-                        padding: 8px 0;
-                        font-weight: bold;
-                      "
-                    >
-                      Created At
-                    </td>
-
-                    <td style="padding: 8px 0;">
-                      ${new Date().toLocaleString('en-IN', {
-                          timeZone: 'Asia/Kolkata',
-                      })}
-                    </td>
-                  </tr>
-
                 </table>
 
-                <hr
-                  style="
-                    margin: 25px 0;
-                    border: none;
-                    border-top: 1px solid #e5e7eb;
-                  "
-                />
+                <hr style="margin: 25px 0; border: none; border-top: 1px solid #e5e7eb;" />
 
-                <p>
-                  Please check the ERP dashboard
-                  for complete client details.
-                </p>
+                <p>Please check the ERP dashboard for complete client details.</p>
 
                 <p style="margin-bottom: 0;">
                   Regards,<br />
                   <strong>ERP System</strong>
                 </p>
-
               </div>
-
             </div>
           `,
                 });
 
                 console.log('✅ Client creation email sent to admins:', adminEmails);
             } catch (mailError) {
-                // Email failure should NOT fail customer creation
                 console.error('❌ Client email sending error:', mailError.message);
             }
         } else {
@@ -250,6 +238,24 @@ export async function POST(req) {
         );
     } catch (error) {
         console.error('Create customer API error:', error);
+
+        if (error.name === 'ValidationError' || error.name === 'CastError') {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: 'Customer validation failed',
+                    errors:
+                        error.name === 'ValidationError'
+                            ? Object.values(error.errors).map((err) => ({ field: err.path, message: err.message }))
+                            : [{ field: error.path || 'unknown', message: error.message }],
+                },
+                { status: 400 }
+            );
+        }
+        // Duplicate non-empty GSTIN (unique partial index) — say so, don't 500.
+        if (error.code === 11000) {
+            return NextResponse.json({ success: false, message: 'A client with this GST No. already exists.' }, { status: 409 });
+        }
 
         return NextResponse.json(
             {

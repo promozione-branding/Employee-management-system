@@ -5,10 +5,7 @@
 import { Button } from '@/components/ui/button';
 import { Plus, Eye, Network, SquarePen, Trash, Search, X } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
-import CommonForm from '@/components/layout/Form';
-import Loading from '@/components/layout/Loading';
-import { addCustomerFormControl } from '@/config/data';
-import { initalCustomerFormData } from '@/config/initialFormDate';
+import CustomerForm from '@/components/subComponents/customer/CustomerForm';
 import {
     createCustomerServices,
     editCustomerServices,
@@ -28,7 +25,7 @@ const CustomerManager = () => {
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState(initalCustomerFormData);
+    const [editingCustomer, setEditingCustomer] = useState(null);
     const [editingId, setEditingId] = useState(null);
     const [fetchSales, setFetchSales] = useState([]);
     const [searchInput, setSearchInput] = useState('');
@@ -84,34 +81,10 @@ const CustomerManager = () => {
         }
     }
 
-    /* ---------------- Sales Person Select ---------------- */
-    const salesPerson = {
-        label: 'salesExecutive',
-        name: 'salesExecutive',
-        componentType: 'select',
-        options: fetchSales.map(({ basicDetails, _id }) => ({
-            id: _id,
-            label: basicDetails?.name,
-        })),
-    };
-
-    const customerFormControls = [...addCustomerFormControl, salesPerson];
 
     /* ---------------- Submit ---------------- */
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        for (const c of customerFormControls) {
-            if (!['tanNo', 'notes', 'website', 'meetingDate', 'email', 'isPaid'].includes(c.name) && !formData[c.name]) {
-                return toast.error(`Please fill ${c.label}`);
-            }
-        }
-
+    const handleSubmit = async (payload) => {
         try {
-            const payload = {
-                ...formData,
-                isPaid: formData.isPaid === 'Paid',
-            };
 
             const res = editingId ? await editCustomerServices(editingId, payload) : await createCustomerServices(payload);
 
@@ -134,11 +107,7 @@ const CustomerManager = () => {
         try {
             const res = await getCustomerServices(id);
             if (res.success) {
-                const customerData = res.data;
-                setFormData({
-                    ...customerData,
-                    isPaid: customerData.isPaid ? 'Paid' : 'Unpaid',
-                });
+                setEditingCustomer(res.data);
                 setEditingId(id);
                 setOpen(true);
             }
@@ -164,7 +133,7 @@ const CustomerManager = () => {
     };
 
     const resetForm = () => {
-        setFormData(initalCustomerFormData);
+        setEditingCustomer(null);
         setEditingId(null);
         setOpen(false);
     };
@@ -410,10 +379,10 @@ const CustomerManager = () => {
                 <SheetContent className="overflow-y-auto p-5">
                     <p className="pb-4 text-center text-xl font-semibold">{editingId ? 'Edit Customer' : 'Create Customer'}</p>
 
-                    <CommonForm
-                        formData={formData}
-                        setFormData={setFormData}
-                        formControls={customerFormControls}
+                    <CustomerForm
+                        key={editingId || 'new-customer'}
+                        customer={editingCustomer}
+                        salesExecutives={fetchSales}
                         buttonText={editingId ? 'Update' : 'Add Client'}
                         onSubmit={handleSubmit}
                     />

@@ -31,9 +31,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
-import CommonForm from '@/components/layout/Form';
-import { addCustomerFormControl } from '@/config/data';
-import { initalCustomerFormData } from '@/config/initialFormDate';
+import CustomerForm from '@/components/subComponents/customer/CustomerForm';
 
 import {
     createCustomerServices,
@@ -54,7 +52,7 @@ const CustomerManager = () => {
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState(initalCustomerFormData);
+    const [editingCustomer, setEditingCustomer] = useState(null);
     const [editingId, setEditingId] = useState(null);
     const [fetchSales, setFetchSales] = useState([]);
     const [searchInput, setSearchInput] = useState('');
@@ -117,19 +115,6 @@ const CustomerManager = () => {
         fetchSalesPerson();
     }, [fetchSalesPerson]);
 
-    // Sales executive form control
-    const salesPersonControl = {
-        label: 'salesExecutive',
-        name: 'salesExecutive',
-        componentType: 'select',
-        options: fetchSales.map(({ basicDetails, _id }) => ({
-            id: _id,
-            label: basicDetails?.name,
-        })),
-    };
-
-    const customerFormControls = [...addCustomerFormControl, salesPersonControl];
-
     // Filter currently loaded customers by sales executive
     const visibleCustomers = useMemo(() => {
         if (executiveFilter === 'all') {
@@ -153,23 +138,9 @@ const CustomerManager = () => {
         };
     }, [customers]);
 
-    // Create or update customer
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        for (const control of customerFormControls) {
-            if (!['tanNo', 'notes', 'website', 'meetingDate', 'email', 'isPaid'].includes(control.name) && !formData[control.name]) {
-                toast.error(`Please fill ${control.label}`);
-                return;
-            }
-        }
-
+    // Create or update customer (validation + payload handled by CustomerForm)
+    const handleSubmit = async (payload) => {
         try {
-            const payload = {
-                ...formData,
-                isPaid: formData.isPaid === 'Paid',
-            };
-
             const res = editingId ? await editCustomerServices(editingId, payload) : await createCustomerServices(payload);
 
             if (res.success) {
@@ -192,13 +163,7 @@ const CustomerManager = () => {
             const res = await getCustomerServices(id);
 
             if (res.success) {
-                const customerData = res.data;
-
-                setFormData({
-                    ...customerData,
-                    isPaid: customerData.isPaid ? 'Paid' : 'Unpaid',
-                });
-
+                setEditingCustomer(res.data);
                 setEditingId(id);
                 setOpen(true);
             }
@@ -228,14 +193,14 @@ const CustomerManager = () => {
 
     // Reset form
     const resetForm = () => {
-        setFormData(initalCustomerFormData);
+        setEditingCustomer(null);
         setEditingId(null);
         setOpen(false);
     };
 
     // Open create form
     const openCreateForm = () => {
-        setFormData(initalCustomerFormData);
+        setEditingCustomer(null);
         setEditingId(null);
         setOpen(true);
     };
@@ -813,10 +778,10 @@ const CustomerManager = () => {
                         </p>
                     </div>
 
-                    <CommonForm
-                        formData={formData}
-                        setFormData={setFormData}
-                        formControls={customerFormControls}
+                    <CustomerForm
+                        key={editingId || 'new-customer'}
+                        customer={editingCustomer}
+                        salesExecutives={fetchSales}
                         buttonText={editingId ? 'Save changes' : 'Add client'}
                         onSubmit={handleSubmit}
                     />

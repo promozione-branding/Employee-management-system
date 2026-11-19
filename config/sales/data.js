@@ -92,6 +92,22 @@ export const salesClientFC = [
         type: 'date',
     },
     {
+        label: 'Category',
+        name: 'category',
+        componentType: 'input',
+        type: 'text',
+        placeholder: 'Enter Category',
+    },
+    {
+        label: 'Paid',
+        name: 'isPaid',
+        componentType: 'select',
+        options: [
+            { id: 'Paid', label: 'Paid' },
+            { id: 'Unpaid', label: 'Unpaid' },
+        ],
+    },
+    {
         label: 'Notes',
         name: 'notes',
         componentType: 'input',

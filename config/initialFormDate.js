@@ -48,6 +48,7 @@ export const initalCustomerFormData = {
     pincode: '',
     country: '',
     meetingDate: '',
+    category: '',
     salesPersonEmail: '',
     SalesPersonName: '',
     notes: '',
