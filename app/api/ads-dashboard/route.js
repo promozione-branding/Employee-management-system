@@ -5,6 +5,7 @@ import AdPerformanceDaily from '@/models/admin/AdPerformanceDaily';
 import { syncAdsSnapshot } from '@/lib/adsSnapshot';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 300;
 
 export async function GET(req) {
     const user = await getAuthUser(req);

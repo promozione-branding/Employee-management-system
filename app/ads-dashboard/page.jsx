@@ -48,18 +48,26 @@ export default function AdsDashboard() {
         conversions: metricSum(campaignRows, 'conversions'),
     }), [campaignRows]);
     const currency = campaignRows.find((row) => row.currency)?.currency || '';
+    const syncedAccounts = new Set(rows.map((row) => `${row.platform}:${row.accountId}`)).size;
     const platforms = useMemo(() => ['google', 'meta'].map((name) => {
         const list = campaignRows.filter((row) => row.platform === name);
         return { name, spend: metricSum(list, 'spend'), clicks: metricSum(list, 'clicks'), impressions: metricSum(list, 'impressions'), conversions: metricSum(list, 'conversions'), campaigns: list.length };
     }), [campaignRows]);
     const chartRows = useMemo(() => {
         const days = new Map();
+        const cursor = new Date(`${from}T00:00:00Z`);
+        const rangeEnd = new Date(`${to}T00:00:00Z`);
+        for (let count = 0; cursor <= rangeEnd && count < 3660; count += 1) {
+            const date = cursor.toISOString().slice(0, 10);
+            days.set(date, { date, google: 0, meta: 0, conversions: 0 });
+            cursor.setUTCDate(cursor.getUTCDate() + 1);
+        }
         rows.filter((row) => row.level === 'campaign').forEach((row) => {
             const day = days.get(row.date) || { date: row.date, google: 0, meta: 0, conversions: 0 };
             day[row.platform] += Number(row.spend || 0); day.conversions += Number(row.conversions || 0); days.set(row.date, day);
         });
         return [...days.values()].sort((a, b) => a.date.localeCompare(b.date));
-    }, [rows]);
+    }, [rows, from, to]);
     const details = useMemo(() => rows.filter((row) => detailLevel === 'all' || row.level === detailLevel), [rows, detailLevel]);
     const sync = async () => {
         setSyncing(true); setError('');
@@ -68,7 +76,7 @@ export default function AdsDashboard() {
             const json = await response.json();
             if (!response.ok) throw new Error(json.error || 'Sync failed.');
             const syncMessage = json.errors?.length
-                ? `${json.saved} records saved. ${json.errors.length} connected account(s) could not be synced.`
+                ? `${json.saved} records saved; ${json.errors.length} account issue(s). ${json.errors[0].platform || ''} ${json.errors[0].accountId || ''}: ${json.errors[0].error || 'Sync failed.'}`
                 : !json.accountsDiscovered?.google && !json.accountsDiscovered?.meta
                   ? 'No ad accounts were found. Check the connections in Reports → Discover, or assign accounts to clients there, then sync again.'
                   : '';
@@ -95,8 +103,8 @@ export default function AdsDashboard() {
     return <main className="min-h-full bg-slate-50 px-4 py-6 text-slate-900 dark:bg-[#0a1222] dark:text-slate-100 md:px-7 lg:px-9"><div className="mx-auto max-w-[1600px] space-y-5">
         <section className="relative overflow-hidden rounded-3xl bg-[#0A2E66] px-6 py-7 text-white shadow-lg md:px-8 md:py-8">
             <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(ellipse_at_top_right,rgba(59,105,173,.65),transparent_65%)] md:block" />
-            <div className="relative flex flex-wrap items-end justify-between gap-6"><div className="max-w-2xl"><div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-[.18em] text-orange-200"><Activity size={16}/> PERFORMANCE CENTER</div><h1 className="font-serif text-3xl font-black tracking-tight md:text-4xl">Ads performance</h1><p className="mt-2 max-w-xl text-sm leading-6 text-blue-100">A live view of the Google Ads and Meta Ads data connected to your client accounts.</p><div className="mt-5 flex flex-wrap gap-2"><span className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold">{campaignRows.length} campaigns</span><span className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold">{clients.length} active clients</span><span className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold">{chartRows.length} days with data</span></div></div>
-                <div className="relative flex flex-wrap items-center gap-3"><span className="text-xs text-blue-100">{syncing ? 'Fetching latest account data…' : lastSynced ? `Updated ${new Date(lastSynced).toLocaleString()}` : 'No saved sync yet'}</span><button onClick={sync} disabled={syncing} className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#F27B1E] px-4 text-sm font-bold text-white shadow-md transition hover:bg-orange-500 disabled:opacity-60"><RefreshCw size={17} className={syncing ? 'animate-spin' : ''}/>{syncing ? 'Syncing accounts…' : 'Sync ad data'}</button></div>
+            <div className="relative flex flex-wrap items-end justify-between gap-6"><div className="max-w-2xl"><div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-[.18em] text-orange-200"><Activity size={16}/> PERFORMANCE CENTER</div><h1 className="font-serif text-3xl font-black tracking-tight md:text-4xl">Ads performance</h1><p className="mt-2 max-w-xl text-sm leading-6 text-blue-100">A live view of the Google Ads and Meta Ads data connected to your client accounts.</p><div className="mt-5 flex flex-wrap gap-2"><span className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold">{campaignRows.length} campaigns</span><span className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold">{clients.length} report clients</span><span className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold">{syncedAccounts} ad accounts with saved data</span><span className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold">{chartRows.filter((day) => day.google || day.meta).length} days with activity</span></div></div>
+                <div className="relative flex flex-wrap items-center gap-3"><button onClick={sync} disabled={syncing} className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#F27B1E] px-4 text-sm font-bold text-white shadow-md transition hover:bg-orange-500 disabled:opacity-60"><RefreshCw size={17} className={syncing ? 'animate-spin' : ''}/>{syncing ? 'Syncing accounts…' : 'Sync ad data'}</button></div>
             </div>
         </section>
 
@@ -104,7 +112,7 @@ export default function AdsDashboard() {
             <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-300"><CalendarDays size={17} className="text-orange-500"/> Date range</div>
             <div className="flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">{[7, 30].map((days) => <button key={days} onClick={() => chooseRange(days)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-white dark:text-slate-300 dark:hover:bg-slate-700">{days} days</button>)}</div>
             <input aria-label="Start date" className={input} type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)}/><span className="text-slate-400">to</span><input aria-label="End date" className={input} type="date" value={to} min={from} max={dateValue(new Date())} onChange={(e) => setTo(e.target.value)}/>
-            <div className="ml-auto flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400"><span className="h-2 w-2 rounded-full bg-emerald-500"/>{loading ? 'Updating…' : lastSynced ? `Last data update ${new Date(lastSynced).toLocaleString()}` : 'No saved data yet'}<button aria-label="Refresh data" onClick={load} className="ml-1 rounded-lg border border-slate-200 p-2 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"><RefreshCw size={15}/></button></div>
+            <div className="ml-auto flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400"><span className="h-2 w-2 rounded-full bg-emerald-500"/>{syncing ? 'Fetching latest account data…' : loading ? 'Updating view…' : lastSynced ? `Data last saved ${new Date(lastSynced).toLocaleString()}` : 'No saved data yet'}</div>
         </section>
 
         {error && <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">{error}</div>}
