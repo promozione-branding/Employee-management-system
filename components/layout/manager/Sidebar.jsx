@@ -19,7 +19,7 @@ import {
     Building2,
     PanelLeftClose,
     ArrowLeft,
-    IdCardLanyard,
+    IdCardLanyard, TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
@@ -50,10 +50,15 @@ const navLinks = [
         icon: IdCardLanyard,
         description: 'Manage your team',
     },
+    {
+        href: '/ads-dashboard',
+        label: 'Ads Dashboard',
+        icon: TrendingUp,
+    },
 ];
 
-const SideBar = ({ children }) => {
-    const [open, setOpen] = useState(false);
+const SideBar = ({ children, defaultOpen = false }) => {
+    const [open, setOpen] = useState(defaultOpen);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
 

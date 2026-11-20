@@ -6,8 +6,8 @@ import EmployeeSidebar from './EmployeeSidebar';
 import EmployeeNavbar from './EmployeeNavbar';
 import { useState } from 'react';
 
-const Layout = ({ children }) => {
-    const [open, setOpen] = useState(false);
+const Layout = ({ children, defaultOpen = false }) => {
+    const [open, setOpen] = useState(defaultOpen);
 
     return (
         <div className="flex min-h-screen bg-white">

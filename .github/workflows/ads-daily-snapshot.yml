@@ -1,0 +1,21 @@
+name: Daily ads performance snapshot
+
+on:
+    schedule:
+        - cron: '25 2 * * *'
+    workflow_dispatch:
+
+jobs:
+    snapshot:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Capture Google and Meta daily performance
+              env:
+                  ADS_DASHBOARD_URL: ${{ secrets.ADS_DASHBOARD_URL }}
+                  CRON_SECRET: ${{ secrets.CRON_SECRET }}
+              run: |
+                  test -n "$ADS_DASHBOARD_URL"
+                  test -n "$CRON_SECRET"
+                  curl --fail-with-body --silent --show-error \
+                    -H "Authorization: Bearer $CRON_SECRET" \
+                    "$ADS_DASHBOARD_URL/api/cron/ads-snapshot"

@@ -10,7 +10,7 @@ import { useSalesEmployeeStore } from '@/lib/store/salesEmployeeStore';
 import axiosInstance from '@/service/axiosInstance';
 import toast from 'react-hot-toast';
 
-import { LayoutDashboard, CalendarCheck, UsersRound, CircleUserRound, Activity, LogOut, Menu, X, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
+import { LayoutDashboard, CalendarCheck, UsersRound, CircleUserRound, Activity, LogOut, Menu, X, ChevronLeft, ChevronRight, Building2, TrendingUp } from 'lucide-react';
 
 const NAVY = '#0A2E66';
 const ORANGE = '#F27B1E';
@@ -46,10 +46,14 @@ const NAV_LINKS = [
         label: 'Profile',
         icon: CircleUserRound,
     },
+    {
+        href: '/ads-dashboard',
+        label: 'Ads Dashboard',
+        icon: TrendingUp,
+    },
 ];
 
-const SalesSidebar = () => {
-    const [open, setOpen] = useState(false);
+const SalesSidebar = ({ open, setOpen }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [loggingOut, setLoggingOut] = useState(false);
 

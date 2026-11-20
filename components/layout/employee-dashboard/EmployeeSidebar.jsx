@@ -2,7 +2,7 @@
 
 'use client';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, CalendarCheck, FileText, User, LogOut, Menu, Briefcase, UsersRound } from 'lucide-react';
+import { LayoutDashboard, CalendarCheck, FileText, User, LogOut, Menu, Briefcase, UsersRound, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -60,6 +60,12 @@ const EmployeeSidebar = ({ open, setOpen }) => {
             href: '/employee-dashboard/profile',
             label: 'Profile',
             icon: <User size={24} />,
+        },
+         {
+            title: '',
+            href: '/ads-dashboard',
+            label: 'Ads Dashboard',
+            icon: <TrendingUp size={24} />,
         },
     ];
 

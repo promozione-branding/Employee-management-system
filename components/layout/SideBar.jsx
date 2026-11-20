@@ -21,7 +21,7 @@ import {
     ChevronDown,
     Building2,
     PanelLeftClose,
-    ArrowLeft,
+    ArrowLeft, TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
@@ -58,10 +58,16 @@ const navLinks = [
         icon: FileBarChart,
         description: 'Business reports',
     },
+    {
+        href: '/ads-dashboard',
+        label: 'Ads Dashboard',
+        icon: TrendingUp,
+        description: 'Google and Meta performance',
+    },
 ];
 
-const SideBar = ({ children }) => {
-    const [open, setOpen] = useState(false);
+const SideBar = ({ children, defaultOpen = false }) => {
+    const [open, setOpen] = useState(defaultOpen);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
 
