@@ -1,3 +1,5 @@
+// app/api/ads-dashboard/report/route.js
+
 import PDFDocument from 'pdfkit';
 import { connectDB } from '@/lib/db';
 import { getAuthUser } from '@/lib/getAuthUser';

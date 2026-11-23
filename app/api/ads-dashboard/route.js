@@ -1,3 +1,5 @@
+// app/api/ads-dashboard/route.js
+
 import { connectDB } from '@/lib/db';
 import { getAuthUser } from '@/lib/getAuthUser';
 import ReportClient from '@/models/admin/ReportClient';

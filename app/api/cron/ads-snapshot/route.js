@@ -1,3 +1,5 @@
+// app/api/cron/ads-snapshot/route.js
+
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { syncAdsSnapshot } from '@/lib/adsSnapshot';

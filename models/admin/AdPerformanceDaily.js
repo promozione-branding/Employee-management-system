@@ -1,3 +1,5 @@
+// models/admin/AdPerformanceDaily.js
+
 import mongoose from 'mongoose';
 
 const AdPerformanceDailySchema = new mongoose.Schema(

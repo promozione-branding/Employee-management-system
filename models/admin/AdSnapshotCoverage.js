@@ -1,3 +1,5 @@
+// models/admin/AdSnapshotCoverage.js
+
 import mongoose from 'mongoose';
 
 const AdSnapshotCoverageSchema = new mongoose.Schema(
