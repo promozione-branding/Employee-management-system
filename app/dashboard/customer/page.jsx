@@ -11,28 +11,26 @@ import {
     Network,
     SquarePen,
     Trash2,
-    Search,
-    X,
     Download,
     Users,
     Wallet,
     CalendarDays,
-    TriangleAlert,
     LayoutGrid,
     List,
     ChevronLeft,
     ChevronRight,
-    ArrowUpDown,
     Phone,
     Mail,
     Building2,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import CustomerForm from '@/components/subComponents/customer/CustomerForm';
+import CustomerDirectoryFilters, { getAddedDateRange } from '@/components/customer-directory/CustomerDirectoryFilters';
+import CustomerContact from '@/components/customer-directory/CustomerContact';
+import CustomerTable from '@/components/customer-directory/CustomerTable';
 
 import {
     createCustomerServices,
@@ -50,22 +48,6 @@ import { searchClientService } from '@/service/customer/search';
 const LIMIT = 20;
 
 const avatarColors = ['bg-[#17845A]', 'bg-[#6A4FD6]', 'bg-[#2B5086]', 'bg-[#C46A2D]', 'bg-[#087E8B]'];
-
-const localDateString = (date) => {
-    const pad = (value) => String(value).padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-};
-
-const getAddedDateRange = (filter, customFrom, customTo) => {
-    if (filter === 'custom') return { dateFrom: customFrom, dateTo: customTo };
-    if (filter === 'all') return { dateFrom: '', dateTo: '' };
-
-    const today = new Date();
-    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    if (filter === 'week') start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
-    if (filter === 'month') start.setDate(1);
-    return { dateFrom: localDateString(start), dateTo: localDateString(today) };
-};
 
 const CustomerManager = () => {
     const [customers, setCustomers] = useState([]);
@@ -393,6 +375,47 @@ const CustomerManager = () => {
         </div>
     );
 
+    const customerTableRows = visibleCustomers.map((customer, index) => (
+        <tr key={customer._id} className="group transition-colors hover:bg-[#F9FAFD]">
+            <td className="px-5 py-4">
+                <Checkbox
+                    checked={selectedCustomers.includes(customer._id)}
+                    onCheckedChange={(checked) => toggleCustomer(customer._id, checked === true)}
+                    aria-label={'Select ' + (customer.name || 'client')}
+                />
+            </td>
+            <td className="px-4 py-4">
+                <div className="flex min-w-[190px] items-center gap-3">
+                    <CustomerAvatar customer={customer} index={index} />
+                    <div className="min-w-0">
+                        <p className="truncate font-semibold text-[#0F1B33]">{customer.name || 'Unnamed client'}</p>
+                        <p className="mt-1 max-w-[220px] truncate text-sm text-[#68738A]">{customer.company || 'No company added'}</p>
+                    </div>
+                </div>
+            </td>
+            <td className="px-4 py-4"><CustomerContact customer={customer} /></td>
+            <td className="px-4 py-4">
+                <div className="flex max-w-[230px] flex-wrap gap-1.5">
+                    {customer.salesExecutive?.length ? customer.salesExecutive.map((executive) => (
+                        <span key={executive._id} className="inline-flex items-center gap-2 rounded-full bg-[#FFF1E4] py-1 pr-3 pl-1 text-xs font-semibold text-[#0F1B33]">
+                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#087E8B] text-[10px] font-bold text-white">
+                                {(executive.basicDetails?.name || 'SE').split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()}
+                            </span>
+                            {executive.basicDetails?.name || 'Executive'}
+                        </span>
+                    )) : <span className="text-sm text-[#8A92A6]">Unassigned</span>}
+                </div>
+            </td>
+            <td className="px-4 py-4">
+                <span className={customer.isPaid ? 'inline-flex rounded-full bg-[#E5F5EC] px-3 py-2 text-xs font-bold text-[#17845A]' : 'inline-flex rounded-full bg-[#FFF4D9] px-3 py-2 text-xs font-bold text-[#B86A00]'}>
+                    {customer.isPaid ? 'Paid' : 'Pending'}
+                </span>
+            </td>
+            <td className="px-4 py-4">{customer.category ? <span className="inline-flex max-w-[160px] truncate rounded-full bg-[#E9EFF9] px-3 py-1.5 text-xs font-semibold text-[#0A2E66]">{customer.category}</span> : <span className="text-sm text-[#8A92A6]">—</span>}</td>
+            <td className="px-5 py-4"><ActionButtons customer={customer} /></td>
+        </tr>
+    ));
+
     return (
         <main className="min-h-screen space-y-6 bg-[#3f71e7] p-3 sm:p-5 lg:p-7">
             {/* Page header: title and actions on separate rows */}
@@ -455,125 +478,26 @@ const CustomerManager = () => {
             <section className="overflow-hidden rounded-[22px] border border-[#E3E7F0] bg-white shadow-[0_4px_18px_rgba(15,27,51,0.04)]">
                 {/* Search and filters */}
                 <div className="flex flex-col gap-3 border-b border-[#E3E7F0] p-4 lg:flex-row lg:items-center lg:justify-between lg:p-5">
-                    <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row">
-                        <div className="relative w-full sm:max-w-[480px]">
-                            <Search size={19} className="absolute top-1/2 left-4 -translate-y-1/2 text-[#8A92A6]" />
-
-                            <Input
-                                value={searchInput}
-                                onChange={(event) => setSearchInput(event.target.value)}
-                                placeholder="Search by name, company or phone"
-                                className="h-12 rounded-xl border-[#E0E5EF] bg-white pr-10 pl-11 text-sm text-[#0F1B33] placeholder:text-[#8A92A6] focus-visible:ring-[#F27B1E]"
-                            />
-
-                            {searchInput && (
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setSearchInput('');
-                                        setDebouncedSearch('');
-                                        setPage(1);
-                                    }}
-                                    aria-label="Clear search"
-                                    className="absolute top-1/2 right-3 -translate-y-1/2 rounded p-1 text-[#8A92A6] hover:text-[#0F1B33]"
-                                >
-                                    <X size={16} />
-                                </button>
-                            )}
-                        </div>
-
-                        <select
-                            value={executiveFilter}
-                            onChange={(event) => setExecutiveFilter(event.target.value)}
-                            aria-label="Filter by sales executive"
-                            className="h-12 w-full rounded-xl border border-[#E0E5EF] bg-white px-4 text-sm text-[#0F1B33] transition outline-none focus:border-[#F27B1E] sm:max-w-[235px]"
-                        >
-                            <option value="all">All executives</option>
-
-                            {fetchSales.map((executive) => (
-                                <option key={executive._id} value={executive._id}>
-                                    {executive.basicDetails?.name || 'Unnamed executive'}
-                                </option>
-                            ))}
-                        </select>
-
-                        <div className="relative w-full sm:max-w-[220px]">
-                            <Input
-                                value={categoryInput}
-                                onChange={(event) => setCategoryInput(event.target.value)}
-                                placeholder="Filter by category"
-                                list="customer-category-options"
-                                aria-label="Filter by category"
-                                className="h-12 rounded-xl border-[#E0E5EF] bg-white pr-10 pl-4 text-sm text-[#0F1B33] placeholder:text-[#8A92A6] focus-visible:ring-[#F27B1E]"
-                            />
-                            <datalist id="customer-category-options">
-                                {categoryOptions.map((category) => (
-                                    <option key={category} value={category} />
-                                ))}
-                            </datalist>
-                            {categoryInput && (
-                                <button
-                                    type="button"
-                                    onClick={() => setCategoryInput('')}
-                                    aria-label="Clear category filter"
-                                    className="absolute top-1/2 right-3 -translate-y-1/2 rounded p-1 text-[#8A92A6] hover:text-[#0F1B33]"
-                                >
-                                    <X size={16} />
-                                </button>
-                            )}
-                        </div>
-
-                        <select
-                            value={addedDateFilter}
-                            onChange={(event) => {
-                                setAddedDateFilter(event.target.value);
-                                setPage(1);
-                            }}
-                            aria-label="Filter clients by date added"
-                            className="h-12 w-full rounded-xl border border-[#E0E5EF] bg-white px-4 text-sm text-[#0F1B33] transition outline-none focus:border-[#F27B1E] sm:max-w-[180px]"
-                        >
-                            <option value="all">Any added date</option>
-                            <option value="week">Added this week</option>
-                            <option value="month">Added this month</option>
-                            <option value="custom">Custom date range</option>
-                        </select>
-
-                        {addedDateFilter === 'custom' && (
-                            <div className="grid w-full grid-cols-2 gap-2 sm:max-w-[300px]">
-                                <Input
-                                    type="date"
-                                    value={customDateFrom}
-                                    onChange={(event) => {
-                                        setCustomDateFrom(event.target.value);
-                                        setPage(1);
-                                    }}
-                                    aria-label="Added from date"
-                                    className="h-12 rounded-xl border-[#E0E5EF] px-2 text-sm"
-                                />
-                                <Input
-                                    type="date"
-                                    value={customDateTo}
-                                    onChange={(event) => {
-                                        setCustomDateTo(event.target.value);
-                                        setPage(1);
-                                    }}
-                                    aria-label="Added to date"
-                                    className="h-12 rounded-xl border-[#E0E5EF] px-2 text-sm"
-                                />
-                            </div>
-                        )}
-
-                        <label className="flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-[#E0E5EF] px-3 text-sm font-medium text-[#5B6478]">
-                            <Checkbox
-                                checked={isPaid}
-                                onCheckedChange={(checked) => {
-                                    setIsPaid(checked === true);
-                                    setPage(1);
-                                }}
-                                className="border-[#C8D0DF] data-[state=checked]:border-[#0A2E66] data-[state=checked]:bg-[#0A2E66]"
-                            />
-                            Paid only
-                        </label>
+                    <div className="min-w-0 flex-1">
+                        <CustomerDirectoryFilters
+                            idPrefix="admin-clients"
+                            searchValue={searchInput}
+                            onSearchChange={(value) => { setSearchInput(value); setPage(1); }}
+                            categoryValue={categoryInput}
+                            onCategoryChange={(value) => { setCategoryInput(value); setPage(1); }}
+                            categoryOptions={categoryOptions}
+                            paidOnly={isPaid}
+                            onPaidChange={(value) => { setIsPaid(value); setPage(1); }}
+                            executiveValue={executiveFilter}
+                            onExecutiveChange={setExecutiveFilter}
+                            executives={fetchSales}
+                            dateFilter={addedDateFilter}
+                            onDateFilterChange={(value) => { setAddedDateFilter(value); setPage(1); }}
+                            dateFrom={customDateFrom}
+                            onDateFromChange={(value) => { setCustomDateFrom(value); setPage(1); }}
+                            dateTo={customDateTo}
+                            onDateToChange={(value) => { setCustomDateTo(value); setPage(1); }}
+                        />
                     </div>
 
                     {/* List / grid toggle */}
@@ -617,173 +541,24 @@ const CustomerManager = () => {
 
                 {/* List view */}
                 {viewMode === 'list' && (
-                    <div className="overflow-x-auto">
-                        <table className="w-full min-w-[850px] border-collapse text-left">
-                            <thead>
-                                <tr className="border-y border-[#E3E7F0] bg-[#F7F8FC] text-xs font-bold text-[#5B6478] sm:text-sm">
-                                    <th className="w-14 px-5 py-4">
-                                        <Checkbox
-                                            checked={
-                                                visibleCustomers.length > 0 && visibleCustomers.every((customer) => selectedCustomers.includes(customer._id))
-                                            }
-                                            onCheckedChange={toggleAllCustomers}
-                                            aria-label="Select all clients on this page"
-                                        />
-                                    </th>
-
-                                    <th className="px-4 py-4">
-                                        <span className="inline-flex items-center gap-1.5">
-                                            Client
-                                            <ArrowUpDown size={13} className="text-[#F27B1E]" />
-                                        </span>
-                                    </th>
-
-                                    <th className="px-4 py-4">Phone</th>
-                                    <th className="px-4 py-4">Sales executive</th>
-                                    <th className="px-4 py-4">Payment</th>
-                                    <th className="px-4 py-4">Category</th>
-                                    <th className="px-5 py-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-
-                            <tbody className="divide-y divide-[#E3E7F0]">
-                                {loading ? (
-                                    Array.from({ length: 6 }).map((_, index) => (
-                                        <tr key={index}>
-                                            {Array.from({ length: 7 }).map((__, cell) => (
-                                                <td key={cell} className="px-4 py-5">
-                                                    <div className="h-5 animate-pulse rounded-md bg-[#F2F4F9]" />
-                                                </td>
-                                            ))}
-                                        </tr>
-                                    ))
-                                ) : visibleCustomers.length > 0 ? (
-                                    visibleCustomers.map((customer, index) => (
-                                        <tr key={customer._id} className="group transition-colors hover:bg-[#F9FAFD]">
-                                            <td className="px-5 py-4">
-                                                <Checkbox
-                                                    checked={selectedCustomers.includes(customer._id)}
-                                                    onCheckedChange={(checked) => toggleCustomer(customer._id, checked === true)}
-                                                    aria-label={`Select ${customer.name || 'client'}`}
-                                                />
-                                            </td>
-
-                                            <td className="px-4 py-4">
-                                                <div className="flex min-w-[190px] items-center gap-3">
-                                                    <CustomerAvatar customer={customer} index={index} />
-
-                                                    <div className="min-w-0">
-                                                        <p className="truncate font-semibold text-[#0F1B33]">{customer.name || 'Unnamed client'}</p>
-
-                                                        <p className="mt-1 max-w-[220px] truncate text-sm text-[#68738A]">
-                                                            {customer.company || 'No company added'}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
-
-                                            <td className="px-4 py-4">
-                                                <div className="flex flex-col gap-1">
-                                                    {customer.phone ? (
-                                                        <a
-                                                            href={`tel:${customer.phone}`}
-                                                            className="text-sm font-semibold whitespace-nowrap text-[#0F1B33] hover:text-[#F27B1E]"
-                                                        >
-                                                            {customer.phone}
-                                                        </a>
-                                                    ) : (
-                                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEAE8] px-2.5 py-1 text-xs font-semibold text-[#CC3B32]">
-                                                            <TriangleAlert size={13} />
-                                                            Missing
-                                                        </span>
-                                                    )}
-                                                    {customer.email && (
-                                                        <a href={`mailto:${customer.email}`} className="max-w-[190px] truncate text-xs text-[#68738A] hover:text-[#F27B1E]">
-                                                            {customer.email}
-                                                        </a>
-                                                    )}
-                                                </div>
-                                            </td>
-
-                                            <td className="px-4 py-4">
-                                                <div className="flex max-w-[230px] flex-wrap gap-1.5">
-                                                    {customer.salesExecutive?.length ? (
-                                                        customer.salesExecutive.map((executive) => (
-                                                            <span
-                                                                key={executive._id}
-                                                                className="inline-flex items-center gap-2 rounded-full bg-[#FFF1E4] py-1 pr-3 pl-1 text-xs font-semibold text-[#0F1B33]"
-                                                            >
-                                                                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#087E8B] text-[10px] font-bold text-white">
-                                                                    {(executive.basicDetails?.name || 'SE')
-                                                                        .split(' ')
-                                                                        .map((part) => part[0])
-                                                                        .slice(0, 2)
-                                                                        .join('')
-                                                                        .toUpperCase()}
-                                                                </span>
-
-                                                                {executive.basicDetails?.name || 'Executive'}
-                                                            </span>
-                                                        ))
-                                                    ) : (
-                                                        <span className="text-sm text-[#8A92A6]">Unassigned</span>
-                                                    )}
-                                                </div>
-                                            </td>
-
-                                            <td className="px-4 py-4">
-                                                <span
-                                                    className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-bold whitespace-nowrap ${
-                                                        customer.isPaid ? 'bg-[#E5F5EC] text-[#17845A]' : 'bg-[#FFF4D9] text-[#B86A00]'
-                                                    }`}
-                                                >
-                                                    <span className={`h-2 w-2 rounded-full ${customer.isPaid ? 'bg-[#17845A]' : 'bg-[#B86A00]'}`} />
-
-                                                    {customer.isPaid ? 'Paid' : 'Pending'}
-                                                </span>
-                                            </td>
-
-                                            <td className="px-4 py-4">
-                                                {customer.category ? (
-                                                    <span className="inline-flex max-w-[160px] items-center truncate rounded-full bg-[#E9EFF9] px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-[#0A2E66]">
-                                                        {customer.category}
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-sm text-[#8A92A6]">—</span>
-                                                )}
-                                            </td>
-
-                                            <td className="px-5 py-4">
-                                                <ActionButtons customer={customer} />
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={7} className="px-5 py-16 text-center">
-                                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E9EFF9] text-[#0A2E66]">
-                                                <Users size={25} />
-                                            </div>
-
-                                            <p className="mt-4 font-semibold text-[#0F1B33]">No clients found</p>
-
-                                            <p className="mt-1 text-sm text-[#8A92A6]">Try a different search or change your filters.</p>
-
-                                            {searchInput && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setSearchInput('')}
-                                                    className="mt-3 text-sm font-semibold text-[#0A2E66] hover:text-[#F27B1E]"
-                                                >
-                                                    Clear search
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                    <CustomerTable
+                        headers={[
+                            { key: 'select', label: <Checkbox checked={visibleCustomers.length > 0 && visibleCustomers.every((customer) => selectedCustomers.includes(customer._id))} onCheckedChange={toggleAllCustomers} aria-label="Select all clients on this page" />, className: 'w-14 px-5 py-4' },
+                            { key: 'client', label: 'Client' },
+                            { key: 'contact', label: 'Phone' },
+                            { key: 'executive', label: 'Sales executive' },
+                            { key: 'payment', label: 'Payment' },
+                            { key: 'category', label: 'Category' },
+                            { key: 'actions', label: 'Actions', className: 'px-5 py-4 text-right' },
+                        ]}
+                        loading={loading}
+                        rows={customerTableRows}
+                        page={page}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                        showPagination={false}
+                        minWidth="min-w-[850px]"
+                    />
                 )}
 
                 {/* Grid view */}

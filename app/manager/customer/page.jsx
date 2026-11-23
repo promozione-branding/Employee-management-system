@@ -3,7 +3,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Plus, Eye, Network, SquarePen, Trash, Search, X } from 'lucide-react';
+import { Plus, Eye, Network, SquarePen, Trash } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import CustomerForm from '@/components/subComponents/customer/CustomerForm';
 import {
@@ -13,13 +13,15 @@ import {
     getAllCustomerServices,
     getCustomerServices,
     getAllSalesService,
+    getCustomerCategoriesService,
 } from '@/service/customer';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Input } from '@/components/ui/input';
 import { searchClientService } from '@/service/customer/search';
-import { Checkbox } from '@/components/ui/checkbox';
+import CustomerDirectoryFilters, { getAddedDateRange } from '@/components/customer-directory/CustomerDirectoryFilters';
+import CustomerContact from '@/components/customer-directory/CustomerContact';
+import CustomerTable from '@/components/customer-directory/CustomerTable';
 
 const CustomerManager = () => {
     const [customers, setCustomers] = useState([]);
@@ -33,6 +35,13 @@ const CustomerManager = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [isPaid, setIsPaid] = useState(false);
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [categoryInput, setCategoryInput] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('');
+    const [categoryOptions, setCategoryOptions] = useState([]);
+    const [executiveFilter, setExecutiveFilter] = useState('all');
+    const [addedDateFilter, setAddedDateFilter] = useState('all');
+    const [customDateFrom, setCustomDateFrom] = useState('');
+    const [customDateTo, setCustomDateTo] = useState('');
     const LIMIT = 20;
 
     useEffect(() => {
@@ -43,6 +52,20 @@ const CustomerManager = () => {
 
         return () => clearTimeout(timer);
     }, [searchInput]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCategoryFilter(categoryInput.trim());
+            setPage(1);
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [categoryInput]);
+
+    useEffect(() => {
+        getCustomerCategoriesService().then((res) => {
+            if (res.success) setCategoryOptions(Array.isArray(res.data) ? res.data : []);
+        }).catch(() => {});
+    }, []);
 
     /* ---------------- Fetch Sales ---------------- */
     async function fetchSalesPerson() {
@@ -55,19 +78,16 @@ const CustomerManager = () => {
     }
 
     /* ---------------- Fetch Customers ---------------- */
-    useEffect(() => {
-        fetchData();
-    }, [page, debouncedSearch, isPaid]);
-
-    async function fetchData() {
+    const fetchData = useCallback(async () => {
         try {
             setLoading(true);
             let res;
+            const { dateFrom, dateTo } = getAddedDateRange(addedDateFilter, customDateFrom, customDateTo);
 
             if (debouncedSearch.trim()) {
-                res = await searchClientService(debouncedSearch, page, isPaid);
+                res = await searchClientService(debouncedSearch, page, isPaid, categoryFilter, dateFrom, dateTo);
             } else {
-                res = await getAllCustomerServices(page, LIMIT, isPaid);
+                res = await getAllCustomerServices(page, LIMIT, isPaid, categoryFilter, dateFrom, dateTo);
             }
 
             if (res.success) {
@@ -79,7 +99,11 @@ const CustomerManager = () => {
         } finally {
             setLoading(false);
         }
-    }
+    }, [addedDateFilter, categoryFilter, customDateFrom, customDateTo, debouncedSearch, isPaid, page]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
 
     /* ---------------- Submit ---------------- */
@@ -146,163 +170,59 @@ const CustomerManager = () => {
     return (
         <div className="flex flex-col gap-4 p-1 md:p-3">
             {/* HEADER */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center justify-between gap-2">
-                    <h1 className="text-lg font-semibold md:text-2xl">Clients</h1>
-                    {/* <form className="flex gap-2"> */}
-                    <div className="relative w-full max-w-md">
-                        <Input
-                            type="text"
-                            placeholder="Client search..."
-                            value={searchInput}
-                            onChange={(e) => setSearchInput(e.target.value)}
-                            required
-                            className="pr-8"
-                        />
-                        {searchInput && (
-                            <X
-                                size={15}
-                                className="absolute top-1/2 right-2.5 -translate-y-1/2 cursor-pointer text-gray-500 hover:text-black"
-                                onClick={() => {
-                                    setSearchInput('');
-                                    setDebouncedSearch('');
-                                    setPage(1);
-                                }}
-                            />
-                        )}
-                    </div>
-
-                    {/* <Button type="submit">
-            <Search />
-          </Button> */}
-                    {/* </form> */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div className="w-full flex-1">
+                    <h1 className="mb-3 text-lg font-semibold md:text-2xl">Clients</h1>
+                    <CustomerDirectoryFilters
+                        idPrefix="manager-clients"
+                        searchValue={searchInput}
+                        onSearchChange={(value) => { setSearchInput(value); setPage(1); }}
+                        categoryValue={categoryInput}
+                        onCategoryChange={(value) => { setCategoryInput(value); setPage(1); }}
+                        categoryOptions={categoryOptions}
+                        paidOnly={isPaid}
+                        onPaidChange={(value) => { setIsPaid(value); setPage(1); }}
+                        executiveValue={executiveFilter}
+                        onExecutiveChange={(value) => { setExecutiveFilter(value); setPage(1); }}
+                        executives={fetchSales}
+                        dateFilter={addedDateFilter}
+                        onDateFilterChange={(value) => { setAddedDateFilter(value); setPage(1); }}
+                        dateFrom={customDateFrom}
+                        onDateFromChange={(value) => { setCustomDateFrom(value); setPage(1); }}
+                        dateTo={customDateTo}
+                        onDateToChange={(value) => { setCustomDateTo(value); setPage(1); }}
+                    />
                 </div>
-
-                <div className="flex flex-wrap justify-between gap-3">
-                    <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm transition-colors hover:bg-gray-50">
-                        <Checkbox
-                            id="paid-filter"
-                            checked={isPaid}
-                            onCheckedChange={(v) => {
-                                setIsPaid(v);
-                                setPage(1);
-                            }}
-                        />
-                        <label htmlFor="paid-filter" className="cursor-pointer text-sm leading-none font-medium select-none">
-                            Paid
-                        </label>
-                    </div>
-
-                    {/* <Button variant="outline">
-            <FunnelPlus size={18} /> Filter
-          </Button> */}
-
-                    {/* for mobile  */}
-                    <Button
-                        variant="outline"
-                        onClick={() => setOpen(true)}
-                        className="bg-orange-500 text-white hover:bg-orange-600 lg:hidden"
-                        title={'add Client'}
-                    >
-                        <Plus size={18} />
-                    </Button>
-
-                    <Button onClick={() => setOpen(true)} className="hidden bg-orange-500 text-white hover:bg-orange-600 lg:flex">
-                        <Plus size={18} /> Add Client
-                    </Button>
-                </div>
+                <Button onClick={() => setOpen(true)} className="shrink-0 bg-orange-500 text-white hover:bg-orange-600">
+                    <Plus size={18} /> Add Client
+                </Button>
             </div>
 
-            {/* DESKTOP TABLE */}
-            <div className="hidden overflow-x-auto rounded-xl border bg-white shadow md:block">
-                <div className="grid border-b px-4 py-2 font-semibold text-gray-500 md:grid-cols-5">
-                    <p>Name</p>
-                    <p>Company</p>
-                    {/* <p className="md:hidden lg:block">GSTIN</p> */}
-                    <p className="text-center">Phone</p>
-                    <p className="text-center">Sales Executive</p>
-                    <p className="text-center">Action</p>
-                </div>
-
-                <div className="lg:h-[60vh] lg:overflow-x-auto">
-                    {loading ? (
-                        <div className="space-y-3 p-4">
-                            {[...Array(10)].map((_, i) => (
-                                <div key={i} className="grid animate-pulse grid-cols-5 gap-4">
-                                    <div className="h-8 rounded bg-gray-200" />
-                                    <div className="h-8 rounded bg-gray-200" />
-                                    <div className="h-8 rounded bg-gray-200" />
-                                    <div className="h-8 rounded bg-gray-200" />
-                                    <div className="h-8 rounded bg-gray-200" />
-                                </div>
-                            ))}
-                        </div>
-                    ) : customers.length ? (
-                        customers.map(({ company, name, phone, salesExecutive, _id, isPaid }, idx) => (
-                            <div
-                                key={_id}
-                                className={`grid grid-cols-6 items-center border-b px-4 py-3 md:grid-cols-5 ${isPaid && 'bg-green-100'} ${
-                                    idx % 2 === 0 ? 'bg-gray-50' : ''
-                                }`}
-                            >
-                                <p>{name}</p>
-                                <p>{company}</p>
-                                <p className="text-center">{phone}</p>
-
-                                <div className="flex flex-wrap justify-center gap-1">
-                                    {salesExecutive?.map((item) => (
-                                        <span key={item._id} className="rounded bg-orange-200 px-2 py-1 text-xs">
-                                            {item?.basicDetails?.name}
-                                        </span>
-                                    ))}
-                                </div>
-
-                                <div className="flex justify-center gap-3 lg:gap-5">
-                                    <Link href={`/manager/customer/work/${_id}`}>
-                                        <Network size={18} className="cursor-pointer lg:h-6 lg:w-6" />
-                                    </Link>
-                                    <Link href={`/manager/customer/${_id}`}>
-                                        <Eye size={18} className="cursor-pointer lg:h-6 lg:w-6" />
-                                    </Link>
-                                    <SquarePen size={18} onClick={() => handleEdit(_id)} className="cursor-pointer lg:h-6 lg:w-6" />
-                                    <Trash size={18} onClick={() => handleDelete(_id)} className="cursor-pointer lg:h-6 lg:w-6" />
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="py-6 text-center text-gray-500">No customers found</div>
-                    )}
-                </div>
-
-                <div className="flex items-center justify-end gap-2 border-t border-gray-300 px-2 py-2">
-                    <button
-                        disabled={page === 1}
-                        onClick={() => setPage((prev) => prev - 1)}
-                        className={`rounded-lg border border-gray-300 px-4 py-2 ${page === 1 ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-100'}`}
-                    >
-                        Previous
-                    </button>
-
-                    <div className="flex gap-2">
-                        {[...Array(totalPages)].map((_, i) => (
-                            <button
-                                key={i}
-                                onClick={() => setPage(i + 1)}
-                                className={`h-10 w-10 rounded-lg ${page === i + 1 ? 'bg-orange-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
-                            >
-                                {i + 1}
-                            </button>
-                        ))}
-                    </div>
-
-                    <button
-                        disabled={page === totalPages}
-                        onClick={() => setPage((prev) => prev + 1)}
-                        className={`rounded-lg border border-gray-300 px-4 py-2 ${page === totalPages ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-100'}`}
-                    >
-                        Next
-                    </button>
-                </div>
+            <div className="hidden md:block">
+                <CustomerTable
+                    headers={[
+                        { key: 'client', label: 'Client' },
+                        { key: 'contact', label: 'Phone' },
+                        { key: 'executive', label: 'Sales executive' },
+                        { key: 'payment', label: 'Payment' },
+                        { key: 'category', label: 'Category' },
+                        { key: 'actions', label: 'Actions', className: 'px-5 py-4 text-right' },
+                    ]}
+                    loading={loading}
+                    page={page}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                    rows={customers.filter((customer) => executiveFilter === 'all' || customer.salesExecutive?.some((item) => item._id === executiveFilter)).map((customer) => (
+                        <tr key={customer._id} className="transition-colors hover:bg-[#F9FAFD]">
+                            <td className="px-4 py-4"><div className="font-semibold text-[#0F1B33]">{customer.name || 'Unnamed client'}</div><div className="mt-1 text-sm text-[#68738A]">{customer.company || 'No company added'}</div></td>
+                            <td className="px-4 py-4"><CustomerContact customer={customer} /></td>
+                            <td className="px-4 py-4"><div className="flex flex-wrap gap-1.5">{customer.salesExecutive?.map((item) => <span key={item._id} className="rounded-full bg-[#FFF1E4] px-2.5 py-1 text-xs font-semibold text-[#0F1B33]">{item.basicDetails?.name || 'Executive'}</span>)}</div></td>
+                            <td className="px-4 py-4"><span className={customer.isPaid ? 'rounded-full bg-[#E5F5EC] px-3 py-1.5 text-xs font-bold text-[#17845A]' : 'rounded-full bg-[#FFF4D9] px-3 py-1.5 text-xs font-bold text-[#B86A00]'}>{customer.isPaid ? 'Paid' : 'Pending'}</span></td>
+                            <td className="px-4 py-4">{customer.category ? <span className="rounded-full bg-[#E9EFF9] px-3 py-1.5 text-xs font-semibold text-[#0A2E66]">{customer.category}</span> : '—'}</td>
+                            <td className="px-5 py-4"><div className="flex justify-end gap-3"><Link href={'/manager/customer/work/' + customer._id}><Network size={18} /></Link><Link href={'/manager/customer/' + customer._id}><Eye size={18} /></Link><SquarePen size={18} onClick={() => handleEdit(customer._id)} className="cursor-pointer" /><Trash size={18} onClick={() => handleDelete(customer._id)} className="cursor-pointer text-red-500" /></div></td>
+                        </tr>
+                    ))}
+                />
             </div>
 
             {/* MOBILE CARD VIEW */}
@@ -326,8 +246,8 @@ const CustomerManager = () => {
                             </div>
                         </div>
                     ))
-                ) : customers.length ? (
-                    customers.map(({ company, name, phone, GSTIN, salesExecutive, _id, isPaid }) => (
+                    ) : customers.filter((customer) => executiveFilter === 'all' || customer.salesExecutive?.some((item) => item._id === executiveFilter)).length ? (
+                    customers.filter((customer) => executiveFilter === 'all' || customer.salesExecutive?.some((item) => item._id === executiveFilter)).map(({ company, name, GSTIN, salesExecutive, _id, isPaid, category, phone, email }) => (
                         <div
                             key={_id}
                             className={`flex flex-col gap-3 rounded-xl border bg-white p-4 shadow transition ${isPaid ? 'border-green-400 bg-green-50' : ''} `}
@@ -344,7 +264,9 @@ const CustomerManager = () => {
 
                             {GSTIN && <p className="text-sm">GSTIN: {GSTIN}</p>}
 
-                            <p className="text-sm">📞 {phone}</p>
+                            <CustomerContact customer={{ phone, email }} />
+
+                            {category && <span className="w-fit rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800">{category}</span>}
 
                             <div className="flex flex-wrap gap-2">
                                 {salesExecutive?.map((item) => (

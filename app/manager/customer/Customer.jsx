@@ -219,13 +219,17 @@ const Customer = ({ customerId }) => {
                 <div className="space-y-5 p-6">
                     {/* Contact Details */}
                     <div className="space-y-3">
-                        <div className="flex items-center gap-3 text-gray-600">
-                            <Mail size={16} className="text-gray-400" />
-                            <p className="text-sm">{email}</p>
-                        </div>
-                        <div className="flex items-center gap-3 text-gray-600">
-                            <Phone size={16} className="text-gray-400" />
-                            <p className="text-sm">{phone}</p>
+                        <div className="flex flex-col gap-2">
+                            <a href={phone ? 'tel:' + phone : undefined} className="flex items-center gap-3 text-gray-600 hover:text-blue-600">
+                                <Phone size={16} className="shrink-0 text-gray-400" />
+                                <p className="text-sm">{phone || 'Phone not provided'}</p>
+                            </a>
+                            {email && (
+                                <a href={'mailto:' + email} className="flex items-center gap-3 text-gray-600 hover:text-blue-600">
+                                    <Mail size={16} className="shrink-0 text-gray-400" />
+                                    <p className="truncate text-sm">{email}</p>
+                                </a>
+                            )}
                         </div>
                         <div className="flex items-center gap-3 text-gray-600">
                             <Globe size={16} className="text-gray-400" />

@@ -9,8 +9,8 @@ import toast from 'react-hot-toast';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import CustomerForm from '@/components/subComponents/customer/CustomerForm';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+import CustomerDirectoryFilters, { getAddedDateRange } from '@/components/customer-directory/CustomerDirectoryFilters';
+import CustomerContact from '@/components/customer-directory/CustomerContact';
 
 import { editCustomerServices, deleteCustomerServices, getCustomerCategoriesService, getCustomerServices } from '@/service/customer';
 
@@ -23,17 +23,12 @@ import {
     Eye,
     SquarePen,
     Trash2,
-    Search,
-    X,
     Users,
-    Phone,
     Building2,
     FileText,
-    Wallet,
     ChevronLeft,
     ChevronRight,
     LoaderCircle,
-    TriangleAlert,
 } from 'lucide-react';
 
 const LIMIT = 20;
@@ -53,6 +48,9 @@ const ExecutiveClientList = () => {
     const [searchInput, setSearchInput] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [isPaid, setIsPaid] = useState(false);
+    const [addedDateFilter, setAddedDateFilter] = useState('all');
+    const [customDateFrom, setCustomDateFrom] = useState('');
+    const [customDateTo, setCustomDateTo] = useState('');
     const [categoryInput, setCategoryInput] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
     const [categoryOptions, setCategoryOptions] = useState([]);
@@ -103,7 +101,8 @@ const ExecutiveClientList = () => {
         try {
             setClientLoading(true);
 
-            const res = await getClientService(employee._id, page, LIMIT, debouncedSearch, isPaid, categoryFilter);
+            const { dateFrom, dateTo } = getAddedDateRange(addedDateFilter, customDateFrom, customDateTo);
+            const res = await getClientService(employee._id, page, LIMIT, debouncedSearch, isPaid, categoryFilter, dateFrom, dateTo);
 
             if (res?.success) {
                 setCustomers(Array.isArray(res.data) ? res.data : []);
@@ -120,7 +119,7 @@ const ExecutiveClientList = () => {
         } finally {
             setClientLoading(false);
         }
-    }, [employee?._id, page, debouncedSearch, isPaid, categoryFilter]);
+    }, [employee?._id, page, debouncedSearch, isPaid, categoryFilter, addedDateFilter, customDateFrom, customDateTo]);
 
     useEffect(() => {
         fetchCustomers();
@@ -316,73 +315,23 @@ const ExecutiveClientList = () => {
 
             {/* Search and filters */}
             <section className="rounded-[20px] border border-[#E3E7F0] bg-white p-4 shadow-[0_4px_16px_rgba(15,27,51,0.04)] sm:p-5">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div className="relative w-full md:max-w-[480px]">
-                        <Search size={19} className="absolute top-1/2 left-4 -translate-y-1/2 text-[#8A92A6]" />
-
-                        <Input
-                            type="text"
-                            placeholder="Search by client name..."
-                            value={searchInput}
-                            onChange={(e) => setSearchInput(e.target.value)}
-                            className="h-12 rounded-xl border-[#E0E5EF] bg-white pr-10 pl-11 text-sm text-[#0F1B33] placeholder:text-[#8A92A6] focus-visible:ring-[#F27B1E]"
-                        />
-
-                        {searchInput && (
-                            <button
-                                type="button"
-                                aria-label="Clear search"
-                                onClick={clearSearch}
-                                className="absolute top-1/2 right-3 -translate-y-1/2 rounded-md p-1 text-[#8A92A6] transition hover:bg-[#F2F4F9] hover:text-[#0F1B33]"
-                            >
-                                <X size={16} />
-                            </button>
-                        )}
-                    </div>
-
-                    <div className="relative w-full md:max-w-[220px]">
-                        <Input
-                            type="text"
-                            placeholder="Filter by category"
-                            value={categoryInput}
-                            onChange={(e) => setCategoryInput(e.target.value)}
-                            list="executive-category-options"
-                            aria-label="Filter by category"
-                            className="h-12 rounded-xl border-[#E0E5EF] bg-white pr-10 pl-4 text-sm text-[#0F1B33] placeholder:text-[#8A92A6] focus-visible:ring-[#F27B1E]"
-                        />
-                        <datalist id="executive-category-options">
-                            {categoryOptions.map((category) => (
-                                <option key={category} value={category} />
-                            ))}
-                        </datalist>
-                        {categoryInput && (
-                            <button
-                                type="button"
-                                aria-label="Clear category filter"
-                                onClick={() => setCategoryInput('')}
-                                className="absolute top-1/2 right-3 -translate-y-1/2 rounded-md p-1 text-[#8A92A6] transition hover:bg-[#F2F4F9] hover:text-[#0F1B33]"
-                            >
-                                <X size={16} />
-                            </button>
-                        )}
-                    </div>
-
-                    <label className="flex h-12 cursor-pointer items-center gap-3 rounded-xl border border-[#E0E5EF] bg-[#F7F8FC] px-4 transition hover:border-[#C8D3E5]">
-                        <Checkbox
-                            id="paid-filter"
-                            checked={isPaid}
-                            onCheckedChange={(value) => {
-                                setIsPaid(value === true);
-                                setPage(1);
-                            }}
-                            className="border-[#C8D0DF] data-[state=checked]:border-[#0A2E66] data-[state=checked]:bg-[#0A2E66]"
-                        />
-
-                        <Wallet size={17} className="text-[#68738A]" />
-
-                        <span className="text-sm font-semibold text-[#0F1B33]">Paid clients only</span>
-                    </label>
-                </div>
+                <CustomerDirectoryFilters
+                    idPrefix="executive-clients"
+                    searchValue={searchInput}
+                    onSearchChange={(value) => { setSearchInput(value); setPage(1); }}
+                    categoryValue={categoryInput}
+                    onCategoryChange={(value) => { setCategoryInput(value); setPage(1); }}
+                    categoryOptions={categoryOptions}
+                    paidOnly={isPaid}
+                    onPaidChange={(value) => { setIsPaid(value); setPage(1); }}
+                    dateFilter={addedDateFilter}
+                    onDateFilterChange={(value) => { setAddedDateFilter(value); setPage(1); }}
+                    dateFrom={customDateFrom}
+                    onDateFromChange={(value) => { setCustomDateFrom(value); setPage(1); }}
+                    dateTo={customDateTo}
+                    onDateToChange={(value) => { setCustomDateTo(value); setPage(1); }}
+                    searchPlaceholder="Search by name, company or phone"
+                />
 
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#E3E7F0] pt-4">
                     <p className="text-sm text-[#68738A]">
@@ -436,19 +385,7 @@ const ExecutiveClientList = () => {
                                         </td>
 
                                         <td className="px-4 py-4">
-                                            {customer.phone ? (
-                                                <a
-                                                    href={`tel:${customer.phone}`}
-                                                    className="text-sm font-semibold whitespace-nowrap text-[#0F1B33] transition hover:text-[#F27B1E]"
-                                                >
-                                                    {customer.phone}
-                                                </a>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1.5 text-sm text-[#CC3B32]">
-                                                    <TriangleAlert size={14} />
-                                                    Missing
-                                                </span>
-                                            )}
+                                            <CustomerContact customer={customer} />
                                         </td>
 
                                         <td className="px-4 py-4">
@@ -551,16 +488,7 @@ const ExecutiveClientList = () => {
                             </div>
 
                             <div className="mt-4 space-y-3 border-t border-[#E3E7F0] pt-4">
-                                <div className="flex items-start gap-2 text-sm">
-                                    <Phone size={16} className="mt-0.5 shrink-0 text-[#8A92A6]" />
-                                    {customer.phone ? (
-                                        <a href={`tel:${customer.phone}`} className="font-medium break-all text-[#0F1B33] hover:text-[#F27B1E]">
-                                            {customer.phone}
-                                        </a>
-                                    ) : (
-                                        <span className="text-[#CC3B32]">Phone not provided</span>
-                                    )}
-                                </div>
+                                <CustomerContact customer={customer} />
 
                                 <div className="flex items-start gap-2 text-sm">
                                     <FileText size={16} className="mt-0.5 shrink-0 text-[#8A92A6]" />

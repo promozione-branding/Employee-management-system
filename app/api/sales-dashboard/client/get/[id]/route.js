@@ -34,6 +34,8 @@ export async function GET(req, { params }) {
         const search = (searchParams.get('search') || '').trim();
         const category = (searchParams.get('category') || '').trim();
         const isPaid = searchParams.get('isPaid');
+        const dateFrom = searchParams.get('dateFrom');
+        const dateTo = searchParams.get('dateTo');
 
         // Show clients assigned to this sales executive.
         const filter = {
@@ -69,10 +71,20 @@ export async function GET(req, { params }) {
             filter.isPaid = true;
         }
 
+        if (dateFrom || dateTo) {
+            filter.createdAt = {};
+            if (dateFrom) filter.createdAt.$gte = new Date(`${dateFrom}T00:00:00`);
+            if (dateTo) {
+                const endDate = new Date(`${dateTo}T00:00:00`);
+                endDate.setDate(endDate.getDate() + 1);
+                filter.createdAt.$lt = endDate;
+            }
+        }
+
         const total = await Customer.countDocuments(filter);
 
         const customers = await Customer.find(filter)
-            .select('name company phone GSTIN category Address isPaid salesExecutive')
+            .select('name company phone email GSTIN category Address isPaid salesExecutive')
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit)
