@@ -17,4 +17,12 @@ exit
 
 
 
+pm2 restart inquiry-bazaar-erp && \
+pm2 restart workflow-renewal && \
+pm2 save && \
+echo "✅ Deployment completed successfully!" && \
+exit
+
+
+
 pm2 logs workflow-renewal --lines 30

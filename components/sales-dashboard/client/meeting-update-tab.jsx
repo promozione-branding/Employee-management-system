@@ -10,8 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TimePicker from '@/components/ui/time-picker';
 import CcPicker from './cc-picker';
-import LocationPicker from './location-picker';
-import { captureLocation, toLocalISO } from './update-utils';
+import LocationPicker from './location-picker'; 
+import { captureLocation, clampPastDate, localDateString, toLocalISO } from './update-utils';
 import { addNewMeetingUpdate, createMeetingService } from '@/service/meeting';
 
 const emptyForm = {
@@ -35,6 +35,7 @@ const MeetingUpdateTab = ({
     const [search, setSearch] = useState('');
     const [recipients, setRecipients] = useState([]);
     const [form, setForm] = useState(emptyForm);
+    const setDate = (field, value) => setForm((current) => ({ ...current, [field]: clampPastDate(value) }));
     const [location, setLocation] = useState(null);
     const [locating, setLocating] = useState(false);
     const autoRanRef = useRef(false);
@@ -188,14 +189,14 @@ const MeetingUpdateTab = ({
                     <Label>Reminder</Label>
                     <div className="grid grid-cols-2 gap-2">
                         <TimePicker value={form.reminderTime} onChange={(v) => setForm({ ...form, reminderTime: v })} />
-                        <Input type="date" value={form.reminderDate} onChange={(e) => setForm({ ...form, reminderDate: e.target.value })} />
+                        <Input type="date" min={localDateString()} value={form.reminderDate} onChange={(e) => setDate('reminderDate', e.target.value)} />
                     </div>
                 </div>
                 <div className="flex flex-col gap-3">
                     <Label>Meeting Date</Label>
                     <div className="grid grid-cols-2 gap-2">
                         <TimePicker value={form.meetingTime} onChange={(v) => setForm({ ...form, meetingTime: v })} />
-                        <Input type="date" value={form.meetingDate} onChange={(e) => setForm({ ...form, meetingDate: e.target.value })} />
+                        <Input type="date" min={localDateString()} value={form.meetingDate} onChange={(e) => setDate('meetingDate', e.target.value)} />
                     </div>
                 </div>
 

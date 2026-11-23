@@ -14,6 +14,16 @@ export const toLocalISO = (dateStr, timeStr) => {
     return `${local.getFullYear()}-${pad(local.getMonth() + 1)}-${pad(local.getDate())}T${pad(local.getHours())}:${pad(local.getMinutes())}:00${offsetStr}`;
 };
 
+export const localDateString = (date = new Date()) => {
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
+export const clampPastDate = (dateStr) => {
+    const today = localDateString();
+    return !dateStr || dateStr < today ? today : dateStr;
+};
+
 // Free reverse geocode via Nominatim (no key). Respect 1 req/sec in production.
 export async function reverseGeocode(lat, lng) {
     try {
