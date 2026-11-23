@@ -21,7 +21,7 @@ import {
     ChevronDown,
     Building2,
     PanelLeftClose,
-    ArrowLeft, TrendingUp,
+    ArrowLeft, TrendingUp, ClipboardCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
@@ -62,6 +62,12 @@ const navLinks = [
         href: '/ads-dashboard',
         label: 'Ads Dashboard',
         icon: TrendingUp,
+        description: 'Google and Meta performance',
+    },
+    {
+        href: '/ads-dashboard',
+        label: 'Track Work',
+        icon: ClipboardCheck,
         description: 'Google and Meta performance',
     },
 ];
