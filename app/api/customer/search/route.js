@@ -40,7 +40,7 @@ export async function GET(req) {
         }
 
         let customers = await Customer.find(filter)
-            .select(`name company phone Address GSTIN category salesExecutive isPaid createdAt`)
+            .select(`name company phone email Address GSTIN category salesExecutive isPaid createdAt`)
             .populate({ path: 'salesExecutive', select: 'basicDetails.name' })
             .lean();
 

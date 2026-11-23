@@ -38,7 +38,7 @@ export async function GET(req) {
 
         const total = await Customer.countDocuments(filter);
         const customers = await Customer.find(filter)
-            .select(`name company phone GSTIN category salesExecutive isPaid `)
+            .select(`name company phone email GSTIN category salesExecutive isPaid `)
             .populate({ path: 'salesExecutive', select: 'basicDetails.name' })
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)

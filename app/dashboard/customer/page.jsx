@@ -24,6 +24,7 @@ import {
     ChevronRight,
     ArrowUpDown,
     Phone,
+    Mail,
     Building2,
 } from 'lucide-react';
 
@@ -682,19 +683,26 @@ const CustomerManager = () => {
                                             </td>
 
                                             <td className="px-4 py-4">
-                                                {customer.phone ? (
-                                                    <a
-                                                        href={`tel:${customer.phone}`}
-                                                        className="text-sm font-semibold whitespace-nowrap text-[#0F1B33] hover:text-[#F27B1E]"
-                                                    >
-                                                        {customer.phone}
-                                                    </a>
-                                                ) : (
-                                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEAE8] px-2.5 py-1 text-xs font-semibold text-[#CC3B32]">
-                                                        <TriangleAlert size={13} />
-                                                        Missing
-                                                    </span>
-                                                )}
+                                                <div className="flex flex-col gap-1">
+                                                    {customer.phone ? (
+                                                        <a
+                                                            href={`tel:${customer.phone}`}
+                                                            className="text-sm font-semibold whitespace-nowrap text-[#0F1B33] hover:text-[#F27B1E]"
+                                                        >
+                                                            {customer.phone}
+                                                        </a>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEAE8] px-2.5 py-1 text-xs font-semibold text-[#CC3B32]">
+                                                            <TriangleAlert size={13} />
+                                                            Missing
+                                                        </span>
+                                                    )}
+                                                    {customer.email && (
+                                                        <a href={`mailto:${customer.email}`} className="max-w-[190px] truncate text-xs text-[#68738A] hover:text-[#F27B1E]">
+                                                            {customer.email}
+                                                        </a>
+                                                    )}
+                                                </div>
                                             </td>
 
                                             <td className="px-4 py-4">
@@ -817,6 +825,15 @@ const CustomerManager = () => {
                                                 <Phone size={15} />
                                                 {customer.phone || 'Phone not provided'}
                                             </div>
+
+                                            {customer.email && (
+                                                <div className="flex min-w-0 items-center gap-2 text-sm text-[#5B6478]">
+                                                    <Mail size={15} className="shrink-0" />
+                                                    <a href={`mailto:${customer.email}`} className="truncate hover:text-[#F27B1E]">
+                                                        {customer.email}
+                                                    </a>
+                                                </div>
+                                            )}
 
                                             <div className="flex items-center gap-2 text-sm text-[#5B6478]">
                                                 <Building2 size={15} />
