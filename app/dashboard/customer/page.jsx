@@ -16,7 +16,7 @@ import {
     Download,
     Users,
     Wallet,
-    Clock3,
+    CalendarDays,
     TriangleAlert,
     LayoutGrid,
     List,
@@ -38,6 +38,7 @@ import {
     editCustomerServices,
     deleteCustomerServices,
     getAllCustomerServices,
+    getCustomerSummaryService,
     getCustomerCategoriesService,
     getCustomerServices,
     getAllSalesService,
@@ -60,6 +61,7 @@ const CustomerManager = () => {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [customerSummary, setCustomerSummary] = useState({ all: 0, paid: 0, addedThisMonth: 0, addedThisWeek: 0 });
     const [isPaid, setIsPaid] = useState(false);
     const [executiveFilter, setExecutiveFilter] = useState('all');
     const [categoryInput, setCategoryInput] = useState('');
@@ -143,6 +145,18 @@ const CustomerManager = () => {
         fetchSalesPerson();
     }, [fetchSalesPerson]);
 
+    useEffect(() => {
+        let active = true;
+        getCustomerSummaryService()
+            .then((res) => {
+                if (active && res.success && res.data) setCustomerSummary(res.data);
+            })
+            .catch((error) => console.error('Failed to fetch customer summary:', error));
+        return () => {
+            active = false;
+        };
+    }, []);
+
     // Filter currently loaded customers by sales executive
     const visibleCustomers = useMemo(() => {
         if (executiveFilter === 'all') {
@@ -152,19 +166,8 @@ const CustomerManager = () => {
         return customers.filter((customer) => customer.salesExecutive?.some((executive) => executive._id === executiveFilter));
     }, [customers, executiveFilter]);
 
-    // Summary cards reflect the currently loaded API page
-    const stats = useMemo(() => {
-        const paid = customers.filter((customer) => customer.isPaid).length;
-
-        const missingPhone = customers.filter((customer) => !String(customer.phone || '').trim()).length;
-
-        return {
-            all: customers.length,
-            paid,
-            pending: customers.length - paid,
-            missingPhone,
-        };
-    }, [customers]);
+    // Summary counts come from the full customer collection, not the current page.
+    const stats = customerSummary;
 
     // Create or update customer (validation + payload handled by CustomerForm)
     const handleSubmit = async (payload) => {
@@ -300,18 +303,18 @@ const CustomerManager = () => {
             iconColor: 'text-[#17845A]',
         },
         {
-            label: 'Payment pending',
-            value: stats.pending,
-            icon: Clock3,
+            label: 'Added this month',
+            value: stats.addedThisMonth,
+            icon: CalendarDays,
             iconBg: 'bg-[#FFF4D9]',
             iconColor: 'text-[#C57900]',
         },
         {
-            label: 'Numbers to fix',
-            value: stats.missingPhone,
-            icon: TriangleAlert,
-            iconBg: 'bg-[#FCEAE8]',
-            iconColor: 'text-[#CC3B32]',
+            label: 'Added this week',
+            value: stats.addedThisWeek,
+            icon: CalendarDays,
+            iconBg: 'bg-[#EFEBFC]',
+            iconColor: 'text-[#7050E8]',
         },
     ];
 
