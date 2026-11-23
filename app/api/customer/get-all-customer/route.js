@@ -13,6 +13,8 @@ export async function GET(req) {
         const limit = Number(searchParams.get('limit')) || 20;
         const isPaid = searchParams.get('isPaid');
         const category = (searchParams.get('category') || '').trim();
+        const dateFrom = searchParams.get('dateFrom');
+        const dateTo = searchParams.get('dateTo');
         const filter = {};
 
         if (isPaid !== null && isPaid !== undefined) {
@@ -22,6 +24,16 @@ export async function GET(req) {
         // Optional category filter: manual text, partial + case-insensitive.
         if (category) {
             filter.category = { $regex: escapeRegExp(category), $options: 'i' };
+        }
+
+        if (dateFrom || dateTo) {
+            filter.createdAt = {};
+            if (dateFrom) filter.createdAt.$gte = new Date(`${dateFrom}T00:00:00`);
+            if (dateTo) {
+                const endDate = new Date(`${dateTo}T00:00:00`);
+                endDate.setDate(endDate.getDate() + 1);
+                filter.createdAt.$lt = endDate;
+            }
         }
 
         const total = await Customer.countDocuments(filter);

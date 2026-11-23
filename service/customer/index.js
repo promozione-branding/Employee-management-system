@@ -2,7 +2,7 @@
 
 import axiosInstance from '../axiosInstance';
 
-export async function getAllCustomerServices(page, limit, isPaid, category) {
+export async function getAllCustomerServices(page, limit, isPaid, category, dateFrom, dateTo) {
     const params = { page, limit };
     if (isPaid) {
         params.isPaid = true;
@@ -10,6 +10,8 @@ export async function getAllCustomerServices(page, limit, isPaid, category) {
     if (category?.trim()) {
         params.category = category.trim();
     }
+    if (dateFrom) params.dateFrom = dateFrom;
+    if (dateTo) params.dateTo = dateTo;
 
     const { data } = await axiosInstance.get('/api/customer/get-all-customer', {
         params,

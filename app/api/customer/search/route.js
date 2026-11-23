@@ -18,6 +18,8 @@ export async function GET(req) {
         const q = searchParams.get('q') || '';
         const category = (searchParams.get('category') || '').trim();
         const isPaid = searchParams.get('isPaid');
+        const dateFrom = searchParams.get('dateFrom');
+        const dateTo = searchParams.get('dateTo');
         const page = Number(searchParams.get('page')) || 1;
         const limit = Number(searchParams.get('limit')) || 20;
         const skip = (page - 1) * limit;
@@ -26,6 +28,15 @@ export async function GET(req) {
         // Paid filter
         if (isPaid === 'true') {
             filter.isPaid = true;
+        }
+        if (dateFrom || dateTo) {
+            filter.createdAt = {};
+            if (dateFrom) filter.createdAt.$gte = new Date(`${dateFrom}T00:00:00`);
+            if (dateTo) {
+                const endDate = new Date(`${dateTo}T00:00:00`);
+                endDate.setDate(endDate.getDate() + 1);
+                filter.createdAt.$lt = endDate;
+            }
         }
 
         let customers = await Customer.find(filter)

@@ -50,6 +50,22 @@ const LIMIT = 20;
 
 const avatarColors = ['bg-[#17845A]', 'bg-[#6A4FD6]', 'bg-[#2B5086]', 'bg-[#C46A2D]', 'bg-[#087E8B]'];
 
+const localDateString = (date) => {
+    const pad = (value) => String(value).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
+const getAddedDateRange = (filter, customFrom, customTo) => {
+    if (filter === 'custom') return { dateFrom: customFrom, dateTo: customTo };
+    if (filter === 'all') return { dateFrom: '', dateTo: '' };
+
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    if (filter === 'week') start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+    if (filter === 'month') start.setDate(1);
+    return { dateFrom: localDateString(start), dateTo: localDateString(today) };
+};
+
 const CustomerManager = () => {
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -63,6 +79,9 @@ const CustomerManager = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [customerSummary, setCustomerSummary] = useState({ all: 0, paid: 0, addedThisMonth: 0, addedThisWeek: 0 });
     const [isPaid, setIsPaid] = useState(false);
+    const [addedDateFilter, setAddedDateFilter] = useState('all');
+    const [customDateFrom, setCustomDateFrom] = useState('');
+    const [customDateTo, setCustomDateTo] = useState('');
     const [executiveFilter, setExecutiveFilter] = useState('all');
     const [categoryInput, setCategoryInput] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
@@ -119,10 +138,11 @@ const CustomerManager = () => {
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
+            const { dateFrom, dateTo } = getAddedDateRange(addedDateFilter, customDateFrom, customDateTo);
 
             const res = debouncedSearch
-                ? await searchClientService(debouncedSearch, page, isPaid, categoryFilter)
-                : await getAllCustomerServices(page, LIMIT, isPaid, categoryFilter);
+                ? await searchClientService(debouncedSearch, page, isPaid, categoryFilter, dateFrom, dateTo)
+                : await getAllCustomerServices(page, LIMIT, isPaid, categoryFilter, dateFrom, dateTo);
 
             if (res.success) {
                 setCustomers(Array.isArray(res.data) ? res.data : []);
@@ -135,7 +155,7 @@ const CustomerManager = () => {
         } finally {
             setLoading(false);
         }
-    }, [page, debouncedSearch, isPaid, categoryFilter]);
+    }, [page, debouncedSearch, isPaid, categoryFilter, addedDateFilter, customDateFrom, customDateTo]);
 
     useEffect(() => {
         fetchData();
@@ -501,6 +521,46 @@ const CustomerManager = () => {
                                 </button>
                             )}
                         </div>
+
+                        <select
+                            value={addedDateFilter}
+                            onChange={(event) => {
+                                setAddedDateFilter(event.target.value);
+                                setPage(1);
+                            }}
+                            aria-label="Filter clients by date added"
+                            className="h-12 w-full rounded-xl border border-[#E0E5EF] bg-white px-4 text-sm text-[#0F1B33] transition outline-none focus:border-[#F27B1E] sm:max-w-[180px]"
+                        >
+                            <option value="all">Any added date</option>
+                            <option value="week">Added this week</option>
+                            <option value="month">Added this month</option>
+                            <option value="custom">Custom date range</option>
+                        </select>
+
+                        {addedDateFilter === 'custom' && (
+                            <div className="grid w-full grid-cols-2 gap-2 sm:max-w-[300px]">
+                                <Input
+                                    type="date"
+                                    value={customDateFrom}
+                                    onChange={(event) => {
+                                        setCustomDateFrom(event.target.value);
+                                        setPage(1);
+                                    }}
+                                    aria-label="Added from date"
+                                    className="h-12 rounded-xl border-[#E0E5EF] px-2 text-sm"
+                                />
+                                <Input
+                                    type="date"
+                                    value={customDateTo}
+                                    onChange={(event) => {
+                                        setCustomDateTo(event.target.value);
+                                        setPage(1);
+                                    }}
+                                    aria-label="Added to date"
+                                    className="h-12 rounded-xl border-[#E0E5EF] px-2 text-sm"
+                                />
+                            </div>
+                        )}
 
                         <label className="flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-[#E0E5EF] px-3 text-sm font-medium text-[#5B6478]">
                             <Checkbox
