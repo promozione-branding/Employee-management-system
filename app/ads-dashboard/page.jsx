@@ -44,7 +44,8 @@ export default function AdsDashboard() {
         [clientId, setClientId] = useState(''),
         [campaignQuery, setCampaignQuery] = useState(''),
         [keywordQuery, setKeywordQuery] = useState(''),
-        [detailLevel, setDetailLevel] = useState('campaign');
+        [detailLevel, setDetailLevel] = useState('campaign'),
+        [activeOnly, setActiveOnly] = useState(true);
     const [reportAction, setReportAction] = useState('');
     const [recipient, setRecipient] = useState('');
     const [reportBusy, setReportBusy] = useState(false);
@@ -74,15 +75,18 @@ export default function AdsDashboard() {
         const map = new Map();
         rows.filter((row) => row.level === 'campaign').forEach((row) => {
             const key = [row.platform, row.accountId, row.campaign, row.clientId].join('|');
-            const item = map.get(key) || { ...row, impressions: 0, clicks: 0, spend: 0, conversions: 0, reach: 0, dates: 0 };
+            const item = map.get(key) || { ...row, impressions: 0, clicks: 0, spend: 0, conversions: 0, reach: 0, dates: 0, resultType: '' };
             item.impressions += Number(row.impressions || 0);
             item.clicks += Number(row.clicks || 0);
             item.spend += Number(row.spend || 0);
             item.conversions += Number(row.conversions || 0);
             item.reach += Number(row.reach || 0);
+            if (!item.resultType && row.resultType) item.resultType = row.resultType;
             item.dates += 1;
             item.ctr = item.impressions ? item.clicks / item.impressions : 0;
             item.cpc = item.clicks ? item.spend / item.clicks : 0;
+            item.costPerResult = item.conversions ? item.spend / item.conversions : 0;
+            item.cpm = item.impressions ? (item.spend / item.impressions) * 1000 : 0;
             map.set(key, item);
         });
         return [...map.values()].sort((a, b) => b.spend - a.spend);
@@ -132,12 +136,15 @@ export default function AdsDashboard() {
         });
         return [...days.values()].sort((a, b) => a.date.localeCompare(b.date));
     }, [rows, from, to]);
+    const isOff = (row) => /PAUSED|OFF|ARCHIVED|DELETED|DISABLED/i.test(row.status || '');
     const visibleCampaigns = useMemo(
         () =>
             campaignRows.filter(
-                (row) => !campaignQuery || `${row.campaign} ${row.clientName} ${row.accountId}`.toLowerCase().includes(campaignQuery.toLowerCase())
+                (row) =>
+                    (!activeOnly || !isOff(row) || Number(row.spend || 0) > 0 || Number(row.conversions || 0) > 0) &&
+                    (!campaignQuery || `${row.campaign} ${row.clientName} ${row.accountId}`.toLowerCase().includes(campaignQuery.toLowerCase()))
             ),
-        [campaignRows, campaignQuery]
+        [campaignRows, campaignQuery, activeOnly]
     );
     const details = useMemo(
         () =>
@@ -198,6 +205,8 @@ export default function AdsDashboard() {
             'cpc',
             'ctr',
             'conversions',
+            'resultType',
+            'reach',
         ];
         const quote = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
         const csv = [columns.join(','), ...details.map((row) => columns.map((key) => quote(row[key])).join(','))].join('\n');
@@ -272,9 +281,11 @@ export default function AdsDashboard() {
             tint: 'bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300',
         },
         {
-            title: 'Conversions',
+            title: 'Results',
             value: totals.conversions.toLocaleString('en-IN', { maximumFractionDigits: 1 }),
-            note: 'Reported by ad platforms',
+            note: totals.conversions
+                ? `Cost per result ${money(totals.spend / totals.conversions, currency)}${campaignRows.find((row) => row.resultType)?.resultType ? ` · ${campaignRows.find((row) => row.resultType).resultType}` : ''}`
+                : 'No results in this period',
             Icon: Target,
             tint: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300',
         },
@@ -488,13 +499,17 @@ export default function AdsDashboard() {
                                 className={`${input} w-full pl-9`}
                             />
                         </label>
+                        <label className="flex shrink-0 items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                            <input type="checkbox" checked={activeOnly} onChange={(e) => setActiveOnly(e.target.checked)} className="h-4 w-4 accent-orange-500" />
+                            Hide off / zero-spend
+                        </label>
                         <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">{visibleCampaigns.length} campaigns</span>
                     </div>
                     <div className="min-h-0 flex-1 overflow-auto">
                         <table className="w-full min-w-[1000px] border-collapse text-left text-sm">
                             <thead className="sticky top-0 z-10 bg-slate-50 text-xs font-bold text-slate-500 dark:bg-slate-950 dark:text-slate-400">
                                 <tr>
-                                    {['Platform', 'Campaign / client', 'Status', 'Impressions', 'Clicks', 'Spend', 'Avg. CPC', 'CTR', 'Conversions'].map(
+                                    {['Platform', 'Campaign / client', 'Status', 'Impressions', 'Reach', 'Clicks', 'Spend', 'Avg. CPC', 'CTR', 'Results', 'Cost / result'].map(
                                         (label) => (
                                             <th key={label} className="px-4 py-3 whitespace-nowrap">
                                                 {label}
@@ -533,16 +548,21 @@ export default function AdsDashboard() {
                                             </span>
                                         </td>
                                         <td className="px-4 py-3">{row.impressions.toLocaleString('en-IN')}</td>
+                                        <td className="px-4 py-3">{row.platform === 'meta' && row.reach ? row.reach.toLocaleString('en-IN') : '—'}</td>
                                         <td className="px-4 py-3">{row.clicks.toLocaleString('en-IN')}</td>
                                         <td className="px-4 py-3 font-semibold whitespace-nowrap">{money(row.spend, row.currency || currency)}</td>
                                         <td className="px-4 py-3 whitespace-nowrap">{money(row.cpc, row.currency || currency)}</td>
                                         <td className="px-4 py-3">{(row.ctr * 100).toFixed(2)}%</td>
-                                        <td className="px-4 py-3">{row.conversions.toLocaleString('en-IN', { maximumFractionDigits: 1 })}</td>
+                                        <td className="px-4 py-3">
+                                            {row.conversions.toLocaleString('en-IN', { maximumFractionDigits: 1 })}
+                                            {row.resultType && <span className="block text-[11px] text-slate-500">{row.resultType}</span>}
+                                        </td>
+                                        <td className="px-4 py-3 font-semibold whitespace-nowrap">{row.costPerResult ? money(row.costPerResult, row.currency || currency) : '—'}</td>
                                     </tr>
                                 ))}
                                 {!loading && visibleCampaigns.length === 0 && (
                                     <tr>
-                                        <td colSpan={9} className="px-5 py-12">
+                                        <td colSpan={11} className="px-5 py-12">
                                             <Empty text="No campaign records match these filters." />
                                         </td>
                                     </tr>
@@ -607,7 +627,8 @@ export default function AdsDashboard() {
                                         'Clicks',
                                         'Spend',
                                         'CPC',
-                                        'Conversions',
+                                        'Results',
+                                        'Cost / result',
                                     ].map((label) => (
                                         <th key={label} className="px-4 py-3 whitespace-nowrap">
                                             {label}
@@ -637,12 +658,13 @@ export default function AdsDashboard() {
                                         <td className="px-4 py-3">{Number(row.clicks || 0).toLocaleString('en-IN')}</td>
                                         <td className="px-4 py-3 whitespace-nowrap">{money(row.spend, row.currency || currency)}</td>
                                         <td className="px-4 py-3 whitespace-nowrap">{money(row.cpc, row.currency || currency)}</td>
-                                        <td className="px-4 py-3">{Number(row.conversions || 0).toLocaleString('en-IN', { maximumFractionDigits: 1 })}</td>
+                                        <td className="px-4 py-3">{Number(row.conversions || 0).toLocaleString('en-IN', { maximumFractionDigits: 1 })}{row.resultType && <span className="block text-[11px] text-slate-500">{row.resultType}</span>}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap">{Number(row.conversions || 0) ? money(Number(row.spend || 0) / Number(row.conversions), row.currency || currency) : '—'}</td>
                                     </tr>
                                 ))}
                                 {!loading && details.length === 0 && (
                                     <tr>
-                                        <td colSpan={13} className="px-5 py-10 text-center text-sm text-slate-500">
+                                        <td colSpan={14} className="px-5 py-10 text-center text-sm text-slate-500">
                                             No detailed data available.
                                         </td>
                                     </tr>

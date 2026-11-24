@@ -24,6 +24,7 @@ const AdPerformanceDailySchema = new mongoose.Schema(
         clicks: { type: Number, default: 0 },
         spend: { type: Number, default: 0 },
         conversions: { type: Number, default: 0 },
+        resultType: { type: String, default: '' },
         reach: { type: Number, default: 0 },
         ctr: { type: Number, default: 0 },
         cpc: { type: Number, default: 0 },

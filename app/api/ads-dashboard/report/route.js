@@ -109,9 +109,10 @@ function makePdf({ rows, from, to, clientName, platform }) {
             const sum = (key) => campaignRows.reduce((total, row) => total + Number(row[key] || 0), 0);
             const spend = sum('spend'), clicks = sum('clicks'), impressions = sum('impressions'), conversions = sum('conversions');
             const currency = campaignRows.find((row) => row.currency)?.currency || section.details.find((row) => row.currency)?.currency || 'INR';
+            const resultType = campaignRows.find((row) => row.resultType)?.resultType || 'Results';
             const cards = [
                 ['SPEND', `${currency} ${fmt(spend)}`], ['IMPRESSIONS', fmt(impressions)], ['CLICKS', fmt(clicks)],
-                ['CONVERSIONS', fmt(conversions)], ['AVG. CPC', `${currency} ${fmt(clicks ? spend / clicks : 0)}`],
+                ['RESULTS', fmt(conversions)], ['COST / RESULT', conversions ? `${currency} ${fmt(spend / conversions)}` : '—'],
             ];
             const cardW = (doc.page.width - 88 - 32) / cards.length;
             cards.forEach(([label, value], index) => {
@@ -120,8 +121,8 @@ function makePdf({ rows, from, to, clientName, platform }) {
                 doc.fillColor('#64748B').fontSize(6.5).font('Helvetica-Bold').text(label, x + 7, 168, { width: cardW - 14 });
                 doc.fillColor('#0F172A').fontSize(8.5).font('Helvetica-Bold').text(value, x + 7, 185, { width: cardW - 14, ellipsis: true });
             });
-            const campaignTable = campaignRows.map((row) => [`${row.campaign || 'Unnamed campaign'} · ${row.status || 'status unavailable'}`, fmt(row.impressions), fmt(row.clicks), `${row.currency || currency} ${fmt(row.spend)}`, `${row.currency || currency} ${fmt(row.clicks ? row.spend / row.clicks : 0)}`, fmt(row.conversions)]);
-            let y = drawTable({ title: 'Active campaign performance', headers: ['Campaign', 'Impressions', 'Clicks', 'Spend', 'Avg. CPC', 'Conversions'], widths: [199, 67, 52, 76, 68, 45], values: campaignTable, startY: 234, platformName: section.name });
+            const campaignTable = campaignRows.map((row) => [`${row.campaign || 'Unnamed campaign'} · ${row.status || 'status unavailable'}`, fmt(row.impressions), fmt(row.clicks), `${row.currency || currency} ${fmt(row.spend)}`, fmt(row.conversions), row.conversions ? `${row.currency || currency} ${fmt(row.spend / row.conversions)}` : '—']);
+            let y = drawTable({ title: `Active campaign performance · ${resultType}`, headers: ['Campaign', 'Impressions', 'Clicks', 'Spend', 'Results', 'Cost / result'], widths: [189, 67, 52, 76, 53, 70], values: campaignTable, startY: 234, platformName: section.name });
             if (!campaignTable.length) {
                 doc.fillColor('#64748B').fontSize(9).font('Helvetica').text('No active campaigns with reported activity in this period.', 44, y - 10);
                 y += 8;
