@@ -46,6 +46,7 @@ export default function AdsDashboard() {
         [keywordQuery, setKeywordQuery] = useState(''),
         [detailLevel, setDetailLevel] = useState('campaign'),
         [activeOnly, setActiveOnly] = useState(true);
+    const [reportPeriod, setReportPeriod] = useState('weekly');
     const [reportAction, setReportAction] = useState('');
     const [recipient, setRecipient] = useState('');
     const [reportBusy, setReportBusy] = useState(false);
@@ -216,14 +217,16 @@ export default function AdsDashboard() {
         link.click();
         URL.revokeObjectURL(link.href);
     };
-    const reportUrl = () => `/api/ads-dashboard/report?${new URLSearchParams({ from, to, platform: platform === 'all' ? 'all' : platform, clientId })}`;
+    const cleanClientName = (name) => (name || 'All clients').replace(/ · (Google Ads|Meta Ads account)$/, '');
+    const reportClientName = cleanClientName(selectedClient?.name);
+    const reportUrl = () => `/api/ads-dashboard/report?${new URLSearchParams({ from, to, platform: platform === 'all' ? 'all' : platform, clientId, period: reportPeriod })}`;
     const downloadReport = async () => {
         const response = await fetch(reportUrl());
         if (!response.ok) throw new Error(await response.text());
         const url = URL.createObjectURL(await response.blob());
         const link = document.createElement('a');
         link.href = url;
-        link.download = `ads-report-${from}-to-${to}.pdf`;
+        link.download = `ads-report-${reportClientName.replace(/[^a-z0-9-_]+/gi, '-')}-${from}-to-${to}.pdf`;
         link.click();
         URL.revokeObjectURL(url);
     };
@@ -233,16 +236,26 @@ export default function AdsDashboard() {
         setError('');
         try {
             if (reportAction === 'email') {
-                const response = await fetch('/api/ads-dashboard/report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ from, to, platform, clientId, recipient: recipient.trim() }) });
+                const response = await fetch('/api/ads-dashboard/report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'email', from, to, platform, clientId, period: reportPeriod, recipient: recipient.trim() }) });
                 const json = await response.json();
                 if (!response.ok) throw new Error(json.error || 'Could not email the report.');
             } else {
-                // Web WhatsApp cannot attach a local PDF from a regular page.
-                // Download the PDF and open the chat with a prepared message.
-                await downloadReport();
+                // Server returns the PDF for WhatsApp mode; download it, then
+                // open the chat with a prepared message to attach the file.
+                const response = await fetch('/api/ads-dashboard/report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'whatsapp', from, to, platform, clientId, period: reportPeriod, recipient: recipient.trim() }) });
+                if (!response.ok) {
+                    const json = await response.json().catch(() => ({}));
+                    throw new Error(json.error || 'Could not prepare the WhatsApp report.');
+                }
+                const url = URL.createObjectURL(await response.blob());
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `ads-report-${from}-to-${to}.pdf`;
+                link.click();
+                URL.revokeObjectURL(url);
                 const phone = recipient.replace(/\D/g, '');
-                const name = selectedClient?.name || 'all clients';
-                const text = encodeURIComponent(`Ads performance report for ${name} (${from} to ${to}). Please find the attached PDF report.`);
+                const label = reportPeriod === 'monthly' ? 'Monthly' : 'Weekly';
+                const text = encodeURIComponent(`${label} ads performance report for ${reportClientName} (${from} to ${to}). Please find the attached PDF report.`);
                 window.open(`https://wa.me/${phone}?text=${text}`, '_blank', 'noopener,noreferrer');
             }
             setReportAction('');
@@ -254,6 +267,13 @@ export default function AdsDashboard() {
         }
     };
     const chooseRange = (days) => {
+        setReportPeriod(days <= 7 ? 'weekly' : 'monthly');
+        setFrom(dateValue(new Date(Date.now() - days * 86400000)));
+        setTo(dateValue(new Date(Date.now() - 86400000)));
+    };
+    const chooseReportPeriod = (period) => {
+        setReportPeriod(period);
+        const days = period === 'monthly' ? 30 : 7;
         setFrom(dateValue(new Date(Date.now() - days * 86400000)));
         setTo(dateValue(new Date(Date.now() - 86400000)));
     };
@@ -362,7 +382,18 @@ export default function AdsDashboard() {
                             </button>
                         ))}
                     </div>
-                    <input aria-label="Start date" className={input} type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} />
+                    <div className="flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="group" aria-label="Report period">
+                        {['weekly', 'monthly'].map((period) => (
+                            <button
+                                key={period}
+                                onClick={() => chooseReportPeriod(period)}
+                                className={`rounded-lg px-3 py-1.5 text-xs font-bold capitalize ${reportPeriod === period ? 'bg-[#0A2E66] text-white' : 'text-slate-600 hover:bg-white dark:text-slate-300 dark:hover:bg-slate-700'}`}
+                            >
+                                {period} report
+                            </button>
+                        ))}
+                    </div>
+                    <input aria-label="Start date" className={input} type="date" value={from} max={to} onChange={(e) => { setReportPeriod(''); setFrom(e.target.value); }} />
                     <span className="text-slate-400">to</span>
                     <input
                         aria-label="End date"
@@ -371,7 +402,7 @@ export default function AdsDashboard() {
                         value={to}
                         min={from}
                         max={dateValue(new Date())}
-                        onChange={(e) => setTo(e.target.value)}
+                        onChange={(e) => { setReportPeriod(''); setTo(e.target.value); }}
                     />
                     <select
                         aria-label="Filter by client or ad account"
@@ -678,7 +709,8 @@ export default function AdsDashboard() {
             {reportAction && <div className="fixed inset-0 z-[100] grid place-items-center bg-slate-950/50 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !reportBusy) setReportAction(''); }}>
                 <section role="dialog" aria-modal="true" aria-labelledby="ads-report-title" className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
                     <h2 id="ads-report-title" className="text-lg font-bold">{reportAction === 'email' ? 'Email PDF report' : 'Share report on WhatsApp'}</h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{selectedClient?.name || 'All clients'} · {from} to {to} · {platform === 'all' ? 'Google + Meta' : platform === 'google' ? 'Google Ads' : 'Meta Ads'}</p>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{reportClientName} · {reportPeriod ? `${reportPeriod === 'monthly' ? 'Monthly' : 'Weekly'} report · ` : ''}{from} to {to} · {platform === 'all' ? 'Google + Meta' : platform === 'google' ? 'Google Ads' : 'Meta Ads'}</p>
+                    <p className="mt-2 rounded-xl bg-slate-50 p-3 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">The PDF will carry the client name <b>{reportClientName}</b> and only the data for {from} to {to}. Use Weekly / Monthly above to change the period before sharing.</p>
                     {reportAction === 'whatsapp' && <p className="mt-3 rounded-xl bg-emerald-50 p-3 text-xs text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">The PDF will download first. WhatsApp opens with a prepared message; attach the downloaded PDF in the chat.</p>}
                     <label className="mt-5 block text-sm font-semibold" htmlFor="report-recipient">{reportAction === 'email' ? 'Recipient email' : 'WhatsApp number with country code'}</label>
                     <input id="report-recipient" autoFocus value={recipient} onChange={(event) => setRecipient(event.target.value)} placeholder={reportAction === 'email' ? 'name@example.com' : '919876543210'} className={`${input} mt-2 w-full`} />
