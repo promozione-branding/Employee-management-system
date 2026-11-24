@@ -28,6 +28,16 @@ const AdPerformanceDailySchema = new mongoose.Schema(
         reach: { type: Number, default: 0 },
         ctr: { type: Number, default: 0 },
         cpc: { type: Number, default: 0 },
+        // Campaign / ad set settings shown like Ads Manager (filled on newer syncs; older rows simply lack them).
+        budget: { type: Number, default: 0 },
+        budgetType: { type: String, default: '' }, // daily | lifetime | adset
+        bidStrategy: { type: String, default: '' },
+        startTime: { type: String, default: '' },
+        endTime: { type: String, default: '' },
+        attributionSetting: { type: String, default: '' },
+        objective: { type: String, default: '' },
+        channelType: { type: String, default: '' },
+        optimizationGoal: { type: String, default: '' },
     },
     { timestamps: true }
 );

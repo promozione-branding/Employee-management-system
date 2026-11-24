@@ -32,3 +32,32 @@ test('unknown or empty actions give zero results', () => {
     assert.deepEqual(metaResultFromActions([{ action_type: 'page_engaged', value: 9 }]), { conversions: 0, resultType: '' });
     assert.deepEqual(metaResultFromActions(undefined), { conversions: 0, resultType: '' });
 });
+
+import { metaResultForGoal } from '../lib/metaResults.js';
+import { formatAttribution, metaMoney, deliveryOf, splitKeyword, perResultLabel, transparencyLinks } from '../lib/adsLabels.js';
+
+test('goal-based results count only the optimised result, like Ads Manager', () => {
+    const actions = [
+        { action_type: 'onsite_conversion.messaging_conversation_started_7d', value: '45' },
+        { action_type: 'lead', value: '3' },
+        { action_type: 'link_click', value: '120' },
+    ];
+    assert.deepEqual(metaResultForGoal(actions, 'CONVERSATIONS'), { conversions: 45, resultType: 'Messaging conversations started' });
+    assert.deepEqual(metaResultForGoal(actions, 'LINK_CLICKS'), { conversions: 120, resultType: 'Link clicks' });
+    assert.deepEqual(metaResultForGoal(actions, 'OFFSITE_CONVERSIONS', { custom_event_type: 'LEAD' }), { conversions: 3, resultType: 'Leads' });
+    assert.deepEqual(metaResultForGoal([], 'REACH', null, { reach: 900 }), { conversions: 900, resultType: 'Reach' });
+    assert.equal(metaResultForGoal(actions, 'SOMETHING_NEW'), null);
+    assert.deepEqual(metaResultForGoal([], 'CONVERSATIONS'), { conversions: 0, resultType: 'Messaging conversations started' });
+});
+
+test('ads labels match Ads Manager wording', () => {
+    assert.equal(formatAttribution([{ event_type: 'CLICK_THROUGH', window_days: 7 }, { event_type: 'VIEW_THROUGH', window_days: 1 }]), '7-day click or 1-day view');
+    assert.equal(metaMoney('30000', 'INR'), 300);
+    assert.equal(perResultLabel('Messaging conversations started'), 'Per messaging conversation started');
+    assert.deepEqual(deliveryOf('google', '3'), { label: 'Off', on: false, raw: 'PAUSED' });
+    assert.equal(deliveryOf('meta', 'ACTIVE').label, 'Active');
+    assert.deepEqual(splitKeyword('titanium dioxide for paints (4)'), { text: 'titanium dioxide for paints', match: 'Broad' });
+    const links = transparencyLinks({ name: 'Acme', websites: ['https://www.acme.in/shop'], metaPageIds: ['123'] });
+    assert.match(links.google[0].url, /domain=acme\.in/);
+    assert.match(links.meta[0].url, /view_all_page_id=123/);
+});
