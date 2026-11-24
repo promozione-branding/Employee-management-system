@@ -5,6 +5,7 @@ import { connectDB } from '@/lib/db';
 import { getAuthUser } from '@/lib/getAuthUser';
 import Attachment from '@/models/admin/Attachments';
 import { sendAttachmentEmail } from '@/lib/email/sendAttachmentEmail';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
 
 export async function POST(req) {
     try {
@@ -43,6 +44,16 @@ export async function POST(req) {
             uploadedBy: authUser?._id,
             clientId,
             cc_email: cleanEmails,
+        });
+
+        await recordEmployeeWork({
+            req,
+            clientId,
+            action: 'ATTACHMENT_ADDED',
+            summary: `Added ${assetType} attachment${title ? `: ${title}` : ''}`,
+            details: { title: title || '', assetType, visibility: visibility || '', file: file || '', referenceLink: referenceLink || '' },
+            entityType: 'Attachment',
+            entityId: attachment._id,
         });
 
         // 📧 SEND EMAIL (non-blocking safe)

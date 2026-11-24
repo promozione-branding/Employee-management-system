@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server';
 import { createAuditLog } from '@/utils/createAuditLog';
 import { getAuthUser } from '@/lib/getAuthUser';
 import nodemailer from 'nodemailer';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
 
 export async function POST(req) {
     try {
@@ -91,6 +92,16 @@ export async function POST(req) {
 
         // 🆕 CREATE CUSTOMER
         const newCustomer = await Customer.create(safeData);
+
+        await recordEmployeeWork({
+            req,
+            clientId: newCustomer._id,
+            action: 'CLIENT_CREATED',
+            summary: `Created client ${newCustomer.name}`,
+            details: { company: newCustomer.company || '', category: newCustomer.category || '' },
+            entityType: 'Customer',
+            entityId: newCustomer._id,
+        });
 
         // 🧾 CREATE AUDIT LOG
         await createAuditLog({

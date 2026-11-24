@@ -50,6 +50,8 @@ export async function middleware(req) {
         if (pathname.startsWith('/employee-dashboard') && role !== 'employee') return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
         if (pathname.startsWith('/sales-dashboard') && role !== 'sales') return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
         if (pathname.startsWith('/manager') && role !== 'manager') return NextResponse.redirect(new URL(ROLE_REDIRECT[role], req.url));
+        if (pathname.startsWith('/track-employee-work') && !['admin', 'manager'].includes(role))
+            return NextResponse.redirect(new URL(ROLE_REDIRECT[role] || '/login', req.url));
         if (pathname.startsWith('/reports') && !['admin', 'manager'].includes(role))
             return NextResponse.redirect(new URL(ROLE_REDIRECT[role] || '/login', req.url));
 

@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/db';
 import ProjectCycle from '@/models/admin/ProjectCycle';
 import { NextResponse } from 'next/server';
 import Customer from '@/models/admin/Customer';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
 
 export async function POST(req) {
     try {
@@ -50,6 +51,16 @@ export async function POST(req) {
                 projectCycle: projectCycle._id,
             });
         }
+
+        await recordEmployeeWork({
+            req,
+            clientId,
+            action: 'PROJECT_ADDED',
+            summary: `Added project${projectName ? `: ${projectName}` : ''}`,
+            details: { projectName: projectName || '', service: finalService || '', serviceType: serviceType || '' },
+            entityType: 'ProjectCycle',
+            entityId: projectCycle._id,
+        });
 
         return NextResponse.json({
             success: true,

@@ -8,6 +8,7 @@ import Customer from '@/models/admin/Customer';
 import { getAuthUser } from '@/lib/getAuthUser';
 import { sendKeywordMail } from '@/lib/mail/keywordMailer';
 import { findDuplicateKeyword, normalizeKeywordText } from '@/lib/seo/keyword';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
 
 export async function POST(req) {
     try {
@@ -49,6 +50,16 @@ export async function POST(req) {
         });
 
         await SeoSheet.findOneAndUpdate({ clientId }, { $addToSet: { keywords: newKeyword._id } }, { upsert: true, new: true });
+
+        await recordEmployeeWork({
+            req,
+            clientId,
+            action: 'SEO_KEYWORD_ADDED',
+            summary: `Added SEO keyword: ${cleanKeyword}`,
+            details: { keyword: cleanKeyword, type: type || '' },
+            entityType: 'Keyword',
+            entityId: newKeyword._id,
+        });
 
         // ── FIRE KEYWORD MAIL (non-blocking, never breaks the response) ──
         try {

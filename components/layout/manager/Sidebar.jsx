@@ -19,7 +19,7 @@ import {
     Building2,
     PanelLeftClose,
     ArrowLeft,
-    IdCardLanyard, TrendingUp
+    IdCardLanyard, TrendingUp, ClipboardCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
@@ -54,6 +54,12 @@ const navLinks = [
         href: '/ads-dashboard',
         label: 'Ads Dashboard',
         icon: TrendingUp,
+    },
+    {
+        href: '/track-employee-work',
+        label: 'Track Work',
+        icon: ClipboardCheck,
+        description: 'Employee work timeline',
     },
 ];
 

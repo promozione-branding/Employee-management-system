@@ -3,6 +3,8 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Keyword from '@/models/employee/seoEmployee/Keyword';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
+import SeoSheet from '@/models/employee/seoEmployee/SeoSheet';
 
 export async function POST(req) {
     try {
@@ -45,6 +47,17 @@ export async function POST(req) {
                 { status: 400 }
             );
         }
+
+        const sheet = await SeoSheet.findOne({ keywords: keywordId }).select('clientId').lean();
+        await recordEmployeeWork({
+            req,
+            clientId: sheet?.clientId,
+            action: 'SEO_RANKING_UPDATED',
+            summary: `Updated keyword ranking to position ${position}`,
+            details: { position, page: page || '', keywordId: String(keywordId) },
+            entityType: 'Keyword',
+            entityId: keywordId,
+        });
 
         return NextResponse.json(
             {

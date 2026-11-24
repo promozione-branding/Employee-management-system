@@ -9,6 +9,7 @@ import { getAuthUser } from '@/lib/getAuthUser';
 import { recordEdit, diffObjects } from '@/lib/auditLog';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
 
 // Fields that are optional: submitting a blank value keeps the existing stored value.
 const OPTIONAL_TEXT_FIELDS = ['company', 'GSTIN', 'tanNo', 'email', 'website', 'Address', 'city', 'state', 'pincode', 'country', 'category'];
@@ -117,6 +118,18 @@ export async function DELETE(req, { params }) {
         } catch (auditErr) {
             console.error('[edit-history] failed to record customer delete:', auditErr);
         }
+
+        await recordEmployeeWork({
+            req,
+            clientId: customer._id,
+            clientName: customer.name,
+            clientCompany: customer.company,
+            action: 'CLIENT_DELETED',
+            summary: `Deleted client ${customer.name}`,
+            details: { company: customer.company || '', email: customer.email || '', phone: customer.phone || '' },
+            entityType: 'Customer',
+            entityId: customer._id,
+        });
 
         return NextResponse.json({ success: true, message: `${customer.name} customer deleted successfully` }, { status: 200 });
     } catch (error) {
@@ -281,6 +294,24 @@ export async function PUT(req, { params }) {
         }
 
         const editedCustomer = await customer.save();
+
+        const changes = Object.keys(body).filter((key) => {
+            if (!ALLOWED_UPDATE_FIELDS.includes(key)) return false;
+            const before = oldData[key];
+            const after = editedCustomer.get(key);
+            return JSON.stringify(before) !== JSON.stringify(after);
+        }).map((field) => ({ field, oldValue: oldData[field] ?? null, newValue: editedCustomer.get(field) ?? null }));
+        if (changes.length) {
+            await recordEmployeeWork({
+                req,
+                clientId: editedCustomer._id,
+                action: 'CLIENT_UPDATED',
+                summary: `Updated client profile (${changes.length} field${changes.length === 1 ? '' : 's'})`,
+                details: { changes },
+                entityType: 'Customer',
+                entityId: editedCustomer._id,
+            });
+        }
 
         // Synchronize the SalesEmployee client lists if the assignment changed.
         const assignmentsChanged = oldEmployeeIds.length !== newEmployeeIds.length || oldEmployeeIds.some((employeeId) => !newEmployeeIds.includes(employeeId));

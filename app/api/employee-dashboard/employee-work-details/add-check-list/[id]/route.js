@@ -3,6 +3,7 @@
 import { connectDB } from '@/lib/db';
 import EmployeeWorkDetail from '@/models/employee/EmployeeWorkDetail';
 import { NextResponse } from 'next/server';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
 
 export async function PATCH(req, { params }) {
     try {
@@ -104,6 +105,22 @@ export async function PATCH(req, { params }) {
         };
 
         await workDetail.save();
+
+        await recordEmployeeWork({
+            req,
+            clientId: workDetail.clientId,
+            action: 'WORK_CHECKLIST_UPDATED',
+            summary: `Updated ${workDetail.department} work checklist`,
+            details: {
+                addedCount,
+                updatedCount,
+                completedCount: completeField,
+                totalCount: safeTotal,
+                items: checklistItems.filter((item) => item?.key).map(({ key, label, completed, remarks }) => ({ key, label, completed, remarks })),
+            },
+            entityType: 'EmployeeWorkDetail',
+            entityId: workDetail._id,
+        });
 
         return NextResponse.json(
             {

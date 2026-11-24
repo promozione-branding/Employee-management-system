@@ -65,10 +65,10 @@ const navLinks = [
         description: 'Google and Meta performance',
     },
     {
-        href: '/ads-dashboard',
+        href: '/track-employee-work',
         label: 'Track Work',
         icon: ClipboardCheck,
-        description: 'Google and Meta performance',
+        description: 'Employee work timeline',
     },
 ];
 

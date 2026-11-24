@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import ProjectCycle from '@/models/admin/ProjectCycle';
+import { recordEmployeeWork, buildFieldChanges } from '@/lib/employeeWorkTracker';
 
 const ALLOWED_STATUS = ['in_build', 'live', 'completed'];
 const ALLOWED_RENEWAL = ['3m', '6m', '12m', 'custom'];
@@ -79,6 +80,10 @@ export async function PATCH(req) {
             update.$set['projectDuration.$.renewal.lastReminderAt'] = null;
         }
 
+        // Snapshot before the update so the work log can show old -> new values.
+        const beforeProject = await ProjectCycle.findOne({ _id: projectCycleId, 'projectDuration._id': durationId }).lean();
+        const beforeDuration = beforeProject?.projectDuration?.find((d) => String(d._id) === String(durationId)) || {};
+
         const updatedProject = await ProjectCycle.findOneAndUpdate(
             {
                 _id: projectCycleId,
@@ -90,6 +95,21 @@ export async function PATCH(req) {
 
         if (!updatedProject) {
             return NextResponse.json({ success: false, message: 'Project cycle or duration not found' }, { status: 404 });
+        }
+
+        const afterDuration = updatedProject.projectDuration?.id?.(durationId)?.toObject?.() || {};
+        const changedFields = Object.keys(updateFields).map((key) => key.replace('projectDuration.$.', '')).filter((key) => !key.includes('.'));
+        const changes = buildFieldChanges(beforeDuration, afterDuration, changedFields);
+        if (changes.length || resetRenewalMilestones) {
+            await recordEmployeeWork({
+                req,
+                clientId: updatedProject.clientId,
+                action: 'PROJECT_UPDATED',
+                summary: `Updated project${afterDuration.projectName ? `: ${afterDuration.projectName}` : ''}${changes.length ? ` (${changes.length} field${changes.length === 1 ? '' : 's'})` : ''}`,
+                details: { changes, projectName: afterDuration.projectName || '', ...(resetRenewalMilestones ? { renewalRemindersReset: true } : {}) },
+                entityType: 'ProjectCycle',
+                entityId: updatedProject._id,
+            });
         }
 
         return NextResponse.json({

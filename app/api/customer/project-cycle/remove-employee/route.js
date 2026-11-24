@@ -5,6 +5,7 @@ import { connectDB } from '@/lib/db';
 import ProjectCycle from '@/models/admin/ProjectCycle';
 import EmployeeWorkDetail from '@/models/employee/EmployeeWorkDetail';
 import Employee from '@/models/employee/Employee';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
 
 export async function DELETE(req) {
     try {
@@ -63,6 +64,17 @@ export async function DELETE(req) {
                 await EmployeeWorkDetail.findByIdAndDelete(workDetail._id);
             }
         }
+
+        const duration = projectCycle.projectDuration?.id?.(projectDurationId);
+        await recordEmployeeWork({
+            req,
+            clientId: projectCycle.clientId,
+            action: 'EMPLOYEE_REMOVED_FROM_PROJECT',
+            summary: `Removed employee from project${duration?.projectName ? `: ${duration.projectName}` : ''}`,
+            details: { employeeIds: [String(employeeId)], projectName: duration?.projectName || '', service: duration?.service || '', department: workDetail?.department || '' },
+            entityType: 'ProjectCycle',
+            entityId: projectCycle._id,
+        });
 
         return NextResponse.json(
             {

@@ -4,11 +4,13 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Keyword from '@/models/employee/seoEmployee/Keyword';
 import SeoSheet from '@/models/employee/seoEmployee/SeoSheet';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
 
 export async function DELETE(req, { params }) {
     try {
         await connectDB();
         const { id } = await params;
+        const sheet = await SeoSheet.findOne({ keywords: id }).select('clientId').lean();
 
         // Delete keyword
         const deletedKeyword = await Keyword.findByIdAndDelete(id);
@@ -19,6 +21,16 @@ export async function DELETE(req, { params }) {
 
         // Remove keyword id from SeoSheet
         await SeoSheet.updateMany({ keywords: id }, { $pull: { keywords: id } });
+
+        await recordEmployeeWork({
+            req,
+            clientId: sheet?.clientId,
+            action: 'SEO_KEYWORD_REMOVED',
+            summary: `Removed SEO keyword: ${deletedKeyword.keyword}`,
+            details: { keyword: deletedKeyword.keyword },
+            entityType: 'Keyword',
+            entityId: id,
+        });
 
         return NextResponse.json({ success: true, message: 'Keyword deleted successfully' }, { status: 200 });
     } catch (error) {

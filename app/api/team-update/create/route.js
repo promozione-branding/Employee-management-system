@@ -5,6 +5,7 @@ import { connectDB } from '@/lib/db';
 import { getAuthUser } from '@/lib/getAuthUser';
 import { sendEmail } from '@/lib/sendEmail';
 import TeamUpdate from '@/models/employee/TeamUpdate';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
 
 function buildTeamUpdateEmail({ title, description, link }) {
     return `
@@ -65,6 +66,16 @@ export async function POST(req) {
             createdBy: authUser._id,
             clientId,
             updateType,
+        });
+
+        await recordEmployeeWork({
+            req,
+            clientId,
+            action: 'TEAM_UPDATE_SENT',
+            summary: `Sent ${updateType} update: ${teamUpdate.title}`,
+            details: { title: teamUpdate.title, updateType, description: teamUpdate.description, link: teamUpdate.link || '', recipients: cleanedRecipients },
+            entityType: 'TeamUpdate',
+            entityId: teamUpdate._id,
         });
 
         const html = buildTeamUpdateEmail({

@@ -8,6 +8,7 @@ import ProjectCycle from '@/models/admin/ProjectCycle';
 import { NextResponse } from 'next/server';
 import { createAuditLog } from '@/utils/createAuditLog';
 import { getAuthUser } from '@/lib/getAuthUser';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
 
 export async function POST(req) {
     try {
@@ -115,6 +116,16 @@ export async function POST(req) {
                 });
             }
 
+            await recordEmployeeWork({
+                req,
+                clientId,
+                action: 'WORK_ASSIGNED',
+                summary: `Updated ${department} project assignment`,
+                details: { department, employeeIds: employeeIds.map(String), projectId: String(projectId) },
+                entityType: 'EmployeeWorkDetail',
+                entityId: workDetail._id,
+            });
+
             return NextResponse.json(
                 {
                     success: true,
@@ -203,6 +214,16 @@ export async function POST(req) {
             });
         }
 
+        await recordEmployeeWork({
+            req,
+            clientId,
+            action: 'WORK_ASSIGNED',
+            summary: `Assigned ${department} project work`,
+            details: { department, employeeIds: employeeIds.map(String), projectId: String(projectId), checklistItems: checklist.length },
+            entityType: 'EmployeeWorkDetail',
+            entityId: workDetail._id,
+        });
+
         return NextResponse.json(
             {
                 success: true,
@@ -227,4 +248,3 @@ export async function POST(req) {
         );
     }
 }
- 
