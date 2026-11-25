@@ -13,7 +13,7 @@ import {
     List, Mail, Megaphone, MessageCircle, MousePointerClick, RefreshCw, Search, ShoppingCart, Table2, Target, Wallet,
 } from 'lucide-react';
 import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { campaignType, costPerResult, deliveryOf, perResultLabel, transparencyLinks, websiteDomains } from '@/lib/adsLabels';
+import { campaignType, costPerResult, deliveryOf, perResultLabel, reportFileName, transparencyLinks, websiteDomains } from '@/lib/adsLabels';
 import { Change, Empty, derive, fmtDate, input, int, money, num1, pane, pct } from '@/components/ads-dashboard/AdsUi';
 import { AdsTab, CampaignsTab, GroupsTab, KeywordsTab, ProductsTab, RawTab, TimelineTab } from '@/components/ads-dashboard/AdsTabs';
 
@@ -202,7 +202,7 @@ export default function AdsDashboard() {
                 const url = URL.createObjectURL(await response.blob());
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `ads-report-${from}-to-${to}.pdf`;
+                link.download = reportFileName(reportClientName, from, to);
                 link.click();
                 URL.revokeObjectURL(url);
                 const phone = recipient.replace(/\D/g, '');
@@ -212,6 +212,26 @@ export default function AdsDashboard() {
             }
             setReportAction('');
             setRecipient('');
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setReportBusy(false);
+        }
+    };
+
+    // Download (not just open) so the file is saved as "<Client> - <from> to <to>.pdf".
+    const downloadPdf = async () => {
+        setReportBusy(true);
+        setError('');
+        try {
+            const response = await fetch(reportUrl());
+            if (!response.ok) throw new Error((await response.text().catch(() => '')) || 'Could not generate the PDF report.');
+            const url = URL.createObjectURL(await response.blob());
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = reportFileName(reportClientName, from, to);
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -322,7 +342,7 @@ export default function AdsDashboard() {
                                         <RefreshCw size={17} className={syncing ? 'animate-spin' : ''} />
                                         {syncing ? 'Syncing accounts…' : 'Sync ad data'}
                                     </button>
-                                    <HeaderIcon onClick={() => window.open(reportUrl(), '_blank', 'noopener,noreferrer')} label="View PDF report"><FileText size={17} /></HeaderIcon>
+                                    <HeaderIcon onClick={downloadPdf} label={reportBusy ? 'Preparing PDF…' : 'Download PDF report'}><FileText size={17} className={reportBusy ? 'animate-pulse' : ''} /></HeaderIcon>
                                     <HeaderIcon onClick={() => { setReportAction('whatsapp'); setRecipient(''); }} label="Send report on WhatsApp"><MessageCircle size={17} /></HeaderIcon>
                                     <HeaderIcon onClick={() => { setReportAction('email'); setRecipient(''); }} label="Email PDF report"><Mail size={17} /></HeaderIcon>
                                 </div>

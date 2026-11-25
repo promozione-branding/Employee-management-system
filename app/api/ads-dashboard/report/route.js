@@ -7,6 +7,11 @@ import ReportClient from '@/models/admin/ReportClient';
 import { buildAdsReport } from '@/lib/adsReportData';
 import { makeAdsReportPdf } from '@/lib/adsReportPdf';
 import { syncAdsSnapshot } from '@/lib/adsSnapshot';
+import { getTransporter, MAIL_FROM } from '@/lib/mailerNew';
+import { reportFileName } from '@/lib/adsLabels';
+
+const esc = (value = '') => String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const fmtDay = (value) => new Date(`${value}T00:00:00Z`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -57,8 +62,8 @@ export async function GET(req) {
         const data = await getReportData(req);
         if (data.error) return new Response(data.error, { status: data.status });
         const pdf = await makeAdsReportPdf(data.report);
-        const safeName = data.report.clientName.replace(/[^a-z0-9-_]+/gi, '-').slice(0, 70);
-        return new Response(pdf, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `inline; filename="ads-report-${safeName}-${data.from}-${data.to}.pdf"`, 'Cache-Control': 'no-store' } });
+        const fileName = reportFileName(data.report.clientName, data.from, data.to);
+        return new Response(pdf, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `inline; filename="${fileName}"`, 'Cache-Control': 'no-store' } });
     } catch (error) {
         console.error('Ads report PDF error:', error);
         return new Response('Could not generate the ads report.', { status: 500 });
@@ -89,23 +94,24 @@ export async function POST(req) {
             return new Response(pdf, {
                 headers: {
                     'Content-Type': 'application/pdf',
-                    'Content-Disposition': `attachment; filename="ads-report-${data.from}-to-${data.to}.pdf"`,
+                    'Content-Disposition': `attachment; filename="${reportFileName(report.clientName, data.from, data.to)}"`,
                     'X-Share-Text': encodeURIComponent(`Please find the ads performance report attached. ${periodText}`),
                     'Cache-Control': 'no-store',
                 },
             });
         }
-        const apiKey = process.env.RESEND_API_KEY;
-        if (!apiKey) return Response.json({ error: 'Email delivery is not configured (RESEND_API_KEY missing).' }, { status: 503 });
-        const { Resend } = await import('resend');
-        const result = await new Resend(apiKey).emails.send({
-            from: process.env.REPORT_FROM_EMAIL || 'accounts@promozionebranding.com',
+        // Same Gmail/nodemailer setup the proposal emails use (lib/mailerNew).
+        if (!process.env.YOUR_EMAIL_ADDRESS || !process.env.YOUR_APP_PASSWORD)
+            return Response.json({ error: 'Email delivery is not configured (YOUR_EMAIL_ADDRESS / YOUR_APP_PASSWORD missing).' }, { status: 503 });
+        const fileName = reportFileName(report.clientName, data.from, data.to);
+        const range = `${fmtDay(data.from)} to ${fmtDay(data.to)}`;
+        await getTransporter().sendMail({
+            from: MAIL_FROM,
             to: recipient,
-            subject: `Ads performance report: ${report.clientName} (${data.from} to ${data.to})`,
-            html: `<p>Please find the ads performance report for <b>${report.clientName}</b>, covering ${data.from} to ${data.to}, attached.</p><p>${report.periodLabel}.</p><p>Regards,<br>Inquiry Bazaar</p>`,
-            attachments: [{ filename: `ads-report-${report.clientName.replace(/[^a-z0-9-_]+/gi, '-')}-${data.from}-to-${data.to}.pdf`, content: pdf.toString('base64') }],
+            subject: `Ads performance report: ${report.clientName} (${range})`,
+            html: `<p>Hello,</p><p>Please find attached the ads performance report for <b>${esc(report.clientName)}</b>, covering ${esc(range)}.</p><p>${esc(report.periodLabel)}.</p><p>Regards,<br>Inquiry Bazaar</p>`,
+            attachments: [{ filename: fileName, content: Buffer.from(pdf), contentType: 'application/pdf' }],
         });
-        if (result.error) throw new Error(result.error.message || 'Email could not be sent.');
         return Response.json({ ok: true, to: recipient, clientName: report.clientName });
     } catch (error) {
         console.error('Ads report share error:', error);
