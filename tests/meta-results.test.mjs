@@ -61,3 +61,16 @@ test('ads labels match Ads Manager wording', () => {
     assert.match(links.google[0].url, /domain=acme\.in/);
     assert.match(links.meta[0].url, /view_all_page_id=123/);
 });
+
+test('metaResultFromResultsField: uses Meta\'s own Results number', async () => {
+    const { metaResultFromResultsField } = await import('../lib/metaResults.js');
+    assert.deepEqual(
+        metaResultFromResultsField([{ indicator: 'actions:onsite_conversion.messaging_conversation_started_7d', values: [{ value: '45', attribution_windows: ['default'] }] }]),
+        { conversions: 45, resultType: 'Messaging conversations started' }
+    );
+    assert.deepEqual(metaResultFromResultsField([{ indicator: 'actions:lead', values: [{ value: '3' }] }]), { conversions: 3, resultType: 'Leads' });
+    assert.deepEqual(metaResultFromResultsField([{ indicator: 'reach', values: [{ value: '1200' }] }]), { conversions: 1200, resultType: 'Reach' });
+    // No value sent (instant-form lead ad sets) -> null so the goal-based fallback runs.
+    assert.equal(metaResultFromResultsField([{ indicator: 'actions:lead' }]), null);
+    assert.equal(metaResultFromResultsField(undefined), null);
+});
