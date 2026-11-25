@@ -53,8 +53,8 @@ export async function POST(req) {
             req,
             clientId: sheet?.clientId,
             action: 'SEO_RANKING_UPDATED',
-            summary: `Updated keyword ranking to position ${position}`,
-            details: { position, page: page || '', keywordId: String(keywordId) },
+            summary: `Ranked "${updated.keyword}" at position ${position}${page ? ` (page ${page})` : ''}`,
+            details: { keyword: updated.keyword, position, page: page || '', keywordId: String(keywordId) },
             entityType: 'Keyword',
             entityId: keywordId,
         });
