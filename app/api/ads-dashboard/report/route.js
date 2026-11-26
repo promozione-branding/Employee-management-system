@@ -8,7 +8,8 @@ import { buildAdsReport } from '@/lib/adsReportData';
 import { makeAdsReportPdf } from '@/lib/adsReportPdf';
 import { syncAdsSnapshot } from '@/lib/adsSnapshot';
 import { getTransporter, MAIL_FROM } from '@/lib/mailerNew';
-import { reportFileName } from '@/lib/adsLabels';
+import { reportFileName, transparencyLinks } from '@/lib/adsLabels';
+import AdCreative from '@/models/admin/AdCreative';
 
 const esc = (value = '') => String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const fmtDay = (value) => new Date(`${value}T00:00:00Z`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
@@ -17,8 +18,9 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
-async function fetchRows({ from, to, platform, clientId }) {
+async function fetchRows({ from, to, platform, clientId, levels }) {
     const filter = { date: { $gte: from, $lte: to } };
+    if (levels) filter.level = { $in: levels };
     if (['google', 'meta'].includes(platform)) filter.platform = platform;
     if (clientId.startsWith('account|')) {
         const [, accountPlatform, accountId] = clientId.split('|');
@@ -49,9 +51,28 @@ async function getReportData(req) {
         }
     }
     let clientName = 'All clients';
+    let client = null;
     if (clientId.startsWith('account|')) clientName = rows[0]?.clientName || 'All clients';
-    else if (clientId) clientName = (await ReportClient.findById(clientId).select('name').lean())?.name || rows[0]?.clientName || 'All clients';
-    const report = buildAdsReport({ rows, from, to, clientName, platform, period });
+    else if (clientId) {
+        client = await ReportClient.findById(clientId).select('name websites metaPageIds').lean().catch(() => null);
+        clientName = client?.name || rows[0]?.clientName || 'All clients';
+    }
+    // Extras for the PDF (comparison, ad copy, transparency links). Best-effort:
+    // a failure here never blocks the report.
+    const days = Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000) + 1;
+    const prevTo = new Date(Date.parse(`${from}T00:00:00Z`) - 86400000).toISOString().slice(0, 10);
+    const prevFrom = new Date(Date.parse(`${prevTo}T00:00:00Z`) - (days - 1) * 86400000).toISOString().slice(0, 10);
+    const adIds = [...new Set(rows.filter((r) => r.level === 'ad').map((r) => String(r.entityId || '')).filter(Boolean))];
+    const [prevRows, creatives] = await Promise.all([
+        fetchRows({ from: prevFrom, to: prevTo, platform, clientId, levels: ['campaign'] }).catch(() => []),
+        adIds.length ? AdCreative.find({ adId: { $in: adIds } }).select('platform accountId adId title headlines descriptions body callToAction finalUrl format adType').lean().catch(() => []) : [],
+    ]);
+    const hasPlatform = (p) => rows.some((r) => r.platform === p);
+    const links = client ? transparencyLinks({ name: clientName, websites: client.websites || [], metaPageIds: client.metaPageIds || [] }) : null;
+    const report = buildAdsReport({
+        rows, prevRows, creatives, from, to, clientName, platform, period,
+        links: links ? { meta: hasPlatform('meta') ? links.meta[0]?.url : '', google: hasPlatform('google') ? links.google[0]?.url : '' } : null,
+    });
     return { report, from, to, platform, clientId };
 }
 

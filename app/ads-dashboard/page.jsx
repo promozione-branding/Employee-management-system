@@ -342,7 +342,7 @@ export default function AdsDashboard() {
                                         <RefreshCw size={17} className={syncing ? 'animate-spin' : ''} />
                                         {syncing ? 'Syncing accounts…' : 'Sync ad data'}
                                     </button>
-                                    <HeaderIcon onClick={downloadPdf} label={reportBusy ? 'Preparing PDF…' : 'Download PDF report'}><FileText size={17} className={reportBusy ? 'animate-pulse' : ''} /></HeaderIcon>
+                                    <HeaderIcon onClick={downloadPdf} label={reportBusy ? 'Preparing PDF…' : 'Download PDF report'}><FileText size={17} className={reportBusy ? 'animate-pulse' : ''} /></HeaderIcon> 
                                     <HeaderIcon onClick={() => { setReportAction('whatsapp'); setRecipient(''); }} label="Send report on WhatsApp"><MessageCircle size={17} /></HeaderIcon>
                                     <HeaderIcon onClick={() => { setReportAction('email'); setRecipient(''); }} label="Email PDF report"><Mail size={17} /></HeaderIcon>
                                 </div>
