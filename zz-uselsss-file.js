@@ -16,7 +16,7 @@ echo "✅ Deployment completed successfully!" && \
 exit
 
 
-
+npm run build && \
 pm2 restart inquiry-bazaar-erp && \
 pm2 restart workflow-renewal && \
 pm2 save && \
