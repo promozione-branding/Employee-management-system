@@ -1,3 +1,5 @@
+// components/customer-directory/CustomerDirectoryFilters.jsx
+
 'use client';
 
 import { X, Search, CalendarDays } from 'lucide-react';
