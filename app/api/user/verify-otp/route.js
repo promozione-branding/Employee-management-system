@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/db';
 import User from '@/models/admin/User';
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
 
 export async function POST(req) {
     try {
@@ -26,6 +27,9 @@ export async function POST(req) {
         user.loginOTP = null;
         user.loginOTPExpiry = null;
         await user.save();
+
+        // Best effort, never fails the login.
+        await recordEmployeeWork({ actorUserId: user._id, action: 'LOGGED_IN', summary: 'Logged in (OTP)', entityType: 'User', entityId: user._id });
 
         const res = NextResponse.json({
             success: true,

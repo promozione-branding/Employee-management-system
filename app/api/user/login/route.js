@@ -5,6 +5,7 @@ import User from '@/models/admin/User';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { recordEmployeeWork } from '@/lib/employeeWorkTracker';
 
 export async function POST(req) {
     try {
@@ -46,6 +47,9 @@ export async function POST(req) {
             process.env.JWT_SECRET,
             { expiresIn: '1d' }
         );
+
+        // Best effort, never fails the login.
+        await recordEmployeeWork({ actorUserId: checkUser._id, action: 'LOGGED_IN', summary: 'Logged in', entityType: 'User', entityId: checkUser._id });
 
         const userResponse = {
             _id: checkUser._id,

@@ -20,6 +20,7 @@ const describeDetails = (details = {}) => {
     if (Array.isArray(details.changes)) parts.push(...details.changes.map((c) => `${c.field}: ${JSON.stringify(c.oldValue ?? '')} -> ${JSON.stringify(c.newValue ?? '')}`));
     if (Array.isArray(details.items)) parts.push(...details.items.map((i) => `${i.completed ? '[x]' : '[ ]'} ${i.label || i.key}${i.remarks ? ` (${i.remarks})` : ''}`));
     if (Array.isArray(details.assignedEmployees) && details.assignedEmployees.length) parts.push(`Employees: ${details.assignedEmployees.join(', ')}`);
+    for (const key of ['note', 'status', 'description', 'number', 'keyword', 'position', 'phone', 'durationSeconds']) if (details[key] !== undefined && details[key] !== '' && details[key] !== null) parts.push(`${key}: ${details[key]}`);
     return parts.join(' | ').slice(0, 5000);
 };
 
