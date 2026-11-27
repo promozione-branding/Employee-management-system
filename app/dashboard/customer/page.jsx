@@ -387,10 +387,11 @@ const CustomerManager = () => {
             <td className="px-4 py-4">
                 <div className="flex min-w-[190px] items-center gap-3">
                     <CustomerAvatar customer={customer} index={index} />
+                   
                     <div className="min-w-0">
-                        <p className="truncate font-semibold text-[#0F1B33]">{customer.name || 'Unnamed client'}</p>
-                        <p className="mt-1 max-w-[220px] truncate text-sm text-[#68738A]">{customer.company || 'No company added'}</p>
-                    </div>
+    <p className="truncate font-semibold text-[#0F1B33]">{customer.company || 'No company added'}</p>
+    <p className="mt-1 max-w-[220px] truncate text-sm text-[#68738A]">{customer.name || 'Unnamed client'}</p>
+</div>
                 </div>
             </td>
             <td className="px-4 py-4"><CustomerContact customer={customer} /></td>

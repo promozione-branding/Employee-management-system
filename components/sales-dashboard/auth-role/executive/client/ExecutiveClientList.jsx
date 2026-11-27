@@ -377,9 +377,9 @@ const ExecutiveClientList = () => {
                                                 <ClientAvatar name={customer.name} index={index} />
 
                                                 <div className="min-w-0">
-                                                    <p className="truncate font-semibold text-[#0F1B33]">{customer.name || 'Unnamed client'}</p>
+                                                    <p className="truncate font-semibold text-[#0F1B33]">{customer.company || 'No company added'}</p>
 
-                                                    <p className="mt-1 text-xs text-[#8A92A6]">Client</p>
+                                                    <p className="mt-1 text-xs text-[#8A92A6]">{customer.name || 'Unnamed client'}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -478,9 +478,9 @@ const ExecutiveClientList = () => {
                                     <ClientAvatar name={customer.name} index={index} />
 
                                     <div className="min-w-0">
-                                        <h3 className="truncate font-bold text-[#0F1B33]">{customer.name || 'Unnamed client'}</h3>
+                                        <h3 className="truncate font-bold text-[#0F1B33]">{customer.company || 'No company added'}</h3>
 
-                                        <p className="mt-1 truncate text-sm text-[#68738A]">{customer.company || 'No company added'}</p>
+                                        <p className="mt-1 truncate text-sm text-[#68738A]">{customer.name || 'Unnamed client'}</p>
                                     </div>
                                 </div>
 
